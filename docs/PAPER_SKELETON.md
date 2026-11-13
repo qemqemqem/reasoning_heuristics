@@ -222,6 +222,8 @@ We derive candidate members with **Pearl's simplified-model view**: a heuristic 
 
 ### 6.2 Likelihood model
 
+**The readout is graded.** A model can partly use several heuristics, so every result is an estimated weight π_h with an interval, plus likelihood gains over the null and over the nearest competitor. None of it is a used / not-used verdict. "Disconfirming" a competitor means bounding its weight (e.g. π ≤ 0.05, upper 95%).
+
 [TODO The noisy-execution likelihood P(y | h, x) ∝ exp(−λ · d(y, h(x))). A violation-profile term for infeasible answers: *which* constraints are broken. The mixture over members, plus a "none of the above" term, with feature-dependent weights π_h(φ(x)). EA, permutation baseline, lift, and the hierarchical model.]
 
 ### 6.3 Manipulation signatures and special item types
@@ -233,15 +235,15 @@ We derive candidate members with **Pearl's simplified-model view**: a heuristic 
 
 ### 6.4 Validation: recovering planted heuristics
 
-**Table 6. Recovery of planted heuristics from simulated models.**
+**Table 6. Recovery of planted mixtures from simulated models.** Simulated "models" mix heuristics with known weights. We report how precisely each weight is recovered, since the real readout is graded.
 
-| Planted | Noise | Recovered as top member | Posterior on true member | Most confused with |
-|---------|-------|-------------------------|--------------------------|--------------------|
-| C1 `FIRST-FIT` | 10% slips | XX% | 0.XX | C2 `DSATUR` |
-| B4 `FIRST` | 10% slips | XX% | 0.XX | B4 `MATCH` |
-| B1 `UP-2` | 10% slips | XX% | 0.XX | D `DPLL-b` |
-| C1 + B1 (50/50) | 10% slips | XX% (both) | 0.XX / 0.XX | — |
-| [TODO] | | | | |
+| Planted mixture | Noise | Recovered weights (mean) | Bias (max over components) | 95% CI width | Most confused pair |
+|-----------------|-------|--------------------------|----------------------------|--------------|--------------------|
+| 100% C1 `FIRST-FIT` | 10% slips | 0.XX / … | ±0.XX | 0.XX | C1 vs C2 `DSATUR` |
+| 60% B4 `FIRST` · 30% B1 `UP-2` · 10% A `DENSITY` | 10% slips | 0.XX / 0.XX / 0.XX | ±0.XX | 0.XX | B4 `FIRST` vs `MATCH` |
+| 50% C1 · 50% D `DPLL-b` | 10% slips | 0.XX / 0.XX | ±0.XX | 0.XX | — |
+| Feature-dependent: C1 on dense items, B1 on sparse | 10% slips | π(φ) curve recovered? R² = 0.XX | ±0.XX | 0.XX | — |
+| 20% each of five families | 10% slips | 0.XX each | ±0.XX | 0.XX | [TODO] |
 
 ### 6.5 Models and setup
 
@@ -360,22 +362,25 @@ We derive candidate members with **Pearl's simplified-model view**: a heuristic 
 
 ## 9. Evidence summary  *(Step 5)*
 
-**Table 14. The evidence table.** ✓ supported · ~ mixed · ✗ against · — not tested. Thresholds pre-registered (Appendix E).
+**Table 14. The evidence table.** Every entry is a **scalar with an interval**. Heuristics can be partly used, so the readout is explanatory power, not a verdict. Weights sum to 1 with the unexplained mass. Phase 2 columns (interpretability) are filled only for families with behavioural weight. Model-level detail is in Appendix D.
 
-| Family | Depth | Behavioural lift | Mixture weight | Signatures matched | Process | Probe selectivity | Intervention > competitor | Control recovered | Verdict |
-|--------|-------|------------------|----------------|--------------------|---------|-------------------|---------------------------|-------------------|---------|
-| A Cue | const | +XX pp | 0.XX | X/7 | ~ | +XX pp | ✗ | ✓ | [TODO] |
-| B1 Relax | const / seq | +XX pp | 0.XX | X/7 | | +XX pp | | | [TODO] |
-| B4 Restrict | const / seq | +XX pp | 0.XX | X/7 | | +XX pp | | | [TODO] |
-| C Constructive | const–seq | +XX pp | 0.XX | X/7 | | +XX pp | | | [TODO] |
-| D Truncated search | seq | +XX pp | 0.XX | X/7 | | — | — | | [TODO] |
-| E Message passing | const | +XX pp | 0.XX | X/7 | | +XX pp | | | [TODO] |
-| F Local search | seq | +XX pp | 0.XX | X/7 | | — | — | | [TODO] |
-| G Decompose | seq | +XX pp | 0.XX | X/7 | | — | — | — | [TODO] |
-| H Guess / sample | const | +XX pp | 0.XX | X/7 | | — | — | — | [TODO] |
-| Nuisance | — | +XX pp | 0.XX | X/7 | | — | — | — | [TODO] |
+| Family | Depth | Mixture weight π (95% CI) | ΔlogL vs null (per item) | ΔlogL vs nearest competitor | Lift on errors | Signature fit (weighted) | Trace-match share (faithfulness-weighted) | *Phase 2:* probe selectivity | *Phase 2:* intervention effect vs competitor |
+|--------|-------|---------------------------|--------------------------|-----------------------------|----------------|--------------------------|-------------------------------------------|------------------------------|----------------------------------------------|
+| A Cue | const | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | +XX pp | +XX pp |
+| B1 Relax | const / seq | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| B4 Restrict | const / seq | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| C Constructive | const–seq | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| D Truncated search | seq | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| E Message passing | const | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| F Local search | seq | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| G Decompose | seq | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| H Guess / sample | const | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| Nuisance (noisy exact, perception) | — | 0.XX [0.XX, 0.XX] | +0.XX | — | +XX pp | 0.XX | — | — | — |
+| *Unexplained* | — | 0.XX [0.XX, 0.XX] | — | — | — | — | — | — | — |
 
-**The standout.** [TODO which family, how strongly, and how consistently across models, domains and framings.]
+**Figure 4** — [TODO Stacked bars of π per model, ordered by capability, for direct-answer vs best-effort thinking. This shows how the weight shifts between families rather than a single winner.]
+
+**What stands out.** [TODO Which families carry the most weight, how concentrated the weight is (e.g. the top family's π and the entropy of π), and how stable it is across models, domains, framings and thinking budget. Hopefully one family dominates; if the weight is spread, say so.]
 
 ---
 
