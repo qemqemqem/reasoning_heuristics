@@ -11,6 +11,26 @@
 - **The full study as the verticals specify it is expensive.** About 1.03B output tokens per model; running every model of the ladder costs about **$7,800**. The recommended plan is **~$2,300**: full study on four cheap core models and the core tier on the two large ones. A lean version, with items cut to pilot-based power, is **~$1,200**. Running only gpt-oss-20b is **~$120**.
 - **The engineering is the real cost.** The design agents' human-equivalent estimate is about **350 person-days**: ~35 shared infrastructure, ~255 vertical-specific, ~60 trace annotation. AI agents can write most of the generators and reference implementations. Human time goes into review, decisions and hand-labelling traces. Staging (below) gets a first result from about a third of that.
 
+## Budget target: real results for under $100
+
+Andrew's target (2026-11-13): preliminary results for well under $100, real results for $100 or less, and more spending only if those look good.
+
+| Stage | What | Cost |
+|-------|------|------|
+| **Preliminary** | Dev batches for all six verticals on gpt-oss-20b (~5,700 items, 58M output tokens; ~$8 per pass), a second pass after fixes, and optionally the first three verticals' dev batches on gpt-oss-120b (batch, ~$5) | **≈ $15–20** |
+| **Real results** | Core evals of all six verticals: gpt-oss-20b (batch) at ~45% of the full design (~$54), gpt-oss-120b (batch) on the same items at ~25% (~$36), LLM trace coding of a 20% sample (~$5) | **≈ $95** |
+| If good | Qwen3-32B and Qwen3-14B (cross-family check; ~$70 each at 25%), then R1 and Qwen3-235B on the core sets, up to the recommended plan below (~$2,300) | $300+ |
+
+**Knobs that make $95 enough:**
+- best-effort condition only (budget-sweep arms only where a design needs them);
+- one sample per item, with repeats on a 10% subset;
+- batch endpoints;
+- item counts set by the pilot's effect sizes rather than worst-case power.
+
+**What this costs in precision.** At ~45% of the specified items, weight intervals are about 1.4× wider than the full design. Detection limits move from roughly 0.03–0.06 to roughly 0.05–0.08. That is enough to see a standout family. The result is an evidence table for two sizes of one model family (20B vs 120B).
+
+Recovery tests on fake models are free and run first.
+
 ---
 
 ## 1. Models and conditions
