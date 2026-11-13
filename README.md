@@ -9,4 +9,6 @@ Many reasoning tasks are NP-hard or coNP-hard in general, and language models an
 
 Start with the design document, [docs/DESIGN.md](docs/DESIGN.md). The literature review behind it is [docs/LITERATURE.md](docs/LITERATURE.md), and [docs/PAPER_SKELETON.md](docs/PAPER_SKELETON.md) sketches the paper we expect to write.
 
+The per-heuristic eval designs and example question libraries are in [docs/verticals/](docs/verticals/) and [data/examples/](data/examples/). The Phase 1 scope and costs are in [docs/SCOPE.md](docs/SCOPE.md).
+
 This follows on from the 2025 ETR study ([arXiv 2506.11128](https://arxiv.org/abs/2506.11128)). Its code is in [Oxford-HAI-Lab/etr_case_generator](https://github.com/Oxford-HAI-Lab/etr_case_generator).
