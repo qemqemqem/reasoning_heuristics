@@ -4,7 +4,7 @@
 
 ## How this review was done
 
-Four research agents each took one slice of the design:
+Six research agents each took one slice of the design. A–D came first; E and F were added for Steps 1 and 2 of the plan:
 
 | Slice | Objectives | Report | Papers |
 |-------|-----------|--------|--------|
@@ -12,6 +12,8 @@ Four research agents each took one slice of the design:
 | B. Heuristics in LLM behaviour | O3, O4, H1, H4, H6 | [B_heuristics_behaviour.md](literature/B_heuristics_behaviour.md) | ~35 |
 | C. Interpretability of reasoning and search | O5, H5 | [C_interpretability.md](literature/C_interpretability.md) | ~50 |
 | D. RASP / RASP-L and algorithm learning | O6, H2 | [D_rasp_algorithms.md](literature/D_rasp_algorithms.md) | ~40 |
+| E. Modelling the world as NP-hard | Step 1 (O1) | [E_world_as_np_hard.md](literature/E_world_as_np_hard.md) | ~45, plus a 42-row catalogue of real task → formal problem → complexity |
+| F. Classes of heuristics for NP-hard problems | Step 2 (O3 zoo, O6) | [F_heuristic_classes.md](literature/F_heuristic_classes.md) | ~90 |
 
 **How far to trust it.**
 
@@ -85,7 +87,7 @@ Treat any other detail in the full reports as a lead to confirm before citing it
 - Most real-world graph and proof instances fall within reasoning models' success range, with a long tail outside it (Rameshkumar et al. 2025).
 - Solver hardness doesn't predict model errors: there is no pooled accuracy gap between proof-hard and proof-easy UNSAT formulas at matched density (Verma 2026). So measure hardness relative to the heuristic zoo as well.
 - Answer the van Rooij, Wright & Wareham (2012) objection directly; see DESIGN §3 O1.
-- *A dedicated review of "how to model the world as NP-hard" is still running; see §6.*
+- Frameworks and a 42-row catalogue of real task → formal problem are in report E (§6).
 
 ### O2: bounded compute
 - The theory is settled: Merrill & Sabharwal 2023 (log-space-uniform TC⁰), 2024 (CoT → P, under generalized pre-norm) and 2025 (padding alone stays in TC⁰); Li et al. 2024 (AC⁰ at constant precision); Amiri et al. 2025 (linear CoT lower bounds).
@@ -194,13 +196,39 @@ Treat any other detail in the full reports as a lead to confirm before citing it
 | Richardson et al. 2025 | ICLR 2026; v1 had a different title |
 | Zhou et al. 2024 | Disambiguate from a separate Zhou et al. 2024 (arXiv 2402.09371) |
 
-## 6. Still running and still to check
+## 6. Steps 1 and 2: reports E and F
 
-- **Two more reviews are running:**
-  - (E) how to model the world as full of NP-hard problems: tractable cognition, intractability of cognitive capacities, bounded and resource rationality, real-world catalogues, framing methodology, why real instances are easy;
-  - (F) a mathematical taxonomy of heuristics for NP-hard problems and theories of what heuristics are (Pearl's relaxation view, ecological rationality, No Free Lunch, smoothed analysis, algorithmic barriers on random instances, and which classes are constant-depth vs. sequential).
+These two are summarised briefly here. Their content is worked into [PAPER_SKELETON.md](PAPER_SKELETON.md) §3 (frameworks and formal models) and §5 (heuristic families).
 
-  They will be added as reports E and F, with updates to O1 and the zoo.
+**E. Modelling the world as NP-hard.**
+
+- **Lead with generality.** General capacities across perception, reasoning, categorisation, decision-making and planning come out NP-hard when stated in full (van Rooij 2015).
+- **Deduction is the mildest case.**
+  - Abduction is "harder than deduction" (Eiter & Gottlob 1995).
+  - Bayesian inference and MPE are NP-hard even to approximate (Cooper 1990; Dagum & Luby 1993; Kwisthout et al. 2011).
+  - Planning is PSPACE-complete; Nash equilibrium is PPAD-complete.
+- **Satisficing doesn't escape.** *Feasibility* alone is NP-complete for timetabling, configuration, Minesweeper and Latin-square completion.
+- **Humans show the same pattern:** accuracy falls with instance hardness (Murawski & Bossaerts 2016; Franco et al. 2022).
+- **Five frameworks:** computational-level intractability; reduction catalogues; bounded and resource rationality; parameterized complexity; beyond-worst-case.
+- **Counterargument:** "real instances have structure". Replies: structure isn't sufficient (Mull et al. 2016), and solver-easy isn't budget-easy.
+- **Recent LLM papers assert the premise without defending it** (EHOP, NPHardEval, NPPC, NATURAL PLAN, TravelPlanner).
+- **Two O1-table rows in DESIGN v0.2 need a source or should be dropped:** monadic first-order logic (NEXPTIME) and register allocation.
+
+**F. Classes of heuristics.**
+
+- **Families by mechanism:** A cue/substitution; B simplified model (relax / abstract / convex / restrict / probabilistic); C constructive/priority; D systematic search; E message passing; F local search; G decomposition/DP; H guess/sample; I meta-level.
+- **Formal models with lower bounds:** priority algorithms, pBT, the LOCAL model (equivalent to GNNs; Sato et al. 2019), low-degree polynomials, PLS.
+- **Pearl (1983):** heuristics come from relaxed, restricted (over-constrained) or probabilistic simplified models. On the report's reading, relaxations err by omission and restrictions by commission, so ETR, MM, FIRST and MATCH are restrictions.
+- **Citable depth labels** come from the P-completeness compendium (Greenlaw, Hoover & Ruzzo).
+  - P-complete: lexicographically-first greedy colouring (`FIRST-FIT`), the nearest-neighbour TSP tour, first-fit-decreasing bin packing, unbounded unit/Horn resolution, exact LP.
+  - Random-order greedy is polylog depth (Blelloch et al. 2012).
+  - Hence a three-way depth split, const / polylog / seq.
+  - *Not re-checked by me; these are standard results, but confirm the compendium entry numbers before citing.*
+- **Random-instance thresholds give signatures:** unit clause ≈ 8/3 and optimal myopic 3.26 on 3-SAT; greedy colouring ≈ 2χ; BP-decimation ≈ 2^k/k.
+- **New item types:** depth-stress items built from P-completeness gadgets (a direct const-vs-seq test); threshold knees; violation profiles; feature-dependent mixture weights (Rice).
+
+## 7. Still to check
+
 - **Confirm before citing in a paper:**
   - Pan et al.'s step bound and venue;
   - Hazra et al.'s trace-level claims;
