@@ -53,6 +53,16 @@ PROPERTIES = (
     "dirty wet dry full empty open shut dark bright loud quiet thin thick smooth rough sharp "
     "flat tall short long wide narrow plain fancy"
 ).split()
+# People theme: a name and a place or state phrase ("Ana is at the front desk").
+PHRASES = (
+    "at the front desk", "on the phone", "in the garden", "wearing gloves", "in the kitchen",
+    "at the station", "on the train", "in the library", "reading a book", "holding a map",
+    "near the door", "at the window", "on the roof", "in the car", "wearing a hat", "carrying a bag",
+    "in the hall", "at the market", "on the bridge", "in the office", "wearing boots", "holding a cup",
+    "at the gate", "on the stairs", "in the attic", "near the pond", "at the table", "on the bench",
+    "in the shed", "holding a lamp",
+)
+
 # Machine-facts lexicon for A/H ENT: each device has one state word.
 DEVICES = {
     "lamp": "lit", "alarm": "armed", "bell": "ringing", "fan": "spinning", "door": "open",
@@ -73,5 +83,6 @@ def partition_of_word(word: str) -> str:
 
 
 def lexicon(kind: str, split: str) -> list[str]:
-    pool = {"objects": OBJECTS, "properties": PROPERTIES, "devices": tuple(DEVICES)}[kind]
+    pool = {"objects": OBJECTS, "properties": PROPERTIES, "devices": tuple(DEVICES),
+            "names": tuple(PEOPLE), "phrases": PHRASES}[kind]
     return [w for w in _dedupe(pool) if partition_of_word(w) == split]

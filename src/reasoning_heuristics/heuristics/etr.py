@@ -31,13 +31,22 @@ D = "entailment"
 _IDENT = re.compile(r"^[a-z][a-z0-9]*$")
 
 
-def atom_text(atom: str, positive: bool) -> str:
-    if ":" in atom:
+def pred_subj(atom: str) -> tuple[str, str | None]:
+    """PyETR predicate and constant names for one of our atoms."""
+    if "@" in atom:
+        name, phrase = atom.split("@", 1)
+        pred, subj = re.sub(r"[^a-z0-9]", "", phrase.lower()), re.sub(r"[^a-z0-9]", "", name.lower())
+    elif ":" in atom:
         subj, pred = atom.split(":", 1)
-        assert _IDENT.match(subj) and _IDENT.match(pred), atom
-        core = f"{pred}({subj}())"
     else:
-        core = f"p{atom}()"
+        return f"p{atom}", None
+    assert _IDENT.match(subj) and _IDENT.match(pred), atom
+    return pred, subj
+
+
+def atom_text(atom: str, positive: bool) -> str:
+    pred, subj = pred_subj(atom)
+    core = f"{pred}({subj}())" if subj else f"{pred}()"
     return core if positive else "~" + core
 
 
@@ -89,10 +98,11 @@ def view_to_formula(v: View, atom_names: dict[str, str]) -> F.Formula | None:
 def _atom_names(task: EntailmentTask) -> dict[str, str]:
     names = {}
     for a in F.atoms_of(list(task.premises) + ([task.probe] if task.probe else []) + list(task.options)):
-        text = atom_text(a, True)
-        m = re.match(r"(\w+)\((\w*)\(?\)?\)", text)
-        pred, subj = m.group(1), m.group(2)
-        names[f"{pred}({subj})" if subj else f"{pred}()"] = a
+        pred, subj = pred_subj(a)
+        key = f"{pred}({subj})" if subj else f"{pred}()"
+        if key in names and names[key] != a:
+            raise ValueError(f"two atoms map to the same PyETR atom {key}")
+        names[key] = a
     return names
 
 

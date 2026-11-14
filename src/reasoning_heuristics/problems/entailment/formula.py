@@ -10,8 +10,9 @@ Grammar (formulas are nested tuples, JSON-serialised as lists):
     ("nand", (f1, ..., fk))          "not both"
     ("nor", (f1, ..., fk))           "neither ... nor" (A/H E5's inverted reading of "either ... or")
 
-Atoms are strings. Atoms of the form "subject:predicate" render as "the subject is
-predicate"; any other atom renders as itself (letters style, C E5).
+Atoms are strings. "subject:predicate" renders as "the subject is predicate";
+"Name@phrase" renders as "Name is phrase" (people theme); any other atom renders as
+itself (letters style, C E5).
 
 Generator path: truth tables (`entails`, `models`). Validator path: `entails_sat`
 (CNF expansion + python-sat), which shares no code with the truth table.
@@ -240,6 +241,9 @@ def canonical(f: Formula) -> Any:
 
 
 def render_lit(atom: str, positive: bool) -> str:
+    if "@" in atom:
+        name, phrase = atom.split("@", 1)
+        return f"{name} is {'' if positive else 'not '}{phrase}"
     if ":" in atom:
         subject, predicate = atom.split(":", 1)
         return f"the {subject} is {'' if positive else 'not '}{predicate}"
