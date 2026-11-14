@@ -6,7 +6,7 @@
 
 - **Phase 1 is behavioural only.** It runs on open-weight thinking models at best effort (high reasoning effort, 32k-token cap), starting with gpt-oss-20b, mostly through OpenRouter. Mechanistic interpretability is Phase 2, only for families that get behavioural weight.
 - **Iteration is cheap:**
-  - one dev pass over all six verticals on gpt-oss-20b costs about **$8**;
+  - one dev pass over all seven verticals on gpt-oss-20b costs about **$8** (the cross-formalism vertical adds $0.29);
   - a pilot at 10% of full size on gpt-oss-20b plus Qwen3-32B costs about **$45**.
 - **The full study as the verticals specify it is expensive.** About 1.03B output tokens per model; running every model of the ladder costs about **$7,800**. The recommended plan is **~$2,300**: full study on four cheap core models and the core tier on the two large ones. A lean version, with items cut to pilot-based power, is **~$1,200**. Running only gpt-oss-20b is **~$120**.
 - **The engineering is the real cost.** The design agents' human-equivalent estimate is about **350 person-days**: ~35 shared infrastructure, ~255 vertical-specific, ~60 trace annotation. AI agents can write most of the generators and reference implementations. Human time goes into review, decisions and hand-labelling traces. Staging (below) gets a first result from about a third of that.
@@ -18,8 +18,8 @@ Andrew's target (2026-11-13): preliminary results for well under $100, real resu
 | Stage | What | Cost |
 |-------|------|------|
 | **Preliminary** | Dev batches for all six verticals on gpt-oss-20b (~5,700 items, 58M output tokens; ~$8 per pass), a second pass after fixes, and optionally the first three verticals' dev batches on gpt-oss-120b (batch, ~$5) | **≈ $15–20** |
-| **Real results** | Core evals of all six verticals: gpt-oss-20b (batch) at ~45% of the full design (~$54), gpt-oss-120b (batch) on the same items at ~25% (~$36), LLM trace coding of a 20% sample (~$5) | **≈ $95** |
-| If good | Qwen3-32B and Qwen3-14B (cross-family check; ~$70 each at 25%), then R1 and Qwen3-235B on the core sets, up to the recommended plan below (~$2,300) | $300+ |
+| **Real results** | Core evals of the six original verticals: gpt-oss-20b (batch) at ~40% of the full design (~$48), gpt-oss-120b (batch) on the same items at ~25% (~$36); the cross-formalism core on gpt-oss-20b (~$6); LLM trace coding of a 20% sample (~$5) | **≈ $95** |
+| If good | Cross-formalism core on gpt-oss-120b (~$7); Qwen3-32B and Qwen3-14B (cross-family check; ~$70 each at 25%), then R1 and Qwen3-235B on the core sets, up to the recommended plan below (~$2,300) | $300+ |
 
 **Knobs that make $95 enough:**
 - best-effort condition only (budget-sweep arms only where a design needs them);
@@ -27,7 +27,7 @@ Andrew's target (2026-11-13): preliminary results for well under $100, real resu
 - batch endpoints;
 - item counts set by the pilot's effect sizes rather than worst-case power.
 
-**What this costs in precision.** At ~45% of the specified items, weight intervals are about 1.4× wider than the full design. Detection limits move from roughly 0.03–0.06 to roughly 0.05–0.08. That is enough to see a standout family. The result is an evidence table for two sizes of one model family (20B vs 120B).
+**What this costs in precision.** At ~40% of the specified items, weight intervals are about 1.5× wider than the full design. Detection limits move from roughly 0.03–0.06 to roughly 0.05–0.09. (The 20b share was cut from ~45% to make room for the cross-formalism vertical; its core tier detects a home-advantage shift of 0.05 with 85% power.) That is enough to see a standout family. The result is an evidence table for two sizes of one model family (20B vs 120B).
 
 Recovery tests on fake models are free and run first.
 
@@ -84,11 +84,13 @@ The infrastructure that keeps iteration cheap and honest:
 | B4, C4: restrict / online (ETR) | ~12,400 | ~133M | 4M | ~53 | [TODO] |
 | D, F: truncated and local search | ~3,500 | ~144M | 6.5M | ~37 | [TODO] |
 | E: message passing | ~15,700 | ~125M | 13M | ~32 | ~25 |
-| **Total** | **~68,000** | **~1.03B** | **~58M** | **~255** | **~80–100** |
+| **Total (six original verticals)** | **~68,000** | **~1.03B** | **~58M** | **~255** | **~80–100** |
+| I: cross-formalism (added later) | ~11,500 (core ~5,740) | ~104M (core ~52M) | 2.8M | ~19 (incl. 4 annotation) | ~10 |
+| **Total, all seven** | **~79,500** | **~1.13B** | **~61M** | **~274** | **~90–110** |
 
 Prompt tokens are taken as about 15% of output tokens, which matches the B1/G vertical's estimate.
 
-**Cost per model** (full study / core tier ≈ 50% of tokens):
+**Cost per model** (full study / core tier ≈ 50% of tokens; six original verticals. The cross-formalism vertical adds $12 / $6 on gpt-oss-20b and $14.6 / $7.3 on gpt-oss-120b, and about 10% for the other models):
 
 | Model | Full study | Core tier only |
 |-------|------------|----------------|
@@ -166,7 +168,7 @@ Prompt tokens are taken as about 15% of output tokens, which matches the B1/G ve
 |-------|-------|------------------|
 | **0. Shared infra** | Runner, schema, heuristic framework, identification engine, recovery harness, trace pipeline (§4, items 1–6) | Recovery gates pass on fake models |
 | **1. First verticals** | Baselines core tier (A/H: E1, E2, E5, E8), C greedy (E1–E3, E5), B4/C4 E1–E2 | Smoke → dev on gpt-oss-20b → size calibration → pilot (gpt-oss-20b + Qwen3-32B) → power analysis |
-| **2. Remaining verticals** | B1/G, D/F, E: dev → pilot | Same |
+| **2. Remaining verticals** | B1/G, D/F, E, and I cross-formalism (reuses C and B4/C4 members and renderers; its E1 and E4 dev batches, ≈ $0.15, can run in Stage 1): dev → pilot | Same |
 | **3. Full study** | Pre-registered; recommended or lean plan | Pre-registration committed before data |
 | **Phase 2 gate** | Interpretability for families whose π lower bound ≥ [TODO, e.g. 0.15] on ≥ 2 models | — |
 
@@ -195,6 +197,7 @@ These came up independently in several verticals; adopt them everywhere.
    - dev and test splits from disjoint seeds;
    - items selected on disagreement among all members, never on one heuristic's errors.
 7. **ETR is several procedures.** The yes/no and what-follows modes, the conditional renderings and the issue-structure mapping are separate pre-registered members. Ask the v1 co-authors which ones represent the theory.
+8. **Compute predictions per encoding.** Every member's prediction is computed on every encoding of an item; predictions transported through a reduction are flagged; slip rates are estimated per encoding.
 
 ---
 
@@ -210,6 +213,9 @@ These came up independently in several verticals; adopt them everywhere.
 | C1 SAT greedy vs "always impossible" | C-vertical SAT items | Identical on B4/C4's SAT instances |
 | Density cue vs real hardness | A/H E2 padding only | Padding variables are atypical; models may notice |
 | `NOISY-EXACT` (weakest-resolved overall) | A/H E7, D E1 | Smallest detectable weight ≈ 0.13 (local search ≈ 0.24) |
+| H-structure vs H-translate (cross-formalism) | I E3 translation dial; traces | Identical in answers if the model always translates |
+| B4 collapse vs `ALWAYS-NO` on colouring rendered as logic | Traces only | The logic-native restrictions say "inconsistent" on every colourable graph |
+| First-fit vs unit-propagation-first vs DPLL in listing order | I E4 dead-end cells; traces | Same first colouring wherever they succeed |
 
 ---
 

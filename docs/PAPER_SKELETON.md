@@ -4,6 +4,7 @@
 >
 > - Every number is a stand-in (`XX`, `+XX pp`, `0.XX`) showing the *kind* of metric we will report. `[TODO …]` marks text to write.
 > - The frameworks (§3) and heuristic families (§5) are filled in briefly from literature reports E and F ([LITERATURE.md](LITERATURE.md), [literature/](literature/)).
+> - The theoretical priors (§4 budget lines, §5.2, Table 14's prior column, §10 and Tables 15–16) are filled in from [theory/](theory/README.md). They were written before any data and should stay frozen once the first run starts.
 > - Section ↔ plan:
 >   - §3 = Step 1 (real problems are NP-hard)
 >   - §5 = Step 2 (heuristic families)
@@ -39,7 +40,7 @@
 2. [TODO] A taxonomy of heuristics for NP-hard problems in [XX] families, each with a reference implementation, a predicted error signature and a depth class.
 3. [TODO] A method that identifies heuristics from instance-level answers, validated by recovering planted heuristics.
 4. [TODO] Behavioural and mechanistic evidence per family across [XX] models. The standout is [TODO].
-5. [TODO] A RASP-L account of the standout, with predictions written down before the evals.
+5. [TODO] Theoretical priors for every family, written down before the evals (§5.2, §10): what transformers can compute in one pass and with thinking, which programs training would select (tested RASP-L programs and their length–accuracy frontier), and what LLMs are already known to do. A RASP-L account of the standout follows from them.
 
 **Figure 1** — [TODO The evidence table (Table 14) as a heatmap, with the standout row highlighted.]
 
@@ -133,6 +134,25 @@
 
 [TODO A forward pass is in TC⁰. Chain of thought with T tokens gives at most T sequential steps. Exact search needs on the order of 2^Θ(n) steps on hard instances, and is *expressible* given enough tokens (Pan et al. 2025). So each model and budget has a size n\* above which the answer must come from an incomplete procedure.]
 
+**What theory predicts before the data** ([theory/T1](theory/T1_expressivity.md) §3; simulated exact search with fixed seeds):
+
+- **The line sits where the ordering rule puts it.** For exact DPLL on unsatisfiable random 3-SAT at a 32k budget, n\* ≈ 30 when branching in listing order and ≈ 50 when branching most-constrained-first (verbose traces). Terse traces add 13–30 variables. Satisfiable items cross near n ≈ 70–80.
+- **Budget buys little.** Each ×4 of budget adds only about 11–31 variables. So n\* is a fingerprint of the model's branching rule (T1 P6) and moves with the log of the budget (T1 P7).
+- **Compute forces heuristics only in some domains.** At our sizes, colouring (≤ 40 nodes) and entailment (3–12 premises) sit *below* the line for a sensible exact method: DSATUR-ordered search needs about n node visits (listing-order search crosses at n ≈ 20–25), and truth tables fit to about 9 atoms. Heuristics are forced only on SAT above n ≈ 30–50, on TSP with 10–14 cities, and on large-capacity knapsack.
+- **Consequence for the argument.** Below the line, errors at best effort are not forced by compute. They are either noise or a shortcut the model *chose*. The paper therefore makes two claims and keeps them apart:
+  - forced heuristics: SAT sizes centred on each model's n\*;
+  - chosen shortcuts: colouring and entailment at best effort, and every domain in direct-answer mode.
+
+**Table 3a. Predicted budget lines at 32k tokens (simulation, written before the evals).**
+
+| Domain | Our sizes | Exact method and ordering | Predicted n\* | Regime at our sizes |
+|---|---|---|---|---|
+| 3-SAT, UNSAT | n = 10–60 | DPLL, listing order / most-constrained-first | ≈ 30 / ≈ 50 (verbose) | Straddles the line |
+| 3-SAT, SAT | n = 10–60 | same | ≈ 70–80 | Below |
+| Colouring | 8–40 nodes | Backtracking, listing order / DSATUR order | ≈ 20–25 / ≫ 40 | Below with DSATUR order; straddles with listing order. Random graphs; re-check on the filtered items |
+| Entailment | 3–12 premises | Truth table / case split or DPLL | ≈ 9 atoms (truth table); far more by case split | Below, except possibly B4 E1L's 20-atom items |
+| TSP | 10–14 cities | Held–Karp DP (n²·2ⁿ ≈ 10⁵–3·10⁶ steps) | < 10 | Above: heuristics forced |
+
 **Figure 2** — [TODO Accuracy vs n per model, with n\* marked.]
 
 **Table 3. Budget line per model.**
@@ -185,8 +205,10 @@ We derive candidate members with **Pearl's simplified-model view**: a heuristic 
 | **F. Local search / repair** | Start from a full candidate and fix violations | `MIN-CONFLICTS`\*, `WALK-k`, `2OPT-k`, `SA`\* | seq (depth ≈ k) | **Infeasible near-misses** (few violated constraints); never certifies UNSAT; depends on initialisation |
 | **G. Decompose / DP** | Split into parts and solve each, ignoring or tracking the links | `DP-EXACT` (knapsack DP), `IGNORE-CROSSLINKS`\* (decompose, drop interactions) | seq | Exact when the structure holds; misses cross-component interactions |
 | **H. Guess / sample** | Sample from a simple distribution, optionally check | `RANDOM`\* (uniform answer: 7/8 of clauses satisfied), `SAMPLE-m`\* (entailment: check the conclusion in m sampled models) | const (one sample) | Chance level; `SAMPLE-m` commits on items with rare counter-models |
-| **I. Strategy selection** (meta) | Choose a heuristic from item features (Rice's algorithm-selection problem; Lieder & Griffiths) | Not a vertical: modelled as feature-dependent mixture weights π_h(φ(x)) | const (the selector) | Errors correlated with features; tests H4 |
+| **I. Strategy selection** (meta) | Choose a heuristic from item features (Rice's algorithm-selection problem; Lieder & Griffiths) | Modelled as feature-dependent weights π_h(φ(x)). One feature, the input's formalism, has its own vertical ([I_cross_formalism](verticals/I_cross_formalism.md): the same instance as graph / story / CNF / English premises, ground truth fixed) | const (the selector) | Errors correlated with features; π shifts with formalism (home-advantage index, length and order controlled); tests H4 |
 | *Nuisance (not heuristics)* | Execution or perception noise | `NOISY-EXACT`, `PERCEPTION-NOISE` (random constraint errors) | — | Smooth error growth with size; unstructured violations |
+
+**Representation-bound members.** Some members' predictions change with the form of the same content: `MATCH`, `PRIMACY`, `ETR` and `ONL(2)` differ between disjunctive and clausal forms of one premise, and first-fit depends on listing order. Family labels can also be formalism-relative: "build one model and read the query off it" is C1 in a graph and a B4-style single-model restriction in logic. Predictions are therefore computed per encoding (I_cross_formalism §2).
 
 **Verticals for the pilot:** A, B1, B4, C, D, F, H (plus E if `BP-t` is cheap to implement), with nuisance models always included. [TODO confirm.]
 
@@ -197,11 +219,58 @@ We derive candidate members with **Pearl's simplified-model view**: a heuristic 
 - **B4. Restrict.** [TODO explain heuristic] Commit early to a reading: one disjunct, "if" as "iff", only the true cases. This is where ETR and mental models live, and the main source of illusory inferences.
 - **C. Constructive / priority.** [TODO explain heuristic] Build the answer piece by piece in some order, never revisiting. The prior work's "LLMs are greedy" claim is about this family. We distinguish its members by order type (fixed / adaptive / random / online).
 - **D. Truncated search.** [TODO explain heuristic] Real search, but with a budget, then a default. It bridges exact solving and heuristics, and the budget b should grow with thinking tokens.
-- **E. Message passing.** [TODO explain heuristic] Local rounds of "my neighbours say…". It is the closest family to what a fixed-depth network computes, so it is a strong candidate for direct-answer mode.
+- **E. Message passing.** [TODO explain heuristic] Local rounds of "my neighbours say…". Attention resembles it, so it seemed a strong candidate for direct-answer mode. Theory is less sure (§5.2): causal `BP-2` is 81 RASP-L primitives and no more accurate than the 9-primitive `POLARITY`, and written out one round costs 9–22k tokens at n = 40.
 - **F. Local search / repair.** [TODO explain heuristic] Guess a full answer, then patch violations. Look for near-miss answers with a few broken constraints.
 - **G. Decompose.** [TODO explain heuristic] Solve the parts separately; misses interactions.
 - **H. Guess / sample.** [TODO explain heuristic] Chance baseline; `SAMPLE-m` is "check a few cases" reasoning.
 - **I. Strategy selection.** [TODO explain] Different items get different heuristics. This is modelled, not tested as a single heuristic.
+
+### 5.2 Theoretical priors (written before the evals)
+
+Before any data, three notes scored every family from −2 to +2, separately for direct answers and for thinking at best effort ([theory/README.md](theory/README.md)):
+
+- **T1 Expressivity:** *can* a transformer compute it cheaply? Theorems plus simulated search costs.
+- **T2 RASP-L:** would training *select* it? Tested RASP-L programs, the length–accuracy frontier, two-part MDL.
+- **T3 Precedent:** do LLMs already do it? Mechanistic and behavioural literature, and training pressure.
+
+T1 acts as a gate (not computable cheaply means not available). T2 and T3 give the support.
+
+**Table 4a. Theoretical priors per family.** Verdict rule and per-lens scores in [theory/README.md](theory/README.md) §1.
+
+| Family | Direct answer | Thinking at best effort |
+|---|---|---|
+| A Cue | **Strong:** constant defaults; the density cue on random 3-SAT. Position cues contested: an effect of the architecture, not a learned program | Contested: appears as search's default answer at the cap; cues weak |
+| B1 Relax | **Strong:** `UP-k`, k ≤ 3 | Supported, as a subroutine of search |
+| B3 Convex | Not available | Not available |
+| B4 Restrict (incl. `ETR`, `MM`) | Contested: computable and observed, but no simplicity advantage | Weak; phantom constraints (`ADD-CONSTRAINT`) supported |
+| B5 Probabilistic | Weak | Weak |
+| C0 One-shot scoring | **Strong:** `POLARITY` | Supported, as the value ordering inside search |
+| C1 Fixed-order greedy | Not available as a single-token answer; supported when the answer is written out | **Strong**, as search's first candidate |
+| C2 Adaptive greedy | Not available | Supported (`DSATUR`); `UC` as a decision procedure contested |
+| C3 Random order | Weak | Weak |
+| C4 Online | Contested | Weak |
+| D Truncated search | Not available | **Strong** |
+| E Message passing | Contested | Not available written out; weak as an implicit value rule |
+| F Local search | Not available | Supported (`MIN-CONFLICTS`), low confidence |
+| G Decompose / DP | `DP-EXACT` not available; `IGNORE-CROSSLINKS` weak | `DP-EXACT` supported on small knapsacks; `IGNORE-CROSSLINKS` weak |
+| H Guess / sample | Supported on entailment (`PROBE-m`); weak on SAT | Supported ("check a few cases") |
+| I Strategy selection | Supported | Supported |
+| Nuisance | `NOISY-EXACT` contested; `PERCEPTION-NOISE` supported | **Strong** (`NOISY-EXACT`); supported (`PERCEPTION-NOISE`) |
+
+**What the priors say.**
+
+1. **The regimes split, and all three lenses agree on the split.** Direct answers favour short, shallow programs: defaults, the density cue, a few propagation rounds, one-shot scoring. Thinking flips the ranking toward truncated exact search. It fits the budget below n\* (T1). Its per-step program is about as long as greedy's and far more accurate on training-size items (T2). Reasoning-model traces build and navigate search trees, and output length tracks solver conflicts (T3).
+2. **In thinking mode the families compose.** Search opens with a greedy candidate (C1/C2), orders values by a one-shot score (C0), propagates units (B1), answers a default at the cap (A1), and slips (nuisance). For thinking runs the zoo therefore includes composite members `SEARCH(b, order, value, default)`, and §6.2 identifies their parameters, not a family label alone.
+3. **Restriction (B4, including ETR) is the most informative contested family.**
+   - `FIRST∘UP-k` and `BICOND∘UP-k` are exactly as long as `UP-k` and less accurate under validity labels (T2). So B4 weight, if found, comes from training data, not from simplicity.
+   - Joint prediction: B4 weight is higher in natural-language than in formal framings, does not grow with size at fixed framing, and falls with thinking. Interpretive members (`BICOND`, `CLOSED-WORLD`) fall least.
+   - This is the sharpest test of H6.
+4. **Position effects are architectural.** They are well documented (T3) but on no frontier (T2). The causal mask explains them. They should survive thinking as *which* correct answer is returned, and grow with trace length.
+5. **The nuisance terms may be the biggest row.** The best-documented reasoning-model errors on constraint problems are misreading the instance and slipping during long execution (T3). Noise is therefore a first-class row with sharp signatures, not a residual:
+   - `NOISY-EXACT` error grows with work done, not with work relative to budget (T1 §3.6);
+   - phantom edges are either uniform (noise) or concentrated on co-mentioned pairs (B4).
+
+Selected pre-registered predictions are in [theory/README.md](theory/README.md) §4; the full lists are in T1 §4, T2 §6 and T3 §4. Table 14 carries the prior next to each observed weight.
 
 ---
 
@@ -226,10 +295,13 @@ We derive candidate members with **Pearl's simplified-model view**: a heuristic 
 
 [TODO The noisy-execution likelihood P(y | h, x) ∝ exp(−λ · d(y, h(x))). A violation-profile term for infeasible answers: *which* constraints are broken. The mixture over members, plus a "none of the above" term, with feature-dependent weights π_h(φ(x)). EA, permutation baseline, lift, and the hierarchical model.]
 
+[TODO Cross-formalism items (I_cross_formalism): predictions computed per encoding, natively or transported through the reduction and flagged; one canonical answer space; slip rates per encoding; a two-stage selector (encoding → working representation → member) with a latent translation state indicated by trace codes.]
+
 ### 6.3 Manipulation signatures and special item types
 
 [TODO The manipulations: order reversal, re-theming, rule inversion, an irrelevant constraint, size, density, thinking budget, environment shifts (e.g. a planted polarity bias). Two special item types:]
 
+- **Re-encoding across formalisms:** [TODO the same instance as graph, story, CNF and English premises with ground truth fixed; a length ladder (padding, expansion, compression) and a translation dial (scrambled numbering, neutral header, a legend naming the reduction). I_cross_formalism E1–E8.]
 - **Threshold knees:** [TODO compare the knee of the model's error-vs-density curve with each heuristic's simulated curve.]
 - **Depth-stress items:** [TODO P-completeness gadgets force a seq heuristic to evaluate a circuit of chosen depth. Prediction: in direct-answer mode, agreement with seq heuristics falls with gadget depth, and recovers with CoT. This is a direct test of const vs seq.]
 
@@ -244,6 +316,8 @@ We derive candidate members with **Pearl's simplified-model view**: a heuristic 
 | 50% C1 · 50% D `DPLL-b` | 10% slips | 0.XX / 0.XX | ±0.XX | 0.XX | — |
 | Feature-dependent: C1 on dense items, B1 on sparse | 10% slips | π(φ) curve recovered? R² = 0.XX | ±0.XX | 0.XX | — |
 | 20% each of five families | 10% slips | 0.XX each | ±0.XX | 0.XX | [TODO] |
+| Encoding-dependent π, home-advantage shift 0.10 / 0.05 (I_cross_formalism) | per-encoding slips | Shift detected: power 1.00 / 0.85 (design simulation) | ≤ 0.02 | 0.XX | H-structure vs H-translate |
+| Translation latent τ = 0.6, with validated trace codes | per-encoding slips | τ̂ = 0.607 ± 0.025 (design simulation) | ±0.XX | 0.XX | — |
 
 ### 6.5 Models and setup
 
@@ -274,7 +348,7 @@ We derive candidate members with **Pearl's simplified-model view**: a heuristic 
 | F Local search (`WALK-k`) | XX% | XX% | +XX pp | 0.XX | [0.XX, 0.XX] |
 | H Guess (`SAMPLE-m`) | XX% | XX% | +XX pp | 0.XX | [0.XX, 0.XX] |
 | Nuisance (`NOISY-EXACT`) | XX% | XX% | +XX pp | 0.XX | [0.XX, 0.XX] |
-| *Unexplained* | — | — | — | 0.XX | |
+| *Unexplained* | — | — | — | — | 0.XX | |
 
 ### 7.2 Manipulation signatures
 
@@ -289,6 +363,8 @@ We derive candidate members with **Pearl's simplified-model view**: a heuristic 
 | Density ↑ (fixed n) | knee at cue | knee | — | knee ≈ 8/3 | — | ↑ smooth | knee | knee at XX | [TODO] |
 | Depth-stress gadget depth ↑ | = | = | = | ↑ (no CoT) | ↑ | ↑ | ↑ | +XX pp | [TODO] |
 | Thinking budget ×4 | = | ↓ (k grows) | = | = | = | ↓ (b grows) | ↓ | −XX pp | [TODO] |
+| Re-encoded graph → CNF → logic, orders matched | = | = | ↑ under H-formalism (extra false IMPOSSIBLE) | ↓ in agreement under H-formalism; = under H-structure | = | = | = | ±XX pp | [TODO] |
+| Reduction named (legend) | = | = | ↓ if translation | ↑ agreement if translation | = | = | = | ±XX pp | [TODO] |
 
 ### 7.3 Capability and thinking budget
 
@@ -364,21 +440,23 @@ We derive candidate members with **Pearl's simplified-model view**: a heuristic 
 
 **Table 14. The evidence table.** Every entry is a **scalar with an interval**. Heuristics can be partly used, so the readout is explanatory power, not a verdict. Weights sum to 1 with the unexplained mass. Phase 2 columns (interpretability) are filled only for families with behavioural weight. Model-level detail is in Appendix D.
 
-| Family | Depth | Mixture weight π (95% CI) | ΔlogL vs null (per item) | ΔlogL vs nearest competitor | Lift on errors | Signature fit (weighted) | Trace-match share (faithfulness-weighted) | *Phase 2:* probe selectivity | *Phase 2:* intervention effect vs competitor |
-|--------|-------|---------------------------|--------------------------|-----------------------------|----------------|--------------------------|-------------------------------------------|------------------------------|----------------------------------------------|
-| A Cue | const | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | +XX pp | +XX pp |
-| B1 Relax | const / seq | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
-| B4 Restrict | const / seq | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
-| C Constructive | const–seq | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
-| D Truncated search | seq | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
-| E Message passing | const | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
-| F Local search | seq | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
-| G Decompose | seq | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
-| H Guess / sample | const | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
-| Nuisance (noisy exact, perception) | — | 0.XX [0.XX, 0.XX] | +0.XX | — | +XX pp | 0.XX | — | — | — |
-| *Unexplained* | — | 0.XX [0.XX, 0.XX] | — | — | — | — | — | — | — |
+| Family | Depth | Theory prior (direct / thinking, §5.2) | Mixture weight π (95% CI) | ΔlogL vs null (per item) | ΔlogL vs nearest competitor | Lift on errors | Signature fit (weighted) | Trace-match share (faithfulness-weighted) | *Phase 2:* probe selectivity | *Phase 2:* intervention effect vs competitor |
+|--------|-------|-----------------|---------------------------|--------------------------|-----------------------------|----------------|--------------------------|-------------------------------------------|------------------------------|----------------------------------------------|
+| A Cue | const | Strong / Cont. | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | +XX pp | +XX pp |
+| B1 Relax | const / seq | Strong / Supp. | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| B4 Restrict | const / seq | Cont. / Weak | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| C Constructive | const–seq | Supp. (written out) / Strong | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| D Truncated search | seq | N/A / **Strong** | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| E Message passing | const | Cont. / Weak | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| F Local search | seq | N/A / Supp. | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| G Decompose | seq | Weak / Supp. (small DP) | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| H Guess / sample | const | Supp. (ENT) / Supp. | 0.XX [0.XX, 0.XX] | +0.XX | +0.XX | +XX pp | 0.XX | XX% | | |
+| Nuisance (noisy exact, perception) | — | Cont. / **Strong** | 0.XX [0.XX, 0.XX] | +0.XX | — | +XX pp | 0.XX | — | — | — |
+| *Unexplained* | — | — | 0.XX [0.XX, 0.XX] | — | — | — | — | — | — | — |
 
-**Figure 4** — [TODO Stacked bars of π per model, ordered by capability, for direct-answer vs best-effort thinking. This shows how the weight shifts between families rather than a single winner.]
+**Family I (strategy selection) readouts**, from I_cross_formalism §7: the home-advantage index with interval, the translation rate τ, the effect of the translation dial, the fingerprint distance between encodings, and the agreement ratio R. [TODO a small Table 14b once fitted.]
+
+**Figure 4** — [TODO Stacked bars of π per model, ordered by capability, for direct-answer vs best-effort thinking, and one bar per encoding (graph / story / CNF / logic). This shows how the weight shifts between families rather than a single winner.]
 
 **What stands out.** [TODO Which families carry the most weight, how concentrated the weight is (e.g. the top family's π and the entropy of π), and how stable it is across models, domains, framings and thinking budget. Hopefully one family dominates; if the weight is spread, say so.]
 
@@ -390,16 +468,28 @@ We derive candidate members with **Pearl's simplified-model view**: a heuristic 
 
 Training-as-adaptation (F3): choosing heuristics by adaptation is intractable in general (Rich et al. 2019). SGD settles for a short program. Rival complexity measures with lower-bound theory: pBT width, LOCAL rounds, polynomial degree.]
 
-**Table 15. Programs per family.** Lengths and the prediction were written down before the evals.
+**What the first draft found** ([theory/T2](theory/T2_rasp_learnability.md); programs run and tested against reference implementations in `scripts/theory/rasp/`):
+
+1. **Two kinds of program.** For a direct answer the program computes the answer. For a thinking model the relevant program is the *per-step* function applied at each trace step, and the heuristic is its iteration. The two rank the families differently.
+2. **Direct answers: short cues and shallow propagation win.** `DENSITY` (8 primitives, 2 layers) is the only short program above base rate on random 3-SAT. `UP-k` is on the frontier for entailment and puzzle-like CNF. `POLARITY` (9) beats causal `BP-2` (81) for choosing one variable's value.
+3. **Thinking: truncated exact search wins below n\*.** Per-step programs for C, D and F share about 40–50 primitives of trace machinery and differ by only 10–40. Iterated accuracy differs a lot (random 3-SAT, n = 20: `DPLL-b` 1.00, `WALK` 0.88, `UC` 0.43). So two-part MDL favours D.
+4. **Restriction is a data effect.** B4 members cost no extra length, so the account can explain B4 weight only through training labels that endorse the restricted reading (≈ 50% for `FIRST`, ≈ 70–80% for `BICOND` on discriminating items).
+5. **The account predicts trace style.** A terse greedy step with state is not RASP-L. A verbose "restate the neighbours' colours, then decide" step is a strict 3-layer program that reproduces first-fit exactly. Traces should be copy-then-evaluate, with tokens scaling with Σdeg or with m per decision.
+6. **Out-of-distribution shadows.** With a fixed atom vocabulary, the MDL-optimal direct entailment program is a 3-layer parallel truth table (`PROBE-16`). It is exact on training-size items and becomes a fixed-probe sampler with 56% commission on larger ones. A heuristic observed on hard items can be the out-of-distribution behaviour of a program that was exact in training.
+7. **Caveat.** Under linear two-part MDL, every switch to a longer program happens by N ≈ 10³–10⁴ examples. At LLM scale, length alone is nearly inert. The constraints that bite are depth, the causal mask, uniformity and optimisation, so §10 leans on those, and on the toy-model test, rather than on length alone.
+
+**Table 15. Programs per family.** Lengths and the prediction were written down before the evals (first draft, T2 §8). Length = RASP-L primitives / attention heads; programs are hand-written upper bounds.
 
 | Family (member) | RASP-L length | Depth (layers) | Depth class | Accuracy on a training-like distribution | On the frontier? | Predicted rank | Observed rank |
 |-----------------|---------------|----------------|-------------|------------------------------------------|------------------|----------------|---------------|
-| A (`DENSITY`) | XX | X | const | XX% | ✓ / ✗ | X | X |
-| B1 (`UP-2`) | XX | X | const | XX% | | X | X |
-| B4 (`FIRST`) | XX | X | const | XX% | | X | X |
-| C (`FIRST-FIT`) | XX | X | seq | XX% | | X | X |
-| E (`BP-2`) | XX | X | const | XX% | | X | X |
-| [TODO] | | | | | | | |
+| A (`DENSITY`) | 8 / 2 | 2 | const | 0.787 random 3-SAT (base 0.728); 0.727 puzzle CNF (base 0.718) | ✓ | 1 on random 3-SAT; 3 on puzzle CNF | X |
+| B1 (`UP-2`) | 51 / 12 SAT (causal); 93 / 25 ENT | 5 | const (fixed k) | 0.865 puzzle CNF; 0.728 random 3-SAT (inert); 0.967 ENT | ✓ puzzle CNF, ENT (by length) | 1 on ENT (fresh names) and puzzle CNF | X |
+| B4 (`FIRST`) | 17 / 3 alone (= `ECHO`); 93 / 25 with `UP-2` | 2 / 5 | const | 0.848 / 0.875 | ✗ (dominated at equal length) | Below `UP-k` and `ECHO` unless ≥ 50% of labels endorse it | X |
+| C (`FIRST-FIT`) | per step: 53 / 14 verbose; 25 / 6 terse with set-valued state (not RASP-L) | 3 per step | seq (const per step) | 0.818 (n 6–12, ≤ 3 colours) | ✓ per step | 1 for written-out colouring with thinking off; 2–3 in thinking | X |
+| C0 (`POLARITY`) | 9 / 2 | 2 | const | 0.960 (single-variable value choice) | ✓ | 1 on value choice | X |
+| E (`BP-2`) | 81 / 25 (causal) | 6 | const | 0.958 (vs `POLARITY` 0.960) | ✗ | Below `POLARITY` | X |
+| H (`PROBE-16`) | 147 / 20 | 3 | const (non-uniform in #atoms) | 1.000 in distribution; 0.61 out | ✓ | 1 for fixed-vocabulary ENT at N ≳ 10⁴ (toy) | X |
+| D (`DPLL-b`) | per step ≈ 75 ± 20 (estimate) | ≈ 5 per step | seq | 1.0 (n ≤ 20 within 32k) | ✓ (thinking) | 1 in thinking below n\* | X |
 
 **Figure 3** — [TODO Accuracy vs program length, with the frontier and the standout marked.]
 
@@ -407,18 +497,26 @@ Training-as-adaptation (F3): choosing heuristics by adaptation is intractable in
 
 **Table 16. Small transformers trained from scratch: which program do they learn?**
 
-| Training set (size / diversity) | Depth | Decompiles to | Matches family | Accuracy in / out of distribution |
-|---------------------------------|-------|---------------|----------------|-----------------------------------|
-| XXk / low | X | [TODO] | [TODO] | XX% / XX% |
-| XXk / high | X | [TODO] | [TODO] | XX% / XX% |
-| XXk / low, with CoT | X | [TODO] | [TODO] | XX% / XX% |
+| Training set (size / diversity) | Depth | Predicted (T2 P9) | Decompiles to | Matches family | Accuracy in / out of distribution |
+|---------------------------------|-------|-------------------|---------------|----------------|-----------------------------------|
+| Entailment, fixed atom vocabulary, ≤ 4 atoms, N ≳ 10⁴ | X | Parallel truth table (`PROBE-16`): exact in distribution, ≈ 50% commission at 5–6 atoms | [TODO] | [TODO] | XX% / XX% |
+| Entailment, fresh atom names per item | X | `UP-k`, with omission-only errors out of distribution | [TODO] | [TODO] | XX% / XX% |
+| Random 3-SAT decision | X | The 8-primitive density program | [TODO] | [TODO] | XX% / XX% |
+| Entailment, N from 10² to 10⁵ | X | `ALWAYS` → `ECHO` → `UP-1` → `UP-2` / `PROBE` as N grows | [TODO] | [TODO] | XX% / XX% |
+| XXk / low, with CoT | X | Per-step copy-then-evaluate program | [TODO] | [TODO] | XX% / XX% |
+
+The account is wrong if the two entailment rows give the same out-of-distribution error type, or if decompiled programs are dense even when the toy model fits in distribution.
 
 ---
 
 ## 11. Discussion
 
 - **What it means:** [TODO]
-- **Human-likeness:** [TODO connection to v1 (ETR is family B4/C4). Inverted U with capability?]
+- **Theory vs data:** [TODO Compare Table 14's observed weights with the priors in Table 4a, family by family. Where theory was right, wrong, or silent. Pre-registered predictions that failed get their own paragraph.]
+- **Does the formalism pick the heuristic?** [TODO I_cross_formalism result for H4: weights invariant across encodings (structure), following the formalism, or following a translation. Zhang, Chen & Chen (2026) compared answer agreement across encodings; we extend that to procedure agreement.]
+- **Forced vs chosen shortcuts:** [TODO Below the budget line, errors are not compute-forced (§4). Which families models choose there, compared with above the line.]
+- **Architecture vs learned program:** [TODO Position effects come from the causal mask, not from a learned heuristic (§5.2). Out-of-distribution shadows: a heuristic on hard items can be an exact training-size program extrapolated (§10).]
+- **Human-likeness:** [TODO connection to v1 (ETR is family B4/C4). Inverted U with capability? Theory says B4 can only come from data (§10), so B4 weight measures what models inherit from human text.]
 - **Practical implications:** [TODO]
 - **Limitations:**
   - [TODO open-model interpretability transfer];
