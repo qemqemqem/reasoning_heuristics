@@ -22,6 +22,7 @@ python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
 - Output: `data/items/<tier>/<V>_<E>_<tier>_s<seed>.jsonl` plus a `.report.json` with selection statistics and the validator report. The CLI exits non-zero if any item or set fails validation; the items are still written so the failure can be inspected.
 - The committed form of each set is the deterministic `.jsonl.gz` copy that `review` writes next to it. Generation is deterministic in (code, tier, seed, parameters), so `review` rebuilds identical files.
 - `review/<V>_<E>.md` renders five representative dev items per eval for human review; `review/summary.md` has item counts, cell coverage, validator pass rates and any failures.
+- `scripts/review_page/build_review.py` builds the interactive review page (50 hand-picked dev items, four to six per eval, with keep / fix / drop and comments). The published page keeps marks in its artifact store, in the collections `reviews` (one document per item) and `generator_notes` (one per eval). Rebuild it after a generator changes.
 
 ## Tiers, seeds and splits
 

@@ -1,0 +1,354 @@
+<title>Stage 1 Item Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Layout: one reading column of item sheets on a paper ground; a sticky ledger bar carries progress and filters.
+   Tokens match the project's explainer page so the two read as one set. */
+:root{
+  --paper:#f4f6f4; --sheet:#ffffff; --ink:#1b2422; --muted:#5b6762; --rule:#d5dcd8;
+  --accent:#2c5f86; --accent-soft:#e3edf5; --ok:#2f7a4d; --ok-soft:#e2f1e7; --no:#a8442f; --no-soft:#f6e5e0; --warn:#8a5a00; --warn-soft:#f7ecd4;
+  --code:#eef2ef;
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#121716; --sheet:#182020; --ink:#e4ebe8; --muted:#9aa8a2; --rule:#2c3634;
+  --accent:#86b6dd; --accent-soft:#1d2c38; --ok:#71c393; --ok-soft:#173025; --no:#e58f78; --no-soft:#3a201a; --warn:#e0b45e; --warn-soft:#3a2e15;
+  --code:#1d2625; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#121716; --sheet:#182020; --ink:#e4ebe8; --muted:#9aa8a2; --rule:#2c3634;
+  --accent:#86b6dd; --accent-soft:#1d2c38; --ok:#71c393; --ok-soft:#173025; --no:#e58f78; --no-soft:#3a201a; --warn:#e0b45e; --warn-soft:#3a2e15;
+  --code:#1d2625; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--sheet)}
+.wrap{max-width:62rem;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3,h4,.label,button,.chip,.cell{font-family:var(--f-display)}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.15}
+code,pre,.mono{font-family:var(--f-mono);font-size:.82rem}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* masthead */
+.mast{padding-block:2rem 1.25rem;display:grid;gap:.75rem}
+.mast .eyebrow{font-family:var(--f-display);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+.mast h1{font-size:2.1rem;font-weight:700}
+.mast p{margin:0;max-width:44rem}
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:.75rem;margin-top:.25rem}
+.how div{background:var(--sheet);border:1px solid var(--rule);border-radius:6px;padding:.7rem .85rem;font-size:.93rem}
+.how b{font-family:var(--f-display);font-weight:600;letter-spacing:.02em}
+.how .k b{color:var(--ok)} .how .f b{color:var(--warn)} .how .d b{color:var(--no)}
+
+/* ledger bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--sheet);border-block:1px solid var(--rule)}
+.bar .wrap{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem 1.25rem;padding-block:.6rem}
+.meter{flex:1 1 14rem;min-width:0;display:grid;gap:.3rem}
+.meter .track{display:flex;height:.5rem;border-radius:3px;overflow:hidden;background:var(--code)}
+.meter .track span{display:block;height:100%}
+.meter .k{background:var(--ok)} .meter .f{background:var(--warn)} .meter .d{background:var(--no)}
+.meter .nums{font-family:var(--f-display);font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.meter .nums b{color:var(--ink)}
+.filters{display:flex;flex-wrap:wrap;gap:.3rem}
+.filters button{font-size:.85rem;padding:.3rem .65rem;border-radius:999px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--sheet)}
+.store{font-family:var(--f-display);font-size:.8rem;color:var(--muted)}
+.store.err{color:var(--no)}
+
+/* eval index */
+.index{display:flex;flex-wrap:wrap;gap:.4rem;padding:1rem 0 .25rem;margin:0;list-style:none}
+.index a{display:inline-flex;gap:.4rem;align-items:baseline;text-decoration:none;color:var(--ink);font-family:var(--f-display);font-size:.88rem;padding:.25rem .6rem;border:1px solid var(--rule);border-radius:4px;background:var(--sheet)}
+.index a .n{color:var(--muted);font-variant-numeric:tabular-nums}
+.index a.done{border-color:var(--ok)} .index a.done .n{color:var(--ok)}
+
+/* eval section */
+.eval{padding-block:2rem .5rem;display:grid;gap:1rem}
+.eval-head{display:grid;gap:.5rem;border-top:3px solid var(--ink);padding-top:.9rem}
+.eval-head .eyebrow{font-family:var(--f-display);font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0}
+.eval-head h2{font-size:1.55rem;font-weight:700;display:flex;flex-wrap:wrap;gap:.25rem .6rem;align-items:baseline}
+.eval-head h2 .code{font-family:var(--f-mono);font-size:.95rem;font-weight:500;color:var(--muted)}
+.eval-head p{margin:0;max-width:46rem}
+.eval-head .check{margin:0;padding-left:1.2rem;max-width:46rem;font-size:.95rem}
+.eval-head .check li::marker{color:var(--accent)}
+.eval-head .links{font-family:var(--f-display);font-size:.88rem;display:flex;flex-wrap:wrap;gap:.3rem 1rem;color:var(--muted)}
+.gnote{display:grid;gap:.3rem}
+.gnote label{font-family:var(--f-display);font-size:.85rem;font-weight:600;letter-spacing:.02em}
+
+/* item sheet */
+.item{background:var(--sheet);border:1px solid var(--rule);border-left:4px solid var(--rule);border-radius:4px;padding:1rem 1.1rem;display:grid;gap:.8rem;min-width:0}
+.item[data-v="keep"]{border-left-color:var(--ok)}
+.item[data-v="fix"]{border-left-color:var(--warn)}
+.item[data-v="drop"]{border-left-color:var(--no)}
+.item-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:.3rem .8rem}
+.cell{font-weight:700;font-size:1.05rem;letter-spacing:.01em}
+.item-head .meta{font-family:var(--f-display);font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums;flex:1 1 16rem;min-width:0}
+.chip{font-size:.75rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:.12rem .5rem;border-radius:3px;background:var(--code);color:var(--muted)}
+.chip[data-v="keep"]{background:var(--ok-soft);color:var(--ok)}
+.chip[data-v="fix"]{background:var(--warn-soft);color:var(--warn)}
+.chip[data-v="drop"]{background:var(--no-soft);color:var(--no)}
+.facts{display:grid;grid-template-columns:max-content 1fr;gap:.25rem .9rem;margin:0;font-size:.92rem}
+.facts dt{font-family:var(--f-display);font-weight:600;color:var(--muted)}
+.facts dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.facts code{background:var(--code);padding:.05rem .3rem;border-radius:3px}
+details>summary{cursor:pointer;font-family:var(--f-display);font-weight:600;font-size:.92rem}
+details>summary .sub{font-weight:500;color:var(--muted)}
+pre.prompt{margin:.4rem 0 0;max-height:26rem;overflow:auto;background:var(--code);border-radius:4px;padding:.75rem .85rem;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45}
+.fmt{font-size:.88rem;color:var(--muted);margin:.4rem 0 0}
+.groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));gap:.35rem}
+.groups h4{grid-column:1/-1}
+.groups h4,.sub-h{margin:0;font-family:var(--f-display);font-size:.92rem;font-weight:600}
+.grp{display:grid;grid-template-columns:minmax(0,1fr);gap:.2rem;padding:.45rem .6rem;border:1px solid var(--rule);border-radius:4px}
+.grp code{overflow-wrap:anywhere}
+.grp .who{display:flex;flex-wrap:wrap;gap:.25rem}
+.grp .who span{font-family:var(--f-display);font-size:.78rem;padding:.05rem .4rem;border-radius:3px;background:var(--accent-soft);color:var(--accent)}
+.tbl{overflow-x:auto;margin-top:.4rem}
+table{border-collapse:collapse;width:100%;font-size:.86rem}
+th,td{text-align:left;vertical-align:top;padding:.35rem .5rem;border-bottom:1px solid var(--rule)}
+th{font-family:var(--f-display);font-weight:600;color:var(--muted);white-space:nowrap}
+td.m{font-family:var(--f-display);font-weight:600;white-space:nowrap}
+ul.against{margin:.4rem 0 0;padding-left:1.1rem;font-size:.9rem;display:grid;gap:.25rem}
+ul.against .lr{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.notes{font-size:.9rem;color:var(--muted);margin:0}
+
+/* review controls */
+.review{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.6rem .9rem;align-items:start;padding-top:.8rem;border-top:1px dashed var(--rule)}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:5px;overflow:hidden}
+.seg button{font-size:.92rem;font-weight:600;padding:.45rem .9rem;border:0;border-right:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[data-v="keep"][aria-pressed="true"]{background:var(--ok);color:var(--sheet)}
+.seg button[data-v="fix"][aria-pressed="true"]{background:var(--warn);color:var(--sheet)}
+.seg button[data-v="drop"][aria-pressed="true"]{background:var(--no);color:var(--sheet)}
+.seg button:disabled{cursor:not-allowed;opacity:.55}
+textarea{width:100%;min-height:2.6rem;resize:vertical;font:inherit;font-size:.93rem;padding:.45rem .6rem;border:1px solid var(--rule);border-radius:5px;background:var(--paper);color:var(--ink)}
+.saved{grid-column:1/-1;font-family:var(--f-display);font-size:.78rem;color:var(--muted);min-height:1em}
+.saved.err{color:var(--no)}
+.empty{padding:2rem 0;color:var(--muted);font-family:var(--f-display)}
+footer{padding-block:2.5rem 3rem;color:var(--muted);font-size:.88rem}
+@media (max-width:560px){.review{grid-template-columns:1fr}.mast h1{font-size:1.7rem}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="wrap mast">
+  <p class="eyebrow">reasoning_heuristics · Stage 1 generators · PR #2</p>
+  <h1>Stage 1 item review</h1>
+  <p>Fifty dev items, four to six from each of the ten Stage 1 evals, chosen to cover each domain and the main contrasts. Where an eval works by comparing two versions of one instance, both versions are here, one after the other. Every item already passed the automatic checks: an independent solver agrees on the answer, every heuristic's prediction was recomputed, and at least two heuristics disagree. What's left is what a script can't judge: whether the prompt reads well, says what it means, and tests what its cell claims.</p>
+  <div class="how">
+    <div class="k"><b>Keep</b> · fine as it is.</div>
+    <div class="f"><b>Fix</b> · say what's wrong. Fixes go into the generator, so every item like it changes too.</div>
+    <div class="d"><b>Drop</b> · this item or its whole cell shouldn't be in the eval.</div>
+  </div>
+</header>
+
+<div class="bar" role="region" aria-label="Review progress">
+  <div class="wrap">
+    <div class="meter">
+      <div class="track" aria-hidden="true"><span class="k" id="m-k"></span><span class="f" id="m-f"></span><span class="d" id="m-d"></span></div>
+      <div class="nums" id="m-nums">Loading…</div>
+    </div>
+    <div class="filters" role="group" aria-label="Show">
+      <button type="button" data-f="all" aria-pressed="true">All</button>
+      <button type="button" data-f="todo" aria-pressed="false">To review</button>
+      <button type="button" data-f="fix" aria-pressed="false">Fix</button>
+      <button type="button" data-f="drop" aria-pressed="false">Drop</button>
+      <button type="button" data-f="commented" aria-pressed="false">Commented</button>
+    </div>
+    <span class="store" id="store">Connecting to the review store…</span>
+  </div>
+</div>
+
+<main class="wrap">
+  <ul class="index" id="index"></ul>
+  <div id="evals"></div>
+  <p class="empty" id="none" hidden>No items match this filter.</p>
+</main>
+<footer class="wrap">Items come from <code>data/items/dev/*_dev_s1.jsonl</code> on the <code>generators</code> branch (seed 1). The review packets in <code>review/</code> show a different five per eval. Marks save as you make them, and Claude reads them back from this page's store.</footer>
+
+<script type="application/json" id="data">/*__DATA__*/null</script>
+<script>
+(function(){
+  "use strict";
+  const DATA = JSON.parse(document.getElementById("data").textContent);
+  const ITEMS = DATA.flatMap(e => e.items);
+  const state = {reviews:{}, notes:{}, filter:"all", db:null, writable:true, dirty:{}};
+  const $ = (sel, el=document) => el.querySelector(sel);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const VLABEL = {keep:"Keep", fix:"Fix", drop:"Drop"};
+
+  // ---------- render (static content, once) ----------
+  function itemHTML(it){
+    const tok = it.tokens ? ` · ${it.tokens} tokens` : "";
+    const groups = it.groups.map(g => `<div class="grp"><code>${esc(g.answer)}</code><div class="who">${g.members.map(m => `<span>${esc(m)}</span>`).join("")}</div></div>`).join("");
+    const rows = it.members.map(m => `<tr><td class="m">${esc(m.label)}</td><td>${esc(m.family)}</td><td>${esc(m.eval)}</td><td>${esc(m.cot)}</td></tr>`).join("");
+    const against = it.against.map(a => `<li>${esc(a.outcome)}: ${a.against.length ? a.against.map(([h,v]) => `${esc(h)} <span class="lr">${v.toFixed(2)}</span>`).join(", ") : "<span class=\"lr\">no theory below log10 LR 1</span>"}</li>`).join("");
+    return `<article class="item" id="it-${esc(it.id)}" data-id="${esc(it.id)}" data-v="">
+      <div class="item-head"><span class="cell">${esc(it.cell)}</span>
+        <span class="meta">set ${esc(it.set_id)} · ${esc(it.domain)} · ${esc(it.framing)}${tok}</span>
+        <span class="chip" data-v="">To review</span></div>
+      <dl class="facts"><dt>Ground truth</dt><dd><code>${esc(it.truth)}</code></dd>
+        <dt>Params</dt><dd><code>${esc(it.params)}</code></dd></dl>
+      <details open><summary>Prompt</summary><pre class="prompt">${esc(it.prompt)}</pre>
+        ${it.answer_format ? `<p class="fmt">Answer format: ${esc(it.answer_format)}</p>` : ""}</details>
+      <div class="groups"><h4>Predicted answers <span class="sub">· ${it.groups.length} distinct across ${it.members.length} heuristics</span></h4>${groups}</div>
+      <details><summary>Each heuristic's hypotheses <span class="sub">· eval result and chain of thought</span></summary>
+        <div class="tbl"><table><thead><tr><th>Heuristic</th><th>Family</th><th>Eval prediction</th><th>Trace prediction</th></tr></thead><tbody>${rows}</tbody></table></div></details>
+      <details><summary>What each outcome counts against <span class="sub">· log10 likelihood ratio, ≥ 1 shown</span></summary><ul class="against">${against}</ul></details>
+      ${it.notes ? `<p class="notes">${esc(it.notes)}</p>` : ""}
+      <div class="review">
+        <div class="seg" role="group" aria-label="Verdict for ${esc(it.cell)}">
+          <button type="button" data-v="keep" aria-pressed="false">Keep</button><button type="button" data-v="fix" aria-pressed="false">Fix</button><button type="button" data-v="drop" aria-pressed="false">Drop</button></div>
+        <textarea id="c-${esc(it.id)}" rows="2" aria-label="Comment on ${esc(it.cell)}" placeholder="What's wrong, or what the generator should do differently"></textarea>
+        <span class="saved" aria-live="polite"></span>
+      </div></article>`;
+  }
+  function render(){
+    $("#index").innerHTML = DATA.map(e => `<li><a href="#ev-${e.slug}" data-slug="${e.slug}">${esc(e.name)} <span class="n">0/${e.items.length}</span></a></li>`).join("");
+    $("#evals").innerHTML = DATA.map(e => `<section class="eval" id="ev-${e.slug}" data-slug="${e.slug}">
+      <div class="eval-head"><p class="eyebrow">${esc(e.vertical)} · ${e.n_dev} dev items</p>
+        <h2>${esc(e.name)} <span class="code">${esc(e.code)}</span></h2>
+        <p>${esc(e.tests)}</p>
+        <ul class="check">${e.check.map(c => `<li>${esc(c)}</li>`).join("")}</ul>
+        <div class="links"><a href="${esc(e.packet)}" target="_blank" rel="noopener">Full review packet and generator design</a></div></div>
+      <div class="gnote"><label for="g-${e.slug}">Notes on this generator (apply to every item it makes)</label>
+        <textarea id="g-${e.slug}" rows="2" placeholder="Changes for the whole eval, such as wording, sizes or a cell to cut"></textarea>
+        <span class="saved" aria-live="polite"></span></div>
+      ${e.items.map(itemHTML).join("")}</section>`).join("");
+  }
+
+  // ---------- review state -> DOM ----------
+  function applyItem(id){
+    const el = document.getElementById("it-" + id); if (!el) return;
+    const r = state.reviews[id] || {};
+    const v = r.verdict || "";
+    el.dataset.v = v;
+    const chip = $(".chip", el); chip.dataset.v = v; chip.textContent = v ? VLABEL[v] : "To review";
+    el.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v)));
+    const ta = $("textarea", el);
+    if (document.activeElement !== ta && !state.dirty["reviews/" + id]) ta.value = r.comment || "";
+  }
+  function applyNote(slug){
+    const ta = document.getElementById("g-" + slug); if (!ta) return;
+    if (document.activeElement !== ta && !state.dirty["generator_notes/" + slug]) ta.value = (state.notes[slug] || {}).note || "";
+  }
+  function summarise(){
+    const c = {keep:0, fix:0, drop:0};
+    ITEMS.forEach(it => { const v = (state.reviews[it.id] || {}).verdict; if (c[v] !== undefined) c[v]++; });
+    const n = ITEMS.length, done = c.keep + c.fix + c.drop;
+    $("#m-k").style.width = (100*c.keep/n) + "%"; $("#m-f").style.width = (100*c.fix/n) + "%"; $("#m-d").style.width = (100*c.drop/n) + "%";
+    $("#m-nums").innerHTML = `<b>${done}</b> of ${n} reviewed · ${c.keep} keep · ${c.fix} fix · ${c.drop} drop`;
+    DATA.forEach(e => {
+      const k = e.items.filter(it => (state.reviews[it.id] || {}).verdict).length;
+      const a = $(`#index a[data-slug="${e.slug}"]`);
+      $(".n", a).textContent = `${k}/${e.items.length}`; a.classList.toggle("done", k === e.items.length);
+    });
+    applyFilter();
+  }
+  function applyFilter(){
+    const f = state.filter; let shown = 0;
+    DATA.forEach(e => {
+      let inSec = 0;
+      e.items.forEach(it => {
+        const r = state.reviews[it.id] || {};
+        const ok = f === "all" || (f === "todo" && !r.verdict) || (f === "commented" && (r.comment || "").trim()) || r.verdict === f;
+        document.getElementById("it-" + it.id).hidden = !ok; if (ok) inSec++;
+      });
+      document.getElementById("ev-" + e.slug).hidden = inSec === 0 && f !== "all"; shown += inSec;
+    });
+    $("#none").hidden = shown > 0;
+  }
+
+  // ---------- writes: one at a time per document ----------
+  const chains = {};
+  function write(coll, id, body, statusEl){
+    if (!state.db || !state.writable) return;
+    const key = coll + "/" + id;
+    statusEl.classList.remove("err"); statusEl.textContent = "Saving…";
+    const run = () => state.db.collection(coll).doc(id).set(body).then(() => {
+      statusEl.textContent = "Saved"; delete state.dirty[key];
+    }, err => {
+      statusEl.classList.add("err");
+      if (err && err.code === "invalid_argument") { state.writable = false; lock("You can read this page but not save marks on it."); }
+      statusEl.textContent = "Not saved: " + ((err && err.message) || "the store refused the write") + ". Try again in a moment.";
+    });
+    chains[key] = (chains[key] || Promise.resolve()).then(run, run);
+  }
+  function reviewBody(id, patch){
+    const it = ITEMS.find(x => x.id === id), prev = state.reviews[id] || {};
+    return Object.assign({item_id: it.item_id, eval: it.eval, cell: it.cell, verdict: prev.verdict || null, comment: prev.comment || ""}, patch, {updated: new Date().toISOString()});
+  }
+  const timers = {};
+  function debounced(key, fn){ clearTimeout(timers[key]); timers[key] = setTimeout(fn, 700); }
+  function flush(key){ if (timers[key]) { clearTimeout(timers[key]); timers[key] = null; return true; } return false; }
+
+  function wire(){
+    document.addEventListener("click", ev => {
+      const fb = ev.target.closest(".filters button");
+      if (fb) { state.filter = fb.dataset.f; document.querySelectorAll(".filters button").forEach(b => b.setAttribute("aria-pressed", String(b === fb))); applyFilter(); return; }
+      const vb = ev.target.closest(".seg button"); if (!vb) return;
+      const el = vb.closest(".item"), id = el.dataset.id;
+      const cur = (state.reviews[id] || {}).verdict;
+      const verdict = cur === vb.dataset.v ? null : vb.dataset.v;
+      const comment = $("textarea", el).value;
+      state.reviews[id] = reviewBody(id, {verdict, comment});
+      applyItem(id); summarise();
+      write("reviews", id, state.reviews[id], $(".saved", el));
+    });
+    document.addEventListener("input", ev => {
+      const ta = ev.target; if (ta.tagName !== "TEXTAREA") return;
+      const item = ta.closest(".item");
+      if (item) {
+        const id = item.dataset.id, key = "reviews/" + id; state.dirty[key] = true;
+        debounced(key, () => { timers[key] = null; state.reviews[id] = reviewBody(id, {comment: ta.value}); summarise(); write("reviews", id, state.reviews[id], $(".saved", item)); });
+      } else {
+        const slug = ta.id.slice(2), key = "generator_notes/" + slug; state.dirty[key] = true;
+        debounced(key, () => { timers[key] = null; const body = {eval: slug, note: ta.value, updated: new Date().toISOString()}; state.notes[slug] = body; write("generator_notes", slug, body, ta.nextElementSibling); });
+      }
+    });
+    document.addEventListener("focusout", ev => {
+      const ta = ev.target; if (ta.tagName !== "TEXTAREA") return;
+      const item = ta.closest(".item");
+      const key = item ? "reviews/" + item.dataset.id : "generator_notes/" + ta.id.slice(2);
+      if (!flush(key)) return;
+      if (item) { const id = item.dataset.id; state.reviews[id] = reviewBody(id, {comment: ta.value}); summarise(); write("reviews", id, state.reviews[id], $(".saved", item)); }
+      else { const slug = ta.id.slice(2); const body = {eval: slug, note: ta.value, updated: new Date().toISOString()}; state.notes[slug] = body; write("generator_notes", slug, body, ta.nextElementSibling); }
+    });
+  }
+  function lock(msg){
+    document.querySelectorAll(".seg button, textarea").forEach(el => el.disabled = true);
+    const s = $("#store"); s.textContent = msg; s.classList.add("err");
+  }
+
+  // ---------- store ----------
+  async function connect(){
+    const use = window.claude && window.claude.use;
+    const db = use ? await window.claude.use("db") : null;
+    if (!db) { lock("Marks can't be saved in this view. Open the page on claude.ai while signed in."); summarise(); return; }
+    state.db = db;
+    const user = await window.claude.use("user");
+    if (user) { const can = await user.can("data.write"); if (can === false) { state.writable = false; lock("You can read this page but not save marks on it."); } }
+    const store = $("#store");
+    const slow = setTimeout(() => { store.textContent = "The review store isn't answering yet. Marks you make will save once it does."; store.classList.add("err"); }, 10000);
+    let gotReviews = false;
+    db.collection("reviews").onSnapshot(snap => {
+      snap.docChanges().forEach(ch => {
+        if (ch.type === "removed") delete state.reviews[ch.doc.id];
+        else if (!state.dirty["reviews/" + ch.doc.id]) state.reviews[ch.doc.id] = ch.doc.data();
+        applyItem(ch.doc.id);
+      });
+      summarise();
+      if (!snap.metadata.fromCache && !gotReviews) { gotReviews = true; clearTimeout(slow); if (state.writable) { store.classList.remove("err"); store.textContent = "Marks save as you go"; } }
+    }, err => { clearTimeout(slow); store.classList.add("err"); store.textContent = "Lost the review store (" + err.code + "). Reload to reconnect."; });
+    db.collection("generator_notes").onSnapshot(snap => {
+      snap.docChanges().forEach(ch => {
+        if (ch.type === "removed") delete state.notes[ch.doc.id];
+        else if (!state.dirty["generator_notes/" + ch.doc.id]) state.notes[ch.doc.id] = ch.doc.data();
+        applyNote(ch.doc.id);
+      });
+    }, () => {});
+  }
+
+  render(); wire(); summarise(); connect();
+})();
+</script>
