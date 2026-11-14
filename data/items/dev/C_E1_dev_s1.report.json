@@ -1,0 +1,45 @@
+{
+ "vertical": "C",
+ "eval_id": "E1",
+ "tier": "dev",
+ "seed": 1,
+ "per_cell": 5,
+ "params": {},
+ "cells": [
+  "COL/c1-NAT",
+  "COL/c2-RELABEL",
+  "COL/c3-ANS-LABEL",
+  "COL/c4-ANS-RAND",
+  "COL/c5-ANS-FREE",
+  "COL/c6-RELIST",
+  "SAT/c1-NAT",
+  "SAT/c2-RELABEL",
+  "SAT/c3-ANS-LABEL",
+  "SAT/c4-ANS-RAND",
+  "SAT/c5-ANS-FREE",
+  "SAT/c6-RELIST"
+ ],
+ "generation": {
+  "attempts": 2451,
+  "accepted": 10,
+  "rejections": {
+   "FF optimal in every order (no C1-vs-D split)": 2,
+   "GREEDY assignments closer than the Hamming threshold": 32,
+   "Grundy fraction among optimal partitions too high": 1,
+   "LF or DSATUR equals an FF partition": 1,
+   "a GREEDY order does not reach a satisfying assignment": 2373,
+   "too few optimal partitions": 2,
+   "unsatisfiable": 30
+  }
+ },
+ "generation_seconds": 23.2,
+ "path": "data/items/dev/C_E1_dev_s1.jsonl",
+ "validation": {
+  "items": 60,
+  "sets": 10,
+  "items_passed": 60,
+  "pass_rate": 1.0,
+  "failures": []
+ },
+ "validation_seconds": 12.3
+}

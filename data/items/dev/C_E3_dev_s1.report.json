@@ -1,0 +1,155 @@
+{
+ "vertical": "C",
+ "eval_id": "E3",
+ "tier": "dev",
+ "seed": 1,
+ "per_cell": 5,
+ "params": {},
+ "cells": [
+  "d=1/BASE/U-LIST",
+  "d=1/BASE/U-REV",
+  "d=1/BASE/I",
+  "d=1/CRITICAL/U-LIST",
+  "d=1/CRITICAL/U-REV",
+  "d=1/CRITICAL/I",
+  "d=1/PLACEBO/U-LIST",
+  "d=1/PLACEBO/U-REV",
+  "d=1/PLACEBO/I",
+  "d=2/BASE/U-LIST",
+  "d=2/BASE/U-REV",
+  "d=2/BASE/I",
+  "d=2/CRITICAL/U-LIST",
+  "d=2/CRITICAL/U-REV",
+  "d=2/CRITICAL/I",
+  "d=2/PLACEBO/U-LIST",
+  "d=2/PLACEBO/U-REV",
+  "d=2/PLACEBO/I",
+  "d=3/BASE/U-LIST",
+  "d=3/BASE/U-REV",
+  "d=3/BASE/I",
+  "d=3/CRITICAL/U-LIST",
+  "d=3/CRITICAL/U-REV",
+  "d=3/CRITICAL/I",
+  "d=3/PLACEBO/U-LIST",
+  "d=3/PLACEBO/U-REV",
+  "d=3/PLACEBO/I",
+  "d=4/BASE/U-LIST",
+  "d=4/BASE/U-REV",
+  "d=4/BASE/I",
+  "d=4/CRITICAL/U-LIST",
+  "d=4/CRITICAL/U-REV",
+  "d=4/CRITICAL/I",
+  "d=4/PLACEBO/U-LIST",
+  "d=4/PLACEBO/U-REV",
+  "d=4/PLACEBO/I",
+  "d=6/BASE/U-LIST",
+  "d=6/BASE/U-REV",
+  "d=6/BASE/I",
+  "d=6/CRITICAL/U-LIST",
+  "d=6/CRITICAL/U-REV",
+  "d=6/CRITICAL/I",
+  "d=6/PLACEBO/U-LIST",
+  "d=6/PLACEBO/U-REV",
+  "d=6/PLACEBO/I",
+  "d=8/BASE/U-LIST",
+  "d=8/BASE/U-REV",
+  "d=8/BASE/I",
+  "d=8/CRITICAL/U-LIST",
+  "d=8/CRITICAL/U-REV",
+  "d=8/CRITICAL/I",
+  "d=8/PLACEBO/U-LIST",
+  "d=8/PLACEBO/U-REV",
+  "d=8/PLACEBO/I"
+ ],
+ "generation": {
+  "attempts": 79,
+  "accepted": 30,
+  "rejections": {
+   "no A input is sensitive for the target": 7,
+   "target value does not match the balancing target": 42
+  },
+  "audit": {
+   "d=1": {
+    "N": 5,
+    "P(target colour 1)": 0.6,
+    "proxy_accuracy": {}
+   },
+   "d=2": {
+    "N": 5,
+    "P(target colour 1)": 0.4,
+    "proxy_accuracy": {
+     "LOCAL-1-LIST/one": 0.4,
+     "LOCAL-1-LIST/free": 0.4
+    }
+   },
+   "d=3": {
+    "N": 5,
+    "P(target colour 1)": 0.6,
+    "proxy_accuracy": {
+     "LOCAL-1-LIST/one": 0.6,
+     "LOCAL-1-LIST/free": 0.6,
+     "LOCAL-2-LIST/one": 0.6,
+     "LOCAL-2-LIST/free": 0.6
+    }
+   },
+   "d=4": {
+    "N": 5,
+    "P(target colour 1)": 0.4,
+    "proxy_accuracy": {
+     "LOCAL-1-LIST/one": 0.4,
+     "LOCAL-1-LIST/free": 0.4,
+     "LOCAL-2-LIST/one": 0.4,
+     "LOCAL-2-LIST/free": 0.4,
+     "LOCAL-3-LIST/one": 0.4,
+     "LOCAL-3-LIST/free": 0.4
+    }
+   },
+   "d=6": {
+    "N": 5,
+    "P(target colour 1)": 0.6,
+    "proxy_accuracy": {
+     "LOCAL-1-LIST/one": 0.6,
+     "LOCAL-1-LIST/free": 0.6,
+     "LOCAL-2-LIST/one": 0.6,
+     "LOCAL-2-LIST/free": 0.6,
+     "LOCAL-3-LIST/one": 0.6,
+     "LOCAL-3-LIST/free": 0.6,
+     "LOCAL-4-LIST/one": 0.6,
+     "LOCAL-4-LIST/free": 0.6,
+     "LOCAL-5-LIST/one": 0.6,
+     "LOCAL-5-LIST/free": 0.6
+    }
+   },
+   "d=8": {
+    "N": 5,
+    "P(target colour 1)": 0.4,
+    "proxy_accuracy": {
+     "LOCAL-1-LIST/one": 0.4,
+     "LOCAL-1-LIST/free": 0.4,
+     "LOCAL-2-LIST/one": 0.4,
+     "LOCAL-2-LIST/free": 0.4,
+     "LOCAL-3-LIST/one": 0.4,
+     "LOCAL-3-LIST/free": 0.4,
+     "LOCAL-4-LIST/one": 0.4,
+     "LOCAL-4-LIST/free": 0.4,
+     "LOCAL-5-LIST/one": 0.4,
+     "LOCAL-5-LIST/free": 0.4,
+     "LOCAL-6-LIST/one": 0.4,
+     "LOCAL-6-LIST/free": 0.4,
+     "LOCAL-7-LIST/one": 0.4,
+     "LOCAL-7-LIST/free": 0.4
+    }
+   }
+  }
+ },
+ "generation_seconds": 2.3,
+ "path": "data/items/dev/C_E3_dev_s1.jsonl",
+ "validation": {
+  "items": 270,
+  "sets": 30,
+  "items_passed": 270,
+  "pass_rate": 1.0,
+  "failures": []
+ },
+ "validation_seconds": 4.3
+}

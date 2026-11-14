@@ -1,0 +1,52 @@
+{
+ "vertical": "A/H",
+ "eval_id": "E2",
+ "tier": "dev",
+ "seed": 1,
+ "per_cell": 5,
+ "params": {},
+ "cells": [
+  "SAT/base/g=SAT",
+  "SAT/K/g=SAT",
+  "SAT/J/g=SAT",
+  "SAT/U/g=SAT",
+  "SAT/base/g=UNSAT",
+  "SAT/K/g=UNSAT",
+  "SAT/J/g=UNSAT",
+  "SAT/U/g=UNSAT",
+  "COL/base/g=possible",
+  "COL/K/g=possible",
+  "COL/J/g=possible",
+  "COL/U/g=possible",
+  "COL/base/g=impossible",
+  "COL/K/g=impossible",
+  "COL/J/g=impossible",
+  "COL/U/g=impossible",
+  "ENT/E-hi-match",
+  "ENT/E-hi-mis",
+  "ENT/E-lo-match",
+  "ENT/E-lo-mis",
+  "ENT/N-hi-match",
+  "ENT/N-hi-mis",
+  "ENT/N-lo-match",
+  "ENT/N-lo-mis"
+ ],
+ "generation": {
+  "attempts": 37,
+  "accepted": 25,
+  "rejections": {
+   "ENT: no premise set with a matched 8-tuple": 4,
+   "SAT: padding changes POLARITY on the core": 8
+  }
+ },
+ "generation_seconds": 32.6,
+ "path": "data/items/dev/AH_E2_dev_s1.jsonl",
+ "validation": {
+  "items": 120,
+  "sets": 25,
+  "items_passed": 120,
+  "pass_rate": 1.0,
+  "failures": []
+ },
+ "validation_seconds": 21.1
+}

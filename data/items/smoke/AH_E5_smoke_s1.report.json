@@ -1,0 +1,42 @@
+{
+ "vertical": "A/H",
+ "eval_id": "E5",
+ "tier": "smoke",
+ "seed": 1,
+ "per_cell": 1,
+ "params": {},
+ "cells": [
+  "SAT/T",
+  "SAT/N",
+  "SAT/I",
+  "SAT/I+R",
+  "SAT/P",
+  "COL/T",
+  "COL/N",
+  "COL/I",
+  "COL/I+R",
+  "KNAP/T",
+  "KNAP/N",
+  "KNAP/I",
+  "KNAP/I+R",
+  "ENT/T",
+  "ENT/N",
+  "ENT/I",
+  "ENT/I+R"
+ ],
+ "generation": {
+  "attempts": 4,
+  "accepted": 4,
+  "rejections": {}
+ },
+ "generation_seconds": 0.0,
+ "path": "data/items/smoke/AH_E5_smoke_s1.jsonl",
+ "validation": {
+  "items": 17,
+  "sets": 4,
+  "items_passed": 17,
+  "pass_rate": 1.0,
+  "failures": []
+ },
+ "validation_seconds": 0.2
+}

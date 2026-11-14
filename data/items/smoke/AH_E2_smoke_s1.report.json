@@ -1,0 +1,51 @@
+{
+ "vertical": "A/H",
+ "eval_id": "E2",
+ "tier": "smoke",
+ "seed": 1,
+ "per_cell": 1,
+ "params": {},
+ "cells": [
+  "SAT/base/g=SAT",
+  "SAT/K/g=SAT",
+  "SAT/J/g=SAT",
+  "SAT/U/g=SAT",
+  "SAT/base/g=UNSAT",
+  "SAT/K/g=UNSAT",
+  "SAT/J/g=UNSAT",
+  "SAT/U/g=UNSAT",
+  "COL/base/g=possible",
+  "COL/K/g=possible",
+  "COL/J/g=possible",
+  "COL/U/g=possible",
+  "COL/base/g=impossible",
+  "COL/K/g=impossible",
+  "COL/J/g=impossible",
+  "COL/U/g=impossible",
+  "ENT/E-hi-match",
+  "ENT/E-hi-mis",
+  "ENT/E-lo-match",
+  "ENT/E-lo-mis",
+  "ENT/N-hi-match",
+  "ENT/N-hi-mis",
+  "ENT/N-lo-match",
+  "ENT/N-lo-mis"
+ ],
+ "generation": {
+  "attempts": 8,
+  "accepted": 5,
+  "rejections": {
+   "SAT: padding changes POLARITY on the core": 3
+  }
+ },
+ "generation_seconds": 4.7,
+ "path": "data/items/smoke/AH_E2_smoke_s1.jsonl",
+ "validation": {
+  "items": 24,
+  "sets": 5,
+  "items_passed": 24,
+  "pass_rate": 1.0,
+  "failures": []
+ },
+ "validation_seconds": 3.7
+}

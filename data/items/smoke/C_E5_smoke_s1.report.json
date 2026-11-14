@@ -1,0 +1,52 @@
+{
+ "vertical": "C",
+ "eval_id": "E5",
+ "tier": "smoke",
+ "seed": 1,
+ "per_cell": 1,
+ "params": {},
+ "cells": [
+  "COL/STUCK/vA/eA",
+  "COL/STUCK/vB/eA",
+  "COL/STUCK/vA/eB",
+  "COL/STUCK/vB/eB",
+  "COL/CONTROL/vA/eA",
+  "SAT/DEAD",
+  "SAT/DEAD-PERM",
+  "SAT/CONTROL",
+  "STATE/SAT/s1",
+  "STATE/SAT/s2",
+  "STATE/SAT/s3",
+  "STATE/COL/s1",
+  "STATE/COL/s3",
+  "ENT/FAIL/ORDER-A",
+  "ENT/FAIL/ORDER-B",
+  "ENT/MATCHED/ORDER-A",
+  "ENT/MATCHED/ORDER-B"
+ ],
+ "generation": {
+  "attempts": 21,
+  "accepted": 5,
+  "rejections": {
+   "COL: not exactly 3-chromatic": 5,
+   "ENT: ETR agrees with GREEDY-CM (keeping the differ share >= 1/2)": 4,
+   "ENT: GREEDY-CM pattern not needed": 4,
+   "SAT: GREEDY and UC do not both dead-end": 1,
+   "STATE-COL: not 3-colourable": 1
+  },
+  "ent": {
+   "pairs": 2,
+   "pairs_where_ETR_differs_from_GREEDY_CM": 1
+  }
+ },
+ "generation_seconds": 1.6,
+ "path": "data/items/smoke/C_E5_smoke_s1.jsonl",
+ "validation": {
+  "items": 17,
+  "sets": 5,
+  "items_passed": 17,
+  "pass_rate": 1.0,
+  "failures": []
+ },
+ "validation_seconds": 1.1
+}
