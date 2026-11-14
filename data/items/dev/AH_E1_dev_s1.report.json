@@ -1,0 +1,39 @@
+{
+ "vertical": "A/H",
+ "eval_id": "E1",
+ "tier": "dev",
+ "seed": 1,
+ "per_cell": 5,
+ "params": {},
+ "cells": [
+  "SAT/critical/x",
+  "SAT/critical/x-prime",
+  "SAT/null/x",
+  "SAT/null/x-prime",
+  "SAT/B1/x",
+  "SAT/B1/x-prime",
+  "COL/critical/x",
+  "COL/critical/x-prime",
+  "COL/null/x",
+  "COL/null/x-prime",
+  "ENT/critical/x",
+  "ENT/critical/x-prime",
+  "ENT/null/x",
+  "ENT/null/x-prime"
+ ],
+ "generation": {
+  "attempts": 35,
+  "accepted": 35,
+  "rejections": {}
+ },
+ "generation_seconds": 9.9,
+ "path": "data/items/dev/AH_E1_dev_s1.jsonl",
+ "validation": {
+  "items": 70,
+  "sets": 35,
+  "items_passed": 70,
+  "pass_rate": 1.0,
+  "failures": []
+ },
+ "validation_seconds": 10.3
+}

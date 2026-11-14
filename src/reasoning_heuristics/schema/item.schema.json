@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "reasoning_heuristics/item.schema.json",
+  "title": "Eval item",
+  "description": "One prompt with its ground truth, every member's prediction, its counterfactual lineage and its likelihood-ratio table. disconfirms[o][h] = log10 max_h' P(o|h') - log10 P(o|h): positive = evidence against theory h.",
+  "type": "object",
+  "required": [
+    "item_id", "vertical", "eval_id", "set_id", "cell", "domain", "framing", "prompt",
+    "answer_format", "ground_truth", "predictions", "instance", "content_hash",
+    "presentation_hash", "base_hash", "split", "tier", "generator_version"
+  ],
+  "properties": {
+    "item_id": {"type": "string", "minLength": 1},
+    "vertical": {"type": "string", "minLength": 1},
+    "eval_id": {"type": "string", "minLength": 1},
+    "set_id": {"type": "string", "minLength": 1},
+    "pair_id": {"type": ["string", "null"]},
+    "cell": {"type": "string", "minLength": 1},
+    "domain": {"type": "string", "minLength": 1},
+    "framing": {"type": "string"},
+    "prompt": {"type": "string", "minLength": 1},
+    "answer_format": {"type": "string"},
+    "ground_truth": {},
+    "predictions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "member": {"type": "string"},
+          "family": {"type": "string"},
+          "params": {"type": "object"},
+          "answer": {},
+          "trace_features": {"type": "object"},
+          "distribution": {"type": ["object", "null"]}
+        },
+        "required": ["answer"]
+      }
+    },
+    "instance": {"type": ["object", "null"]},
+    "params": {"type": "object"},
+    "trace_predictions": {"type": "object"},
+    "hypotheses": {"type": "object"},
+    "disconfirms": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {"type": "number"}
+      }
+    },
+    "notes": {"type": "string"},
+    "likelihood_model": {"type": "string"},
+    "content_hash": {"type": "string", "pattern": "^[0-9a-f]{16}$"},
+    "presentation_hash": {"type": "string", "pattern": "^[0-9a-f]{16}$"},
+    "base_hash": {"type": "string", "pattern": "^[0-9a-f]{16}$"},
+    "source_hash": {"type": ["string", "null"]},
+    "seed": {"type": ["integer", "null"]},
+    "split": {"enum": ["dev", "test", "library"]},
+    "tier": {"enum": ["smoke", "dev", "test", "library"]},
+    "generator": {"type": "string"},
+    "generator_version": {"type": "string"},
+    "extra": {"type": "object"}
+  },
+  "additionalProperties": false
+}

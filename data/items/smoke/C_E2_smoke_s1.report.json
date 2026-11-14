@@ -1,0 +1,73 @@
+{
+ "vertical": "C",
+ "eval_id": "E2",
+ "tier": "smoke",
+ "seed": 1,
+ "per_cell": 1,
+ "params": {},
+ "cells": [
+  "COL/FF-vs-DSATUR/BASE",
+  "COL/FF-vs-DSATUR/D(FF|DSATUR)",
+  "COL/FF-vs-DSATUR/D(DSATUR|FF)",
+  "COL/FF-vs-DSATUR/PLACEBO",
+  "COL/FF-vs-DSATUR/G-ONLY",
+  "COL/FF-vs-LF/BASE",
+  "COL/FF-vs-LF/D(FF|LF)",
+  "COL/FF-vs-LF/D(LF|FF)",
+  "COL/FF-vs-LF/PLACEBO",
+  "COL/FF-vs-LF/G-ONLY",
+  "COL/DSATUR-vs-LF/BASE",
+  "COL/DSATUR-vs-LF/D(DSATUR|LF)",
+  "COL/DSATUR-vs-LF/D(LF|DSATUR)",
+  "COL/DSATUR-vs-LF/PLACEBO",
+  "COL/DSATUR-vs-LF/G-ONLY",
+  "SAT/GREEDY-vs-UC/BASE",
+  "SAT/GREEDY-vs-UC/D(GREEDY|UC)",
+  "SAT/GREEDY-vs-UC/D(UC|GREEDY)",
+  "SAT/GREEDY-vs-UC/PLACEBO",
+  "SAT/GREEDY-vs-UC/G-ONLY",
+  "SAT/GREEDY-vs-POLARITY/BASE",
+  "SAT/GREEDY-vs-POLARITY/D(GREEDY|POLARITY)",
+  "SAT/GREEDY-vs-POLARITY/D(POLARITY|GREEDY)",
+  "SAT/GREEDY-vs-POLARITY/PLACEBO",
+  "SAT/GREEDY-vs-POLARITY/G-ONLY",
+  "KNAP/RATIO-vs-DIFF/BASE",
+  "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)",
+  "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)",
+  "KNAP/RATIO-vs-DIFF/PLACEBO",
+  "KNAP/RATIO-vs-DIFF/G-ONLY",
+  "KNAP/RATIO-vs-VALUE/BASE",
+  "KNAP/RATIO-vs-VALUE/D(RATIO|VALUE)",
+  "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)",
+  "KNAP/RATIO-vs-VALUE/PLACEBO",
+  "KNAP/RATIO-vs-VALUE/G-ONLY",
+  "KNAP/PREFIX-vs-RATIO/BASE",
+  "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)",
+  "KNAP/PREFIX-vs-RATIO/D(RATIO|PREFIX)",
+  "KNAP/PREFIX-vs-RATIO/PLACEBO",
+  "KNAP/PREFIX-vs-RATIO/G-ONLY"
+ ],
+ "generation": {
+  "attempts": 186,
+  "accepted": 8,
+  "rejections": {
+   "base ground truth not unique / enumeration cap": 8,
+   "not every cell reachable for an open contrast": 152,
+   "round ratio in the base": 18
+  },
+  "competitor_balance": {
+   "balanced": 6,
+   "unbalanced": 2
+  }
+ },
+ "generation_seconds": 20.3,
+ "path": "data/items/smoke/C_E2_smoke_s1.jsonl",
+ "validation": {
+  "items": 40,
+  "sets": 8,
+  "items_passed": 40,
+  "pass_rate": 1.0,
+  "failures": []
+ },
+ "validation_seconds": 3.0
+}
