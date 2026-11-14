@@ -28,6 +28,7 @@ this one.
 
 from __future__ import annotations
 
+import gzip
 import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -131,5 +132,16 @@ def write_jsonl(items: list[Item], path: Path) -> None:
 
 
 def read_jsonl(path: Path) -> list[Item]:
-    with path.open(encoding="utf-8") as fh:
+    """Read items from .jsonl or .jsonl.gz."""
+    opener = gzip.open if path.suffix == ".gz" else open
+    with opener(path, "rt", encoding="utf-8") as fh:
         return [Item.from_json(json.loads(line)) for line in fh if line.strip()]
+
+
+def compress(path: Path) -> Path:
+    """Write a deterministic gzip copy (mtime 0) next to a .jsonl file; return its path."""
+    out = path.with_name(path.name + ".gz")
+    with path.open("rb") as src, open(out, "wb") as raw:
+        with gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0, compresslevel=9) as gz:
+            gz.write(src.read())
+    return out
