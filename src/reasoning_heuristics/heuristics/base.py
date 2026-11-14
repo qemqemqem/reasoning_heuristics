@@ -82,6 +82,7 @@ def _ensure_loaded() -> None:
     from reasoning_heuristics.heuristics import (  # noqa: F401
         coloring, entailment, etr, knapsack, sat, search, tsp,
     )
+    from reasoning_heuristics.heuristics import baselines  # noqa: F401  (A/H cue and nuisance members)
 
     _LOADED = True
 

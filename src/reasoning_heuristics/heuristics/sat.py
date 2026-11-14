@@ -27,10 +27,14 @@ D = "sat"
 
 
 def effective_cnf(task: SatTask) -> CNF:
-    """The formula the *stated* rule describes. Inverted rule: every literal flipped (F̄)."""
-    if not task.inverted:
-        return task.cnf
-    return task.cnf.with_clauses([[-l for l in c] for c in task.cnf.clauses])
+    """The formula the *stated* rule describes. Inverted rule: every literal flipped (F̄);
+    partial inversion (A/H E5 P): only the marked clauses flipped."""
+    if task.inverted:
+        return task.cnf.with_clauses([[-l for l in c] for c in task.cnf.clauses])
+    if task.inverted_clauses:
+        marked = set(task.inverted_clauses)
+        return task.cnf.with_clauses([[-l for l in c] if i in marked else list(c) for i, c in enumerate(task.cnf.clauses)])
+    return task.cnf
 
 
 def clause_state(c: tuple[int, ...], values: dict[int, bool]) -> tuple[str, list[int]]:

@@ -46,6 +46,7 @@ class SatTask:
     answer_order: tuple[str, ...] | None = None
     declared: tuple[str, ...] | None = None  # declared variables (A/H E2 padding level U)
     inverted: bool = False  # A/H E5: "a rule holds when at least one condition is false"
+    inverted_clauses: tuple[int, ...] = ()  # A/H E5 P: 0-based clauses marked ★, read with the inverted rule
 
     domain = "sat"
 
@@ -56,11 +57,16 @@ class SatTask:
         return {"kind": "sat_task", "cnf": self.cnf.to_json(), "fixed": [list(x) for x in self.fixed],
                 "answer_order": list(self.answer_order) if self.answer_order is not None else None,
                 "declared": list(self.declared) if self.declared is not None else None,
-                "inverted": self.inverted}
+                "inverted": self.inverted,
+                **({"inverted_clauses": list(self.inverted_clauses)} if self.inverted_clauses else {})}
 
     def content_key(self) -> dict[str, Any]:
-        return {"cnf": self.cnf.content_key(), "fixed": sorted(self.fixed),
-                "declared": sorted(self.declared) if self.declared else None, "inverted": self.inverted}
+        key = {"cnf": self.cnf.content_key(), "fixed": sorted(self.fixed),
+               "declared": sorted(self.declared) if self.declared else None, "inverted": self.inverted}
+        if self.inverted_clauses:  # marked clauses, as content (name-sorted literals of each marked clause)
+            key["inverted_clauses"] = sorted(sorted((self.cnf.name(l), l > 0) for l in self.cnf.clauses[i])
+                                             for i in self.inverted_clauses)
+        return key
 
 
 @dataclass(frozen=True)
@@ -125,7 +131,7 @@ def load_task(data: dict[str, Any]):
         return SatTask(CNF.from_json(data["cnf"]), tuple((v, b) for v, b in data["fixed"]),
                        tuple(data["answer_order"]) if data["answer_order"] is not None else None,
                        tuple(data["declared"]) if data.get("declared") is not None else None,
-                       data.get("inverted", False))
+                       data.get("inverted", False), tuple(data.get("inverted_clauses", ())))
     if kind == "entailment_task":
         return EntailmentTask(tuple(F.from_json(p) for p in data["premises"]),
                               F.from_json(data["probe"]) if data["probe"] is not None else None,

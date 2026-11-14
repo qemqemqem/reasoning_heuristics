@@ -163,8 +163,49 @@ def partition_json(col: Colouring, order: list[str]) -> list[list[str]]:
 # --- exact colouring (generator path) --------------------------------------------------
 
 
+def components(g: Graph) -> list[list[str]]:
+    """Connected components, each in listing order, ordered by their first-listed vertex."""
+    seen: set[str] = set()
+    out = []
+    for v in g.vertices:
+        if v in seen:
+            continue
+        comp, stack = set(), [v]
+        while stack:
+            x = stack.pop()
+            if x in comp:
+                continue
+            comp.add(x)
+            stack.extend(g.adj[x] - comp)
+        seen |= comp
+        out.append([u for u in g.vertices if u in comp])
+    return out
+
+
+def induced(g: Graph, vertices: list[str]) -> Graph:
+    keep = set(vertices)
+    return Graph(tuple(vertices), tuple(e for e in g.edges if e[0] in keep and e[1] in keep))
+
+
 def k_colour(g: Graph, k: int, fixed: Colouring | None = None) -> Colouring | None:
-    """A proper colouring with colours 1..k extending `fixed`, or None. DSATUR-ordered backtracking."""
+    """A proper colouring with colours 1..k extending `fixed`, or None.
+
+    Each connected component is solved separately (so an uncolourable component cannot make
+    the search thrash over the others), by DSATUR-ordered backtracking."""
+    fixed = dict(fixed or {})
+    comps = components(g)
+    if len(comps) == 1:
+        return _k_colour_connected(g, k, fixed)
+    out: Colouring = {}
+    for comp in comps:
+        sub = _k_colour_connected(induced(g, comp), k, {v: c for v, c in fixed.items() if v in set(comp)})
+        if sub is None:
+            return None
+        out.update(sub)
+    return {v: out[v] for v in g.vertices}
+
+
+def _k_colour_connected(g: Graph, k: int, fixed: Colouring | None = None) -> Colouring | None:
     col: Colouring = dict(fixed or {})
     if conflicts(g, col):
         return None

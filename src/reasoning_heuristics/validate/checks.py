@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import math
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 from typing import Any, Callable
 
@@ -211,6 +211,9 @@ def check_leakage(items: list[Item], lexicon_partitioned: bool = False) -> list[
 def run_checks(items: list[Item], set_check: Callable[[list[Item]], list[str]] | None) -> dict[str, Any]:
     """All item checks plus the generator's set checks. Returns a JSON-able report."""
     failures: list[Failure] = []
+    for item_id, n in Counter(it.item_id for it in items).items():
+        if n > 1:
+            failures.append(Failure(item_id, "unique_id", f"item id used by {n} items"))
     for it in items:
         failures += check_item(it)
     sets: dict[str, list[Item]] = defaultdict(list)

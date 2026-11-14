@@ -498,8 +498,9 @@ def up_k(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
             break
         known.update(new)
     if task.fmt == "YN":
-        probe = cat_lits(task.probe)
-        return Prediction("YES" if all(known.get(a) == s for a, s in probe) else "NO", {"derived": len(known)})
+        # Membership semantics: a conjunction needs every literal derived, a disjunction one.
+        derived = holds_in_state(task.probe, frozenset(known.items()))
+        return Prediction("YES" if derived else "NO", {"derived": len(known)})
     state = frozenset(known.items())
     return Prediction(mc_choose(task, lambda o: holds_in_state(o, state)), {"derived": len(known)})
 

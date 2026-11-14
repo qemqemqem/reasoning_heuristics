@@ -98,6 +98,14 @@ def disconfirms(preds: dict[str, dict[str, Any]], channel: Channel, eps: float =
             p[channel.key(rec["answer"])] = 1.0
         elif rec.get("distribution"):
             for k, v in rec["distribution"].items():
+                if k == "_exact" and "EXACT" in channel.set_valued:
+                    # slip models: the "_exact" mass is spread like EXACT's solution set
+                    is_member, size = channel.set_valued["EXACT"]
+                    listed = [c for c in keys[:-1] if is_member(c)]
+                    for c in listed:
+                        p[c] += v / size
+                    p["_other"] += v * max(0.0, 1.0 - len(listed) / size)
+                    continue
                 kk = k if k in p else "_other"
                 p[kk] += v
         else:
@@ -136,10 +144,16 @@ def hypotheses(domain: str, preds: dict[str, dict[str, Any]], roles: dict[str, s
         if rec["answer"] is None and dist:
             top = sorted(dist.items(), key=lambda kv: -kv[1])[:3]
             output = "; ".join(f"P({k[:40]}) = {v:.2f}" for k, v in top)
+        if rec["answer"] is not None:
+            rate = f"p_h(answer = its prediction) = {1 - EPS:.2f} with slip eps = {EPS}"
+        elif dist:
+            rate = "p_h(outcome) = its distribution, mixed with slip eps = " + str(EPS)
+        else:
+            rate = "set-valued: uniform over its solution set"
         out[label] = {
             "family": rec["family"],
             "output": output,
-            "eval_prediction": (roles.get(label, "") + " " + cell_note).strip(),
+            "eval_prediction": " ".join(x for x in (roles.get(label, ""), rate + "; the cell rate is Σ_h π_h·p_h.", cell_note) if x),
             "cot_prediction": m.cot,
         }
     return out
@@ -155,7 +169,7 @@ def distinct_answers(preds: dict[str, dict[str, Any]], channel: Channel) -> int:
 
 def item_id(vertical: str, eval_id: str, set_id: str, cell: str) -> str:
     v = vertical.replace("/", "")
-    c = re.sub(r"[^A-Za-z0-9=+\-.]+", "_", cell).strip("_")
+    c = re.sub(r"[\s/|]+", "_", cell).strip("_")  # keep symbols such as ·, ′, →, ¬: they distinguish cells
     return f"{v}-{eval_id}-{set_id}-{c}"
 
 
