@@ -205,8 +205,10 @@ We derive candidate members with **Pearl's simplified-model view**: a heuristic 
 | **F. Local search / repair** | Start from a full candidate and fix violations | `MIN-CONFLICTS`\*, `WALK-k`, `2OPT-k`, `SA`\* | seq (depth ≈ k) | **Infeasible near-misses** (few violated constraints); never certifies UNSAT; depends on initialisation |
 | **G. Decompose / DP** | Split into parts and solve each, ignoring or tracking the links | `DP-EXACT` (knapsack DP), `IGNORE-CROSSLINKS`\* (decompose, drop interactions) | seq | Exact when the structure holds; misses cross-component interactions |
 | **H. Guess / sample** | Sample from a simple distribution, optionally check | `RANDOM`\* (uniform answer: 7/8 of clauses satisfied), `SAMPLE-m`\* (entailment: check the conclusion in m sampled models) | const (one sample) | Chance level; `SAMPLE-m` commits on items with rare counter-models |
-| **I. Strategy selection** (meta) | Choose a heuristic from item features (Rice's algorithm-selection problem; Lieder & Griffiths) | Not a vertical: modelled as feature-dependent mixture weights π_h(φ(x)) | const (the selector) | Errors correlated with features; tests H4 |
+| **I. Strategy selection** (meta) | Choose a heuristic from item features (Rice's algorithm-selection problem; Lieder & Griffiths) | Modelled as feature-dependent weights π_h(φ(x)). One feature, the input's formalism, has its own vertical ([I_cross_formalism](verticals/I_cross_formalism.md): the same instance as graph / story / CNF / English premises, ground truth fixed) | const (the selector) | Errors correlated with features; π shifts with formalism (home-advantage index, length and order controlled); tests H4 |
 | *Nuisance (not heuristics)* | Execution or perception noise | `NOISY-EXACT`, `PERCEPTION-NOISE` (random constraint errors) | — | Smooth error growth with size; unstructured violations |
+
+**Representation-bound members.** Some members' predictions change with the form of the same content: `MATCH`, `PRIMACY`, `ETR` and `ONL(2)` differ between disjunctive and clausal forms of one premise, and first-fit depends on listing order. Family labels can also be formalism-relative: "build one model and read the query off it" is C1 in a graph and a B4-style single-model restriction in logic. Predictions are therefore computed per encoding (I_cross_formalism §2).
 
 **Verticals for the pilot:** A, B1, B4, C, D, F, H (plus E if `BP-t` is cheap to implement), with nuisance models always included. [TODO confirm.]
 
@@ -293,10 +295,13 @@ Selected pre-registered predictions are in [theory/README.md](theory/README.md) 
 
 [TODO The noisy-execution likelihood P(y | h, x) ∝ exp(−λ · d(y, h(x))). A violation-profile term for infeasible answers: *which* constraints are broken. The mixture over members, plus a "none of the above" term, with feature-dependent weights π_h(φ(x)). EA, permutation baseline, lift, and the hierarchical model.]
 
+[TODO Cross-formalism items (I_cross_formalism): predictions computed per encoding, natively or transported through the reduction and flagged; one canonical answer space; slip rates per encoding; a two-stage selector (encoding → working representation → member) with a latent translation state indicated by trace codes.]
+
 ### 6.3 Manipulation signatures and special item types
 
 [TODO The manipulations: order reversal, re-theming, rule inversion, an irrelevant constraint, size, density, thinking budget, environment shifts (e.g. a planted polarity bias). Two special item types:]
 
+- **Re-encoding across formalisms:** [TODO the same instance as graph, story, CNF and English premises with ground truth fixed; a length ladder (padding, expansion, compression) and a translation dial (scrambled numbering, neutral header, a legend naming the reduction). I_cross_formalism E1–E8.]
 - **Threshold knees:** [TODO compare the knee of the model's error-vs-density curve with each heuristic's simulated curve.]
 - **Depth-stress items:** [TODO P-completeness gadgets force a seq heuristic to evaluate a circuit of chosen depth. Prediction: in direct-answer mode, agreement with seq heuristics falls with gadget depth, and recovers with CoT. This is a direct test of const vs seq.]
 
@@ -311,6 +316,8 @@ Selected pre-registered predictions are in [theory/README.md](theory/README.md) 
 | 50% C1 · 50% D `DPLL-b` | 10% slips | 0.XX / 0.XX | ±0.XX | 0.XX | — |
 | Feature-dependent: C1 on dense items, B1 on sparse | 10% slips | π(φ) curve recovered? R² = 0.XX | ±0.XX | 0.XX | — |
 | 20% each of five families | 10% slips | 0.XX each | ±0.XX | 0.XX | [TODO] |
+| Encoding-dependent π, home-advantage shift 0.10 / 0.05 (I_cross_formalism) | per-encoding slips | Shift detected: power 1.00 / 0.85 (design simulation) | ≤ 0.02 | 0.XX | H-structure vs H-translate |
+| Translation latent τ = 0.6, with validated trace codes | per-encoding slips | τ̂ = 0.607 ± 0.025 (design simulation) | ±0.XX | 0.XX | — |
 
 ### 6.5 Models and setup
 
@@ -356,6 +363,8 @@ Selected pre-registered predictions are in [theory/README.md](theory/README.md) 
 | Density ↑ (fixed n) | knee at cue | knee | — | knee ≈ 8/3 | — | ↑ smooth | knee | knee at XX | [TODO] |
 | Depth-stress gadget depth ↑ | = | = | = | ↑ (no CoT) | ↑ | ↑ | ↑ | +XX pp | [TODO] |
 | Thinking budget ×4 | = | ↓ (k grows) | = | = | = | ↓ (b grows) | ↓ | −XX pp | [TODO] |
+| Re-encoded graph → CNF → logic, orders matched | = | = | ↑ under H-formalism (extra false IMPOSSIBLE) | ↓ in agreement under H-formalism; = under H-structure | = | = | = | ±XX pp | [TODO] |
+| Reduction named (legend) | = | = | ↓ if translation | ↑ agreement if translation | = | = | = | ±XX pp | [TODO] |
 
 ### 7.3 Capability and thinking budget
 
@@ -445,7 +454,9 @@ Selected pre-registered predictions are in [theory/README.md](theory/README.md) 
 | Nuisance (noisy exact, perception) | — | Cont. / **Strong** | 0.XX [0.XX, 0.XX] | +0.XX | — | +XX pp | 0.XX | — | — | — |
 | *Unexplained* | — | — | 0.XX [0.XX, 0.XX] | — | — | — | — | — | — | — |
 
-**Figure 4** — [TODO Stacked bars of π per model, ordered by capability, for direct-answer vs best-effort thinking. This shows how the weight shifts between families rather than a single winner.]
+**Family I (strategy selection) readouts**, from I_cross_formalism §7: the home-advantage index with interval, the translation rate τ, the effect of the translation dial, the fingerprint distance between encodings, and the agreement ratio R. [TODO a small Table 14b once fitted.]
+
+**Figure 4** — [TODO Stacked bars of π per model, ordered by capability, for direct-answer vs best-effort thinking, and one bar per encoding (graph / story / CNF / logic). This shows how the weight shifts between families rather than a single winner.]
 
 **What stands out.** [TODO Which families carry the most weight, how concentrated the weight is (e.g. the top family's π and the entropy of π), and how stable it is across models, domains, framings and thinking budget. Hopefully one family dominates; if the weight is spread, say so.]
 
@@ -502,6 +513,7 @@ The account is wrong if the two entailment rows give the same out-of-distributio
 
 - **What it means:** [TODO]
 - **Theory vs data:** [TODO Compare Table 14's observed weights with the priors in Table 4a, family by family. Where theory was right, wrong, or silent. Pre-registered predictions that failed get their own paragraph.]
+- **Does the formalism pick the heuristic?** [TODO I_cross_formalism result for H4: weights invariant across encodings (structure), following the formalism, or following a translation. Zhang, Chen & Chen (2026) compared answer agreement across encodings; we extend that to procedure agreement.]
 - **Forced vs chosen shortcuts:** [TODO Below the budget line, errors are not compute-forced (§4). Which families models choose there, compared with above the line.]
 - **Architecture vs learned program:** [TODO Position effects come from the causal mask, not from a learned heuristic (§5.2). Out-of-distribution shadows: a heuristic on hard items can be an exact training-size program extrapolated (§10).]
 - **Human-likeness:** [TODO connection to v1 (ETR is family B4/C4). Inverted U with capability? Theory says B4 can only come from data (§10), so B4 weight measures what models inherit from human text.]
