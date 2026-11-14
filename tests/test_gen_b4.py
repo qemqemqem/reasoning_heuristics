@@ -40,3 +40,37 @@ def test_e1_smoke_and_dev_validate():
     dev, _ = b4_e1.generate("dev", 3, per_cell=2)
     test, _ = b4_e1.generate("test", 3, per_cell=1)
     assert check_leakage(items + dev + test, lexicon_partitioned=True) == []
+
+
+from reasoning_heuristics.generators import b4_e2  # noqa: E402
+
+LIB_FRAME_E2 = B.Frame("abstract", ("box", "jar"), ("red", "cold"))
+E2_NAMES = SAME_NAMES + ["MM-G", "ETR-default-R2", "ETR-1p-R2", "BICOND-PRAG", "SAMPLE-3"]
+
+
+def _lib_e2():
+    return [r for r in library("B4_C4_restrict_online") if r["eval_id"] == "E2" and r["framing"] == "abstract"]
+
+
+@pytest.mark.parametrize("rec", _lib_e2(), ids=lambda r: r["cell"])
+def test_e2_reproduces_library(rec):
+    p = rec["params"]
+    task = b4_e2.build_task(LIB_FRAME_E2, p["form"], p["inference"], p["O"])
+    note = b4_e2.INSTRUCTION if p["instruction"] else b4_e2.NEUTRAL["library"]
+    assert B.render_prompt(task, note=note) == rec["prompt"]
+    preds = predict_all(task, b4_e2.specs(p["instruction"]))
+    for name in E2_NAMES:
+        lib = rec["predictions"].get(name)
+        if lib in (None, "n/a"):
+            continue
+        ours = preds[name]["answer"]
+        if name == "SAMPLE-3":
+            assert preds[name]["distribution"]["YES"] == pytest.approx(lib, abs=0.01)
+            continue
+        assert ours == lib or ({"X": "NO"}.get(ours) == lib), (rec["cell"], name, ours, lib)
+
+
+def test_e2_smoke_validates():
+    items, stats = b4_e2.generate("smoke", 5)
+    assert len(items) == len(b4_e2.cells({})) == 48
+    assert run_checks(items, b4_e2.check_set)["failures"] == []

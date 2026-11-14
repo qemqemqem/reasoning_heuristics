@@ -219,14 +219,25 @@ def bicond(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
     return Prediction(answer_from_premises(task, rewritten), {"converses_added": sum(p[0] == "if" for p in task.premises)})
 
 
+@member("BICOND-PRAG", "B4", D, "reads 'if' as 'iff' as a pragmatic default; the reading disappears once the prompt says 'if X, then Y' does not mean 'if Y, then X'")
+def bicond_pragmatic(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
+    """B4/C4 E2's pragmatic variant: BICOND unless the item carries the anti-converse instruction
+    (params["instruction"]), in which case the conditional is read as stated."""
+    if params["instruction"]:
+        return Prediction(answer_from_premises(task, effective_premises(task)), {"reading": "as stated (instructed)"})
+    pred = bicond(task, {})
+    return Prediction(pred.answer, {"reading": "biconditional", **pred.trace_features})
+
+
 @member("CW-COMP", "B4", D, "listed antecedents treated as the only possible causes (Clark completion)")
 def cw_comp(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
-    """Clark completion: for each consequent literal l of a rule, add l -> OR(antecedents of rules for l).
-    With a single rule this is BICOND."""
+    """Clark completion (B4/C4 §1.1): for each *atom* E that is a rule consequent, add
+    E -> OR(antecedents of the rules for E). Negated consequents are not heads, so a rule
+    "if A then not B" is left as stated. With one positive-headed rule this is BICOND."""
     prem = list(effective_premises(task))
     heads: dict[tuple, list] = {}
     for p in prem:
-        if p[0] == "if":
+        if p[0] == "if" and p[2][0] == "lit" and p[2][2]:
             heads.setdefault(tuple(F.to_json(p[2])), []).append(p[1])
     for head, bodies in heads.items():
         body = bodies[0] if len(bodies) == 1 else ("or", tuple(bodies))
