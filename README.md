@@ -11,4 +11,6 @@ Start with the design document, [docs/DESIGN.md](docs/DESIGN.md). The literature
 
 The per-heuristic eval designs and example question libraries are in [docs/verticals/](docs/verticals/) and [data/examples/](data/examples/). The Phase 1 scope and costs are in [docs/SCOPE.md](docs/SCOPE.md).
 
+Theoretical priors for each heuristic family, written before any data, are in [docs/theory/](docs/theory/README.md): what transformers can compute, what RASP-L simplicity predicts they learn, and what LLMs are already known to do.
+
 This follows on from the 2025 ETR study ([arXiv 2506.11128](https://arxiv.org/abs/2506.11128)). Its code is in [Oxford-HAI-Lab/etr_case_generator](https://github.com/Oxford-HAI-Lab/etr_case_generator).

@@ -1,0 +1,1264 @@
+{
+ "assumptions": "Length vs accuracy for every member, the Pareto frontier, two-part MDL winners, and\naverage sensitivity.  Writes results.json and a figure next to the theory note.\n\n    python frontier.py [--n 400] [--seed 0]\n\nTraining-like distributions (stated assumptions, see T2 section 4):\n  SAT-DEC/puzzle  mixed-width CNF (15% units, 35% binary, 50% ternary), n 4-10, m/n 0.5-3\n  SAT-DEC/bench   random 3-SAT, n 8-14, alpha 3.0-5.5 (benchmark-like, near threshold)\n  SAT-VAL         satisfiable random 3-SAT, n 6-12, alpha 1.5-4.2; target = a mentioned var\n  ENT             2-4 premises over 3-4 atoms, consistent, conclusion atom mentioned\n  COL             planted 3-colourable G(n,p), n 6-12, p 0.3-0.6; success = proper, <= 3 colours\n",
+ "lengths": {
+  "SAT-DEC|ALWAYS-SAT": {
+   "name": "ALWAYS-SAT",
+   "length": 1,
+   "counts": {
+    "tok_map": 1
+   },
+   "heads": 0,
+   "layers": 0,
+   "flags": []
+  },
+  "SAT-DEC|DENSITY": {
+   "name": "DENSITY",
+   "length": 8,
+   "counts": {
+    "tok_map": 2,
+    "select": 2,
+    "aggregate": 2,
+    "seq_map": 2
+   },
+   "heads": 2,
+   "layers": 2,
+   "flags": []
+  },
+  "SAT-DEC|UP-1c": {
+   "name": "UP-1c",
+   "length": 31,
+   "counts": {
+    "tok_map": 10,
+    "select": 4,
+    "sel_width": 1,
+    "aggregate": 6,
+    "seq_map": 10
+   },
+   "heads": 7,
+   "layers": 3,
+   "flags": []
+  },
+  "SAT-DEC|UP-2c": {
+   "name": "UP-2c",
+   "length": 51,
+   "counts": {
+    "tok_map": 14,
+    "select": 5,
+    "sel_width": 1,
+    "aggregate": 11,
+    "seq_map": 20
+   },
+   "heads": 12,
+   "layers": 5,
+   "flags": []
+  },
+  "SAT-DEC|UP-3c": {
+   "name": "UP-3c",
+   "length": 71,
+   "counts": {
+    "tok_map": 18,
+    "select": 6,
+    "sel_width": 1,
+    "aggregate": 16,
+    "seq_map": 30
+   },
+   "heads": 17,
+   "layers": 7,
+   "flags": []
+  },
+  "SAT-DEC|PROBE-2": {
+   "name": "PROBE-2",
+   "length": 19,
+   "counts": {
+    "tok_map": 7,
+    "select": 3,
+    "sel_width": 1,
+    "aggregate": 4,
+    "seq_map": 4
+   },
+   "heads": 5,
+   "layers": 3,
+   "flags": []
+  },
+  "SAT-DEC|PROBE-4": {
+   "name": "PROBE-4",
+   "length": 29,
+   "counts": {
+    "tok_map": 9,
+    "select": 3,
+    "sel_width": 1,
+    "aggregate": 8,
+    "seq_map": 8
+   },
+   "heads": 9,
+   "layers": 3,
+   "flags": []
+  },
+  "SAT-VAL|CONST-TRUE": {
+   "name": "CONST-TRUE",
+   "length": 1,
+   "counts": {
+    "tok_map": 1
+   },
+   "heads": 0,
+   "layers": 0,
+   "flags": []
+  },
+  "SAT-VAL|POLARITY": {
+   "name": "POLARITY",
+   "length": 9,
+   "counts": {
+    "select": 2,
+    "tok_map": 4,
+    "aggregate": 2,
+    "seq_map": 1
+   },
+   "heads": 2,
+   "layers": 2,
+   "flags": []
+  },
+  "SAT-VAL|BP-1c": {
+   "name": "BP-1c",
+   "length": 62,
+   "counts": {
+    "tok_map": 11,
+    "select": 14,
+    "sel_width": 1,
+    "aggregate": 18,
+    "seq_map": 18
+   },
+   "heads": 19,
+   "layers": 4,
+   "flags": []
+  },
+  "SAT-VAL|BP-2c": {
+   "name": "BP-2c",
+   "length": 81,
+   "counts": {
+    "tok_map": 11,
+    "select": 17,
+    "sel_width": 1,
+    "aggregate": 24,
+    "seq_map": 28
+   },
+   "heads": 25,
+   "layers": 6,
+   "flags": []
+  },
+  "ENT|ALWAYS-NO": {
+   "name": "ALWAYS-NO",
+   "length": 1,
+   "counts": {
+    "tok_map": 1
+   },
+   "heads": 0,
+   "layers": 0,
+   "flags": []
+  },
+  "ENT|MATCH": {
+   "name": "MATCH",
+   "length": 17,
+   "counts": {
+    "tok_map": 5,
+    "select": 4,
+    "aggregate": 3,
+    "seq_map": 5
+   },
+   "heads": 3,
+   "layers": 2,
+   "flags": []
+  },
+  "ENT|PRIMACY": {
+   "name": "PRIMACY",
+   "length": 20,
+   "counts": {
+    "tok_map": 6,
+    "select": 5,
+    "aggregate": 4,
+    "seq_map": 5
+   },
+   "heads": 4,
+   "layers": 2,
+   "flags": []
+  },
+  "ENT|UP-0 (ECHO)": {
+   "name": "UP-0 (ECHO)",
+   "length": 17,
+   "counts": {
+    "tok_map": 5,
+    "select": 4,
+    "aggregate": 3,
+    "seq_map": 5
+   },
+   "heads": 3,
+   "layers": 2,
+   "flags": []
+  },
+  "ENT|UP-1": {
+   "name": "UP-1",
+   "length": 54,
+   "counts": {
+    "tok_map": 11,
+    "select": 9,
+    "aggregate": 14,
+    "seq_map": 20
+   },
+   "heads": 14,
+   "layers": 4,
+   "flags": [
+    "nary_map"
+   ]
+  },
+  "ENT|UP-2": {
+   "name": "UP-2",
+   "length": 93,
+   "counts": {
+    "tok_map": 14,
+    "select": 16,
+    "aggregate": 25,
+    "seq_map": 38
+   },
+   "heads": 25,
+   "layers": 5,
+   "flags": [
+    "nary_map"
+   ]
+  },
+  "ENT|FIRST-0": {
+   "name": "FIRST-0",
+   "length": 17,
+   "counts": {
+    "tok_map": 5,
+    "select": 4,
+    "aggregate": 3,
+    "seq_map": 5
+   },
+   "heads": 3,
+   "layers": 2,
+   "flags": []
+  },
+  "ENT|FIRST.UP-1": {
+   "name": "FIRST.UP-1",
+   "length": 54,
+   "counts": {
+    "tok_map": 11,
+    "select": 9,
+    "aggregate": 14,
+    "seq_map": 20
+   },
+   "heads": 14,
+   "layers": 4,
+   "flags": [
+    "nary_map"
+   ]
+  },
+  "ENT|FIRST.UP-2": {
+   "name": "FIRST.UP-2",
+   "length": 93,
+   "counts": {
+    "tok_map": 14,
+    "select": 16,
+    "aggregate": 25,
+    "seq_map": 38
+   },
+   "heads": 25,
+   "layers": 5,
+   "flags": [
+    "nary_map"
+   ]
+  },
+  "ENT|BICOND.UP-1": {
+   "name": "BICOND.UP-1",
+   "length": 54,
+   "counts": {
+    "tok_map": 11,
+    "select": 9,
+    "aggregate": 14,
+    "seq_map": 20
+   },
+   "heads": 14,
+   "layers": 4,
+   "flags": [
+    "nary_map"
+   ]
+  },
+  "ENT|BICOND.UP-2": {
+   "name": "BICOND.UP-2",
+   "length": 93,
+   "counts": {
+    "tok_map": 14,
+    "select": 16,
+    "aggregate": 25,
+    "seq_map": 38
+   },
+   "heads": 25,
+   "layers": 5,
+   "flags": [
+    "nary_map"
+   ]
+  },
+  "ENT|PROBE-4": {
+   "name": "PROBE-4",
+   "length": 51,
+   "counts": {
+    "tok_map": 18,
+    "select": 4,
+    "aggregate": 8,
+    "seq_map": 21
+   },
+   "heads": 8,
+   "layers": 3,
+   "flags": [
+    "nary_map"
+   ]
+  },
+  "ENT|PROBE-16": {
+   "name": "PROBE-16",
+   "length": 147,
+   "counts": {
+    "tok_map": 54,
+    "select": 4,
+    "aggregate": 20,
+    "seq_map": 69
+   },
+   "heads": 20,
+   "layers": 3,
+   "flags": [
+    "nary_map"
+   ]
+  },
+  "COL|FIRST-FIT (terse, set ext.)": {
+   "name": "FF-terse",
+   "length": 25,
+   "counts": {
+    "tok_map": 3,
+    "select": 6,
+    "aggregate": 6,
+    "seq_map": 10
+   },
+   "heads": 6,
+   "layers": 3,
+   "flags": [
+    "nary_map",
+    "set_valued"
+   ]
+  },
+  "COL|FIRST-FIT (verbose)": {
+   "name": "FF-verbose",
+   "length": 53,
+   "counts": {
+    "tok_map": 5,
+    "select": 14,
+    "aggregate": 14,
+    "seq_map": 20
+   },
+   "heads": 14,
+   "layers": 3,
+   "flags": [
+    "nary_map"
+   ]
+  }
+ },
+ "density_theta": {
+  "puzzle": 10,
+  "bench": 5
+ },
+ "SAT-DEC/puzzle": {
+  "acc": {
+   "ALWAYS-SAT": 0.7183333333333334,
+   "DENSITY": 0.7266666666666667,
+   "UP-1c": 0.7183333333333334,
+   "UP-2c": 0.865,
+   "UP-3c": 0.8933333333333333,
+   "PROBE-2": 0.47333333333333333,
+   "PROBE-4": 0.5933333333333334,
+   "UP-fix (non-causal)": 0.9966666666666667,
+   "EXACT": 1.0
+  },
+  "sat_rate": 0.7183333333333334
+ },
+ "SAT-DEC/bench": {
+  "acc": {
+   "ALWAYS-SAT": 0.7283333333333334,
+   "DENSITY": 0.7866666666666666,
+   "UP-1c": 0.7283333333333334,
+   "UP-2c": 0.7283333333333334,
+   "UP-3c": 0.7283333333333334,
+   "PROBE-2": 0.2783333333333333,
+   "PROBE-4": 0.2866666666666667,
+   "UP-fix (non-causal)": 0.7283333333333334,
+   "EXACT": 1.0
+  },
+  "sat_rate": 0.7283333333333334
+ },
+ "SAT-VAL": {
+  "acc": {
+   "CONST-TRUE": 0.9166666666666666,
+   "POLARITY": 0.96,
+   "BP-1c": 0.96,
+   "BP-2c": 0.9583333333333334,
+   "BP-1 (non-causal)": 0.9683333333333334,
+   "BP-2 (non-causal)": 0.9783333333333334,
+   "BP-5 (non-causal)": 0.985,
+   "EXACT": 1.0
+  },
+  "true_ok_rate": 0.9166666666666666
+ },
+ "ENT": {
+  "acc": {
+   "ALWAYS-NO": 0.6983333333333334,
+   "MATCH": 0.61,
+   "PRIMACY": 0.7033333333333334,
+   "UP-0 (ECHO)": 0.8966666666666666,
+   "UP-1": 0.9583333333333334,
+   "UP-2": 0.9666666666666667,
+   "FIRST-0": 0.8483333333333334,
+   "FIRST.UP-1": 0.87,
+   "FIRST.UP-2": 0.875,
+   "BICOND.UP-1": 0.935,
+   "BICOND.UP-2": 0.9283333333333333,
+   "PROBE-4": 0.6366666666666667,
+   "PROBE-16": 1.0,
+   "ALWAYS-YES": 0.3016666666666667,
+   "MM (initial models)": 0.7583333333333333,
+   "SAMPLE-1": 0.4483333333333333,
+   "SAMPLE-2": 0.5366666666666666,
+   "SAMPLE-4": 0.725,
+   "SAMPLE-8": 0.8316666666666667,
+   "FIRST.EXACT": 0.87,
+   "BICOND.EXACT": 0.9509090909090909,
+   "NOISY-EXACT (2%/row)": 0.975,
+   "EXACT": 1.0
+  },
+  "yes_rate": 0.3016666666666667
+ },
+ "COL": {
+  "acc": {
+   "RANDOM": 0.055,
+   "FIRST-FIT": 0.8183333333333334,
+   "RO-FIRST-FIT": 0.8366666666666667,
+   "DSATUR": 0.9983333333333333,
+   "LOCAL-1": 0.115,
+   "LOCAL-2": 0.5316666666666666,
+   "LOCAL-3": 0.7266666666666667,
+   "MIN-CONFLICTS-20": 0.9683333333333334,
+   "MIN-CONFLICTS-100": 0.985,
+   "EXACT": 1.0
+  },
+  "rasp_ff_mismatches_on_30": 0
+ },
+ "sens_SAT-DEC/puzzle": {
+  "ALWAYS-SAT": 0.0,
+  "DENSITY": 0.0,
+  "UP-1c": 0.0,
+  "UP-2c": 0.01633333333333333,
+  "UP-3c": 0.022999999999999996,
+  "PROBE-2": 0.07935954785954785,
+  "PROBE-4": 0.09002813852813851,
+  "UP-fix (non-causal)": 0.04688888888888889,
+  "EXACT": 0.053
+ },
+ "sens_ENT": {
+  "ALWAYS-NO": 0.0,
+  "MATCH": 0.2008888888888889,
+  "PRIMACY": 0.11811111111111113,
+  "UP-0 (ECHO)": 0.07111111111111111,
+  "UP-1": 0.12833333333333333,
+  "UP-2": 0.13455555555555554,
+  "FIRST-0": 0.10722222222222222,
+  "FIRST.UP-1": 0.17766666666666667,
+  "FIRST.UP-2": 0.18166666666666667,
+  "BICOND.UP-1": 0.16277777777777777,
+  "BICOND.UP-2": 0.18411111111111111,
+  "PROBE-4": 0.1802222222222222,
+  "PROBE-16": 0.17277777777777775,
+  "MM (initial models)": 0.2327777777777778,
+  "EXACT": 0.17277777777777775
+ },
+ "frontier": {
+  "SAT-DEC/puzzle": {
+   "by_length": [
+    "ALWAYS-SAT",
+    "DENSITY",
+    "UP-2c",
+    "UP-3c"
+   ],
+   "by_heads": [
+    "ALWAYS-SAT",
+    "DENSITY",
+    "UP-2c",
+    "UP-3c"
+   ],
+   "mdl_path": [
+    [
+     10,
+     "ALWAYS-SAT"
+    ],
+    [
+     30,
+     "ALWAYS-SAT"
+    ],
+    [
+     100,
+     "ALWAYS-SAT"
+    ],
+    [
+     300,
+     "ALWAYS-SAT"
+    ],
+    [
+     1000.0,
+     "ALWAYS-SAT"
+    ],
+    [
+     3000.0,
+     "UP-2c"
+    ],
+    [
+     10000.0,
+     "UP-3c"
+    ],
+    [
+     100000.0,
+     "UP-3c"
+    ],
+    [
+     1000000.0,
+     "UP-3c"
+    ],
+    [
+     10000000.0,
+     "UP-3c"
+    ]
+   ],
+   "capacity_path_b1.5": [
+    [
+     100.0,
+     "DENSITY"
+    ],
+    [
+     1000.0,
+     "UP-3c"
+    ],
+    [
+     10000.0,
+     "UP-3c"
+    ],
+    [
+     100000.0,
+     "UP-3c"
+    ],
+    [
+     1000000.0,
+     "UP-3c"
+    ],
+    [
+     100000000.0,
+     "UP-3c"
+    ]
+   ],
+   "capacity_path_b2": [
+    [
+     100.0,
+     "DENSITY"
+    ],
+    [
+     1000.0,
+     "DENSITY"
+    ],
+    [
+     10000.0,
+     "UP-2c"
+    ],
+    [
+     100000.0,
+     "UP-2c"
+    ],
+    [
+     1000000.0,
+     "UP-3c"
+    ],
+    [
+     100000000.0,
+     "UP-3c"
+    ]
+   ]
+  },
+  "SAT-DEC/bench": {
+   "by_length": [
+    "ALWAYS-SAT",
+    "DENSITY"
+   ],
+   "by_heads": [
+    "ALWAYS-SAT",
+    "DENSITY"
+   ],
+   "mdl_path": [
+    [
+     10,
+     "ALWAYS-SAT"
+    ],
+    [
+     30,
+     "ALWAYS-SAT"
+    ],
+    [
+     100,
+     "ALWAYS-SAT"
+    ],
+    [
+     300,
+     "ALWAYS-SAT"
+    ],
+    [
+     1000.0,
+     "ALWAYS-SAT"
+    ],
+    [
+     3000.0,
+     "DENSITY"
+    ],
+    [
+     10000.0,
+     "DENSITY"
+    ],
+    [
+     100000.0,
+     "DENSITY"
+    ],
+    [
+     1000000.0,
+     "DENSITY"
+    ],
+    [
+     10000000.0,
+     "DENSITY"
+    ]
+   ],
+   "capacity_path_b1.5": [
+    [
+     100.0,
+     "DENSITY"
+    ],
+    [
+     1000.0,
+     "DENSITY"
+    ],
+    [
+     10000.0,
+     "DENSITY"
+    ],
+    [
+     100000.0,
+     "DENSITY"
+    ],
+    [
+     1000000.0,
+     "DENSITY"
+    ],
+    [
+     100000000.0,
+     "DENSITY"
+    ]
+   ],
+   "capacity_path_b2": [
+    [
+     100.0,
+     "DENSITY"
+    ],
+    [
+     1000.0,
+     "DENSITY"
+    ],
+    [
+     10000.0,
+     "DENSITY"
+    ],
+    [
+     100000.0,
+     "DENSITY"
+    ],
+    [
+     1000000.0,
+     "DENSITY"
+    ],
+    [
+     100000000.0,
+     "DENSITY"
+    ]
+   ]
+  },
+  "SAT-VAL": {
+   "by_length": [
+    "CONST-TRUE",
+    "POLARITY"
+   ],
+   "by_heads": [
+    "CONST-TRUE",
+    "POLARITY"
+   ],
+   "mdl_path": [
+    [
+     10,
+     "CONST-TRUE"
+    ],
+    [
+     30,
+     "CONST-TRUE"
+    ],
+    [
+     100,
+     "CONST-TRUE"
+    ],
+    [
+     300,
+     "CONST-TRUE"
+    ],
+    [
+     1000.0,
+     "POLARITY"
+    ],
+    [
+     3000.0,
+     "POLARITY"
+    ],
+    [
+     10000.0,
+     "POLARITY"
+    ],
+    [
+     100000.0,
+     "POLARITY"
+    ],
+    [
+     1000000.0,
+     "POLARITY"
+    ],
+    [
+     10000000.0,
+     "POLARITY"
+    ]
+   ],
+   "capacity_path_b1.5": [
+    [
+     100.0,
+     "POLARITY"
+    ],
+    [
+     1000.0,
+     "POLARITY"
+    ],
+    [
+     10000.0,
+     "POLARITY"
+    ],
+    [
+     100000.0,
+     "POLARITY"
+    ],
+    [
+     1000000.0,
+     "POLARITY"
+    ],
+    [
+     100000000.0,
+     "POLARITY"
+    ]
+   ],
+   "capacity_path_b2": [
+    [
+     100.0,
+     "POLARITY"
+    ],
+    [
+     1000.0,
+     "POLARITY"
+    ],
+    [
+     10000.0,
+     "POLARITY"
+    ],
+    [
+     100000.0,
+     "POLARITY"
+    ],
+    [
+     1000000.0,
+     "POLARITY"
+    ],
+    [
+     100000000.0,
+     "POLARITY"
+    ]
+   ]
+  },
+  "ENT": {
+   "by_length": [
+    "ALWAYS-NO",
+    "UP-0 (ECHO)",
+    "UP-1",
+    "UP-2",
+    "PROBE-16"
+   ],
+   "by_heads": [
+    "ALWAYS-NO",
+    "UP-0 (ECHO)",
+    "UP-1",
+    "PROBE-16"
+   ],
+   "mdl_path": [
+    [
+     10,
+     "ALWAYS-NO"
+    ],
+    [
+     30,
+     "ALWAYS-NO"
+    ],
+    [
+     100,
+     "ALWAYS-NO"
+    ],
+    [
+     300,
+     "ALWAYS-NO"
+    ],
+    [
+     1000.0,
+     "UP-0 (ECHO)"
+    ],
+    [
+     3000.0,
+     "UP-1"
+    ],
+    [
+     10000.0,
+     "PROBE-16"
+    ],
+    [
+     100000.0,
+     "PROBE-16"
+    ],
+    [
+     1000000.0,
+     "PROBE-16"
+    ],
+    [
+     10000000.0,
+     "PROBE-16"
+    ]
+   ],
+   "capacity_path_b1.5": [
+    [
+     100.0,
+     "UP-0 (ECHO)"
+    ],
+    [
+     1000.0,
+     "UP-1"
+    ],
+    [
+     10000.0,
+     "PROBE-16"
+    ],
+    [
+     100000.0,
+     "PROBE-16"
+    ],
+    [
+     1000000.0,
+     "PROBE-16"
+    ],
+    [
+     100000000.0,
+     "PROBE-16"
+    ]
+   ],
+   "capacity_path_b2": [
+    [
+     100.0,
+     "UP-0 (ECHO)"
+    ],
+    [
+     1000.0,
+     "UP-0 (ECHO)"
+    ],
+    [
+     10000.0,
+     "UP-0 (ECHO)"
+    ],
+    [
+     100000.0,
+     "UP-1"
+    ],
+    [
+     1000000.0,
+     "UP-1"
+    ],
+    [
+     100000000.0,
+     "PROBE-16"
+    ]
+   ]
+  }
+ },
+ "label_mixture_ENT": {
+  "FIRST": [
+   [
+    0,
+    "UP-2",
+    {
+     "UP-2": 0.967,
+     "FIRST.UP-2": 0.875,
+     "BICOND.UP-2": 0.928,
+     "MATCH": 0.61,
+     "UP-0 (ECHO)": 0.897
+    }
+   ],
+   [
+    0.1,
+    "UP-2",
+    {
+     "UP-2": 0.954,
+     "FIRST.UP-2": 0.881,
+     "BICOND.UP-2": 0.917,
+     "MATCH": 0.619,
+     "UP-0 (ECHO)": 0.884
+    }
+   ],
+   [
+    0.2,
+    "UP-2",
+    {
+     "UP-2": 0.941,
+     "FIRST.UP-2": 0.888,
+     "BICOND.UP-2": 0.906,
+     "MATCH": 0.627,
+     "UP-0 (ECHO)": 0.871
+    }
+   ],
+   [
+    0.3,
+    "UP-2",
+    {
+     "UP-2": 0.928,
+     "FIRST.UP-2": 0.894,
+     "BICOND.UP-2": 0.895,
+     "MATCH": 0.636,
+     "UP-0 (ECHO)": 0.858
+    }
+   ],
+   [
+    0.4,
+    "UP-2",
+    {
+     "UP-2": 0.915,
+     "FIRST.UP-2": 0.9,
+     "BICOND.UP-2": 0.884,
+     "MATCH": 0.645,
+     "UP-0 (ECHO)": 0.845
+    }
+   ],
+   [
+    0.5,
+    "FIRST.UP-2",
+    {
+     "UP-2": 0.902,
+     "FIRST.UP-2": 0.907,
+     "BICOND.UP-2": 0.873,
+     "MATCH": 0.653,
+     "UP-0 (ECHO)": 0.832
+    }
+   ],
+   [
+    0.6,
+    "FIRST.UP-2",
+    {
+     "UP-2": 0.889,
+     "FIRST.UP-2": 0.913,
+     "BICOND.UP-2": 0.862,
+     "MATCH": 0.662,
+     "UP-0 (ECHO)": 0.819
+    }
+   ],
+   [
+    0.8,
+    "FIRST.UP-2",
+    {
+     "UP-2": 0.863,
+     "FIRST.UP-2": 0.926,
+     "BICOND.UP-2": 0.84,
+     "MATCH": 0.679,
+     "UP-0 (ECHO)": 0.793
+    }
+   ],
+   [
+    1.0,
+    "FIRST.UP-2",
+    {
+     "UP-2": 0.837,
+     "FIRST.UP-2": 0.938,
+     "BICOND.UP-2": 0.818,
+     "MATCH": 0.697,
+     "UP-0 (ECHO)": 0.767
+    }
+   ]
+  ],
+  "BICOND": [
+   [
+    0,
+    "UP-2",
+    {
+     "UP-2": 0.967,
+     "FIRST.UP-2": 0.875,
+     "BICOND.UP-2": 0.928,
+     "MATCH": 0.61,
+     "UP-0 (ECHO)": 0.897
+    }
+   ],
+   [
+    0.1,
+    "UP-2",
+    {
+     "UP-2": 0.96,
+     "FIRST.UP-2": 0.87,
+     "BICOND.UP-2": 0.928,
+     "MATCH": 0.608,
+     "UP-0 (ECHO)": 0.892
+    }
+   ],
+   [
+    0.2,
+    "UP-2",
+    {
+     "UP-2": 0.954,
+     "FIRST.UP-2": 0.864,
+     "BICOND.UP-2": 0.927,
+     "MATCH": 0.606,
+     "UP-0 (ECHO)": 0.888
+    }
+   ],
+   [
+    0.3,
+    "UP-2",
+    {
+     "UP-2": 0.948,
+     "FIRST.UP-2": 0.859,
+     "BICOND.UP-2": 0.926,
+     "MATCH": 0.604,
+     "UP-0 (ECHO)": 0.884
+    }
+   ],
+   [
+    0.4,
+    "UP-2",
+    {
+     "UP-2": 0.941,
+     "FIRST.UP-2": 0.854,
+     "BICOND.UP-2": 0.926,
+     "MATCH": 0.602,
+     "UP-0 (ECHO)": 0.879
+    }
+   ],
+   [
+    0.5,
+    "UP-2",
+    {
+     "UP-2": 0.935,
+     "FIRST.UP-2": 0.848,
+     "BICOND.UP-2": 0.925,
+     "MATCH": 0.6,
+     "UP-0 (ECHO)": 0.875
+    }
+   ],
+   [
+    0.6,
+    "UP-2",
+    {
+     "UP-2": 0.929,
+     "FIRST.UP-2": 0.843,
+     "BICOND.UP-2": 0.924,
+     "MATCH": 0.598,
+     "UP-0 (ECHO)": 0.871
+    }
+   ],
+   [
+    0.8,
+    "BICOND.UP-2",
+    {
+     "UP-2": 0.916,
+     "FIRST.UP-2": 0.832,
+     "BICOND.UP-2": 0.923,
+     "MATCH": 0.594,
+     "UP-0 (ECHO)": 0.862
+    }
+   ],
+   [
+    1.0,
+    "BICOND.UP-2",
+    {
+     "UP-2": 0.903,
+     "FIRST.UP-2": 0.822,
+     "BICOND.UP-2": 0.922,
+     "MATCH": 0.59,
+     "UP-0 (ECHO)": 0.853
+    }
+   ]
+  ],
+  "MM": [
+   [
+    0,
+    "UP-2",
+    {
+     "UP-2": 0.967,
+     "FIRST.UP-2": 0.875,
+     "BICOND.UP-2": 0.928,
+     "MATCH": 0.61,
+     "UP-0 (ECHO)": 0.897
+    }
+   ],
+   [
+    0.1,
+    "UP-2",
+    {
+     "UP-2": 0.946,
+     "FIRST.UP-2": 0.858,
+     "BICOND.UP-2": 0.909,
+     "MATCH": 0.614,
+     "UP-0 (ECHO)": 0.883
+    }
+   ],
+   [
+    0.2,
+    "UP-2",
+    {
+     "UP-2": 0.925,
+     "FIRST.UP-2": 0.841,
+     "BICOND.UP-2": 0.89,
+     "MATCH": 0.618,
+     "UP-0 (ECHO)": 0.87
+    }
+   ],
+   [
+    0.3,
+    "UP-2",
+    {
+     "UP-2": 0.904,
+     "FIRST.UP-2": 0.824,
+     "BICOND.UP-2": 0.871,
+     "MATCH": 0.622,
+     "UP-0 (ECHO)": 0.856
+    }
+   ],
+   [
+    0.4,
+    "UP-2",
+    {
+     "UP-2": 0.883,
+     "FIRST.UP-2": 0.808,
+     "BICOND.UP-2": 0.852,
+     "MATCH": 0.627,
+     "UP-0 (ECHO)": 0.843
+    }
+   ],
+   [
+    0.5,
+    "UP-2",
+    {
+     "UP-2": 0.863,
+     "FIRST.UP-2": 0.791,
+     "BICOND.UP-2": 0.833,
+     "MATCH": 0.631,
+     "UP-0 (ECHO)": 0.829
+    }
+   ],
+   [
+    0.6,
+    "UP-2",
+    {
+     "UP-2": 0.842,
+     "FIRST.UP-2": 0.774,
+     "BICOND.UP-2": 0.813,
+     "MATCH": 0.635,
+     "UP-0 (ECHO)": 0.816
+    }
+   ],
+   [
+    0.8,
+    "UP-2",
+    {
+     "UP-2": 0.8,
+     "FIRST.UP-2": 0.74,
+     "BICOND.UP-2": 0.775,
+     "MATCH": 0.643,
+     "UP-0 (ECHO)": 0.789
+    }
+   ],
+   [
+    1.0,
+    "UP-0 (ECHO)",
+    {
+     "UP-2": 0.758,
+     "FIRST.UP-2": 0.707,
+     "BICOND.UP-2": 0.737,
+     "MATCH": 0.652,
+     "UP-0 (ECHO)": 0.762
+    }
+   ]
+  ]
+ },
+ "thinking": [
+  {
+   "n": 10,
+   "m": 43,
+   "sat_rate": 0.675,
+   "dpll_decisions_in_budget": 124,
+   "walk_flips_in_budget": 139,
+   "DPLL-b (default SAT)": 1.0,
+   "DPLL-b (default UNSAT)": 1.0,
+   "WALK-k": 0.9,
+   "UC (no backtrack)": 0.45,
+   "ALWAYS-SAT": 0.675,
+   "UP-fix": 0.675
+  },
+  {
+   "n": 20,
+   "m": 85,
+   "sat_rate": 0.625,
+   "dpll_decisions_in_budget": 62,
+   "walk_flips_in_budget": 139,
+   "DPLL-b (default SAT)": 0.975,
+   "DPLL-b (default UNSAT)": 1.0,
+   "WALK-k": 0.875,
+   "UC (no backtrack)": 0.425,
+   "ALWAYS-SAT": 0.625,
+   "UP-fix": 0.625
+  },
+  {
+   "n": 30,
+   "m": 128,
+   "sat_rate": 0.5,
+   "dpll_decisions_in_budget": 41,
+   "walk_flips_in_budget": 139,
+   "DPLL-b (default SAT)": 0.6,
+   "DPLL-b (default UNSAT)": 0.95,
+   "WALK-k": 0.7,
+   "UC (no backtrack)": 0.55,
+   "ALWAYS-SAT": 0.5,
+   "UP-fix": 0.5
+  },
+  {
+   "n": 40,
+   "m": 170,
+   "sat_rate": 0.625,
+   "dpll_decisions_in_budget": 31,
+   "walk_flips_in_budget": 139,
+   "DPLL-b (default SAT)": 0.625,
+   "DPLL-b (default UNSAT)": 0.625,
+   "WALK-k": 0.65,
+   "UC (no backtrack)": 0.375,
+   "ALWAYS-SAT": 0.625,
+   "UP-fix": 0.625
+  }
+ ]
+}

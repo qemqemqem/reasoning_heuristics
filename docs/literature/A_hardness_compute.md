@@ -29,7 +29,7 @@ Convention: **Claim** = what the paper says. **Interp.** = my reading of what it
   - a bias toward answering SAT (SATBench; Zhang et al. 2026);
   - hallucinated graph edges as the main cause of coloring errors (Heyman & Zylberberg 2025b);
   - GraphArena's "default to greedy", with hallucination (infeasible answers) rising from about 20% to 44% as graphs grow;
-  - reasoning models' coloring errors spiking when a randomized greedy colorer rarely succeeds (Heyman & Zylberberg 2025a);
+  - ~~reasoning models' coloring errors spiking when a randomized greedy colorer rarely succeeds (Heyman & Zylberberg 2025a)~~ — **withdrawn by its authors**: 2505.12151 v3 (§1, App. A.1) reports the correlation is "not causally significant"; it tracked edge count. Don't cite 2025a as evidence of greedy behaviour (see [theory/T3](../theory/T3_llm_precedent.md) §5);
   - o1 producing plans for unsolvable instances.
 - **H3 has partial qualitative support, plus two real threats.**
   - Support: R1 uses unit propagation and DPLL where GPT-4o uses greedy search (Hazra). Phi-4-Reasoning opens TSP with nearest neighbour where Phi-4 brute-forces or guesses (AlgoTrace).
@@ -144,7 +144,7 @@ Ranked by how much each threatens the paper's claims.
   - SAT bias (SATBench; Zhang 2026).
   - "Too complex, so UNSAT" lazy answers (Hazra).
   - Hallucinated edges (Heyman & Zylberberg 2025b).
-  - Errors concentrated where greedy coloring fails (Heyman & Zylberberg 2025a).
+  - ~~Errors concentrated where greedy coloring fails (Heyman & Zylberberg 2025a).~~ Withdrawn by the authors (confounded with edge count; 2505.12151 v3, App. A.1).
   - Greedy-level suboptimality, plus hallucinated infeasible answers that rise with size (GraphArena).
   - o1 producing plans for unsolvable problems (Valmeekam 2024).
 - *Caveat:* some structure is *misperception* (hallucinated constraints), not a decision procedure. A heuristic zoo with no perception-error component will misattribute these errors.
