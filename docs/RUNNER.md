@@ -105,7 +105,14 @@ For the single-vertex format (C E3, arm I) the members' answers are full colouri
 
 Deterministic, no LLM (DESIGN §5 rule 4), and it reads the item's structured `instance`, never the prompt.
 
-**Parsing.** The last answer block wins: the last line-initial `ANSWER:` marker (also `**ANSWER:**`, `Final answer:`, `ANSWER` alone on a line; an inline `ANSWER:` only when there is no line-initial one), or the last JSON object carrying the format's key. Code fences, markdown emphasis, list bullets, whitespace and case are tolerated, and so is inline `<think>…</think>` in the content (removed first). The reasoning channel is never parsed for the answer; an answer found only there is flagged `answer_only_in_reasoning` and stays a parse failure.
+**Parsing.** The last answer block wins.
+
+- **Markers:** the last line-initial `ANSWER:` marker, also `**ANSWER:**`, `Final answer:`, or `ANSWER` alone on a line. An inline `ANSWER:` counts only when there is no line-initial one. For the JSON formats, the last JSON object carrying the format's key.
+- **Tolerated and removed first:** code fences, markdown emphasis, list bullets, whitespace and case; inline `<think>…</think>` in the content; and, for the `ANSWER:` formats, LaTeX decoration (`$$\text{ANSWER: C}$$`, `\boxed{C}`; flag `latex_unwrapped`, since 1.2.0).
+- **No marker at all:** a reply that is nothing but an answer in the format is parsed (flag `no_answer_marker`, since 1.1.0). This matters in the direct condition. Any other text without a marker is a parse failure.
+- **The reasoning channel is never parsed for the answer.** A finished reply whose answer appears only there is flagged `answer_only_in_reasoning` and stays a parse failure.
+
+**Versions so far.** 1.0.0 was the first. 1.1.0 parses marker-less bare answers. 1.1.1 stops `answer_only_in_reasoning` on truncated replies, whose reasoning often just quotes the format. 1.2.0 unwraps LaTeX. Each came from the smoke runs below.
 
 | Answer format (items) | Parsed into |
 |---|---|
@@ -213,14 +220,21 @@ Endpoint listings and 62 tiny calls ("What is 17 + 25?") over the SCOPE §1 mode
 
 ## Before any pilot (SCOPE §1)
 
-To do on the first approved live run; results go in `data/runs/probes/` and the pins in `models.py`:
+Checked on the probes and the 2026-11-18 smoke runs:
 
-- [ ] Each model and provider returns the reasoning text (`reasoning` or `reasoning_details` non-empty; `reasoning_returned` on every scored record).
-- [ ] The provider and precision are pinned per model (`provider.order`, `allow_fallbacks: false`, quantization recorded), with the reason.
-- [ ] Thinking off is honoured for the direct condition on the pinned Qwen3 providers (no reasoning text, zero reasoning tokens, no `<think>` in content).
-- [ ] Reported reasoning tokens and max_tokens behave as configured (DESIGN §5 rule 11): truncated responses stop at 32,768 completion tokens.
-- [ ] The proxy prompt-token counts are compared with API-reported `prompt_tokens`, and the real tokenizers' counts are checked for the surface-matched pairs (`tokens.py` docstring).
-- [ ] The cost estimate is recalibrated from the smoke run's measured tokens before any dev run.
+- [x] **Each model and provider returns the reasoning text.**
+  - Every probed endpoint of the seven models did, on the probe question.
+  - Every thinking response in the smoke runs did (`reasoning_returned`).
+  - One endpoint, AkashML fp4 for gpt-oss-20b, reported 0 reasoning tokens alongside reasoning text, so it is not pinned.
+- [x] **The provider and precision are pinned per model, with the reason** (`models.py`; the table above).
+- [x] **Thinking off is honoured for the direct condition on the pinned Qwen3 provider.**
+  - In the probes, `{enabled: false}` and `{effort: none}` both gave 0 reasoning tokens.
+  - In run (c), all 254 Qwen3-32B direct responses had no reasoning text and 0 reasoning tokens.
+- [x] **max_tokens behaves as configured** (DESIGN §5 rule 11). Truncated responses stop at exactly max_tokens: 32,768 for thinking, 1,024 for direct. Reasoning tokens are reported on every response of the pinned endpoints.
+- [ ] **Proxy and real prompt-token counts compared.**
+  - Done for counts: on Qwen3-32B, API-reported prompt tokens are 1.07× the proxy count (1.04–1.16 by eval, chat template included). The gpt-oss figure is in the runs section below.
+  - Not done: the per-tokenizer check of the surface-matched pairs (`tokens.py` docstring) needs the tokenizers themselves.
+- [x] **Measured tokens per eval are in the runs section below**, for recalibrating the dev-run estimate.
 
 ## E8: continuations and prefill
 

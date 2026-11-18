@@ -61,10 +61,12 @@ from reasoning_heuristics.problems.coloring import graph as G
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.sat import cnf as S
 
-SCORER_VERSION = "scorer-1.2.0"
+SCORER_VERSION = "scorer-1.3.0"
 # 1.1.0: a reply that is nothing but the answer, without the ANSWER: marker, is parsed (flag no_answer_marker).
 # 1.1.1: answer_only_in_reasoning is not set on truncated replies (their reasoning often quotes the format).
 # 1.2.0: LaTeX answer decoration (\\boxed{..}, \\text{..}, $$ ... $$) is unwrapped before the ANSWER: formats are parsed.
+# 1.3.0: C SAT / colouring values given without their names (or with the format's placeholder, `x=T`) are read in
+#        the requested order when the count is exact (flags positional_values, placeholder_names).
 
 CATEGORIES = ("ok", "parse_fail", "refusal", "declared_impossible", "partial", "truncated", "api_error")
 
@@ -472,9 +474,10 @@ def _bare_answer(ctx: ItemContext, text: str) -> Parse | None:
     elif kind == "ans_knap":
         pure = len(lines) == 1 and re.fullmatch(rf"(?i)(?:none|(?:(?:{ctx.name_pattern})(?:\s*[,;]\s*|\s+|$))+)", one)
     elif kind in ("ans_col", "ans_sat"):
-        word = "IMPOSSIBLE" if kind == "ans_col" else "UNSAT"
+        word, ph, value = ("IMPOSSIBLE", "vertex", r"-?\d+") if kind == "ans_col" else ("UNSAT", "x", r"(?:TRUE|FALSE|T|F|1|0)")
         pure = (len(lines) == 1 and one.upper() == word) or all(
-            re.fullmatch(rf"(?i)(?:(?:{ctx.name_pattern})\s*[:=]\s*\S+?\s*[,;]?\s*)+", ln) for ln in lines)
+            re.fullmatch(rf"(?i)(?:(?:{ctx.name_pattern})\s*[:=]\s*\S+?\s*[,;]?\s*)+", ln) for ln in lines) or all(
+            re.fullmatch(rf"(?i)(?:(?:{ph}\s*[:=]\s*)?{value}(?:\s*[,;]\s*|\s+|$))+", ln.rstrip(".")) for ln in lines)
     else:
         pure = False
     if not pure:
@@ -546,6 +549,9 @@ def _parse_pairs(ctx: ItemContext, block: str, value_rx: str, convert, negative_
     if not pairs:
         if _NEGATIVE.search(first) and ctx.fmt.allow_impossible:
             return Parse("ok", negative_word, flags=[f"{negative_word.lower()}_as_phrase"])
+        positional = _positional(ctx, block, value_rx, convert, what)
+        if positional is not None:
+            return positional
         return _declared_or_fail(ctx, first, f"no `{what}: value` pairs")
     flags = ["extra_text_in_block"] if extra_lines else []
     values: dict[str, Any] = {}
@@ -567,6 +573,29 @@ def _parse_pairs(ctx: ItemContext, block: str, value_rx: str, convert, negative_
     if order and [n for n in (ctx.name_map[p[0].lower()] for p in pairs)] != order:
         flags.append("order_differs_from_requested")
     return _complete_or_partial(ctx, values, flags, what)
+
+
+PLACEHOLDER = {"variable": "x", "vertex": "vertex"}  # the generic names in the C formats' `x=T` / `vertex: colour`
+
+
+def _positional(ctx: ItemContext, block: str, value_rx: str, convert, what: str) -> Parse | None:
+    """Values without their names, in the requested order (seen live: "ANSWER: T, T, F, ..." and the
+    format's own placeholder taken literally, "ANSWER: x=T, x=T, x=F, ..."). Read positionally only when
+    the item states an answer order and the block holds exactly one value per name; otherwise None."""
+    order = list(ctx.task.answer_order) if getattr(ctx.task, "answer_order", None) else None
+    if not order:
+        return None
+    ph = PLACEHOLDER[what]
+    item = rf"(?:{ph}\s*[:=]\s*)?({value_rx})"
+    line_rx = re.compile(rf"(?i)^(?:{item}(?:\s*[,;]\s*|\s+|$))+$")
+    lines = [ln.strip().rstrip(".") for ln in block.splitlines() if ln.strip()]
+    if not lines or not all(line_rx.match(ln) for ln in lines):
+        return None
+    vals = [m.group(1) for ln in lines for m in re.finditer(rf"(?i)(?<![\w]){item}(?![\w])", ln)]
+    if len(vals) != len(order):
+        return Parse("parse_fail", detail=f"{len(vals)} values without names for {len(order)} {what}s")
+    flags = ["positional_values"] + (["placeholder_names"] if re.search(rf"(?i)\b{ph}\s*[:=]", block) else [])
+    return _complete_or_partial(ctx, {n: convert(v) for n, v in zip(order, vals)}, flags, what)
 
 
 def _complete_or_partial(ctx: ItemContext, values: dict[str, Any], flags: list[str], what: str) -> Parse:

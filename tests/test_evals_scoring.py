@@ -217,6 +217,29 @@ def test_latex_answer_decoration_is_unwrapped():
     assert "latex_unwrapped" not in score_text(js, '$x$ so {"follows": true}')["flags"]
 
 
+def test_positional_values_in_the_requested_order():
+    """The C SAT format says "the values as `x=T` / `x=F` ... in this order: x15, x18, ...": seen live,
+    Qwen3-32B wrote "ANSWER: x=T, x=T, ..." and "ANSWER: T, T, F, ...". Read positionally only when the
+    item states an order and the count is exact."""
+    sat = first_with("ans_sat", vertical="C", eval_id="E1")
+    order = list(load_task(sat["instance"]).answer_order)
+    bits = ["T" if i % 3 else "F" for i in range(len(order))]
+    want = {v: b == "T" for v, b in zip(order, bits)}
+    for text in ("### Final Answer:\n\n```\nANSWER: " + ", ".join(bits) + "\n```",
+                 "ANSWER: " + ", ".join(f"x={b}" for b in bits)):
+        rec = score_text(sat, text)
+        assert rec["category"] == "ok" and rec["parsed"] == {v: want[v] for v in load_task(sat["instance"]).cnf.var_names}
+        assert "positional_values" in rec["flags"]
+    assert "placeholder_names" in score_text(sat, "ANSWER: " + ", ".join(f"x={b}" for b in bits))["flags"]
+    short = score_text(sat, "ANSWER: " + ", ".join(bits[:-1]))
+    assert short["category"] == "parse_fail" and "without names" in short["parse_detail"]
+    free = next(it for it in runnable(committed_items("smoke")) if answer_format(it).kind == "ans_sat"
+                and load_task(it["instance"]).answer_order is None)
+    n = len(load_task(free["instance"]).cnf.var_names)
+    assert score_text(free, "ANSWER: " + ", ".join(["T"] * n))["category"] == "parse_fail"  # FREE order: no positions
+    assert score_text(sat, ", ".join(bits))["category"] == "ok"  # a bare positional reply (direct condition)
+
+
 def test_trailing_periods_after_values():
     it = first_with("ans_single_colour")
     want = it["ground_truth"]["answer"]
