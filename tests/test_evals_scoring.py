@@ -179,6 +179,30 @@ def test_inverted_rule_items_are_judged_under_the_stated_rule():
     assert seen[True] and seen[False]  # the textbook answer is right in T cells and wrong in some inverted ones
 
 
+def test_bare_answer_without_marker_only_when_it_is_nothing_but_the_answer():
+    """Direct replies often drop the ANSWER: marker (seen live: Qwen3-32B direct wrote just "UNSAT", "NO")."""
+    sat = first_with("ans_sat", vertical="C", eval_id="E1")
+    rec = score_text(sat, "UNSAT")
+    assert rec["category"] == "ok" and rec["parsed"] == "UNSAT" and "no_answer_marker" in rec["flags"]
+    pred = next(p["answer"] for p in sat["predictions"].values() if isinstance(p["answer"], dict))
+    assert score_text(sat, render(sat, pred).split("\n", 1)[1])["parsed"] == pred
+    assert score_text(sat, "The formula is UNSAT.")["category"] == "parse_fail"
+    yn = first_with("ans_yn", vertical="C")
+    assert score_text(yn, "NO")["parsed"] == "NO" and score_text(yn, "no.")["parsed"] == "NO"
+    assert score_text(yn, "I think NO")["category"] == "parse_fail"
+    mc = first_with("ans_letter")
+    assert score_text(mc, "(C)")["parsed"] == "C" and score_text(mc, "Probably C")["category"] == "parse_fail"
+    one = first_with("ans_single_colour")
+    assert score_text(one, "2")["parsed"] == {answer_format(one).target: 2}
+    knap = first_with("ans_knap")
+    assert score_text(knap, "A, C, H")["parsed"] == ["A", "C", "H"]
+    col = first_with("ans_col", vertical="C", eval_id="E1")
+    sol = col["predictions"]["DSATUR"]["answer"]
+    lines = render(col, sol).split("\n", 1)[1]
+    assert score_text(col, lines)["category"] == "ok"
+    assert score_text(col, "Here is my colouring:\n" + lines)["category"] == "parse_fail"
+
+
 def test_trailing_periods_after_values():
     it = first_with("ans_single_colour")
     want = it["ground_truth"]["answer"]

@@ -61,7 +61,7 @@ from reasoning_heuristics.problems.coloring import graph as G
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.sat import cnf as S
 
-SCORER_VERSION = "scorer-1.0.0"
+SCORER_VERSION = "scorer-1.1.0"  # 1.1.0: a reply that is nothing but the answer, without the ANSWER: marker, is parsed (flag no_answer_marker)
 
 CATEGORIES = ("ok", "parse_fail", "refusal", "declared_impossible", "partial", "truncated", "api_error")
 
@@ -417,7 +417,7 @@ def parse(ctx: ItemContext, text: str) -> Parse | None:
         return _parse_json(ctx, text)
     marks, inline = answer_markers(text)
     if not marks:
-        return None
+        return _bare_answer(ctx, text)
     results = []
     for i, (start, end) in enumerate(marks):
         stop = marks[i + 1][0] if i + 1 < len(marks) else len(text)
@@ -435,6 +435,38 @@ def parse(ctx: ItemContext, text: str) -> Parse | None:
 
 def _first_line(block: str) -> str:
     return next((ln for ln in block.splitlines() if ln.strip()), "")
+
+
+def _bare_answer(ctx: ItemContext, text: str) -> Parse | None:
+    """No ANSWER marker at all: accept the visible text only if it is nothing but an answer in the
+    format (the direct condition's "respond with only the final answer" often drops the marker).
+    Any other text means no answer block. Flagged `no_answer_marker`."""
+    block = clean_block(text)
+    lines = [ln.strip() for ln in block.splitlines() if ln.strip()]
+    if not lines:
+        return None
+    kind = ctx.fmt.kind
+    one = lines[0].rstrip(".")
+    if kind == "ans_yn":
+        pure = len(lines) == 1 and re.fullmatch(r"(?i)yes|no", one)
+    elif kind == "ans_letter":
+        pure = len(lines) == 1 and re.fullmatch(r"\(?[A-Za-z]\)?", one)
+    elif kind == "ans_single_colour":
+        pure = len(lines) == 1 and re.fullmatch(rf"(?i)(?:{re.escape(ctx.fmt.target)}\s*[:=]\s*)?-?\d+", one)
+    elif kind == "ans_knap":
+        pure = len(lines) == 1 and re.fullmatch(rf"(?i)(?:none|(?:(?:{ctx.name_pattern})(?:\s*[,;]\s*|\s+|$))+)", one)
+    elif kind in ("ans_col", "ans_sat"):
+        word = "IMPOSSIBLE" if kind == "ans_col" else "UNSAT"
+        pure = (len(lines) == 1 and one.upper() == word) or all(
+            re.fullmatch(rf"(?i)(?:(?:{ctx.name_pattern})\s*[:=]\s*\S+?\s*[,;]?\s*)+", ln) for ln in lines)
+    else:
+        pure = False
+    if not pure:
+        return None
+    res = _parse_block(ctx, block)
+    res.flags.append("no_answer_marker")
+    res.answer_start, res.n_blocks = 0, 1
+    return res
 
 
 def _declared_or_fail(ctx: ItemContext, snippet: str, what: str) -> Parse:
