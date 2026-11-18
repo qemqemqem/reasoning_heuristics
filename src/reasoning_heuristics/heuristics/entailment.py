@@ -9,7 +9,8 @@ set (ties: first in canonical order; none: the "None of these" letter); OPEN -> 
 list of entailed literals, or "NOTHING".
 
 Mental models (MM-S1, MM-G) are the simplified form the B4/C4 doc specifies (initial
-models with the principle of truth, an implicit model for conditionals, Girotto fleshing);
+models with the principle of truth, an implicit model for conditionals, Girotto fleshing),
+conjoined premise by premise with the system-1 rules the doc points to (`conjoin_models`);
 the doc itself marks them as a provisional port, to be validated against mSentential.
 """
 
@@ -178,23 +179,35 @@ def first(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
 
 
 def _match(task: EntailmentTask, later_only: bool, polarity: bool) -> Prediction:
-    prem = list(effective_premises(task))
+    """SELECT-BY-MATCH (B4/C4 §1.1). A disjunction keeps the disjuncts that share a literal (an atom,
+    for MATCH-atom) with the categorical premise(s) it is matched against, when that keeps some but
+    not all of them. Matching reads the premises as stated: a disjunction rewritten to one
+    disjunct does not become a categorical premise for the others.
+
+    MATCH-L: the first categorical premise after the disjunction. MATCH-A ("any j != i",
+    order-invariant): every categorical premise, so the result cannot depend on premise order
+    (reading: with several categoricals, "the first such j" would)."""
+    stated = list(effective_premises(task))
+    prem = list(stated)
     rewrites = []
-    for i, p in enumerate(prem):
-        if p[0] != "or":
+    for i, p in enumerate(stated):
+        if p[0] != "or" or not all(is_categorical(d) for d in p[1]):
             continue
-        js = [j for j in range(len(prem)) if j != i and (j > i or not later_only) and is_categorical(prem[j])]
-        for j in js:
-            cat = cat_lits(prem[j])
-            if polarity:
-                share = [d for d in p[1] if set(cat_lits(d)) & set(cat)] if all(is_categorical(d) for d in p[1]) else []
-            else:
-                atoms_j = {a for a, _ in cat}
-                share = [d for d in p[1] if {a for a, _ in cat_lits(d)} & atoms_j] if all(is_categorical(d) for d in p[1]) else []
-            if 0 < len(share) < len(p[1]):
-                prem[i] = share[0] if len(share) == 1 else ("or", tuple(share))
-                rewrites.append({"premise": i + 1, "by": j + 1, "kept": F.render(prem[i])})
-            break  # only the first categorical j is consulted
+        cats = [j for j in range(len(stated)) if j != i and (j > i or not later_only) and is_categorical(stated[j])]
+        if later_only:
+            cats = cats[:1]
+        if not cats:
+            continue
+        lits = {l for j in cats for l in cat_lits(stated[j])}
+        if polarity:
+            share = [d for d in p[1] if set(cat_lits(d)) & lits]
+        else:
+            atoms = {a for a, _ in lits}
+            share = [d for d in p[1] if {a for a, _ in cat_lits(d)} & atoms]
+        if 0 < len(share) < len(p[1]):
+            prem[i] = share[0] if len(share) == 1 else ("or", tuple(share))
+            by = cats[0] + 1 if later_only else [j + 1 for j in cats]
+            rewrites.append({"premise": i + 1, "by": by, "kept": F.render(prem[i])})
     return Prediction(answer_from_premises(task, prem), {"rewrites": rewrites})
 
 
@@ -298,9 +311,37 @@ def fully_explicit_if(p: F.Formula) -> list[State]:
     return out
 
 
+def _represented(models: list) -> set[str]:
+    return {a for m in models if m != IMPLICIT for a, _ in m}
+
+
+def conjoin_models(state: list, models: list) -> list:
+    """System-1 conjunction of two model sets (Johnson-Laird & Savary 1999; mSentential):
+    explicit x explicit = the union, or null if it is contradictory; an implicit model x an
+    explicit model m = null if an atom of m is represented in the set the implicit model belongs
+    to, otherwise m; implicit x implicit = implicit. Nulls are dropped."""
+    in_state, in_models = _represented(state), _represented(models)
+    out: list = []
+    for s in state:
+        for m in models:
+            if s == IMPLICIT and m == IMPLICIT:
+                r = IMPLICIT
+            elif s == IMPLICIT:
+                r = None if {a for a, _ in m} & in_state else m
+            elif m == IMPLICIT:
+                r = None if {a for a, _ in s} & in_models else s
+            else:
+                r = s | m if consistent(s | m) else None
+            if r is not None and r not in out:
+                out.append(r)
+    return out
+
+
 def mental_models(task: EntailmentTask, variant: str) -> tuple[list[State], bool, dict]:
-    """variant: 'open' (MM-S1 default), 'elim' (categoricals eliminate unmatched disjunction models),
-    'girotto' (MM-G: a categorical read before a conditional fleshes it out)."""
+    """The premises' initial models (`mm_initial`), conjoined in presentation order by
+    `conjoin_models`. Returns (the surviving explicit models, whether an implicit model survives,
+    trace). variant: 'open' (MM-S1 default), 'elim' (categoricals eliminate unmatched disjunction
+    models), 'girotto' (MM-G: a categorical read before a conditional fleshes it out)."""
     prem = effective_premises(task)
     per = [mm_initial(p) for p in prem]
     per = [(list(ms), imp) for ms, imp in per]
@@ -326,24 +367,14 @@ def mental_models(task: EntailmentTask, variant: str) -> tuple[list[State], bool
                 if any(l in m for m in survivors):
                     ms = [m for m in survivors if l in m]
             per[j] = (ms, per[j][1])
-    states: list[State] = [frozenset()]
-    implicit_alive = False
-    for j, (ms, imp) in enumerate(per):
-        nxt = []
-        for s in states:
-            for m in ms:
-                u = s | m
-                if consistent(u) and u not in nxt:
-                    nxt.append(u)
-        if imp:
-            # The implicit model survives a categorical context only if nothing in the other
-            # premises matches a literal of this conditional's explicit models.
-            explicit_lits = set().union(*ms)
-            others = [l for i, p in enumerate(prem) if i != j and is_categorical(p) for l in cat_lits(p)]
-            if not any(l in explicit_lits for l in others):
-                implicit_alive = True
-        states = nxt
-    return states, implicit_alive, {"models": describe(states), "implicit": implicit_alive}
+    combined: list | None = None
+    for ms, imp in per:
+        models = list(ms) + ([IMPLICIT] if imp else [])
+        combined = models if combined is None else conjoin_models(combined, models)
+    combined = combined or []
+    states = [m for m in combined if m != IMPLICIT]
+    implicit = IMPLICIT in combined
+    return states, implicit, {"models": describe(states), "implicit": implicit}
 
 
 @member("MM-S1", "B4", D, "lists only the possibilities in which the clauses are true (negative literals rare); conditionals get one explicit case plus 'other cases'")

@@ -1,5 +1,8 @@
 """Entailment members reproduce the B4/C4 vertical's computed prediction tables (§2.5 E1, E2)."""
 
+import itertools
+
+import numpy as np
 import pytest
 
 from reasoning_heuristics.heuristics.base import run
@@ -179,3 +182,73 @@ def test_greedy_cm_library_item():
     t = EntailmentTask(prem, L("D"), "YN")
     assert run("entailment", "EXACT", t).answer == "NO"
     assert run("entailment", "GREEDY-CM", t).answer == "YES"  # library: GREEDY-CM-MENTION says YES
+
+
+# --- MATCH-A is order-invariant (B4/C4 §1.1) ---------------------------------------------------------
+
+
+def test_match_a_is_order_invariant_on_the_review_example():
+    # [(A∧X)∨B, (X∧Y)∨C, A] ⊢ Y: the categorical A selects A∧X. A rewritten disjunction is not a
+    # categorical premise, so (X∧Y)∨C stays as stated and Y does not follow, in every order.
+    d1 = F.disj(F.conj(L("A"), L("X")), L("B"))
+    d2 = F.disj(F.conj(L("X"), L("Y")), L("C"))
+    answers = {run("entailment", "MATCH-A", EntailmentTask(p, L("Y"), "YN")).answer
+               for p in itertools.permutations((d1, d2, L("A")))}
+    assert answers == {"NO"}
+
+
+def test_match_a_and_match_atom_are_order_invariant_on_random_premise_sets():
+    rng = np.random.default_rng(0)
+    atoms = ["A", "B", "C", "D", "E"]
+
+    def lit():
+        return L(atoms[int(rng.integers(len(atoms)))], bool(rng.integers(2)))
+
+    def conj():
+        parts = {}
+        for _ in range(int(rng.integers(1, 3))):
+            x = lit()
+            parts.setdefault(x[1], x)
+        ps = list(parts.values())
+        return ps[0] if len(ps) == 1 else F.conj(*ps)
+
+    checked = 0
+    for _ in range(150):
+        prem = [F.disj(conj(), conj()) if rng.random() < 0.5 else conj() for _ in range(int(rng.integers(2, 5)))]
+        if not F.models(prem, F.atoms_of(prem)):
+            continue
+        probe = lit()
+        for name in ("MATCH-A", "MATCH-atom"):
+            outs = {run("entailment", name, EntailmentTask(p, probe, "YN")).answer for p in itertools.permutations(prem)}
+            assert len(outs) == 1, (name, prem, probe, outs)
+        checked += 1
+    assert checked > 50
+
+
+# --- MM-S1: implicit models are eliminated by conjunction (B4/C4 §1.1, mSentential) --------------------
+
+
+def test_mm_s1_chain_of_conditionals():
+    # A; A→B; B→C ⊢ C. Conjoining [A] with "if A then B" leaves [A B]: the implicit model is null
+    # because A is represented in the conditional's models. Conjoining with "if B then C" leaves
+    # [A B C], so C follows in system 1.
+    t = EntailmentTask((L("A"), F.cond(L("A"), L("B")), F.cond(L("B"), L("C"))), L("C"), "YN")
+    p = run("entailment", "MM-S1", t)
+    assert p.answer == "YES"
+    assert p.trace_features == {"models": [["A", "B", "C"]], "implicit": False}
+    assert run("entailment", "MM-G", t).answer == "YES"
+    # The same chain read rules first, and a conditional with no categorical premise at all.
+    t2 = EntailmentTask((F.cond(L("B"), L("C")), F.cond(L("A"), L("B")), L("A")), L("C"), "YN")
+    assert run("entailment", "MM-S1", t2).answer == "YES"
+    t3 = EntailmentTask((F.cond(L("A"), L("B")),), L("B"), "YN")
+    assert run("entailment", "MM-S1", t3).answer == "NO"
+    assert run("entailment", "MM-S1", t3).trace_features["implicit"] is True
+
+
+def test_mm_s1_implicit_model_meets_an_unrelated_premise():
+    # "if A then B; C": C mentions no atom of the conditional, so the implicit model conjoined with
+    # [C] yields [C] (not null). The models are [A B C] and [C], and B does not follow.
+    t = EntailmentTask((F.cond(L("A"), L("B")), L("C")), L("B"), "YN")
+    p = run("entailment", "MM-S1", t)
+    assert p.answer == "NO"
+    assert p.trace_features == {"models": [["A", "B", "C"], ["C"]], "implicit": False}
