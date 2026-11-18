@@ -91,7 +91,8 @@ near-miss model gets their shape wrong:</p>
 <ul>
 <li>gpt-oss-20b's wrong knapsack packings are often two items from the nearest member, one item swapped for another:
 0.15 of answers, against 0.08 predicted (distance-profile p = 0.01).</li>
-<li>gpt-oss-120b's knapsack fit is borderline (p = 0.05).</li>
+<li>gpt-oss-120b's knapsack fit is borderline: p = 0.0495, just under the 0.05 line, with the same excess of two-item
+answers (0.07 against 0.04).</li>
 <li>The two Qwen3 colouring fits with thinking have ε well below the cap (0.15 and 0.13). Their largest weight is on
 FF-LIST: 0.373 [0.313, 0.436] for Qwen3-32B and 0.464 [0.398, 0.531] for Qwen3-14B. But each expects 0.03–0.04 of
 answers beyond every member's reach, and there are none. Each also expects fewer exact matches than the data have:

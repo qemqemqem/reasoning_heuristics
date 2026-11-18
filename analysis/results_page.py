@@ -718,12 +718,12 @@ def section_ppc(d: Data) -> str:
                 lo, hi = dc["tv_simulated_p05_p95"]
                 bad = f.dist_misfit
                 tip = (f"Distance profile: total variation from the fitted model's mean profile, observed {dc['tv_observed']:.3f}; "
-                       f"fake data {dc['tv_simulated_mean']:.3f} [{lo:.3f}, {hi:.3f}]; p = {dc['p_value']:.3f}")
+                       f"fake data {dc['tv_simulated_mean']:.3f} [{lo:.3f}, {hi:.3f}]; p = {dc['p_value']:.3g}")
                 marks = [f'<rect class="sim" x="{pc(scale(lo))}" y="{MID - 6}" width="{pc(max(scale(hi) - scale(lo), 0.0))}" '
                          'height="12" rx="2"/>', vtick(scale(dc["tv_simulated_mean"]), "simmean"),
                          dot(scale(dc["tv_observed"]), "obs" + (" out" if bad else ""))]
                 val = (f"{dc['tv_observed']:.2f} vs {dc['tv_simulated_mean']:.2f} [{lo:.2f}, {hi:.2f}] "
-                       f'<span class="nw">· p {dc["p_value"]:.2f}</span>'
+                       f'<span class="nw">· p {dc["p_value"]:.3g}</span>'
                        + (' <span class="out-word"><span aria-hidden="true">✗</span> misfit</span>' if bad else ""))
                 rows.append(row("Distance profile (total variation from the fitted model's)",
                                 band(scale, [tip_group(tip, *marks, hit_x=scale(dc["tv_observed"]))]), val))
@@ -742,7 +742,7 @@ def section_ppc(d: Data) -> str:
         if has_dist:
             dc = f.dist
             cells.append(num(f"{dc['tv_observed']:.3f} vs {dc['tv_simulated_mean']:.3f} [{dc['tv_simulated_p05_p95'][0]:.3f}, "
-                             f"{dc['tv_simulated_p05_p95'][1]:.3f}]; p {dc['p_value']:.3f}" + (" <strong>misfit</strong>" if f.dist_misfit else ""))
+                             f"{dc['tv_simulated_p05_p95'][1]:.3f}]; p {dc['p_value']:.3g}" + (" <strong>misfit</strong>" if f.dist_misfit else ""))
                          if dc else "not run")
         rows.append(cells)
     out.append(details("Table: the predictive check for every fit",
