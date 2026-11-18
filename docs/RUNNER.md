@@ -220,13 +220,38 @@ Endpoint listings and 62 tiny calls ("What is 17 + 25?") over the SCOPE §1 mode
 
 ## First live runs (smoke, 2026-11-18)
 
-Three acceptance runs, each on all 254 smoke items except A/H E8, on the pinned endpoints. They used the items as committed before the generator fixes of 2026-11-18. To re-score them, use `score --items-at-run-sha`. Each run's own `REPORT.md` has the details; all are scored with scorer RUN_SCORER.
+Three acceptance runs, each on all 254 smoke items except A/H E8, on the pinned endpoints. They used the items as committed before the generator fixes of 2026-11-18. To re-score them, use `score --items-at-run-sha`. Each run's own `REPORT.md` has the details; all are scored with scorer-1.4.0.
 
-RUNS_TABLE
+| Run | Model, condition | Provider served | Responses | ok | Truncated | Other categories | Correct of ok | API cost | Wall time |
+|---|---|---|---|---|---|---|---|---|---|
+| `2026-11-18-smoke-gpt-oss-20b-thinking-high` | gpt-oss-20b, thinking-high | DekaLLM | (running) | | | | | | |
+| `2026-11-18-smoke-qwen3-32b-thinking-high` | qwen3-32b, thinking-high | DeepInfra (254) | 254 | 248 | 6 | – | 188/248 (76%) | $0.4941 | 56 min |
+| `2026-11-18-smoke-qwen3-32b-direct` | qwen3-32b, direct | DeepInfra (254) | 254 | 250 | 3 | parse_fail 1 | 93/250 (37%) | $0.0194 | 1 min |
 
 **Measured completion tokens per item** (reasoning included, API-reported; truncated responses count at their cap), with the truncation rate at the cap and the actual API cost per item. Use these, not the assumptions above, to price dev runs (`run --dry-run --tokens-from data/runs/<run_id>`):
 
-TOKENS_TABLE
+| Model | Condition | Vertical | Eval | n | Completion tokens, median | mean | Truncated at cap | $/item | Run cost |
+|---|---|---|---|---|---|---|---|---|---|
+| qwen3-32b | thinking-high | A/H | E1 | 14 | 11,656 | 10,896 | 0 (0%) | 0.00249 | 0.0349 |
+| qwen3-32b | thinking-high | A/H | E2 | 24 | 12,036 | 13,508 | 4 (17%) | 0.00310 | 0.0744 |
+| qwen3-32b | thinking-high | A/H | E5 | 17 | 9,140 | 10,154 | 0 (0%) | 0.00231 | 0.0392 |
+| qwen3-32b | thinking-high | B4/C4 | E1 | 28 | 1,109 | 1,439 | 0 (0%) | 0.00033 | 0.0092 |
+| qwen3-32b | thinking-high | B4/C4 | E2 | 48 | 466 | 507 | 0 (0%) | 0.00012 | 0.0058 |
+| qwen3-32b | thinking-high | C | E1 | 12 | 12,824 | 11,380 | 0 (0%) | 0.00260 | 0.0313 |
+| qwen3-32b | thinking-high | C | E2 | 40 | 11,536 | 13,293 | 0 (0%) | 0.00302 | 0.1207 |
+| qwen3-32b | thinking-high | C | E3 | 54 | 8,960 | 10,743 | 1 (2%) | 0.00252 | 0.1359 |
+| qwen3-32b | thinking-high | C | E5 | 17 | 10,100 | 10,999 | 1 (6%) | 0.00252 | 0.0428 |
+| **qwen3-32b** | **thinking-high** | **all** | | **254** | **7,276** | **8,462** | **6 (2%)** | **0.00195** | **0.4941** |
+| qwen3-32b | direct | A/H | E1 | 14 | 29 | 31 | 0 (0%) | 0.00006 | 0.0008 |
+| qwen3-32b | direct | A/H | E2 | 24 | 38 | 208 | 3 (12%) | 0.00012 | 0.0029 |
+| qwen3-32b | direct | A/H | E5 | 17 | 19 | 30 | 0 (0%) | 0.00004 | 0.0007 |
+| qwen3-32b | direct | B4/C4 | E1 | 28 | 5 | 12 | 0 (0%) | 0.00001 | 0.0003 |
+| qwen3-32b | direct | B4/C4 | E2 | 48 | 5 | 5 | 0 (0%) | 0.00001 | 0.0005 |
+| qwen3-32b | direct | C | E1 | 12 | 110 | 93 | 0 (0%) | 0.00008 | 0.0009 |
+| qwen3-32b | direct | C | E2 | 40 | 103 | 67 | 0 (0%) | 0.00006 | 0.0023 |
+| qwen3-32b | direct | C | E3 | 54 | 472 | 317 | 0 (0%) | 0.00018 | 0.0098 |
+| qwen3-32b | direct | C | E5 | 17 | 8 | 45 | 0 (0%) | 0.00006 | 0.0011 |
+| **qwen3-32b** | **direct** | **all** | | **254** | **8** | **111** | **3 (1%)** | **0.00008** | **0.0194** |
 
 What the runs showed:
 
