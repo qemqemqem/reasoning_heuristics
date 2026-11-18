@@ -628,12 +628,26 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
 
 
 def merge(base_path: str, patch_path: str) -> None:
-    """Replace the units of `base` that `patch` also has (a rerun of some units, e.g. after a rule
-    change), keeping both runs' provenance."""
+    """Overwrite, unit by unit, the scenarios of `base` that `patch` reran (e.g. after a rule change),
+    with the patch's planted triple, and keep both runs' provenance."""
     base = json.loads(Path(base_path).read_text())
     patch = json.loads(Path(patch_path).read_text())
-    names = {u["unit"] for u in patch["units"]}
-    base["units"] = sorted([u for u in base["units"] if u["unit"] not in names] + patch["units"], key=lambda u: u["unit"])
+    by_name = {u["unit"]: u for u in base["units"]}
+    names = set()
+    for pu in patch["units"]:
+        names.add(pu["unit"])
+        bu = by_name.get(pu["unit"])
+        if bu is None or "error" in bu or "error" in pu:
+            by_name[pu["unit"]] = pu
+            continue
+        for k, v in pu.items():
+            if k != "scenarios":
+                bu[k] = v
+        bu["scenarios"].update(pu["scenarios"])
+        gated = [v["pass"] for k, v in bu["scenarios"].items() if k in GATED and v.get("pass") is not None]
+        bu["all_gates_pass"] = bool(gated) and all(gated)
+        bu["not_testable"] = [k for k, v in bu["scenarios"].items() if k in GATED and v.get("pass") is None]
+    base["units"] = sorted(by_name.values(), key=lambda u: u["unit"])
     base.setdefault("merged", []).append({"units": sorted(names), "provenance": patch["provenance"],
                                            "command": patch.get("command"), "generated": patch.get("generated")})
     Path(base_path).write_text(json.dumps(base, indent=1, ensure_ascii=False))
