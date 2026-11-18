@@ -1,0 +1,138 @@
+{
+  "run_id": "2026-11-18-pc20-qwen3-14b-direct",
+  "status": "complete",
+  "started_at": "2026-11-18T07:57:12Z",
+  "model_requested": "qwen/qwen3-14b",
+  "condition": {
+    "name": "direct",
+    "label": "direct",
+    "effort": null,
+    "max_tokens": 1024,
+    "system_prompt": "Respond with only the final answer in the requested format. Do not explain or show your working.",
+    "reasoning": {
+      "enabled": false
+    },
+    "sampling": {
+      "temperature": 0.7,
+      "top_p": 0.8,
+      "top_k": 20
+    },
+    "prompt_suffix": ""
+  },
+  "provider_routing": {
+    "order": [
+      "deepinfra/fp8/flex"
+    ],
+    "allow_fallbacks": false,
+    "require_parameters": true,
+    "quantizations": [
+      "fp8"
+    ]
+  },
+  "price": {
+    "prompt": 0.096,
+    "completion": 0.192,
+    "source": "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
+  },
+  "model_notes": "Hybrid thinking checkpoint. No bf16 endpoint exists on OpenRouter (DeepInfra fp8 tiers and NextBit int4), so fp8 is pinned. deepinfra/fp8 (standard tier) caps completions at 16,384, so the flex tier is pinned. reasoning {enabled: false} is honoured (0 reasoning tokens); /no_think leaves an empty think block.",
+  "samples_per_item": 1,
+  "seed_base": null,
+  "items": {
+    "files": {
+      "data/items/pc20/C_E2_dev_s1.jsonl.gz": "a2336e000a0518332416154ab9ef2ac4fd66aab43c7d0ed1fa9b8a38a2ada027",
+      "data/items/pc20/AH_E5_dev_s1.jsonl.gz": "c0cf6a23b09e11841d3060abb3722e13d7c497e054ee170ccfd25972bb8e353f",
+      "data/items/pc20/C_E1_dev_s1.jsonl.gz": "afc3de26f70fc116fac3edd6a254247b7fa855c09fa34b72aa3c2d03e278fd2a"
+    },
+    "n_items": 1380,
+    "skipped": {
+      "excluded_eval": 0,
+      "unsupported": 0,
+      "not_included": 0
+    },
+    "exclude_eval": [],
+    "include_eval": [],
+    "limit": null
+  },
+  "estimate": {
+    "cost_usd": 0.1093,
+    "worst_case_usd": 0.3579,
+    "output_tokens": 118600,
+    "prompt_tokens_proxy": 901560
+  },
+  "cap_usd": 0.4,
+  "cap_requested_usd": 0.4,
+  "budget_tag": "pilot2-2026-11-18",
+  "budget_usd": 12.0,
+  "budget_spent_before_usd": 0.0,
+  "git": {
+    "sha": "9f33eaae34ec5c7affccdaf2744e5d74a4221624",
+    "dirty": false,
+    "branch": "pc40-c-e5"
+  },
+  "versions": {
+    "python": "3.12.12",
+    "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "reasoning_heuristics": "0.1.0",
+    "scorer": "scorer-1.5.0",
+    "tokenizer_proxy": "regex-digit-split-v1",
+    "python-sat": "1.9.dev23",
+    "pyetr": "1.0.0",
+    "numpy": "2.5.5",
+    "networkx": "3.7",
+    "jsonschema": "4.26.0"
+  },
+  "client": {
+    "timeout_s": 1800.0,
+    "max_attempts": 6,
+    "concurrency": 12
+  },
+  "notes": "",
+  "resumed_from": 0,
+  "key_usage": {
+    "before": {
+      "usage": 89.260064666,
+      "usage_daily": 8.615456806,
+      "limit": null,
+      "limit_remaining": null
+    },
+    "after": {
+      "usage": 90.044086948,
+      "usage_daily": 9.399479088,
+      "limit": null,
+      "limit_remaining": null
+    },
+    "delta_usd": 0.784022,
+    "note": "the key's own usage counter (GET /key); other users of the key move it too"
+  },
+  "stop_reason": null,
+  "finished_at": "2026-11-18T08:02:52Z",
+  "wall_s": 339.2,
+  "models_returned": [
+    "qwen/qwen3-14b"
+  ],
+  "system_fingerprints": [],
+  "providers_served": {
+    "DeepInfra": 1380
+  },
+  "responses": 1380,
+  "failed_calls": 0,
+  "cache_hits": 160,
+  "spend": {
+    "cap_usd": 0.4,
+    "spent_usd": 0.094906,
+    "calls": 1220,
+    "refused_reservations": 0,
+    "calls_without_reported_cost": 0,
+    "failed_attempt_cost_usd": 0.0,
+    "failed_attempts_charged": 0,
+    "safety_factor": 1.25,
+    "price": {
+      "prompt": 0.096,
+      "completion": 0.192,
+      "source": "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
+    }
+  },
+  "charged_usd": 0.094906,
+  "charged_usd_all_invocations": 0.094906,
+  "api_reported_cost_usd_all_responses": 0.110954
+}
