@@ -29,8 +29,9 @@ palette of a's colours plus one new colour (C = b_a + 1), and the observed answe
 so P(y | a) sums over every injective colour naming of y's blocks:
 P(y | a) = sum_sigma g_{d(sigma)} / (C(n, d) (C - 1)^d), d(sigma) = vertices whose colour differs.
 These are exact probability mass functions over the space (tests check that they sum to 1). A
-slip from a special token (UNSAT, IMPOSSIBLE, X) is a draw from q conditioned on "not that token".
-Slips from structured answers stay structured.
+special token (UNSAT, IMPOSSIBLE, X) has no near misses: the kernels refuse one as the intended
+answer, and the likelihood does not slip predictions of one (`likelihood.py`). Slips from
+structured answers stay structured.
 
 `slip(y, a)` returns (b0, c) with P_slip(y | a; rho) = b0 + sum_d c[d] g_d(rho): the rho-free part
 and the coefficients of g, so the slip shape rho can be estimated without recomputing kernels.
@@ -152,12 +153,9 @@ class Space:
         return (self.kind,)
 
 
-def _special_slip(space: Space, y: str, a: str) -> float:
-    """Slip from special token a: q conditioned on 'not a'."""
-    if y == a:
-        return 0.0
-    qa = math.exp(space.log_q(a))
-    return math.exp(space.log_q(y)) / (1.0 - qa)
+def _no_special(space: Space, a: str) -> None:
+    if a in space.specials:
+        raise ValueError(f"special token {a!r} has no near misses; predictions of it do not slip")
 
 
 def _tau(specials: tuple[str, ...]) -> float:
@@ -371,8 +369,7 @@ class BitSpace(Space):
         return c
 
     def slip(self, y: str, a: str) -> tuple[float, np.ndarray]:
-        if a in self.specials:
-            return _special_slip(self, y, a), np.zeros(DMAX + 1)
+        _no_special(self, a)
         if y in self.specials:
             return 0.0, np.zeros(DMAX + 1)
         vy, va = self.parse(y), self.parse(a)
@@ -406,11 +403,7 @@ class BitSpace(Space):
         return self.encode(rng.random(self.n) < 0.5)
 
     def sample_slip(self, a: str, rho: float, rng: np.random.Generator) -> str:
-        if a in self.specials:
-            while True:
-                y = self.sample_q(rng)
-                if y != a:
-                    return y
+        _no_special(self, a)
         d = min(sample_d(rho, rng), self.n)
         vec = self.parse(a).copy()
         flip = rng.choice(self.n, size=d, replace=False)
@@ -517,8 +510,7 @@ class PartitionSpace(Space):
         return c
 
     def slip(self, y: str, a: str) -> tuple[float, np.ndarray]:
-        if a in self.specials:
-            return _special_slip(self, y, a), np.zeros(DMAX + 1)
+        _no_special(self, a)
         if y in self.specials:
             return 0.0, np.zeros(DMAX + 1)
         ry, ra = self.parse(y), self.parse(a)
@@ -587,11 +579,7 @@ class PartitionSpace(Space):
         return self.encode(self.canon(rng.integers(self.k_uniform, size=self.n)))
 
     def sample_slip(self, a: str, rho: float, rng: np.random.Generator) -> str:
-        if a in self.specials:
-            while True:
-                y = self.sample_q(rng)
-                if y != a:
-                    return y
+        _no_special(self, a)
         ra = self.parse(a).copy()
         C = int(ra.max()) + 2
         d = min(sample_d(rho, rng), self.n)

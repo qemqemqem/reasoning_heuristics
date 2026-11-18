@@ -5,7 +5,10 @@ Computed from each item's `predictions`, its `instance` and the raw answer (`mem
 
 A member that slips (deterministic and set-valued members) gives its intended answer with
 probability 1 - eps and otherwise slips; distributional members are complete noise models and are
-used as stored. Two slip models:
+used as stored. A prediction that is a special token (UNSAT, IMPOSSIBLE, X) does not slip: it has no
+near misses, and a slip to "q without the token" would make a member that predicts the token on
+every item (ALWAYS-UNSAT) equal to q at eps = 1 - q(token), which is the eps cap (0.5) on a channel
+with one special token, so pure noise could load on it. Two slip models:
 
 - `near-miss` (the pre-registered noise model, SCOPE §6 rule 3): a slip is a near miss of the
   intended answer under the domain kernel of `spaces.py` (vertices recoloured, variables
@@ -237,6 +240,11 @@ class UnitModel:
     def pred(self, i: int, label: str) -> Pred:
         return self.items[i].preds.get(label, Pred("na"))
 
+    def slips(self, i: int, p: Pred) -> bool:
+        """Whether prediction p on item i slips: deterministic and set-valued predictions do, except a
+        special token (UNSAT, IMPOSSIBLE, X), which has no near misses."""
+        return p.slips and not (p.kind == "det" and self.items[i].space.is_special(p.key))
+
     # --- rows -------------------------------------------------------------------------------
     def row(self, i: int, y: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, float, np.ndarray]:
         """(A, B0, C, Q, avail) for observed answer key y on item i, one entry per column (unscaled)."""
@@ -257,7 +265,9 @@ class UnitModel:
             avail[g] = True
             if p.kind == "det":
                 A[g] = 1.0 if y == p.key else 0.0
-                if self.model == NEAR_MISS:
+                if not self.slips(i, p):
+                    B0[g] = A[g]  # (1 - eps) A + eps B0 = A at any eps
+                elif self.model == NEAR_MISS:
                     B0[g], C[g] = im.space.slip(y, p.key)
                 else:
                     B0[g] = self._candidate_slip(im, y, p.key)
@@ -295,7 +305,7 @@ class UnitModel:
             raise ValueError(f"{label} has no prediction on item {im.item['item_id']}")
         if p.kind in ("det", "set"):
             a = p.key if p.kind == "det" else p.sol.keys()[int(rng.integers(p.sol.size))]
-            if rng.random() >= eps:
+            if not self.slips(i, p) or rng.random() >= eps:
                 return a
             if self.model == NEAR_MISS:
                 return im.space.sample_slip(a, rho, rng)
@@ -427,7 +437,7 @@ class UnitModel:
         B0 /= scale[:, None]
         C /= scale[:, None, None]
         Q = Q / scale
-        slips = np.array([any(self.pred(i, g.members[0]).slips for i in range(len(self.items))) for g in cols])
+        slips = np.array([any(self.slips(i, self.pred(i, g.members[0])) for i in range(len(self.items))) for g in cols])
         items = np.array([o.item for o in obs], dtype=np.int64)
         finite = np.array([isinstance(self.items[o.item].space, FiniteSpace) for o in obs], dtype=bool)
         return Tensors(A, B0, C, Q, avail, slips, np.log(scale), items, self.unit.cluster[items], [g.name for g in cols],
