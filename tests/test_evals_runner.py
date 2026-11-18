@@ -15,7 +15,7 @@ from reasoning_heuristics.evals import cost as C
 from reasoning_heuristics.evals import ledger
 from reasoning_heuristics.evals.cache import ResponseCache, cache_key
 from reasoning_heuristics.evals.client import FatalAPIError, HttpResponse, MissingKeyError, OpenRouterClient
-from reasoning_heuristics.evals.models import DIRECT_SYSTEM_PROMPT, Pricing, condition, get_model, request_body
+from reasoning_heuristics.evals.models import BUDGET_NOTICE, DIRECT_SYSTEM_PROMPT, Pricing, condition, get_model, request_body
 from reasoning_heuristics.evals.run import main as run_main
 from reasoning_heuristics.evals.score import main as score_main
 
@@ -454,3 +454,18 @@ def test_rescore_against_the_items_at_the_runs_git_sha(tmp_path, key, monkeypatc
     (out / "manifest.json").write_text(json.dumps(m))
     with pytest.raises(SystemExit, match="not the run's"):
         score_main([str(out), "--items-at-run-sha"])
+
+
+def test_the_budget_notice_variant():
+    cfg = get_model("openai/gpt-oss-20b")
+    plain, notice = condition(cfg, "thinking", "high"), condition(cfg, "thinking", "high", budget_notice=True)
+    assert (plain.label, notice.label) == ("thinking-high", "thinking-high+budget")
+    assert notice.prompt_suffix == BUDGET_NOTICE.format(max_tokens=32768) and "32,768 tokens" in notice.prompt_suffix
+    assert "variant" not in plain.to_json() and notice.to_json()["variant"] == "budget"  # old manifests unchanged
+    body = request_body(cfg, notice, "Is it so?", None)
+    assert body["messages"] == [{"role": "user", "content": "Is it so?" + notice.prompt_suffix}]
+    assert {k: v for k, v in body.items() if k != "messages"} == {k: v for k, v in request_body(cfg, plain, "Is it so?", None).items()
+                                                                  if k != "messages"}  # nothing else differs
+    assert "16,384 tokens" in condition(cfg, "thinking", "high", 16384, budget_notice=True).prompt_suffix
+    with pytest.raises(ValueError):
+        condition(get_model("qwen/qwen3-32b"), "direct", None, budget_notice=True)

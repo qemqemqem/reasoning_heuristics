@@ -17,13 +17,17 @@ precision to be pinned before any pilot.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 THINKING_MAX_TOKENS = 32768
 DIRECT_MAX_TOKENS = 1024
 DIRECT_SYSTEM_PROMPT = ("Respond with only the final answer in the requested format. "
                         "Do not explain or show your working.")
+# The "budget" variant of the thinking condition (--budget-notice; Andrew's suggestion, 2026-11-18): the model is told its
+# token budget, and what happens at the cap (force.py). Appended to the item prompt; {max_tokens} is the condition's.
+BUDGET_NOTICE = ("\n\nYou have a budget of {max_tokens:,} tokens for your reasoning and your answer together. If you reach it "
+                 "before you have answered, your reasoning will be cut off and you will have to give your final answer straight away.")
 
 
 @dataclass(frozen=True)
@@ -138,26 +142,35 @@ class Condition:
     sampling: dict[str, Any]
     prompt_suffix: str = ""
     extra: dict[str, Any] = field(default_factory=dict)
+    variant: str | None = None  # e.g. "budget" (BUDGET_NOTICE); part of the label
 
     @property
     def label(self) -> str:
-        return f"thinking-{self.effort}" if self.name == "thinking" and self.effort else self.name
+        base = f"thinking-{self.effort}" if self.name == "thinking" and self.effort else self.name
+        return f"{base}+{self.variant}" if self.variant else base
 
     def to_json(self) -> dict[str, Any]:
+        # "variant" only when set, so the manifests of runs without one (and their resumes) are unchanged
         return {"name": self.name, "label": self.label, "effort": self.effort, "max_tokens": self.max_tokens,
                 "system_prompt": self.system_prompt, "reasoning": self.reasoning, "sampling": self.sampling,
-                "prompt_suffix": self.prompt_suffix, **self.extra}
+                "prompt_suffix": self.prompt_suffix, **({"variant": self.variant} if self.variant else {}), **self.extra}
 
 
-def condition(cfg: ModelConfig, name: str, effort: str | None = "high", max_tokens: int | None = None) -> Condition:
+def condition(cfg: ModelConfig, name: str, effort: str | None = "high", max_tokens: int | None = None,
+              budget_notice: bool = False) -> Condition:
+    if budget_notice and name != "thinking":
+        raise ValueError("the budget notice is a variant of the thinking condition only")
     if name == "thinking":
         reasoning = dict(cfg.thinking_reasoning)
         if "effort" in reasoning and effort:
             reasoning["effort"] = effort
         elif effort and effort != "high":
             raise ValueError(f"{cfg.slug}: reasoning {reasoning} takes no effort level; got {effort!r}")
-        return Condition("thinking", effort if "effort" in reasoning else None, max_tokens or THINKING_MAX_TOKENS, None,
+        cond = Condition("thinking", effort if "effort" in reasoning else None, max_tokens or THINKING_MAX_TOKENS, None,
                          reasoning, dict(cfg.thinking_sampling))
+        if budget_notice:
+            cond = replace(cond, prompt_suffix=BUDGET_NOTICE.format(max_tokens=cond.max_tokens), variant="budget")
+        return cond
     if name == "direct":
         if cfg.direct_reasoning is None:
             raise ValueError(f"{cfg.slug} cannot turn reasoning off, so it has no direct condition ({cfg.notes})")

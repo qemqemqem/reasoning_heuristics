@@ -62,6 +62,9 @@ Decision record: [decisions/2026-11-17-direct-answer-arm.md](decisions/2026-11-1
 | Sampling | each model's recommended thinking settings (gpt-oss: temperature 1.0, top_p 1.0; Qwen3: 0.6 / 0.95 / top_k 20; R1: 0.6 / 0.95) | Qwen3 non-thinking settings: 0.7 / 0.8 / top_k 20 |
 
 - **gpt-oss cannot turn reasoning off.** It has no direct condition; the runner refuses one. `--effort low` is a budget arm of the thinking condition, labelled `thinking-low`.
+- **The budget notice** (`--budget-notice`; Andrew's suggestion, 2026-11-18) is a variant of the thinking condition, labelled `thinking-<effort>+budget`. The user message ends with: "You have a budget of 32,768 tokens for your reasoning and your answer together. If you reach it before you have answered, your reasoning will be cut off and you will have to give your final answer straight away." That is `BUDGET_NOTICE` in evals/models.py, with the condition's max_tokens. Nothing else in the request changes.
+  - Pair it with `force.py`, which gives the responses cut at the cap their final answer.
+  - The analysis (`RUN_PATTERNS`) does not know the variant, so name such runs `2026-11-18-budget-<tier>-…` to keep them out.
 - **The system instruction is an experimental factor.** Its exact text is in every manifest (`condition.system_prompt`) and in every raw request.
 - **`pre_answer_tokens`** (proxy tokens of visible text before the final answer block) is on every scored record, so direct responses that work in the visible output can be flagged or excluded.
 
