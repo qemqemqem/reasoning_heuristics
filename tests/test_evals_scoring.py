@@ -213,6 +213,18 @@ def test_latex_answer_decoration_is_unwrapped():
         assert rec["category"] == "ok" and rec["parsed"] == "C" and "latex_unwrapped" in rec["flags"], tail
     yn = first_with("ans_yn", vertical="B4/C4")
     assert score_text(yn, "ANSWER: $\\boxed{\\text{NO}}$")["parsed"] == "NO"
+    # seen live (scorer 1.4.0): an emoji between the heading marks and "Final Answer"
+    one = first_with("ans_single_colour")
+    rec = score_text(one, "- The smallest positive integer not used is **1**.\n\n---\n\n### ✅ Final Answer\n\n$$\n\\boxed{1}\n$$")
+    assert rec["category"] == "ok" and rec["parsed"] == {answer_format(one).target: 1}
+    col = first_with("ans_col", vertical="C", eval_id="E1")
+    lines = render(col, col["predictions"]["DSATUR"]["answer"]).split("\n", 1)[1]
+    assert score_text(col, "Working...\n\n### ✅ Final Answer\n\n```\n" + lines + "\n```")["category"] == "ok"
+    # seen live: no marker at all, a sentence, then the answer in a code fence
+    rec = score_text(col, "The graph can be colored using these colors. Here is the coloring for each vertex in the "
+                          "specified order:\n\n```\n" + lines + "\n```")
+    assert rec["category"] == "ok" and "fenced_answer_no_marker" in rec["flags"] and rec["pre_answer_tokens"] > 5
+    assert score_text(col, "Some thoughts.\n\n```\nthis is not an answer\n```")["category"] == "parse_fail"
     js = first_with("json_ent_yn")  # JSON formats are left alone
     assert "latex_unwrapped" not in score_text(js, '$x$ so {"follows": true}')["flags"]
 

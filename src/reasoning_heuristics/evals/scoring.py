@@ -61,13 +61,15 @@ from reasoning_heuristics.problems.coloring import graph as G
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.sat import cnf as S
 
-SCORER_VERSION = "scorer-1.3.1"
+SCORER_VERSION = "scorer-1.4.0"
 # 1.1.0: a reply that is nothing but the answer, without the ANSWER: marker, is parsed (flag no_answer_marker).
 # 1.1.1: answer_only_in_reasoning is not set on truncated replies (their reasoning often quotes the format).
 # 1.2.0: LaTeX answer decoration (\\boxed{..}, \\text{..}, $$ ... $$) is unwrapped before the ANSWER: formats are parsed.
 # 1.3.0: C SAT / colouring values given without their names (or with the format's placeholder, `x=T`) are read in
 #        the requested order when the count is exact (flags positional_values, placeholder_names).
 # 1.3.1: commentary after such a run of values (e.g. "---" and a sentence) is tolerated (flag extra_text_in_block).
+# 1.4.0: a line-initial answer marker may follow any symbols, not only markdown ("### ✅ Final Answer"); with no
+#        marker at all, the last fenced code block is read if it holds nothing but an answer (flag fenced_answer_no_marker).
 
 CATEGORIES = ("ok", "parse_fail", "refusal", "declared_impossible", "partial", "truncated", "api_error")
 
@@ -230,8 +232,8 @@ _REFUSAL = re.compile(
 
 # Line-initial ANSWER markers ("ANSWER:", "**ANSWER:**", "### Final answer:", "ANSWER" alone on a line);
 # an inline "ANSWER:" (upper case) only counts when no line-initial marker exists.
-_MARK_LINE = re.compile(r"(?im)^[ \t>*_#`~|-]*(?:final[ \t]+)?answer[ \t*_`]*[:：]")
-_MARK_HEAD = re.compile(r"(?im)^[ \t>*_#`~|-]*(?:final[ \t]+)?answer[ \t*_`]*$")
+_MARK_LINE = re.compile(r"(?im)^[^\w\n]*(?:final[ \t]+)?answer[ \t*_`]*[:：]")  # any symbols before it: "### ✅ Final Answer:"
+_MARK_HEAD = re.compile(r"(?im)^[^\w\n]*(?:final[ \t]+)?answer[ \t*_`]*$")
 _MARK_INLINE = re.compile(r"ANSWER[ \t*_`]*[:：]")
 
 
@@ -436,7 +438,14 @@ def parse(ctx: ItemContext, text: str) -> Parse | None:
         return _parse_json(ctx, text)
     marks, inline = answer_markers(text)
     if not marks:
-        return _bare_answer(ctx, text)
+        res = _bare_answer(ctx, text)
+        fences = list(re.finditer(r"(?:```|~~~)[\w+-]*[ \t]*\n(.*?)(?:```|~~~)", text, re.S))
+        if res is None and fences:  # no marker: the last fenced block, if it holds nothing but an answer
+            res = _bare_answer(ctx, fences[-1].group(1))
+            if res is not None:
+                res.flags = [f for f in res.flags if f != "no_answer_marker"] + ["fenced_answer_no_marker"]
+                res.answer_start = fences[-1].start()
+        return res
     results = []
     for i, (start, end) in enumerate(marks):
         stop = marks[i + 1][0] if i + 1 < len(marks) else len(text)
