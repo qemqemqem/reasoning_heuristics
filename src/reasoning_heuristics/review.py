@@ -222,7 +222,8 @@ def write_summary(rows: list[dict[str, Any]], seed: int) -> Path:
     lines += ["", "## Validators", "",
               "Item checks: schema, hashes, seed range, ground truth recomputed by an independent solver, every",
               "prediction recomputed from (instance, member, params), and discrimination (two or more members",
-              "disagree). Set checks: each generator's designed invariants (see the review packets). Leakage:",
+              "differ on the item's scoring channel, and the likelihood table is non-degenerate). Set checks: each",
+              "generator's designed invariants (see the review packets). Leakage:",
               "dev vs test bases by hash and by isomorphism (graphs, CNF, premise structure), or by lexicon",
               "partition for B4/C4.", ""]
     path = REVIEW / "summary.md"

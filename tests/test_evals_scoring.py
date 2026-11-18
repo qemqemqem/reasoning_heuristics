@@ -39,6 +39,15 @@ def independent_class_key(item, answer):
     return answer_key(load_task(item["instance"]).domain, answer)
 
 
+def set_valued(item, label, pred):
+    """Set-valued on this item's channel: from `extra.channel_spec` (scorer-1.1.0 items), else the
+    member's own trace flag (older items)."""
+    spec = item["extra"].get("channel_spec")
+    if spec is not None:
+        return label in spec["set_valued"]
+    return bool((pred.get("trace_features") or {}).get("set_valued"))
+
+
 def test_smoke_items_cover_every_answer_format():
     kinds = Counter(answer_format(it).kind for it in runnable(committed_items("smoke")))
     assert sorted(kinds) == sorted(FORMATS)
@@ -61,7 +70,7 @@ def test_member_predictions_score_back_to_their_outcome_class(kind):
         classes = it["extra"]["outcome_classes"]
         for label, pred in it["predictions"].items():
             ans = pred["answer"]
-            if ans is None or (pred.get("trace_features") or {}).get("set_valued"):
+            if ans is None or set_valued(it, label, pred):
                 continue
             text = render(it, ans)
             if text is None:
@@ -98,12 +107,14 @@ def test_channel_reconstruction_matches_every_committed_item():
             ctx = ItemContext(it)
             values = set(it["extra"]["outcome_classes"].values())
             for label, pred in it["predictions"].items():
-                if pred["answer"] is None or (pred.get("trace_features") or {}).get("set_valued"):
+                if pred["answer"] is None or set_valued(it, label, pred):
                     continue
                 key = ctx.channel.key(pred["answer"])
                 if key is None:  # the member has no reading on this channel (e.g. "POSSIBLE" on a bit channel)
                     continue
-                assert key in values or label.lower().startswith(("exact", "a3 tt[exact]")), (it["item_id"], label, key)
+                legacy = "channel_spec" not in it["extra"]  # older items list EXACT / TT witnesses only when another member does
+                assert key in values or (legacy and label.lower().startswith(("exact", "a3 tt[exact]"))), (
+                    it["item_id"], label, key)
                 n += 1
     assert n > 5000
 
@@ -350,3 +361,40 @@ def test_every_category_is_reachable():
         score_response(it, ResponseView.from_api(None, error="boom"))["category"],
     }
     assert cats == set(CATEGORIES)
+
+
+# --- scorer-1.1.0: outcome classes from the serialised channel -------------------------------------------
+
+
+def _new_style_colouring_item():
+    """A fewest-colours item built with the current generator code (three disjoint edges: chi = 2,
+    four optimal partitions): FF lists one, EXACT is set-valued over all four."""
+    from reasoning_heuristics.generators import c_common as CC
+    from reasoning_heuristics.generators.common import make_item
+    from reasoning_heuristics.heuristics.tasks import ColouringTask
+    from reasoning_heuristics.problems.coloring.graph import Graph
+
+    g = Graph(("v10", "v11", "v12", "v13", "v14", "v15"), (("v10", "v11"), ("v12", "v13"), ("v14", "v15")))
+    task = ColouringTask(g, None, (), tuple(g.vertices))
+    it = make_item(vertical="C", eval_id="TEST", set_id="s", cell="c", domain="colouring", framing="textbook",
+                   prompt="p", answer_format=CC.COLOUR_FEWEST_FORMAT, task=task, ground_truth={"chromatic_number": 2},
+                   specs=[("FF-LIST", "FF", {"order": "LIST"}), ("EXACT", "EXACT", {}), ("RANDOM (H)", "RANDOM", {})],
+                   channel=CC.colouring_channel(task, 2, 4), seed=100_001, tier="dev", generator="test", base_hash="")
+    return it.to_json()
+
+
+def test_unlisted_valid_answers_and_invalid_answers_get_their_own_classes():
+    it = _new_style_colouring_item()
+    classes = it["extra"]["outcome_classes"]
+
+    def answer(cols):
+        return "ANSWER:\n" + "\n".join(f"v{10 + i}: {c}" for i, c in enumerate(cols))
+
+    ff = score_text(it, answer([1, 2, 1, 2, 1, 2]))
+    assert ff["outcome_class"] != "answer = other" and "FF-LIST" in ff["members_matched"] and ff["sets_matched"] == ["EXACT"]
+    unlisted = score_text(it, answer([1, 2, 2, 1, 1, 2]))  # optimal, but no member predicts it
+    assert classes[unlisted["outcome_class"]] == "_in:EXACT" and unlisted["sets_matched"] == ["EXACT"]
+    assert it["disconfirms"][unlisted["outcome_class"]]["EXACT"] == 0.0
+    invalid = score_text(it, answer([1, 1, 1, 1, 1, 1]))
+    assert invalid["outcome_class"] == "answer = other" and invalid["sets_matched"] == []
+    assert it["disconfirms"]["answer = other"]["EXACT"] > 0.5

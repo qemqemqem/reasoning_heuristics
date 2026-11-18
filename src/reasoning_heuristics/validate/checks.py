@@ -6,7 +6,8 @@ Item checks:
   seed              the seed lies in its split's range (dev < 10^6 <= test)
   ground_truth      every standard ground-truth key equals its independent recomputation
   predictions       every listed prediction is recomputed from (instance, member, params)
-  discriminates     at least two listed members give different answers
+  discriminates     at least two listed members differ on the item's scoring channel, and the
+                    likelihood table is non-degenerate
 
 Set checks are supplied by each generator (its designed invariants: truth fixed while a
 heuristic flips, identical label multisets, surface matching within tolerance, ...).

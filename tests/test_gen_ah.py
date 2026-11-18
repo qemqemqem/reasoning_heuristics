@@ -5,6 +5,7 @@ import re
 import pytest
 
 from libparse import find
+from lineage import lineage_problems
 from reasoning_heuristics.generators import ah_common as A
 from reasoning_heuristics.generators import ah_e1, ah_e2, ah_e5, ah_e8
 from reasoning_heuristics.heuristics.tasks import EntailmentTask, SatTask
@@ -77,6 +78,7 @@ def test_e1_smoke_validates_and_cues_are_blind():
     assert len(items) == len(ah_e1.cells({})) and stats["accepted"] == len(items) // 2
     report = run_checks(items, ah_e1.check_set)
     assert report["failures"] == []
+    assert lineage_problems(items) == []
     for kind in ("critical", "null", "B1"):
         pair = [it for it in items if it.params["pair_kind"] == kind and it.domain == "SAT"]
         assert pair[0].predictions["A2 DENSITY-U"]["answer"] == pair[1].predictions["A2 DENSITY-U"]["answer"]
@@ -107,6 +109,7 @@ def test_e2_smoke_validates():
     items, _ = ah_e2.generate("smoke", 4)
     assert sorted({it.cell for it in items}) == sorted(ah_e2.cells({}))
     assert run_checks(items, ah_e2.check_set)["failures"] == []
+    assert lineage_problems(items) == []
     k = next(it for it in items if it.cell.startswith("SAT/K"))
     j = next(it for it in items if it.cell.startswith("SAT/J") and it.set_id == k.set_id)
     assert k.params["alpha_U"] > 4.26 > j.params["alpha_U"]
@@ -162,6 +165,7 @@ def test_e8_specs_reference_e2_items_and_validate():
     assert sorted(it.cell for it in items) == sorted(ah_e8.cells({}))
     assert run_checks(items, ah_e8.check_set)["failures"] == []
     e2, _ = ah_e2.generate("smoke", 1, domains=["SAT"])
+    assert lineage_problems(items, external=e2) == []
     e2_ids = {it.item_id: it for it in e2}
     for it in items:
         host = e2_ids[it.params["host_item_id"]]

@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 
 from libparse import cnf_from_c_prompt, find, graph_from_edge_list, graph_from_neighbours, library
+from lineage import lineage_problems
 from reasoning_heuristics.counterfactual import edits as E
 from reasoning_heuristics.generators import c_e1, c_e2, c_e3, c_e5
 from reasoning_heuristics.generators.common import predict_all
@@ -171,6 +172,7 @@ def test_e2_smoke_small_validates():
     items, stats = c_e2.generate("smoke", 3, n_col=12, n_sat=14, n_knap=8)
     assert {it.cell for it in items} == set(c_e2.cells({}))
     assert run_checks(items, c_e2.check_set)["failures"] == []
+    assert lineage_problems(items) == []
 
 
 def test_e3_smoke_small_validates():
@@ -184,3 +186,4 @@ def test_e5_smoke_validates():
     items, stats = c_e5.generate("smoke", 2)
     assert {it.cell for it in items} == set(c_e5.cells({}))
     assert run_checks(items, c_e5.check_set)["failures"] == []
+    assert lineage_problems(items) == []

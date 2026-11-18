@@ -459,6 +459,9 @@ def likelihood_table(preds: dict[str, dict[str, Any]], channel: Channel, eps: fl
             sig = sets.signature(answer_key_)
             if sig in region_of:
                 return region_key(sig)
+            if sig:
+                raise ValueError(f"answer {answer_key_[:40]!r} lies in solution set(s) {sig} with no unlisted element left: "
+                                 "the declared set sizes are inconsistent")
         return OTHER
 
     def set_mass(label: str) -> dict[str, float]:
@@ -658,8 +661,8 @@ def make_item(*, vertical: str, eval_id: str, set_id: str, cell: str, domain: st
               notes: str = "", roles: dict[str, str] | None = None, cell_note: str = "",
               extra: dict[str, Any] | None = None) -> Item:
     preds = predict_all(task, specs)
-    if channel.task is None:
-        channel.task = task
+    if channel.task is not None and channel.task != task:
+        raise ValueError(f"{cell}: the channel was built for another task (its solution sets would be wrong)")
     lt = likelihood_table(preds, channel)
     it = Item(
         item_id=item_id(vertical, eval_id, set_id, cell),
