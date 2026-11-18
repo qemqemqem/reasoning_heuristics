@@ -302,12 +302,12 @@ The Stage 0 gates were run at one operating point (a 0.6 / 0.3 / 0.1 triple, ε 
 <!-- BEGIN prelim:ppc -->
 | Unit | Run | Answers equal to a member's answer: observed vs fitted model [5–95%] | Answers beyond every member's slip reach | Special-token answers (UNSAT) | Distance profile: total variation from the fitted model's mean, observed vs fake data [5–95%] |
 |---|---|---|---|---|---|
-| C_E2/colouring | Qwen3-32B direct | 0.00 vs 0.33 [0.29, 0.38] **outside** | 0.33 vs 0.34 [0.29, 0.38] | 0.00 vs 0.00 [0.00, 0.00] | 0.45 vs 0.05 [0.02, 0.08]; p = 0.01 **misfit** |
-| C_E2/colouring | gpt-oss-20b thinking-low | 0.28 vs 0.39 [0.35, 0.43] **outside** | 0.10 vs 0.12 [0.09, 0.15] | 0.00 vs 0.00 [0.00, 0.00] | 0.14 vs 0.05 [0.02, 0.08]; p = 0.01 **misfit** |
-| C_E2/knapsack | Qwen3-32B direct | 0.08 vs 0.46 [0.41, 0.51] **outside** | 0.00 vs 0.00 [0.00, 0.00] | 0.00 vs 0.00 [0.00, 0.00] | 0.41 vs 0.04 [0.02, 0.08]; p = 0.01 **misfit** |
-| C_E2/knapsack | gpt-oss-20b thinking-low | 0.72 vs 0.72 [0.69, 0.75] | 0.00 vs 0.00 [0.00, 0.00] | 0.00 vs 0.00 [0.00, 0.00] | 0.07 vs 0.03 [0.01, 0.05]; p = 0.01 **misfit** |
-| AH_E5/SAT | Qwen3-32B direct | 0.00 vs 0.02 [0.00, 0.05] | 0.27 vs 0.55 [0.46, 0.62] **outside** | 0.03 vs 0.47 [0.38, 0.55] **outside** | 0.46 vs 0.08 [0.03, 0.13]; p = 0.01 **misfit** |
-| AH_E5/SAT | gpt-oss-20b thinking-low | 0.00 vs 0.07 [0.03, 0.10] **outside** | 0.32 vs 0.50 [0.42, 0.58] **outside** | 0.27 vs 0.43 [0.34, 0.52] **outside** | 0.25 vs 0.09 [0.05, 0.14]; p = 0.01 **misfit** |
+| C_E2/colouring | Qwen3-32B direct | 0.00 vs 0.33 [0.29, 0.38] **outside** | 0.33 vs 0.34 [0.29, 0.38] | 0.00 vs 0.00 [0.00, 0.00] | 0.45 vs 0.05 [0.02, 0.08]; p = 0.0099 **misfit** |
+| C_E2/colouring | gpt-oss-20b thinking-low | 0.28 vs 0.39 [0.35, 0.43] **outside** | 0.10 vs 0.12 [0.09, 0.15] | 0.00 vs 0.00 [0.00, 0.00] | 0.14 vs 0.05 [0.02, 0.08]; p = 0.0099 **misfit** |
+| C_E2/knapsack | Qwen3-32B direct | 0.08 vs 0.46 [0.41, 0.51] **outside** | 0.00 vs 0.00 [0.00, 0.00] | 0.00 vs 0.00 [0.00, 0.00] | 0.41 vs 0.04 [0.02, 0.08]; p = 0.0099 **misfit** |
+| C_E2/knapsack | gpt-oss-20b thinking-low | 0.72 vs 0.72 [0.69, 0.75] | 0.00 vs 0.00 [0.00, 0.00] | 0.00 vs 0.00 [0.00, 0.00] | 0.07 vs 0.03 [0.01, 0.05]; p = 0.0099 **misfit** |
+| AH_E5/SAT | Qwen3-32B direct | 0.00 vs 0.02 [0.00, 0.05] | 0.27 vs 0.55 [0.46, 0.62] **outside** | 0.03 vs 0.47 [0.38, 0.55] **outside** | 0.46 vs 0.08 [0.03, 0.13]; p = 0.0099 **misfit** |
+| AH_E5/SAT | gpt-oss-20b thinking-low | 0.00 vs 0.07 [0.03, 0.10] **outside** | 0.32 vs 0.50 [0.42, 0.58] **outside** | 0.27 vs 0.43 [0.34, 0.52] **outside** | 0.25 vs 0.09 [0.05, 0.14]; p = 0.0099 **misfit** |
 <!-- END prelim:ppc -->
 
 **Reading the two checks.**

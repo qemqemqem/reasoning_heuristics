@@ -638,7 +638,8 @@ def distance_check(observed: dict[str, Any], sims: np.ndarray) -> dict[str, Any]
     a data set's shares and the fake data sets' mean shares; p is the share of fake data sets at
     least as far from that mean as the real data (with the +1 of a Monte Carlo p-value). The fake
     data come from parameters fitted to the real data, so the check is conservative: the real data
-    sit closer to the mean than a fresh data set would, and a small p is a real misfit."""
+    sit closer to the mean than a fresh data set would. With 100 fake data sets and four checks per fit,
+    a single p near 0.05 is weak evidence of misfit."""
     o = np.array([observed["bins"].get(b, 0) / max(observed["n"], 1) for b in NEAR_BINS])
     m = sims.mean(0)
     tv_obs = 0.5 * float(np.abs(o - m).sum())
@@ -903,7 +904,7 @@ def ppc_table(fits_by_unit: dict[str, dict[str, dict[str, Any]]], rec: dict[str,
             if dc:
                 lo, hi = dc["tv_simulated_p05_p95"]
                 cells.append(f"{dc['tv_observed']:.2f} vs {dc['tv_simulated_mean']:.2f} [{lo:.2f}, {hi:.2f}]; "
-                             f"p = {dc['p_value']:.2f}" + (" **misfit**" if dc["p_value"] < 0.05 else ""))
+                             f"p = {dc['p_value']:.3g}" + (" **misfit**" if dc["p_value"] < 0.05 else ""))
             else:
                 cells.append("–")
             rows.append([name, lab] + cells)
