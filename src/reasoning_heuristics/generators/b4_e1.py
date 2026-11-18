@@ -94,6 +94,7 @@ def generate(tier: str, seed: int, per_cell: int | None = None, themes: list[str
     stats = GenStats()
     items = []
     attempt = 0
+    used_bases: set[str] = set()  # one base, one seed (LINEAGE_RULES base-provenance)
     while stats.accepted < per_cell:
         bseed = base_seed(tier, seed, attempt)
         attempt += 1
@@ -139,6 +140,11 @@ def generate(tier: str, seed: int, per_cell: int | None = None, themes: list[str
         if problems:
             stats.reject("set invariant failed: " + problems[0][:60])
             continue
+        bases = {it.base_hash for it in frame_items}
+        if bases & used_bases:  # the lexicon draw repeated an earlier frame: its bases would carry two seeds
+            stats.reject("duplicate frame (a base already drawn)")
+            continue
+        used_bases |= bases
         items += frame_items
         stats.accepted += 1
     return items, stats.to_json()

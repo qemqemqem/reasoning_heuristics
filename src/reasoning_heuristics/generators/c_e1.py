@@ -31,6 +31,10 @@ Readings of the doc (also in docs/GENERATORS.md):
 - E1-KNAP / E1-TSP copies, the 20% re-themed subset and the names variant are not built.
 - MIN-CONFLICTS / WALK (F) are not in the zoo for colouring; NOISY-EXACT is included for
   colouring (slip mass spread like EXACT's optimal set) but not for SAT witnesses.
+- SAT items list the A1 constant give-up, ALWAYS-UNSAT, as C E5 does. Without it a model that
+  answers UNSAT on every item is read as RO-GREEDY (C3), whose distribution puts about 0.4-0.6
+  on UNSAT here (docs/RECOVERY.md, `null_always`). COL items need none: the fewest-colours
+  format offers no IMPOSSIBLE answer.
 - The theory §5 arms are parameters: `serialisation` ("adjacency" | "edge_list_shuffled";
   the edge order is shuffled once per base and kept across copies) and `repeat_prompt`.
 """
@@ -239,6 +243,7 @@ def sat_members(copy: str) -> list:
         ("RO-GREEDY (C3)", "RO-GREEDY", {"seed": 0}),
         ("EXACT", "EXACT", {}),
         ("RANDOM (H)", "RANDOM", {}),
+        ("ALWAYS-UNSAT (A1 give-up)", "ALWAYS-UNSAT", {}),
     ]
     if copy == "c5-ANS-FREE":
         specs = [s for s in specs if s[0] != "GREEDY-OUT (AR)"]
