@@ -468,7 +468,7 @@ The manifest records both routings: `source.provider_routing` (the source run's)
 
 | Model | f = 1: same answer | f = 1: same correctness | Repeatable | Cut: answered | Cut: parsed | Renewed reasoning |
 |---|---|---|---|---|---|---|
-| gpt-oss-120b | 136/136 (100%) | 136/136 (100%) | 68/68 | 275/284 (96.8%) | 261/284 (91.9%) | 0 |
+| gpt-oss-120b | 136/136 (100%) | 136/136 (100%) | 68/68 | 284/284 (100%) | 270/284 (95.1%) | 0 |
 | gpt-oss-20b | 132/132 (100%) | 132/132 (100%) | 66/66 | 461/462 (99.8%) | 439/462 (95.0%) | 0 |
 | Qwen3-14B | 131/136 (96.3%) | 136/136 (100%) | 66/68 | 67/70 (95.7%) | 66/70 (94.3%) | 0 |
 | Qwen3-32B | 127/136 (93.4%) | 132/136 (97.1%) | 63/67 | 50/54 (92.6%) | 50/54 (92.6%) | 0 |
@@ -476,7 +476,7 @@ The manifest records both routings: `source.provider_routing` (the source run's)
 - **Forcing reproduces the model's own answers.** gpt-oss gives the natural answer every time. Qwen3's misses on "same answer" are mostly a different but equally correct colouring or assignment; Qwen3-32B has 2 genuinely wrong forced answers and 2 unparsed ones in 136.
 - **No forced call went back to reasoning.**
 - **Where cut traces fall short of 95%:**
-  - **Provider-empty replies:** 9 of gpt-oss-120b's 284 came back empty, with no usage record, from DeepInfra. That is a provider failure, not an answer; without them gpt-oss-120b parses 94.9%. The client now retries these (#42), and a resume sends them again.
+  - **Provider-empty replies:** 9 of gpt-oss-120b's 284 first came back empty, with no usage record, from DeepInfra: a provider failure, not an answer. The client now retries these (#42). The resumed pass sent the 9 again, and all answered; that row of the table is after the resume.
   - **Runaway digit strings:** all 7 of Qwen3's unfinished answers are A/H SAT JSON whose assignment string never closes. They start `{"satisfiable": true, "assignment": "1010…`, then repeat 0s or 1s until max_tokens.
   - **Answers outside the required format:** for example "**Answer:** The formula is satisfiable … `1110…`" where A/H wants JSON; variables renamed a, b, c…; invented knapsack items.
   - **Declines and partial answers:** "I do not have enough information to …", or colourings missing 1–24 vertices.

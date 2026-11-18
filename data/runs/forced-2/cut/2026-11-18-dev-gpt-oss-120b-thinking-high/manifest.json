@@ -1,7 +1,7 @@
 {
   "run_id": "forced-2/cut/2026-11-18-dev-gpt-oss-120b-thinking-high",
   "status": "complete",
-  "started_at": "2026-11-18T20:23:47Z",
+  "started_at": "2026-11-18T21:19:41Z",
   "model_requested": "openai/gpt-oss-120b",
   "source": {
     "run_id": "2026-11-18-dev-gpt-oss-120b-thinking-high",
@@ -80,7 +80,7 @@
     "prompt": "<|start|>system<|message|>You are ChatGPT, a large language model trained by OpenAI.\nKnowledge cutoff: 2024-06\n\nReasoning: low\n\n# Valid channels: analysis, commentary, final. Channel must be included for every message.<|end|><|start|>user<|message|>Is 17 a prime number? Answer with one word, YES or NO.<|end|><|start|>assistant<|channel|>analysis<|message|>17 has no divisors other than 1 and itself.<|end|><|start|>assistant<|channel|>final<|message|>",
     "max_tokens": 8,
     "temperature": 0,
-    "checked_at": "2026-11-18T20:23:16Z",
+    "checked_at": "2026-11-18T21:19:00Z",
     "completions": {
       "provider": "DeepInfra",
       "prompt_tokens": 93,
@@ -89,7 +89,7 @@
       "reasoning": null,
       "finish_reason": "stop",
       "cost_usd": 2.597e-06,
-      "generation_id": "gen-1795033397-FbhG68OdPsB97bDi23zy"
+      "generation_id": "gen-1795036740-yVQmx39uBItc83Lu8SwV"
     },
     "chat": {
       "provider": "DeepInfra",
@@ -99,7 +99,7 @@
       "reasoning": "The user asks: \"",
       "finish_reason": "length",
       "cost_usd": 5.615e-06,
-      "generation_id": "gen-1795033411-zLBKFfF5W6WkkQACbN5X"
+      "generation_id": "gen-1795036759-eHiTg3d3ZqNf4dK4vKyB"
     },
     "cost_usd": 8.21e-06
   },
@@ -134,15 +134,15 @@
     "worst_case_usd": 0.5572,
     "assumptions": "prompt tokens: each source response's prompt plus completion tokens; cost_usd is the prompt alone (every call answers at once), worst_case_usd has every call at its max_tokens"
   },
-  "cap_usd": 0.75,
-  "cap_requested_usd": 0.75,
+  "cap_usd": 0.1,
+  "cap_requested_usd": 0.1,
   "budget_tag": "forced2-2026-11-18",
   "budget_usd": 4.0,
-  "budget_spent_before_usd": 0.868009,
+  "budget_spent_before_usd": 1.225823,
   "git": {
-    "sha": "75fb55fb5ebeafb80486f7fb27a1954c03404897",
+    "sha": "c30616bc9159d4af81b231aef1079c2107f48800",
     "dirty": false,
-    "branch": "forced2-acceptance-2026-11-18"
+    "branch": "forced2-120b-resume"
   },
   "versions": {
     "python": "3.12.12",
@@ -161,8 +161,8 @@
     "max_attempts": 6,
     "concurrency": 4
   },
-  "notes": "force-2: all cut traces",
-  "resumed_from": 0,
+  "notes": "force-2: resumed after #42 to re-send the 9 provider-empty replies",
+  "resumed_from": 275,
   "counts": {
     "candidates": 284,
     "selected": 284,
@@ -173,14 +173,110 @@
     "skipped_no_room": 0,
     "max_tokens_lowered": 0,
     "responses": 284,
-    "answered": 275,
-    "parsed": 261,
+    "answered": 284,
+    "parsed": 270,
     "still_reasoning": 0,
     "renewed_reasoning": 0
   },
+  "previous_invocations": [
+    {
+      "started_at": "2026-11-18T20:23:47Z",
+      "finished_at": "2026-11-18T20:53:28Z",
+      "status": "complete",
+      "stop_reason": null,
+      "git": {
+        "sha": "75fb55fb5ebeafb80486f7fb27a1954c03404897",
+        "dirty": false,
+        "branch": "forced2-acceptance-2026-11-18"
+      },
+      "versions": {
+        "python": "3.12.12",
+        "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+        "reasoning_heuristics": "0.1.0",
+        "scorer": "scorer-1.5.2",
+        "tokenizer_proxy": "regex-digit-split-v1",
+        "python-sat": "1.9.dev22",
+        "pyetr": "1.0.0",
+        "numpy": "2.5.5",
+        "networkx": "3.7",
+        "jsonschema": "4.26.0"
+      },
+      "cap_usd": 0.75,
+      "charged_usd": 0.357814,
+      "spend": {
+        "cap_usd": 0.75,
+        "spent_usd": 0.357814,
+        "calls": 286,
+        "refused_reservations": 0,
+        "calls_without_reported_cost": 9,
+        "failed_attempt_cost_usd": 0.0,
+        "failed_attempts_charged": 0,
+        "safety_factor": 1.25,
+        "price": {
+          "prompt": 0.037,
+          "completion": 0.17,
+          "source": "DeepInfra bf16 endpoint listing (OpenRouter, 2026-11-17: data/runs/probes/2026-11-17)"
+        }
+      },
+      "responses": 284,
+      "failed_calls": 0,
+      "resumed_from": 0,
+      "providers_served": {
+        "DeepInfra": 284
+      },
+      "models_returned": [
+        "openai/gpt-oss-120b"
+      ],
+      "wall_s": 1780.9,
+      "client": {
+        "timeout_s": 1800.0,
+        "max_attempts": 6,
+        "concurrency": 4
+      },
+      "notes": "force-2: all cut traces",
+      "raw_check": {
+        "passed": true,
+        "routing": {
+          "order": [
+            "deepinfra/bf16"
+          ],
+          "allow_fallbacks": false,
+          "require_parameters": true,
+          "quantizations": [
+            "bf16"
+          ]
+        },
+        "prompt": "<|start|>system<|message|>You are ChatGPT, a large language model trained by OpenAI.\nKnowledge cutoff: 2024-06\n\nReasoning: low\n\n# Valid channels: analysis, commentary, final. Channel must be included for every message.<|end|><|start|>user<|message|>Is 17 a prime number? Answer with one word, YES or NO.<|end|><|start|>assistant<|channel|>analysis<|message|>17 has no divisors other than 1 and itself.<|end|><|start|>assistant<|channel|>final<|message|>",
+        "max_tokens": 8,
+        "temperature": 0,
+        "checked_at": "2026-11-18T20:23:16Z",
+        "completions": {
+          "provider": "DeepInfra",
+          "prompt_tokens": 93,
+          "completion_tokens": 2,
+          "text": "YES",
+          "reasoning": null,
+          "finish_reason": "stop",
+          "cost_usd": 2.597e-06,
+          "generation_id": "gen-1795033397-FbhG68OdPsB97bDi23zy"
+        },
+        "chat": {
+          "provider": "DeepInfra",
+          "prompt_tokens": 147,
+          "completion_tokens": 8,
+          "text": null,
+          "reasoning": "The user asks: \"",
+          "finish_reason": "length",
+          "cost_usd": 5.615e-06,
+          "generation_id": "gen-1795033411-zLBKFfF5W6WkkQACbN5X"
+        },
+        "cost_usd": 8.21e-06
+      }
+    }
+  ],
   "stop_reason": null,
-  "finished_at": "2026-11-18T20:53:28Z",
-  "wall_s": 1780.9,
+  "finished_at": "2026-11-18T21:21:24Z",
+  "wall_s": 102.3,
   "models_returned": [
     "openai/gpt-oss-120b"
   ],
@@ -191,11 +287,11 @@
   "failed_calls": 0,
   "cache_hits": 0,
   "spend": {
-    "cap_usd": 0.75,
-    "spent_usd": 0.357814,
-    "calls": 286,
+    "cap_usd": 0.1,
+    "spent_usd": 0.011808,
+    "calls": 11,
     "refused_reservations": 0,
-    "calls_without_reported_cost": 9,
+    "calls_without_reported_cost": 0,
     "failed_attempt_cost_usd": 0.0,
     "failed_attempts_charged": 0,
     "safety_factor": 1.25,
@@ -205,7 +301,7 @@
       "source": "DeepInfra bf16 endpoint listing (OpenRouter, 2026-11-17: data/runs/probes/2026-11-17)"
     }
   },
-  "charged_usd": 0.357814,
-  "charged_usd_all_invocations": 0.357814,
-  "api_reported_cost_usd_all_responses": 0.357806
+  "charged_usd": 0.011808,
+  "charged_usd_all_invocations": 0.369622,
+  "api_reported_cost_usd_all_responses": 0.369605
 }
