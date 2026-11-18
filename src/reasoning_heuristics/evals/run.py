@@ -132,7 +132,8 @@ class Runner:
                     self._append(self._record(job, body, key, response=cached["response"], error=None, errors=[],
                                               attempts=0, status=200, latency_s=0.0, from_cache=True,
                                               cached_from=cached.get("source"), charged_usd=0.0,
-                                              cost_usd=(cached["response"].get("usage") or {}).get("cost")))
+                                              cost_usd=(cached["response"].get("usage") or {}).get("cost"),
+                                              failed_attempt_costs=[]))
                     continue
                 worst = self.guard.worst_case(json.dumps(body))
                 slots.acquire()
@@ -150,15 +151,20 @@ class Runner:
         body, key = job["body"], job["key"]
         try:
             try:
-                res = self.client.chat(body)
+                # failed attempts that the API charged are booked as they happen, and a retry is
+                # refused when it could take the spend past the cap
+                res = self.client.chat(body, on_failed_attempt=self.guard.book_failed_attempt)
             except FatalAPIError as e:
+                if e.charged:
+                    self.guard.book_failed_attempt(e.charged)
                 self.guard.release(worst)
                 self.stop_reason = f"fatal API error: {e}"
                 with self._write_lock:
                     self.failures += 1
+                    self.charged += e.charged
                 self._append(self._record(job, body, key, response=None, error=str(e), errors=[str(e)], attempts=1,
-                                          status=None, latency_s=0.0, from_cache=False, cached_from=None, charged_usd=0.0,
-                                          cost_usd=None))
+                                          status=None, latency_s=0.0, from_cache=False, cached_from=None,
+                                          charged_usd=e.charged, cost_usd=None, failed_attempt_costs=[e.charged]))
                 return
             except MissingKeyError as e:
                 self.guard.release(worst)
@@ -176,13 +182,17 @@ class Runner:
                 self.guard.release(worst)
                 charged = 0.0
                 failed = True
+                if any(c > 0 for c in res.failed_attempt_costs) and self.guard.spent + self.guard.reserved > self.guard.cap:
+                    self.stop_reason = (f"cap: a charged failed attempt took the running total to ${self.guard.spent:.4f} "
+                                        f"of ${self.guard.cap:.4f}")
+            charged += sum(res.failed_attempt_costs)  # already booked in the guard
             with self._write_lock:
                 self.charged += charged
                 self.failures += failed
             rec = self._record(job, body, key, response=res.response, error=res.error, errors=res.errors,
                                attempts=res.attempts, status=res.status, latency_s=round(res.latency_s, 2),
                                from_cache=False, cached_from=None, charged_usd=charged,
-                               cost_usd=(usage or {}).get("cost"))
+                               cost_usd=(usage or {}).get("cost"), failed_attempt_costs=res.failed_attempt_costs)
             if res.ok and self.cache is not None:
                 self.cache.put(key, {"request": body, "response": res.response, "sample": job["sample"],
                                      "source": f"{self.run_id}"})
@@ -292,10 +302,17 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
     }
     write_json(out / "manifest.json", manifest)
     runner = Runner(client, None if a.no_cache else ResponseCache(a.cache_dir), guard, out, run_id, a.concurrency)
+    key_before = client.key_usage() if jobs else {}
     t0 = time.monotonic()
     try:
         runner.run(jobs)
     finally:
+        key_after = client.key_usage() if jobs else {}
+        delta = None
+        if isinstance(key_before.get("usage"), (int, float)) and isinstance(key_after.get("usage"), (int, float)):
+            delta = round(key_after["usage"] - key_before["usage"], 6)
+        manifest["key_usage"] = {"before": key_before, "after": key_after, "delta_usd": delta,
+                                 "note": "the key's own usage counter (GET /key); other users of the key move it too"}
         recs = read_raw(out)
         write_raw(out, recs, {it["item_id"]: i for i, it in enumerate(items)})
         status = "complete" if runner.stop_reason is None and len([r for r in recs if r.get("response")]) == len(items) * a.samples else (

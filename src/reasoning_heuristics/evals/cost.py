@@ -154,6 +154,8 @@ class CostGuard:
         self.calls = 0
         self.refused = 0
         self.estimated_costs = 0  # calls whose usage carried no cost (settled at the configured price)
+        self.failed_attempt_cost = 0.0  # API-reported cost of attempts that failed (e.g. an error body after generation)
+        self.failed_attempts_charged = 0
         self._lock = threading.Lock()
 
     def worst_case(self, body_text: str) -> float:
@@ -188,9 +190,23 @@ class CostGuard:
         with self._lock:
             self.reserved -= reserved
 
+    def book_failed_attempt(self, cost: float) -> bool:
+        """Book the API-reported cost of a failed attempt; return whether the call may retry.
+
+        The call still holds its reservation, which covers its next attempt, so a retry is allowed
+        only while spend (now including this attempt) plus every reservation stays within the cap."""
+        with self._lock:
+            if cost:
+                self.spent += float(cost)
+                self.failed_attempt_cost += float(cost)
+                self.failed_attempts_charged += 1
+            return self.spent + self.reserved <= self.cap
+
     def to_json(self) -> dict[str, Any]:
         return {"cap_usd": self.cap, "spent_usd": round(self.spent, 6), "calls": self.calls,
                 "refused_reservations": self.refused, "calls_without_reported_cost": self.estimated_costs,
+                "failed_attempt_cost_usd": round(self.failed_attempt_cost, 6),
+                "failed_attempts_charged": self.failed_attempts_charged,
                 "safety_factor": self.safety, "price": self.price.__dict__}
 
 

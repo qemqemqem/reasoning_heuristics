@@ -33,6 +33,9 @@ python -m reasoning_heuristics.evals.run --items data/items/smoke --model qwen/q
 # re-score from raw outputs after any scorer change
 python -m reasoning_heuristics.evals.score data/runs/*/
 
+# after the item sets are regenerated: score against the item files as they were at each run's git SHA
+python -m reasoning_heuristics.evals.score --items-at-run-sha data/runs/*/
+
 # provider probes (tiny calls; results under data/runs/probes/)
 python -m reasoning_heuristics.evals.probe --model qwen/qwen3-32b --out data/runs/probes/<date> --cap-usd 0.25
 ```
@@ -40,6 +43,7 @@ python -m reasoning_heuristics.evals.probe --model qwen/qwen3-32b --out data/run
 - **The key** is read from `OPENROUTER_API_KEY` inside each request and is never stored, printed, logged or written. A test greps every output file for it.
 - **Provider pinning.** A live run refuses a model with no pinned provider (SCOPE §1), unless you pass `--provider <slug>` (sent as `order: [slug]`, `allow_fallbacks: false`, `require_parameters: true`) or `--no-pin`. Pins and the pinned endpoint's prices live in `models.py`; they come from the probes.
 - **Resuming.** Re-running into the same `--out` sends only the (item, sample) pairs that have no response yet.
+- **Re-scoring after the items change.** `score` refuses a run whose item files no longer hash to its manifest. `--items-at-run-sha` reads each file with `git show <run's SHA>:<path>` and checks it against the manifest's SHA-256 (`--items-ref <ref>` picks another ref). PRs merge with merge commits, so a run made at a pushed branch commit stays re-scorable after the merge.
 - **The cache** (`data/cache/openrouter/`, gitignored) means an identical request is never paid for twice, across runs. Repeat samples are separate keys. The permanent copy is each run's `raw.jsonl.gz`; `ResponseCache.import_runs` rebuilds a cache from those.
 - **Concurrency** defaults to 8. Timeouts are 30 minutes per request. Retries: 6 attempts with exponential backoff and jitter (honouring `Retry-After`) on network errors, 408/409/425/429/5xx and errors inside a 200 body. 400/401/402/403/404/413/422 stop the run at once.
 - **E8 is skipped** (`--exclude-eval E8`; the loader also refuses E8 specs). See [E8](#e8-continuations-and-prefill) below.
@@ -50,7 +54,7 @@ Decision record: [decisions/2026-11-17-direct-answer-arm.md](decisions/2026-11-1
 
 | | thinking (primary) | direct (secondary) |
 |---|---|---|
-| Reasoning | on: gpt-oss `{"effort": "high"}` (`--effort` changes it); Qwen3 / R1 `{"enabled": true}` | off: `{"enabled": false}` (what each provider honours is a probe result) |
+| Reasoning | on: `{"effort": "high"}` for every model (`--effort` changes it; `enabled: true` alone would mean medium effort) | off: `{"enabled": false}` (what each provider honours is a probe result) |
 | max_tokens | 32,768 (reasoning + answer) | 1,024 |
 | Messages | the item prompt as the only user message | a system message, then the item prompt |
 | System instruction | none | "Respond with only the final answer in the requested format. Do not explain or show your working." |
@@ -66,8 +70,8 @@ Decision record: [decisions/2026-11-17-direct-answer-arm.md](decisions/2026-11-1
 
 | File | Contents |
 |---|---|
-| `manifest.json` | run id; status and stop reason; start and finish times; model requested and `models_returned`; `system_fingerprints`; provider routing sent and `providers_served`; the full condition (reasoning, sampling, max_tokens, system prompt); prices; item files with SHA-256, item count, skipped items; the dry-run estimate; cap, budget and spend (`spend.spent_usd` is API-reported); git SHA, branch and dirty flag; Python, python-sat, PyETR, numpy, networkx, tokenizer-proxy and scorer versions; client settings |
-| `raw.jsonl.gz` | one record per (item, sample): `item_id`, `content_hash`, `presentation_hash`, `sample`, `cache_key`, `prompt_hash`, the exact `request` body, the full API `response` (content, reasoning, reasoning_details, usage, provider, model, id, finish reasons), `error` / `errors`, `attempts`, `latency_s`, `from_cache`, `charged_usd` (0 for a cache hit) and `cost_usd` (API-reported) |
+| `manifest.json` | run id; status and stop reason; start and finish times; model requested and `models_returned`; `system_fingerprints`; provider routing sent and `providers_served`; the full condition (reasoning, sampling, max_tokens, system prompt); prices; item files with SHA-256, item count, skipped items; the dry-run estimate; cap, budget and spend (`spend.spent_usd` is API-reported, including `failed_attempt_cost_usd`); the key's own usage counter before and after (`key_usage`, numbers only; other users of the key move it too, so its delta is an upper bound); git SHA, branch and dirty flag; Python, python-sat, PyETR, numpy, networkx, tokenizer-proxy and scorer versions; client settings |
+| `raw.jsonl.gz` | one record per (item, sample): `item_id`, `content_hash`, `presentation_hash`, `sample`, `cache_key`, `prompt_hash`, the exact `request` body, the full API `response` (content, reasoning, reasoning_details, usage, provider, model, id, finish reasons), `error` / `errors`, `attempts`, `latency_s`, `from_cache`, `failed_attempt_costs` (API-reported cost of each failed attempt, 0 if none), `charged_usd` (all attempts; 0 for a cache hit) and `cost_usd` (the returned response's) |
 | `scored.jsonl.gz` | one scored record per raw record (below) |
 | `scoring.json` | scorer version, git SHA, scoring time, category counts |
 | `REPORT.md` | descriptive summary: categories and accuracy per eval, tokens per eval and kind, truncation by cell, parse flags, the responses that were not ok. No mixture fits and no claims about heuristics |
@@ -184,7 +188,7 @@ Estimate = items × (proxy prompt tokens × prompt price + assumed output tokens
 
 These are assumptions until a smoke run measures them. Each run's `REPORT.md` gives measured completion tokens per eval and kind, and the dev projections should be redone from those.
 
-**The cap.** Before a request is sent, it reserves its worst case: prompt bytes as a token upper bound plus the full max_tokens, at the configured price, times 1.25. The reservation is settled to the API-reported `usage.cost` when the call returns. A request whose reservation would take spend plus in-flight reservations past `--cap-usd` is not sent; the run stops cleanly with status `stopped`, keeps everything already returned, and scores it. A call that costs more than its reservation means the configured price is wrong, and it also stops the run.
+**The cap.** Before a request is sent, it reserves its worst case: prompt bytes as a token upper bound plus the full max_tokens, at the configured price, times 1.25. The reservation is settled to the API-reported `usage.cost` when the call returns. A request whose reservation would take spend plus in-flight reservations past `--cap-usd` is not sent; the run stops cleanly with status `stopped`, keeps everything already returned, and scores it. A call that costs more than its reservation means the configured price is wrong, and it also stops the run. A failed attempt can still be charged (a 200 whose body carries an error after the provider generated): any `usage.cost` it reports is booked at once, and the call retries only while spend plus every reservation, its own included, stays within the cap.
 
 ## Before any pilot (SCOPE §1)
 

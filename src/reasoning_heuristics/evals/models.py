@@ -65,19 +65,19 @@ MODELS: dict[str, ModelConfig] = {
         "openai/gpt-oss-120b", Pricing(0.15, 0.60, SCOPE), GPT_OSS_SAMPLING, {"effort": "high"},
         notes="Reasoning cannot be turned off; effort low is a budget arm, not the direct condition."),
     "qwen/qwen3-14b": ModelConfig(
-        "qwen/qwen3-14b", Pricing(0.12, 0.24, SCOPE), QWEN3_THINKING_SAMPLING, {"enabled": True},
+        "qwen/qwen3-14b", Pricing(0.12, 0.24, SCOPE), QWEN3_THINKING_SAMPLING, {"effort": "high"},
         QWEN3_DIRECT_SAMPLING, {"enabled": False}, notes="Hybrid thinking checkpoint."),
     "qwen/qwen3-32b": ModelConfig(
-        "qwen/qwen3-32b", Pricing(0.08, 0.28, SCOPE), QWEN3_THINKING_SAMPLING, {"enabled": True},
+        "qwen/qwen3-32b", Pricing(0.08, 0.28, SCOPE), QWEN3_THINKING_SAMPLING, {"effort": "high"},
         QWEN3_DIRECT_SAMPLING, {"enabled": False}, notes="Hybrid thinking checkpoint."),
     "qwen/qwen3-30b-a3b": ModelConfig(
-        "qwen/qwen3-30b-a3b", Pricing(0.12, 0.50, SCOPE), QWEN3_THINKING_SAMPLING, {"enabled": True},
+        "qwen/qwen3-30b-a3b", Pricing(0.12, 0.50, SCOPE), QWEN3_THINKING_SAMPLING, {"effort": "high"},
         QWEN3_DIRECT_SAMPLING, {"enabled": False}, notes="Hybrid thinking checkpoint (MoE)."),
     "deepseek/deepseek-r1-0528": ModelConfig(
-        "deepseek/deepseek-r1-0528", Pricing(0.50, 2.15, SCOPE), R1_SAMPLING, {"enabled": True},
+        "deepseek/deepseek-r1-0528", Pricing(0.50, 2.15, SCOPE), R1_SAMPLING, {"effort": "high"},
         notes="Reasoning is mandatory."),
     "qwen/qwen3-235b-a22b-thinking-2507": ModelConfig(
-        "qwen/qwen3-235b-a22b-thinking-2507", Pricing(0.45, 3.50, SCOPE), QWEN3_THINKING_SAMPLING, {"enabled": True},
+        "qwen/qwen3-235b-a22b-thinking-2507", Pricing(0.45, 3.50, SCOPE), QWEN3_THINKING_SAMPLING, {"effort": "high"},
         notes="Thinking-only checkpoint; reasoning is mandatory."),
 }
 
