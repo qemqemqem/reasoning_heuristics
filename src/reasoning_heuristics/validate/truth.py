@@ -7,7 +7,8 @@ lives in `validate.independent`, parses the raw instance JSON itself, applies it
 the stated rule and decides everything with CaDiCaL, sharing no code with this path. The standard
 keys are:
 
-- colouring: {"chromatic_number"} (fewest) or {"k", "colourable"};
+- colouring: {"chromatic_number"} (fewest) or {"k", "colourable"}; plus {"answer"}, the
+  target's colour, for an instructed first-fit question (C E3 I arm, `task.target`);
 - SAT: {"satisfiable"};
 - entailment: {"answer"} (+ {"follows"} for yes/no);
 - knapsack: {"optimum"}; TSP: {"optimal_length"}.
@@ -22,7 +23,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from reasoning_heuristics.heuristics.coloring import effective_graph
+from reasoning_heuristics.heuristics.coloring import effective_graph, first_fit
 from reasoning_heuristics.heuristics.entailment import answer_from_premises, effective_premises, mc_choose
 from reasoning_heuristics.heuristics.sat import effective_cnf
 from reasoning_heuristics.heuristics.tasks import ColouringTask, EntailmentTask, KnapsackTask, SatTask, TspTask
@@ -48,6 +49,9 @@ def _vacuous_answer(task: EntailmentTask) -> str | list[str]:
 def truth(task: Any) -> dict[str, Any]:
     if isinstance(task, ColouringTask):
         g = effective_graph(task)
+        if task.target is not None:
+            ff = first_fit(task, g, list(g.vertices), None, "ABORT").answer
+            return {"chromatic_number": G.chromatic_number(g), "answer": ff[task.target]}
         if task.k is None:
             return {"chromatic_number": G.chromatic_number(g)}
         return {"k": task.k, "colourable": G.k_colour(g, task.k, task.fixed_dict()) is not None}

@@ -9,7 +9,8 @@ Item checks:
                     optimal-partition counts, optimal sets, ...) equal their independent recomputation
   premises          an entailment item's stated premises are consistent (no design intends otherwise)
   predictions       every listed prediction is recomputed from (instance, member, params)
-  discriminates     at least two listed members give different answers
+  discriminates     at least two listed members differ on the item's scoring channel, and the
+                    likelihood table is non-degenerate
 
 The ground truth and readouts are recomputed by `validate.independent`, which reads the raw
 instance JSON with its own code and a different SAT backend from the generator path.
@@ -17,8 +18,8 @@ instance JSON with its own code and a different SAT backend from the generator p
 Run checks (`run_checks`) add, over the items of one generated set:
   unique_id         no item id is used twice
   hash_collision    no 16-hex content or presentation hash is shared by two different contents or prompts
-  lineage           the counterfactual lineage holds (`LINEAGE_RULES`); the violations today's
-                    generators are known to have (`KNOWN_LINEAGE_GAPS`) are reported, not failed
+  lineage           the counterfactual lineage holds (`LINEAGE_RULES`); violations listed in
+                    `KNOWN_LINEAGE_GAPS` would be reported, not failed (the list is empty: every one fails)
   set_invariant     each generator's designed invariants (truth fixed while a heuristic flips,
                     identical label multisets, surface matching within tolerance, ...)
 
@@ -129,11 +130,32 @@ def check_item(item: Item) -> list[Failure]:
             fail("predictions", f"{label}: stored distribution differs from recomputed")
         if not _close(to_jsonable(pred.trace_features), rec.get("trace_features", {})):
             fail("predictions", f"{label}: stored trace features differ from recomputed")
-    keys = {answer_key(task.domain, r["answer"]) for r in item.predictions.values()
-            if r["answer"] is not None and not r.get("trace_features", {}).get("set_valued")}
-    if len(keys) < 2:
-        fail("discriminates", f"only {len(keys)} distinct member answer(s)")
+    why = discriminates(item)
+    if why is not None:
+        fail("discriminates", why)
     return out
+
+
+def discriminates(item: Item) -> str | None:
+    """None if the item can tell members apart, else the reason it cannot.
+
+    Judged on the item's scoring channel, not on raw answers: the members' outcome-class
+    probabilities are rebuilt from the stored predictions and the serialised channel
+    (`extra.channel_spec`), and at least two members must differ. The stored likelihood table
+    must also be non-degenerate: some outcome row separates two members by >= 0.01 log10 units."""
+    from reasoning_heuristics.generators.common import item_channel, likelihood_table
+
+    try:
+        lt = likelihood_table(item.predictions, item_channel(item))
+    except (ValueError, KeyError) as exc:
+        return f"no likelihood table on the scoring channel: {exc}"
+    rows = {tuple(round(p[k], 9) for k in lt.keys) for p in lt.probs.values()}
+    if len(rows) < 2:
+        return f"all {len(lt.probs)} members predict the same outcome distribution on the scoring channel"
+    spread = max((max(r.values()) - min(r.values()) for r in item.disconfirms.values() if r), default=0.0)
+    if spread < 0.01:
+        return "the stored likelihood table is degenerate (no outcome separates two members)"
+    return None
 
 
 # --- hash collisions ----------------------------------------------------------------------------
@@ -170,21 +192,7 @@ LINEAGE_RULES = {
 # (generator, rule) violations that the generators had when the lineage check was written. They
 # are reported (run_checks' "lineage_known_gaps", review/summary.md) instead of failing; any
 # other violation fails. Delete an entry when its generator is fixed.
-KNOWN_LINEAGE_GAPS: set[tuple[str, str]] = {
-    ("reasoning_heuristics.generators.ah_e2", "root-is-base"),  # ENT sets: 8 roots, base = premises only
-    ("reasoning_heuristics.generators.ah_e5", "root-is-base"),  # ENT: base hashes the premises only
-    ("reasoning_heuristics.generators.ah_e5", "source-resolves"),
-    ("reasoning_heuristics.generators.b4_e1", "root-is-base"),  # base = the pair id, not an item
-    ("reasoning_heuristics.generators.b4_e1", "source-resolves"),
-    ("reasoning_heuristics.generators.b4_e2", "root-is-base"),
-    ("reasoning_heuristics.generators.b4_e2", "source-resolves"),
-    ("reasoning_heuristics.generators.c_e1", "root-is-base"),  # base = c2's task, the root is c2-RELABEL
-    ("reasoning_heuristics.generators.c_e1", "source-resolves"),
-    ("reasoning_heuristics.generators.c_e3", "root-is-base"),  # base = the bare Graph, not a task
-    ("reasoning_heuristics.generators.c_e3", "source-resolves"),
-    ("reasoning_heuristics.generators.c_e5", "root-is-base"),  # COL/SAT/STATE bases hash the bare instance
-    ("reasoning_heuristics.generators.c_e5", "source-resolves"),
-}
+KNOWN_LINEAGE_GAPS: set[tuple[str, str]] = set()  # every generator follows LINEAGE_RULES (fix-generators)
 
 
 def check_lineage(items: list[Item], known: set[tuple[str, str]] | None = None) -> tuple[list[Failure], list[Failure]]:

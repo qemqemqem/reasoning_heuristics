@@ -12,7 +12,6 @@ from reasoning_heuristics.generators.common import predict_all
 from reasoning_heuristics.heuristics.base import run
 from reasoning_heuristics.heuristics.tasks import ColouringTask, EntailmentTask, KnapsackTask, SatTask
 from reasoning_heuristics.problems.coloring import graph as G
-from reasoning_heuristics.problems.coloring import render as colouring_render
 from reasoning_heuristics.problems.coloring.render import render_neighbours
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.knapsack.knapsack import Knapsack
@@ -95,14 +94,12 @@ def test_e2_col_library_edits_have_their_signatures():
     assert s["TRUTH"]
 
 
-def test_e3_library_gadget_prompts_and_lemma(monkeypatch):
-    # u_prompt (generator code) renders with the default answer wording: ask for the library's
-    monkeypatch.setattr(colouring_render, "DEFAULT_ANSWER_STYLE", "library")
+def test_e3_library_gadget_prompts_and_lemma():
     base_u = find("C_constructive", pair_id="E3-COL-A", cell="d=2/BASE/U-LIST")
     base_i = find("C_constructive", pair_id="E3-COL-A", cell="d=2/BASE/I")
     crit_i = find("C_constructive", pair_id="E3-COL-A", cell="d=2/CRITICAL/I")
     g = graph_from_neighbours(base_u["prompt"])
-    assert c_e3.u_prompt(g, list(g.vertices)) == base_u["prompt"]
+    assert c_e3.u_prompt(g, list(g.vertices), style="library") == base_u["prompt"]
     assert c_e3.i_prompt(g, "v29") == base_i["prompt"]
     ff = run("coloring", "FF", ColouringTask(g), {"order": "LIST"}).answer
     assert ff["v29"] == base_i["ground_truth"]["answer"]
@@ -112,7 +109,7 @@ def test_e3_library_gadget_prompts_and_lemma(monkeypatch):
 
 def test_e5_library_prompts_and_states():
     stuck = find("C_constructive", pair_id="E5-COL-A", cell="STUCK/vertexA/edgeA")
-    assert c_e5.col_edge_prompt(graph_from_edge_list(stuck["prompt"])) == stuck["prompt"]
+    assert c_e5.col_edge_prompt(graph_from_edge_list(stuck["prompt"]), style="library") == stuck["prompt"]
     for cell, want in (("STATE-s1: POLARITY vs GREEDY", "s1"), ("STATE-s2: UC vs GREEDY", "s2")):
         rec = find("C_constructive", pair_id="E5-SAT-STATE-A", cell=cell)
         cnf = cnf_from_c_prompt(rec["prompt"])
@@ -173,7 +170,7 @@ def test_e1_edge_list_and_repeat_arms():
 def test_e2_smoke_small_validates():
     items, stats = c_e2.generate("smoke", 3, n_col=12, n_sat=14, n_knap=8)
     assert {it.cell for it in items} == set(c_e2.cells({}))
-    assert run_checks(items, c_e2.check_set)["failures"] == []
+    assert run_checks(items, c_e2.check_set)["failures"] == []  # includes lineage (no known gaps left)
 
 
 def test_e3_smoke_small_validates():
@@ -186,4 +183,4 @@ def test_e3_smoke_small_validates():
 def test_e5_smoke_validates():
     items, stats = c_e5.generate("smoke", 2)
     assert {it.cell for it in items} == set(c_e5.cells({}))
-    assert run_checks(items, c_e5.check_set)["failures"] == []
+    assert run_checks(items, c_e5.check_set)["failures"] == []  # includes lineage (no known gaps left)

@@ -152,13 +152,15 @@ def build(only: list[tuple[str, str]] | None, seed: int, reuse: bool,
             rpath = path.with_suffix(".report.json")
             if reuse and rpath.exists():
                 reports[tier] = json.loads(rpath.read_text())
+                # the committed form is the .jsonl.gz (the .jsonl is gitignored); test batches stay uncompressed
+                reports[tier]["items_list"] = read_jsonl(path if tier == "test" else path.with_name(path.name + ".gz"))
             else:
                 print(f"generating {vertical} {eval_id} {tier} ...", flush=True)
                 reports[tier] = generate_and_validate(mod.VERTICAL, mod.EVAL_ID, tier, seed, per, {}, ITEMS,
                                                       validate=(tier != "test"))
-            reports[tier]["items_list"] = read_jsonl(path)
-            if tier != "test":
-                compress(path)
+                reports[tier]["items_list"] = read_jsonl(path)
+                if tier != "test":
+                    compress(path)
         smoke, dev, test = (reports[t]["items_list"] for t in ("smoke", "dev", "test"))
         everything += smoke + dev + test
         leak = check_leakage(dev + smoke + test, lexicon_partitioned=mod.LEXICON_PARTITIONED)
@@ -243,7 +245,8 @@ def write_summary(rows: list[dict[str, Any]], seed: int, collisions: list[Failur
               "tables (solution, completion and optimal-partition counts, optimal sets, the C E3 asked answer)",
               "recomputed by `validate/independent.py` (its own instance reading and stated-rule transforms,",
               "CaDiCaL instead of the generators' MiniSat), consistent premises, every prediction recomputed from",
-              "(instance, member, params), and discrimination (two or more members disagree). Set checks: hash",
+              "(instance, member, params), and discrimination (two or more members differ on the item's scoring",
+              "channel, and its likelihood table is non-degenerate). Set checks: hash",
               "collisions, lineage, and each generator's designed invariants (see the review packets). Leakage: every",
               "test instance against every dev instance, by base hash and by isomorphism of the stated problem",
               "(graphs, canonical CNF, premise structure, knapsack item multisets, TSP distance matrices), or by",

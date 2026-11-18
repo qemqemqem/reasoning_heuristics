@@ -57,7 +57,7 @@ import numpy as np
 
 from reasoning_heuristics import tokens
 from reasoning_heuristics.generators import ah_common as A
-from reasoning_heuristics.generators.common import GenStats, make_item, set_hash
+from reasoning_heuristics.generators.common import GenStats, content_hash, make_item, set_hash
 from reasoning_heuristics.hashing import sha
 from reasoning_heuristics.heuristics.base import run
 from reasoning_heuristics.heuristics.entailment import atmosphere_of, cat_lits, freq_score, is_categorical, mood_of
@@ -434,7 +434,7 @@ def _ent_items(rng, made, bseed, tier, atom_range, prem_range, tries, etr_max_at
         return None, "no premise set with a matched 8-tuple"
     prem, chosen, atoms, atm = found
     set_id = f"{set_hash(bseed, 'ENT')}-ENT"
-    base_hash = sha({"premises": sorted((F.canonical(p) for p in prem), key=repr)})
+    base_hash = content_hash(EntailmentTask(prem, chosen[ENT_CELLS[0]]["c"], "YN"))  # the first conclusion's item
     items = []
     with_etr = len(F.atoms_of(prem)) <= etr_max_atoms
     for name in ENT_CELLS:
@@ -451,7 +451,8 @@ def _ent_items(rng, made, bseed, tier, atom_range, prem_range, tries, etr_max_at
         items.append(make_item(vertical=VERTICAL, eval_id=EVAL_ID, set_id=set_id, cell=f"ENT/{name}", domain="ENT",
                                framing="machine facts", prompt=prompt, answer_format=A.ENT_YN_FORMAT, task=task,
                                ground_truth=truth(task), specs=A.ent_members(with_etr), channel=A.ENT_CHANNEL,
-                               seed=bseed, tier=tier, generator=__name__, base_hash=base_hash, source_hash=None,
+                               seed=bseed, tier=tier, generator=__name__, base_hash=base_hash,
+                               source_hash=None if name == ENT_CELLS[0] else base_hash,
                                pair_id=set_id, params=params,
                                notes="Matched conclusions: the cues (FREQ, ATMOSPHERE) vary within one premise set.",
                                cell_note=f"Cell {name}."))

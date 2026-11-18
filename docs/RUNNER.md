@@ -91,8 +91,9 @@ One JSON object per response, the record the identification engine joins on `con
 | `parse_status`, `parse_detail`, `flags`, `n_answer_blocks`, `witness` | What the parser found (kept for truncated responses too), why, and tolerated deviations |
 | `parsed` | The answer in the members' representation: colouring dict, assignment dict, "UNSAT", "IMPOSSIBLE", "SAT" / "POSSIBLE" (a positive decision without a usable witness), "YES" / "NO", "X", option letter, sorted item list, sorted fact list or "NOTHING". `{target: colour}` for the single-vertex format. `null` unless `category` is ok |
 | `answer_key` | `heuristics.answers.answer_key(domain, parsed)`, comparable with `answer_key(domain, predictions[label]["answer"])` |
-| `channel_value`, `outcome_class` | The parsed answer on the item's channel, and the outcome-class label as written in `extra.outcome_classes` and `disconfirms` ("answer = other" when no deterministic member predicted it). Only for ok |
-| `members_matched`, `answer_key_matches` | Member labels whose prediction has the same channel value / the same answer key. Set-valued members (EXACT on witness tasks) never appear; use `correct` |
+| `channel_value`, `outcome_class` | The parsed answer on the item's channel, and the outcome-class label as written in `extra.outcome_classes` and `disconfirms`. Since scorer-1.1.0 an answer no member listed goes to the unlisted-solution class of the solution sets that contain it (checked with the item's serialised membership rules), and to "answer = other" only when it is in none. Only for ok |
+| `members_matched`, `answer_key_matches` | Member labels whose prediction has the same channel value / the same answer key. A set-valued member appears in `members_matched` only when its set has one solution and the answer is it |
+| `sets_matched` | Set-valued members (EXACT, A/H E5's TT) whose solution set contains the answer. Empty for items written before `extra.channel_spec` existed. Only for ok |
 | `correct`, `valid`, `optimal` | Only for ok; otherwise `null`. See below |
 | `prompt_tokens`, `completion_tokens`, `reasoning_tokens`, `cost_usd` | API-reported usage |
 | `finish_reason`, `native_finish_reason`, `truncated` | Truncated = finish_reason `length`, or the completion reached max_tokens |
@@ -139,7 +140,9 @@ Deterministic, no LLM (DESIGN §5 rule 4), and it reads the item's structured `i
 | Knapsack | weight ≤ capacity (≥ for the A/H E5 covering rule) | valid and the value equals the optimum (`optimal`) |
 | Entailment | – | equals the ground-truth answer (YES/NO, letter, fact set) |
 
-**Versioning.** `SCORER_VERSION` is on every record, with the git SHA of the scoring checkout. Bump it on any behavioural change and re-score every run (`python -m reasoning_heuristics.evals.score data/runs/*/`). The outcome classes are rebuilt with the generator's own channel functions (`decision_channel`, `witness_channel`, C E3's `bit_channel` / `colour_channel`); a test checks them against every committed item's stored classes.
+**Versioning.** `SCORER_VERSION` is on every record, with the git SHA of the scoring checkout. Bump it on any behavioural change and re-score every run (`python -m reasoning_heuristics.evals.score data/runs/*/`). The channel is rebuilt from the item's `extra.channel_spec` (`generators.common.item_channel`). Items written before it existed are rebuilt from the channel name with the generator's channel functions. A test checks them against every committed item's stored classes.
+
+- **scorer-1.1.0** (fix-generators). It reads `extra.channel_spec` and classifies answers with `generators.common.classify_answer`. An answer that no member predicted is put in the unlisted-solution class of the sets containing it, or in other when it is in none. The record gains `sets_matched`. On items without a `channel_spec` (every set generated before this version) the outcome classes are unchanged.
 
 ## Cost estimates (dry runs)
 

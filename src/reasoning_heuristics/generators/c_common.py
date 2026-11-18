@@ -11,13 +11,15 @@ vertex / variable, so partitions and assignments can be compared across isomorph
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Any
 
-from reasoning_heuristics.generators.common import Channel, witness_channel
+from reasoning_heuristics.generators.common import Channel, SetSpec, uniform_fill, witness_channel
 from reasoning_heuristics.heuristics.answers import answer_key
+from reasoning_heuristics.problems.coloring import graph as G
 from reasoning_heuristics.problems.coloring.graph import Graph, label_key
 from reasoning_heuristics.problems.coloring.render import render_edge_list, render_neighbours
-from reasoning_heuristics.problems.sat.cnf import CNF, satisfies
+from reasoning_heuristics.problems.sat import cnf as S
+from reasoning_heuristics.problems.sat.cnf import CNF
 
 COLOUR_FEWEST_FORMAT = "After the line ANSWER:, one line `vertex: colour` per vertex"
 COLOUR_K_FORMAT = "After the line ANSWER:, IMPOSSIBLE or one line `vertex: colour` per vertex"
@@ -64,21 +66,26 @@ def parse_partition_key(key: str) -> list[list[str]] | None:
     return [c.split(",") for c in key.split("|")]
 
 
-def optimal_partition_test(g: Graph, chi: int) -> Callable[[str], bool]:
-    """Is an answer class a proper colouring with exactly chi colours?"""
-
-    def test(key: str) -> bool:
-        classes = parse_partition_key(key)
-        if classes is None or len(classes) != chi or sorted(v for c in classes for v in c) != sorted(g.vertices):
-            return False
-        return all(not g.has_edge(u, v) for c in classes for i, u in enumerate(c) for v in c[i + 1:])
-
-    return test
+def random_fill(n: int, k: int) -> SetSpec:
+    """RANDOM (H) on a colouring witness channel: uniform over the k^n colourings with colours 1..k."""
+    return uniform_fill(f"uniform over the {k}^{n} colourings with colours 1..{k}", k, n)
 
 
-def colouring_channel(g: Graph, chi: int, n_optimal: int) -> Channel:
-    return witness_channel("coloring", {"EXACT": (optimal_partition_test(g, chi), n_optimal),
-                                        "RANDOM": (lambda key: False, 1)})
+def colouring_channel(task, colours: int, n_solutions: int, exactly: bool = True) -> Channel:
+    """EXACT is uniform over the proper colourings (as partitions) with exactly `colours` classes
+    (fewest-colours task: the optimal ones) or at most `colours` (a k task, which also offers
+    IMPOSSIBLE); RANDOM (H) is a uniform fill. `n_solutions` counts partitions, not labelled
+    colourings."""
+    g = task.graph
+    rule = {"graph": "stated", "colours": colours, "exactly": exactly}
+    desc = f"proper colouring with exactly {colours} colours (optimal)" if exactly else f"proper colouring with at most {colours} colours"
+    if task.fixed:
+        desc += ", keeping the fixed colours (up to renaming the others)"
+    sv = {"RANDOM (H)": random_fill(g.n, task.k or g.n)}
+    if n_solutions > 0:  # with no solution EXACT answers IMPOSSIBLE deterministically
+        solution = answer_key("coloring", G.k_colour(g, colours, task.fixed_dict())) if n_solutions == 1 else None
+        sv["EXACT"] = SetSpec("colouring", rule, n_solutions, desc, solution)
+    return witness_channel("coloring", sv, task, values=() if task.k is None else ("IMPOSSIBLE",))
 
 
 def structural_partition(col: Any, structure: dict[str, int]) -> frozenset | str:
@@ -99,25 +106,20 @@ def structural_edges(g: Graph, structure: dict[str, int]) -> frozenset:
 # --- SAT ----------------------------------------------------------------------------------------
 
 
-def solution_test(cnf: CNF, fixed: dict[str, bool] | None = None) -> Callable[[str], bool]:
-    def test(key: str) -> bool:
-        if "=" not in key:
-            return False
-        a = {kv.split("=")[0]: kv.split("=")[1] == "T" for kv in key.split(",")}
-        if any(a.get(k) != v for k, v in (fixed or {}).items()):
-            return False
-        return set(a) == set(cnf.var_names) and satisfies(cnf, a)
-
-    return test
-
-
-def sat_channel(cnf: CNF, n_solutions: int, fixed: dict[str, bool] | None = None) -> Channel:
-    """EXACT is set-valued (uniform over the solutions) only when solutions exist; on an
-    UNSAT item it answers UNSAT deterministically."""
-    sv = {"RANDOM": (lambda key: False, 1)}
+def sat_channel(task, n_solutions: int) -> Channel:
+    """EXACT is set-valued (uniform over the solutions, fixed values respected) only when solutions
+    exist; on an UNSAT item it answers UNSAT deterministically. UNSAT is always an outcome class.
+    RANDOM (H) predicts SAT / UNSAT at 1/2 each; its SAT mass lands on other."""
+    sv = {}
     if n_solutions > 0:
-        sv["EXACT"] = (solution_test(cnf, fixed), n_solutions)
-    return witness_channel("sat", sv)
+        solution = None
+        if n_solutions == 1:
+            from reasoning_heuristics.heuristics.sat import effective_cnf
+
+            solution = answer_key("sat", S.solve(effective_cnf(task), task.fixed_dict()))
+        desc = "satisfying assignment" + (" extending the fixed values" if task.fixed else "")
+        sv["EXACT"] = SetSpec("assignment", {"cnf": "stated"}, n_solutions, desc, solution)
+    return witness_channel("sat", sv, task, values=("UNSAT",))
 
 
 def count_models(cnf: CNF, fixed: dict[str, bool] | None = None) -> int:
