@@ -6,8 +6,9 @@ The runner sends items to models through OpenRouter and keeps every response. Th
 |---|---|
 | `run.py` | CLI: dry-run estimate, capped and cached live calls, raw outputs, then scoring, report, manifest and ledger |
 | `score.py` | CLI: re-score runs from their raw outputs on disk |
+| `force.py` | CLI: forced final answers for responses cut at the cap ([below](#forced-final-answers-at-the-cap)) |
 | `scoring.py` | The one versioned scorer (`SCORER_VERSION`) |
-| `client.py` | OpenRouter chat completions: retries with backoff, long timeouts, full response capture |
+| `client.py` | OpenRouter chat completions (and raw text completions for `force.py`): retries with backoff, long timeouts, full response capture |
 | `cache.py` | Response cache keyed on the request body (model, provider routing, parameters, messages) plus the sample index |
 | `cost.py` | Dry-run estimates and the `CostGuard` hard cap |
 | `models.py` | Model configs, the thinking and direct conditions, the exact request body |
@@ -99,6 +100,7 @@ One JSON object per response. The identification engine joins it to its item on 
 | `finish_reason`, `native_finish_reason`, `truncated` | Truncated = finish_reason `length`, or the completion reached max_tokens |
 | `reasoning_returned`, `reasoning_chars`, `content_chars`, `pre_answer_tokens` | Whether reasoning text came back, sizes, and visible working before the answer |
 | `scorer_version`, `scorer_git_sha`, `scorer_git_dirty` | Which scorer made the record (DESIGN §5 rule 3) |
+| `forced`, `forced_template`, `source_run_id` | Only on a forced final answer (`force.py`): `true`, the template, and the run whose truncated response it continues |
 
 For the single-vertex format (C E3, arm I) the members' answers are full colourings, so `answer_key` never matches theirs; compare on `channel_value`.
 
@@ -160,7 +162,8 @@ Deterministic, no LLM (DESIGN §5 rule 4), and it reads the item's structured `i
 | runs-1.4.0 | smoke-runs branch | A line-initial marker may follow any symbols (`### ✅ Final Answer`). With no marker at all, the last fenced block is read if it holds nothing but an answer (`fenced_answer_no_marker`) |
 | runs-1.4.1 | smoke-runs branch | Positional values may use the placeholders the generators switched to (`<variable>=T`, PR #12) |
 | scorer-1.5.0 | PR #15 | scorer-1.1.0 plus every runs-x.y.z change |
-| **scorer-1.5.1** | 2026-11-18 | A knapsack answer block that opens with a lead-in ending in a colon and naming no item ("The chosen items in alphabetical order are:") is read from its next line (`answer_after_lead_in`). Seen on Qwen3-14B with thinking: 98 of its 300 pc20 C E2 knapsack answers were parse failures under 1.5.0. Every committed run is re-scored with it |
+| scorer-1.5.1 | 2026-11-18 | A knapsack answer block that opens with a lead-in ending in a colon and naming no item ("The chosen items in alphabetical order are:") is read from its next line (`answer_after_lead_in`). Seen on Qwen3-14B with thinking: 98 of its 300 pc20 C E2 knapsack answers were parse failures under 1.5.0. Every committed run is re-scored with it |
+| **scorer-1.5.2** | 2026-11-18 | Reads a text-completions choice (`POST /completions`, `force.py`): no `message` but a `text` means the content is the text and the reasoning is the choice's `reasoning`. Chat responses score exactly as under 1.5.1: re-scoring all 22 committed 2026-11-18 runs (22,012 records) changed no field but `scorer_version`, `scorer_git_sha` and `scorer_git_dirty`. Their committed files stay at 1.5.1 |
 
 ## Cost estimates (dry runs)
 
@@ -336,12 +339,112 @@ Checked on the probes and the 2026-11-18 smoke runs:
   - Not done: the per-tokenizer check of the surface-matched pairs (`tokens.py` docstring) needs the tokenizers themselves.
 - [x] **Measured tokens per eval are in the runs section below**, for recalibrating the dev-run estimate.
 
+## Forced final answers at the cap
+
+`force.py` gives a thinking model that stopped at its token cap one more chance to answer. It replays the truncated reasoning with the thinking closed, so the model writes only its final answer. This is the "`</think>` plus answer forcing" that [C's design](verticals/C_constructive.md) (§2.1) gives BE runs that reach the cap.
+
+**Why.** A response cut at the cap carries no answer. It is `truncated`, and censored (SCOPE §6 rule 2). On the dev tier at high effort that is 462 of gpt-oss-20b's 1,270 responses and 284 of gpt-oss-120b's; the Qwen3 dev and pilot runs have 14–28 each. The censoring removes the hard items, not random ones, so what a model answers when stopped there is worth having, as a stratum of its own.
+
+**Why not the chat API.** Probes on 2026-11-18, on the dev runs' truncated responses:
+
+- The partial trace as a visible assistant turn, then a user turn saying the budget is used up and to answer now: gpt-oss-20b started over, and ran out of a 1,024- or 4,096-token second budget on 9 of 10.
+- `reasoning_details` passed back on the assistant turn are dropped by the provider (`prompt_tokens` 256).
+- A content prefill is not continued: the model starts new reasoning.
+
+**What works: raw text completions**, `POST https://openrouter.ai/api/v1/completions`. We write the model's chat template ourselves, with the trace as its thinking, and close the thinking. The body is `model`, `provider` (the source request's), `prompt`, `max_tokens`, and the source request's `temperature`, `top_p` and, when it has one, `top_k`. For gpt-oss the provider parses the harmony output: `choices[0].text` holds the final channel, and `choices[0].reasoning` any analysis the model writes again.
+
+| Model (pinned endpoint) | max_tokens | Answered | Completion tokens |
+|---|---|---|---|
+| Qwen3-32B (DeepInfra) | 1,024 | 5 of 5 | 29–172 |
+| gpt-oss-120b (DekaLLM) | 4,096 | 7 of 8, mostly at once | 17–479; the eighth used all 4,096 |
+| gpt-oss-20b (DekaLLM) | 4,096 | 3 of 8 | 305–2,450; the other 5 went back to reasoning and used all 4,096 |
+
+Two additions made gpt-oss no better or worse, so the template has neither:
+
+- a wrap-up sentence at the end of the analysis ("I have run out of time to think, so I must give my final answer now…"): 0 of 5 and 1 of 5 answered, in two probes at max_tokens 1,024;
+- an answer header prefilled in the final channel (`ANSWER:` or `{"`), which the model wrote again after itself (`ANSWER:ANSWER: …`).
+
+**The template, `force-1`.** `trace` is the source response's `choices[0].message.reasoning`, with trailing whitespace removed. `user` and `system` are the source request's last user message and its system message, verbatim.
+
+- **gpt-oss** (`openai/gpt-oss-*`). `effort` is the source request's `reasoning.effort`. The developer message is there only when the source request had a system message.
+
+  ```
+  <|start|>system<|message|>You are ChatGPT, a large language model trained by OpenAI.
+  Knowledge cutoff: 2024-06
+
+  Reasoning: {effort}
+
+  # Valid channels: analysis, commentary, final. Channel must be included for every message.<|end|><|start|>developer<|message|># Instructions
+
+  {system}<|end|><|start|>user<|message|>{user}<|end|><|start|>assistant<|channel|>analysis<|message|>{trace}<|end|><|start|>assistant<|channel|>final<|message|>
+  ```
+
+- **Qwen3** (`qwen/qwen3-*`). The system turn is there only when the source request had one. The stop sentence is the Qwen3 technical report's thinking-budget mechanism. The prompt ends with a blank line after `</think>`.
+
+  ```
+  <|im_start|>system
+  {system}<|im_end|>
+  <|im_start|>user
+  {user}<|im_end|>
+  <|im_start|>assistant
+  <think>
+  {trace}
+
+  Considering the limited time by the user, I have to give the solution based on the thinking directly now.
+  </think>
+  ```
+
+- **Any other model** is refused.
+
+**What it selects.** The source's raw records whose response stopped for length (finish_reason `length`) with a non-empty `reasoning`, in the source's order. Those that stopped there without a trace (the direct condition's) are counted and skipped.
+
+**Where the outputs live.** `data/runs/forced/<source_run_id>/`, beside the source run:
+
+| File | Contents |
+|---|---|
+| `manifest.json` | `source` (run id, the SHA-256 of its `raw.jsonl.gz`, condition, git); `forced` (template, endpoint, max_tokens); condition `<source label>-forced`; provider routing; the pinned price; the dry-run estimate; cap, budget and spend; git and versions; `items` (the source's item files and the item flags used); `counts`: `selected`, `skipped_no_trace`, `responses`, `answered` (stopped by itself with a non-empty reply), `still_reasoning` (stopped at max_tokens again) |
+| `raw.jsonl.gz` | one record per forced call, as `run.py` writes them: the full request, prompt included, and response. Plus `source_run_id`, `source_cache_key` and `forced_template`. `prompt_hash` is the first 16 hex digits of the prompt's SHA-256 |
+| `scored.jsonl.gz` | the standard scorer's records (since scorer-1.5.2 it reads a text completion), plus `forced: true`, `forced_template` and `source_run_id`. `run_id` is `forced/<source_run_id>` |
+| `scoring.json`, `REPORT.md` | as for any run; the report adds the pass's counts |
+
+**How they are kept apart.** The source run's files are never written. Its truncated records stay `truncated` (censored), and a forced answer never replaces one: it was written under a second budget the source condition did not have. Forced answers are analysed as their own stratum (`forced: true`, condition `…-forced`). The analysis reads only `data/runs/2026-11-18-{dev,pc20,pc40}-*` (`RUN_PATTERNS`), which `data/runs/forced/` does not match.
+
+**Running it.**
+
+```bash
+# count and cost estimate: no network, writes nothing
+python -m reasoning_heuristics.evals.force data/runs/<source_run_id> --dry-run --allow-item-drift
+
+# live (the key comes from the environment); re-running resumes, and the cache never pays twice
+python -m reasoning_heuristics.evals.force data/runs/<source_run_id> --cap-usd 1 --allow-item-drift \
+    [--max-tokens 4096] [--limit N] [--concurrency 4] [--budget-tag T --budget-usd B]
+
+# re-score after a scorer change, with the item flag the pass used
+python -m reasoning_heuristics.evals.score --allow-item-drift data/runs/forced/<source_run_id>
+```
+
+- **Items.** The pass is scored against the source run's items. It refuses to start if they no longer hash to the source manifest, unless given the flag the source's own scoring used:
+  - `--allow-item-drift` for the dev and pilot runs: their C E1 and C E2 files gained the A1 give-up member after the runs (data/items/pc20/README.md);
+  - `--items-at-run-sha` for the smoke runs: the files at the source run's SHA. Re-score such a pass with `score --items-ref <SHA>` (`source.git.sha` in its manifest).
+- **The cap.** Each call reserves 1.25 × (prompt + max_tokens) at the pinned price. The prompt is estimated as the source response's prompt plus completion tokens; the probes' forced prompts came to 1.0007–1.0033 times that. A source run not routed to the model's configured pin is refused, since that is what the price is for.
+- **Ledger.** Each live invocation that sends a call appends one row: run id `forced/<source_run_id>`, condition `<source label>-forced`.
+- **Dry-run estimates** for the 2026-11-18 thinking runs at max_tokens 4,096, from the prompt alone (every call answers at once) to every call at max_tokens. The low-effort and direct runs have nothing to force.
+
+| Source run | Calls | Estimate (USD) |
+|---|---|---|
+| dev, gpt-oss-20b thinking-high | 462 | 0.45–0.72 |
+| dev, gpt-oss-120b thinking-high | 284 | 0.29–0.50 |
+| dev, Qwen3-32B / Qwen3-14B thinking-high | 26 / 28 | 0.06–0.08 / 0.09–0.12 |
+| pc20 and pc40, Qwen3-32B / Qwen3-14B thinking-high (each) | 14 / 21 | 0.03–0.04 / 0.07–0.09 |
+| smoke, gpt-oss-20b / Qwen3-32B thinking-high | 89 / 6 | 0.09–0.14 / 0.01–0.02 |
+
 ## E8: continuations and prefill
 
 E8 items are specs: each continuation is built from the model's own earlier response (`generators/ah_e8.py`, `materialise`), as a user turn plus an assistant prefill: `<think>` + the truncated trace + `</think>` + a forced-answer header (early answering and transplants, 64 new tokens at most), or the trace up to a flipped assignment (mistake insertion, then free continuation). The runner skips E8 for now. What it would need, judged from OpenRouter's public docs (read 2026-11-17):
 
 - **Assistant prefill exists.** The API overview says that to have a model complete a partial response you "include a message with `role: "assistant"` at the end of your messages array". That covers the visible-content channel only.
 - **Prefilling the reasoning channel is not documented.** The reasoning-tokens page documents sending `reasoning` / `reasoning_details` back on earlier assistant turns to preserve reasoning across turns, and warns that `reasoning_details` blocks must be passed back unmodified and in order. It says nothing about a final assistant message whose reasoning the model should continue. For gpt-oss (harmony format: analysis and final channels) and Qwen3 (`<think>` in the template), a content prefill would most likely land in the final answer channel, which is not what E8 means by a truncated trace.
+- **The 2026-11-18 forced-answer probes answered part of this** ([below](#forced-final-answers-at-the-cap)): a content prefill is not continued, `reasoning_details` passed back are dropped, and the raw completions endpoint serves the pinned gpt-oss and Qwen3 providers with our own chat template.
 - **So E8 on OpenRouter needs a probe before it is built:** send a content prefill (`<think>…</think>` text plus the header) and an assistant message carrying `reasoning`, per pinned provider, and check whether the model continues the prefix or starts a new reply. If neither works, the options are a raw completions endpoint with the chat template applied by us (`/api/v1/completions`, if the pinned provider serves these models there), or self-hosted vLLM, where the prompt can end inside the analysis channel.
 - **Runner changes then:** materialise each spec from the source run's raw output (`ah_e8.materialise`, with the model tokenizer's offsets for the truncation point, not the proxy), send it as a continuation with max_tokens 64 (or the condition's max for mistake insertion), and score with the `sat_json` parser on the continuation text. E8 raw records would carry the source run id and the source response's cache key.
 

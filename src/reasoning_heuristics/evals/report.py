@@ -37,6 +37,8 @@ def build_report(manifest: dict[str, Any], scored: list[dict[str, Any]], items: 
          + (f" {spend['calls_without_reported_cost']} calls carried no cost and were booked at the configured price." if spend.get("calls_without_reported_cost") else ""),
          f"- **Code:** git `{(manifest.get('git') or {}).get('sha')}`{' (dirty)' if (manifest.get('git') or {}).get('dirty') else ''}; "
          f"scorer `{scored[0]['scorer_version'] if scored else '–'}` at `{scored[0].get('scorer_git_sha') if scored else '–'}`.", ""]
+    if manifest.get("forced"):
+        L += _forced_section(manifest, scored)
     by_eval: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
     for r in scored:
         by_eval[(r["vertical"], r["eval_id"])].append(r)
@@ -90,6 +92,24 @@ def build_report(manifest: dict[str, Any], scored: list[dict[str, Any]], items: 
         L += ["## Truncation by cell (censored, SCOPE §6 rule 2)", "", "| Eval | Cell | Truncated |", "|---|---|---|"]
         L += [f"| {e} | {c} | {n} |" for (e, c), n in sorted(trunc_cells.items())] + [""]
     return "\n".join(L) + "\n"
+
+
+def forced_outcomes(scored: list[dict[str, Any]]) -> dict[str, int]:
+    """A forced pass's outcomes: `answered` (stopped by itself with a non-empty reply, whatever its category)
+    and `still_reasoning` (stopped at max_tokens again)."""
+    return {"answered": sum(1 for r in scored if not r["truncated"] and r["category"] != "api_error" and r["content_chars"]),
+            "still_reasoning": sum(1 for r in scored if r["truncated"])}
+
+
+def _forced_section(manifest: dict[str, Any], scored: list[dict[str, Any]]) -> list[str]:
+    f, counts, out = manifest["forced"], manifest.get("counts") or {}, forced_outcomes(scored)
+    return ["## Forced final answers", "",
+            f"The responses of `{manifest['source']['run_id']}` that stopped at the cap with a reasoning trace, replayed with the "
+            f"thinking closed (template `{f['template']}`, `{f['endpoint']}`, max_tokens {f['max_tokens']}): "
+            f"{counts.get('selected', '–')} selected; {counts.get('skipped_no_trace', '–')} stopped at the cap without a trace and were skipped. "
+            f"Of {len(scored)} forced responses, {out['answered']} answered and {out['still_reasoning']} went back to reasoning "
+            "and stopped at max_tokens again (`truncated` below).", "",
+            "These records are a stratum of their own. The source run's records stay `truncated` (censored, SCOPE §6 rule 2).", ""]
 
 
 def _cost_per_item(rs: list[dict[str, Any]]) -> str:

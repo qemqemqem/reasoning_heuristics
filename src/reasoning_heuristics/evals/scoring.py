@@ -6,8 +6,9 @@ instance (`instance`, `ground_truth`, `predictions`, `extra.outcome_classes`), n
 
 Pipeline for one response
 -------------------------
-1. **Visible text.** The message `content`, with any inline `<think>...</think>` removed (some
-   providers inline the reasoning). The reasoning channel is never parsed for the answer.
+1. **Visible text.** The message `content` (a text completion's `text`), with any inline
+   `<think>...</think>` removed (some providers inline the reasoning). The reasoning channel is
+   never parsed for the answer.
 2. **Gates.** `truncated` if the provider stopped for length (finish_reason "length", or the
    completion reached `max_tokens`); `refusal` if finish_reason is "content_filter" or the
    message carries a `refusal`. Truncation is censoring (SCOPE §6 rule 2), so it wins even when a
@@ -63,7 +64,7 @@ from reasoning_heuristics.problems.coloring import graph as G
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.sat import cnf as S
 
-SCORER_VERSION = "scorer-1.5.1"
+SCORER_VERSION = "scorer-1.5.2"
 # The changelog is in docs/RUNNER.md ("Scorer versions"). 1.5.0 is main's scorer-1.1.0 (outcome classes from
 # extra.channel_spec, sets_matched) plus the parsing changes made on the smoke-runs branch, whose own labels
 # 1.1.0-1.4.1 were never used on main; 1.5.0 is the first label above both lines.
@@ -148,7 +149,10 @@ class ResponseView:
         if response is None:
             return cls(None, None, None, max_tokens=max_tokens, error=error or "no response")
         choice = (response.get("choices") or [{}])[0]
-        msg = choice.get("message") or {}
+        if "message" not in choice and "text" in choice:  # a text-completions choice (POST /completions, force.py)
+            msg = {"content": choice["text"], "reasoning": choice.get("reasoning")}
+        else:
+            msg = choice.get("message") or {}
         usage = response.get("usage") or {}
         details = usage.get("completion_tokens_details") or {}
         reasoning = msg.get("reasoning")
