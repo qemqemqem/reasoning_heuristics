@@ -9,8 +9,11 @@ response and a member that give the same answer get the same key.
 Spaces
 ------
 - `FiniteSpace`: decisions (SAT/UNSAT, POSSIBLE/IMPOSSIBLE, YES/NO), MC option letters,
-  C E3's target bit (same/different) and target colour. A slip is any other value, uniformly
-  (for two values, a flip). q is uniform over the values.
+  C E3's target bit and target colour. A slip is any other value, uniformly (for two values, a
+  flip). q is uniform over the values. **C E3's bit channel is {same, different, IMPOSSIBLE}**, with
+  q uniform over the three: the U-arm format admits IMPOSSIBLE and FF-OUT and LF predict it (on
+  every U-REV item), so it is a point prediction here. The items' stored outcome classes and the
+  scorer's `outcome_class` lump IMPOSSIBLE with "other" on that channel.
 - `BitSpace`: SAT assignments (Hamming distance = variables flipped), knapsack item sets and
   A/H E5's "what follows" literal sets (symmetric difference), plus special tokens (UNSAT; X).
 - `PartitionSpace`: colourings, compared up to renaming of colours, plus IMPOSSIBLE on

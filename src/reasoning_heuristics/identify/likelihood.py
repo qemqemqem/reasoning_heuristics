@@ -26,9 +26,12 @@ largest entry is 1 (`log_scale` keeps the factor), so one EM serves both.
 Responses that are not `ok` (DESIGN §5 rule 5):
 
 - `parse_fail`, `refusal`, `partial`: excluded from the answer likelihood; counted per cell.
-- `declared_impossible`: by default read as the item's impossibility token when the channel has
-  one (UNSAT, IMPOSSIBLE, or the decision's negative value on SAT and colouring decisions);
-  otherwise excluded and counted. `declared_impossible="exclude"` excludes them all.
+- `declared_impossible`: excluded and counted per cell (the default). The scorer already returns
+  IMPOSSIBLE / UNSAT as an `ok` answer wherever the answer format offers it, so this category holds
+  give-ups ("too complex", "cannot be determined") and impossibility claims the format does not
+  offer; reading them as UNSAT would credit ALWAYS-UNSAT and the abort members with give-ups
+  (DESIGN §3 O2). `declared_impossible="as-token"` reads them as the channel's impossibility token
+  where it has one, as a sensitivity option.
 - `truncated` (SCOPE §6 rule 2, censoring): excluded and counted per cell, unless a `TokenModel`
   is given. **Token-model hook:** with `token_model`, a truncated run becomes a censored row with
   likelihood P(run hits the cap | h, x) for each member and for q, and every answered row is
@@ -163,7 +166,9 @@ class Tensors:
 
     @property
     def rho_free(self) -> bool:
-        return not bool(self.C.any())
+        if not hasattr(self, "_rho_free"):
+            self._rho_free = not bool(self.C.any())
+        return self._rho_free
 
     def subset(self, rows: np.ndarray) -> "Tensors":
         return Tensors(self.A[rows], self.B0[rows], self.C[rows], self.Q[rows], self.avail[rows], self.slips,
@@ -352,7 +357,7 @@ class UnitModel:
 
     # --- observations -----------------------------------------------------------------------
     def observations(self, responses: Iterable[Response], token_model: TokenModel | None = None,
-                     declared_impossible: str = "as-token") -> tuple[list[Observation], Exclusions]:
+                     declared_impossible: str = "exclude") -> tuple[list[Observation], Exclusions]:
         """Turn responses into likelihood rows; everything else is counted in Exclusions."""
         obs: list[Observation] = []
         exc = Exclusions()
@@ -376,6 +381,8 @@ class UnitModel:
                     continue
                 obs.append(Observation(i, key, r))
             elif r.category == "declared_impossible":
+                if declared_impossible not in ("exclude", "as-token"):
+                    raise ValueError(f"declared_impossible must be 'exclude' or 'as-token', not {declared_impossible!r}")
                 tok = _impossibility_token(space) if declared_impossible == "as-token" else None
                 if tok is None:
                     exc.add(cell, "declared_impossible")

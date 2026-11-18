@@ -39,16 +39,209 @@ def separations(um: UnitModel) -> dict[str, dict[str, int]]:
     return out
 
 
+def design_rank(um: UnitModel) -> dict[str, Any] | None:
+    """For units whose items are all on finite channels: the (item, value) x (groups + q) matrix of
+    no-slip probabilities, its rank and sigma_min / sigma_max after scaling columns to unit norm
+    (A/H §5.3 pre-registers >= 0.05), and the columns of the weakest direction. A rank below the
+    number of columns means some weights are not identified by any amount of data on these items
+    (e.g. q = 1/2 ALWAYS-SAT + 1/2 ALWAYS-UNSAT on a two-valued channel)."""
+    from reasoning_heuristics.identify.spaces import FiniteSpace
+
+    if not all(isinstance(im.space, FiniteSpace) for im in um.items):
+        return None
+    cols = um.columns
+    rows = []
+    for i, im in enumerate(um.items):
+        V = im.space.values
+        block = np.zeros((len(V), len(cols) + 1))
+        for j, g in enumerate(cols):
+            p = um.pred(i, g.members[0])
+            if p.kind == "det":
+                block[V.index(p.key), j] = 1.0
+            elif p.kind == "dist":
+                for k, v in p.dist.items():
+                    block[V.index(k), j] += v
+            elif p.kind in ("uniform",):
+                block[:, j] = 1.0 / len(V)
+        block[:, -1] = 1.0 / len(V)
+        rows.append(block)
+    M = np.vstack(rows)
+    norms = np.linalg.norm(M, axis=0)
+    M = M / np.where(norms > 0, norms, 1.0)
+    _, s, vt = np.linalg.svd(M, full_matrices=False)
+    tol = s.max() * 1e-9
+    rank = int((s > tol).sum())
+    weak = vt[-1]
+    labels = [g.name for g in cols] + ["q"]
+    involved = [labels[j] for j in np.argsort(-np.abs(weak)) if abs(weak[j]) > 0.1]
+    return {"columns": len(labels), "rank": rank, "sigma_ratio": round(float(s.min() / s.max()), 4),
+            "weakest_direction": involved[:8]}
+
+
+def design_matrix(um: UnitModel, eps: float = 0.1, rho: float = 0.3, samples: int = 6,
+                  rng: np.random.Generator | None = None) -> np.ndarray:
+    """Rows: (item, outcome); columns: the unit's column groups, then q; entries P(outcome | component, item).
+
+    Finite channels: every value, without slips (eps is held at 0 there). Witness channels: the
+    answer space is too large to list, so the rows are the candidate answers plus `samples` draws
+    from every component (slips at eps, rho), with the components' likelihoods at those points; a
+    linear dependency among the full distributions holds on any such rows, and with enough draws
+    an independent column shows up as full rank. Unavailable members are 0 on an item (the Luce
+    renormalisation is ignored here)."""
+    from reasoning_heuristics.identify.spaces import FiniteSpace, trunc_geom
+
+    rng = rng or np.random.default_rng(0)
+    cols = um.columns
+    G = len(cols)
+    g = trunc_geom(rho)
+    rows = []
+    for i, im in enumerate(um.items):
+        if isinstance(im.space, FiniteSpace):
+            V = im.space.values
+            block = np.zeros((len(V), G + 1))
+            for j, grp in enumerate(cols):
+                p = um.pred(i, grp.members[0])
+                if p.kind == "det":
+                    block[V.index(p.key), j] = 1.0
+                elif p.kind == "dist":
+                    for k, v in p.dist.items():
+                        block[V.index(k), j] += v
+                elif p.kind == "uniform":
+                    block[:, j] = 1.0 / len(V)
+            block[:, G] = 1.0 / len(V)
+            rows.append(block)
+            continue
+        ys = set(im.candidates)
+        for grp in cols:
+            if um.pred(i, grp.members[0]).available:
+                ys.update(um.sample(i, grp.members[0], eps, rho, rng) for _ in range(samples))
+        ys.update(um.sample_q(i, rng) for _ in range(samples))
+        block = np.zeros((len(ys), G + 1))
+        for r, y in enumerate(sorted(ys)):
+            A, B0, C, Q, avail = um.row(i, y)
+            block[r, :G] = np.where(avail, (1 - eps) * A + eps * (B0 + C @ g), 0.0)
+            block[r, G] = Q
+        # Scale every row by its largest entry: that leaves the null space unchanged and keeps the
+        # tiny probabilities (q on a random colouring, ~1e-15) visible to the SVD.
+        rows.append(block / np.maximum(block.max(1, keepdims=True), 1e-300))
+    return np.vstack(rows)
+
+
+_PIVOT_ORDER = {"q": 0, "dist": 1, "uniform": 2, "set": 3, "det": 4, "na": 5}
+
+
+def identifiability(um: UnitModel, tol: float = 1e-7, rng: np.random.Generator | None = None, **kw: Any) -> dict[str, Any]:
+    """Numerical rank and null space of `design_matrix`, generalising pairwise ties to linear
+    dependencies (on a two-valued channel q = 1/2 ALWAYS-pos + 1/2 ALWAYS-neg, which no pairwise
+    test can see).
+
+    For k null directions, k columns are chosen as **pivots** (q first, then noise models, then
+    procedures) and are *not identified*. Every other column c has an identified quantity
+    theta_c = pi_c - sum_j R[j, c] pi_{pivot_j}: its weight plus the share of the pivots' mass the
+    design cannot tell apart from it (e.g. pi_ALWAYS-SAT + 0.5 pi_0). `transform` maps
+    (columns + q) weights to those quantities; with full rank it is the identity."""
+    M = design_matrix(um, rng=rng, **kw)
+    labels = [g.name for g in um.columns] + ["q"]
+    C = M.shape[1]
+    norms = np.linalg.norm(M, axis=0)
+    norms = np.where(norms > 0, norms, 1.0)
+    _, s, vt = np.linalg.svd(M / norms, full_matrices=False)
+    rank = int((s > tol * s[0]).sum())
+    U = vt[rank:].copy() if rank < C else np.zeros((0, C))  # null basis in column-scaled coordinates
+    kinds = []
+    for j, g in enumerate(um.columns):
+        ks = {um.pred(i, g.members[0]).kind for i in range(len(um.items))} - {"na"}
+        kinds.append(min(ks, key=lambda k: _PIVOT_ORDER[k]) if ks else "na")
+    kinds.append("q")
+    order = sorted(range(C), key=lambda c: (_PIVOT_ORDER[kinds[c]], -c))
+    # Reduce the null basis (Gauss-Jordan in the scaled coordinates, where entries are O(1)), taking
+    # pivots in preference order: q, then noise models, then procedures.
+    pivots: list[int] = []
+    piv_row: dict[int, int] = {}  # pivot column -> its row of the reduced null basis
+    for c in order:
+        if len(pivots) == len(U):
+            break
+        free = [j for j in range(len(U)) if j not in piv_row.values()]
+        cand = [j for j in free if abs(U[j, c]) > 1e-3 * np.abs(U[j]).max()]
+        if not cand:
+            continue
+        j = max(cand, key=lambda r: abs(U[r, c]))
+        U[j] /= U[j, c]
+        for r in range(len(U)):
+            if r != j:
+                U[r] -= U[r, c] * U[j]
+        piv_row[c] = j
+        pivots.append(c)
+    # back to weight coordinates (M v = 0 for v = u / norms), scaled so v[pivot] = 1
+    R = U / norms[None, :]
+    for c, j in piv_row.items():
+        R[j] /= R[j, c]
+    R[np.abs(R) < 1e-4] = 0.0  # numerical residue (e.g. a 1e-7 probability that is 0 in all but name)
+    transform, id_labels = [], []
+    for c in range(C):
+        if c in pivots:
+            continue
+        a = np.zeros(C)
+        a[c] = 1.0
+        terms = []
+        for p, j in piv_row.items():
+            if R[j, c] != 0:
+                a[p] -= R[j, c]
+                terms.append(f"{-R[j, c]:.3g} × {labels[p]}")
+        transform.append(a)
+        id_labels.append(labels[c] if not terms else f"{labels[c]} + " + " + ".join(terms))
+    directions, dependencies = [], []
+    for p, j in piv_row.items():
+        rhs = [f"{-R[j, c]:.3g} × {labels[c]}" for c in range(C) if c != p and R[j, c] != 0]
+        rel = f"{labels[p]} = " + (" + ".join(rhs) if rhs else "0")
+        directions.append(rel)
+        members = [labels[c] for c in range(C) if R[j, c] != 0]
+        substantive = all(kinds[c] in ("det", "set") for c in range(C) if R[j, c] != 0)
+        # Among substantive members the pivot is arbitrary, so state the dependency symmetrically.
+        statement = (f"{', '.join(members)} span only {len(members) - 1} directions ({rel}): their weights are "
+                     f"identified only up to this combination") if substantive else rel
+        dependencies.append({"members": members, "substantive": substantive, "relation": rel, "statement": statement})
+    involved = sorted({m for d in dependencies for m in d["members"]}, key=labels.index)
+    return {"columns": labels, "rank": rank, "deficiency": C - rank, "sigma_ratio": float(s[-1] / s[0]),
+            "null_directions": directions, "dependencies": dependencies,
+            "not_identified": [labels[p] for p in pivots], "involved": involved,
+            "identified": id_labels, "transform": np.array(transform).reshape(len(transform), C),
+            "null_basis": R}
+
+
+def weight_ranges(pi: np.ndarray, null_basis: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Each weight's smallest and largest value consistent with the fit: every pi + N t with all
+    weights >= 0 gives the same mixture, so min / max pi_c over that polytope (small LPs)."""
+    from scipy.optimize import linprog
+
+    pi = np.asarray(pi, dtype=float)
+    C = len(pi)
+    if len(null_basis) == 0:
+        return pi.copy(), pi.copy()
+    N = np.asarray(null_basis).T  # (C, k)
+    lo, hi = pi.copy(), pi.copy()
+    A_ub, b_ub = -N, pi  # pi + N t >= 0
+    for c in range(C):
+        if not np.any(N[c]):
+            continue
+        for sign, store in ((1.0, lo), (-1.0, hi)):
+            r = linprog(sign * N[c], A_ub=A_ub, b_ub=b_ub, bounds=[(None, None)] * N.shape[1], method="highs")
+            if r.status == 0:
+                store[c] = max(0.0, min(1.0, pi[c] + N[c] @ r.x))
+    return lo, hi
+
+
 def diagnostics(um: UnitModel) -> dict[str, Any]:
     sep = separations(um)
     weakest = sorted(((min(v.values()) if v else 0, k, min(v, key=v.get) if v else None) for k, v in sep.items()))[:5]
     return {"groups": [g.members for g in um.columns], "folded_into_q": um.q_members,
             "n_items": len(um.items), "n_clusters": um.unit.n_clusters,
-            "least_separated": [{"group": k, "nearest": n, "separating_items": s} for s, k, n in weakest]}
+            "least_separated": [{"group": k, "nearest": n, "separating_items": s} for s, k, n in weakest],
+            "design": design_rank(um)}
 
 
 def fit_unit(um: UnitModel, responses: list[Response], n_boot: int = 200, seed: int = 0,
-             token_model: TokenModel | None = None, declared_impossible: str = "as-token",
+             token_model: TokenModel | None = None, declared_impossible: str = "exclude",
              n_perm: int = 100, ea_ties: str = "include") -> dict[str, Any]:
     rng = np.random.default_rng(seed)
     obs, exc = um.observations(responses, token_model, declared_impossible)
@@ -61,6 +254,27 @@ def fit_unit(um: UnitModel, responses: list[Response], n_boot: int = 200, seed: 
     res = fit(T, n_boot=n_boot, rng=rng)
     report["fit"] = res.to_json()
     report["fit"]["q_members"] = um.q_members
+    ident = identifiability(um, rng=rng)
+    report["identifiability"] = {k: v for k, v in ident.items() if k not in ("transform", "null_basis")}
+    if ident["deficiency"]:
+        # A weight involved in a linear dependency is not a number: it is reported as not identified,
+        # with the range of values consistent with the fit (pi >= 0), and the identified combinations
+        # are given instead. Every involved member is treated alike, whichever one is the pivot.
+        names = [g.name for g in um.columns] + [res.labels[-1]]
+        lo_r, hi_r = weight_ranges(res.pi, ident["null_basis"])
+        for lab in ident["involved"]:
+            c = ident["columns"].index(lab)
+            report["fit"]["weights"][names[c]] = {"pi": "not identified",
+                                                 "range": [round(float(lo_r[c]), 4), round(float(hi_r[c]), 4)]}
+        Tid = ident["transform"]
+        est = Tid @ res.pi
+        if res.boot is not None:
+            tb = res.boot @ Tid.T
+            lo, hi = np.percentile(tb, 2.5, 0), np.percentile(tb, 97.5, 0)
+        else:
+            lo = hi = np.full(len(est), np.nan)
+        report["fit"]["identified"] = {l: {"est": round(float(e), 4), "lo": round(float(a), 4), "hi": round(float(b), 4)}
+                                       for l, e, a, b in zip(ident["identified"], est, lo, hi)}
     ea, exch = agreement.ea_lift(um, obs, n_perm=n_perm, rng=rng, ties=ea_ties, stat="ea")
     co, _ = agreement.ea_lift(um, obs, n_perm=n_perm, rng=rng, ties=ea_ties, stat="co_error")
     report["error_agreement"] = {"ties": ea_ties, "exchangeable": round(exch, 3),
