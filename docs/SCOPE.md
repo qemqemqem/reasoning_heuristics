@@ -4,7 +4,7 @@
 
 ## Bottom line
 
-- **Phase 1 is behavioural only.** It runs on open-weight thinking models at best effort (high reasoning effort, 32k-token cap), starting with gpt-oss-20b, mostly through OpenRouter. Mechanistic interpretability is Phase 2, only for families that get behavioural weight.
+- **Phase 1 is behavioural only.** It runs mostly on open-weight thinking models at best effort (high reasoning effort, 32k-token cap), starting with gpt-oss-20b, mostly through OpenRouter, with a cheap direct-answer arm (thinking off) on the same items ([decision](decisions/2026-11-17-direct-answer-arm.md)). Mechanistic interpretability is Phase 2, only for families that get behavioural weight.
 - **Iteration is cheap:**
   - one dev pass over all seven verticals on gpt-oss-20b costs about **$8** (the cross-formalism vertical adds $0.29);
   - a pilot at 10% of full size on gpt-oss-20b plus Qwen3-32B costs about **$45**.
@@ -35,7 +35,9 @@ Recovery tests on fake models are free and run first.
 
 ## 1. Models and conditions
 
-**Primary condition:** open-weight thinking models at best effort (high reasoning effort, 32k cap). Direct-answer and low-budget runs are diagnostic only, used where a design needs them (the depth-stress gadgets, single-pass locality tests). No tiny models.
+**Primary condition:** open-weight thinking models at best effort (high reasoning effort, 32k cap).
+
+**Secondary condition (decided 2026-11-17, [decision record](decisions/2026-11-17-direct-answer-arm.md)):** direct answers, thinking off, on every eval and the same items. It runs on the hybrid Qwen3 checkpoints, so the contrast holds the weights fixed, and costs about 1% of the thinking runs. gpt-oss cannot turn reasoning off; its low effort is a budget arm. Low-budget runs remain diagnostic, used where a design needs them (the depth-stress gadgets, single-pass locality tests). No tiny models.
 
 | Model (OpenRouter) | $/M in | $/M out | Role |
 |--------------------|--------|---------|------|
