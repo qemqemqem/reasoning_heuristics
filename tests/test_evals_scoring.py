@@ -323,6 +323,11 @@ def test_empty_content_inline_think_and_loose_json():
     it = first_with("ans_yn", vertical="B4/C4")
     rec = score_text(it, "", reasoning="... so ANSWER: YES")
     assert rec["category"] == "parse_fail" and "answer_only_in_reasoning" in rec["flags"]
+    # a trace cut at the cap that merely quotes the prompt's format is not "an answer in the reasoning"
+    js = first_with("json_sat", eval_id="E1")
+    rec = score_text(js, None, reasoning='The answer must look like {"satisfiable": true, "assignment": "0101"} ... C008: (x04',
+                     finish="length", completion_tokens=32768)
+    assert rec["category"] == "truncated" and "answer_only_in_reasoning" not in rec["flags"]
     rec = score_text(it, "<think>ANSWER: YES</think>\nANSWER: NO")
     assert rec["parsed"] == "NO" and "think_in_content" in rec["flags"] and rec["n_answer_blocks"] == 1
     js = first_with("json_ent_yn")

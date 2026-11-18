@@ -61,7 +61,9 @@ from reasoning_heuristics.problems.coloring import graph as G
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.sat import cnf as S
 
-SCORER_VERSION = "scorer-1.1.0"  # 1.1.0: a reply that is nothing but the answer, without the ANSWER: marker, is parsed (flag no_answer_marker)
+SCORER_VERSION = "scorer-1.1.1"
+# 1.1.0: a reply that is nothing but the answer, without the ANSWER: marker, is parsed (flag no_answer_marker).
+# 1.1.1: answer_only_in_reasoning is not set on truncated replies (their reasoning often quotes the format).
 
 CATEGORIES = ("ok", "parse_fail", "refusal", "declared_impossible", "partial", "truncated", "api_error")
 
@@ -851,7 +853,9 @@ def score_response(item: dict[str, Any], view: ResponseView, ctx: ItemContext | 
             tail = text[-600:]
             if not text.strip():
                 result = Parse("parse_fail", detail="empty content")
-                if view.reasoning and parse(ctx, visible_text(view.reasoning)[0]) is not None:
+                # only for a finished reply: a reasoning trace cut at the cap often just quotes the
+                # prompt's answer format, which is not an answer
+                if not truncated and view.reasoning and parse(ctx, visible_text(view.reasoning)[0]) is not None:
                     result.flags.append("answer_only_in_reasoning")
             elif _GIVEUP.search(tail):
                 result = Parse("declared_impossible", detail="no answer block; " + _GIVEUP.search(tail).group(0))
