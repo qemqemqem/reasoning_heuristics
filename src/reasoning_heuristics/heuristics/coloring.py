@@ -17,6 +17,7 @@ import numpy as np
 
 from reasoning_heuristics.heuristics.answers import colouring_key
 from reasoning_heuristics.heuristics.base import Prediction, member
+from reasoning_heuristics.heuristics.montecarlo import SAMPLES, SMOOTHING_EPS, random_orders, smoothed
 from reasoning_heuristics.heuristics.tasks import ColouringTask
 from reasoning_heuristics.problems.coloring import graph as G
 from reasoning_heuristics.problems.coloring.graph import Graph, label_key
@@ -128,30 +129,73 @@ def dsatur(task: ColouringTask, params: dict[str, Any]) -> Prediction:
     return Prediction(dict(col), trace)
 
 
+def ro_ff_counts(task: ColouringTask, g: Graph, free: list[str], orders: np.ndarray, k: int | None, mode: str) -> dict[str, int]:
+    """Outcome counts of first-fit over many orders at once (row r visits free[orders[r, 0]], ...);
+    the same outcome as `first_fit` on each row."""
+    n, runs = g.n, len(orders)
+    index = {v: i for i, v in enumerate(g.vertices)}
+    fixed = task.fixed_dict()
+    width = max([g.degree(v) for v in g.vertices] + [1])
+    nbr = np.full((n, width), n, dtype=np.int64)  # padded with n: a column that stays uncoloured
+    for v in g.vertices:
+        nbr[index[v], :g.degree(v)] = [index[u] for u in g.adj[v]]
+    top = max([n, k or 0] + list(fixed.values())) + 2
+    col = np.zeros((runs, n + 1), dtype=np.int64)  # 0 = uncoloured
+    for v, c in fixed.items():
+        col[:, index[v]] = c
+    stuck = np.zeros(runs, dtype=bool)
+    rows = np.arange(runs)[:, None]
+    seq = np.asarray([index[v] for v in free], dtype=np.int64)[orders] if free else np.zeros((runs, 0), dtype=np.int64)
+    for t in range(seq.shape[1]):
+        v = seq[:, t]
+        around = col[rows, nbr[v]]  # colours of v's neighbours (0 = uncoloured)
+        used = np.zeros((runs, top), dtype=bool)
+        used[rows, around] = True
+        used[:, 0] = True
+        c = used.argmin(axis=1)  # the smallest colour no neighbour has
+        if k is not None:
+            over = c > k
+            stuck |= over
+            if mode == "INFEAS":  # the colour in 1..k with the fewest conflicts, ties to the smallest
+                conflicts = np.zeros((runs, top), dtype=np.int64)
+                np.add.at(conflicts, (np.broadcast_to(rows, around.shape), around), 1)
+                c = np.where(over, 1 + conflicts[:, 1:k + 1].argmin(axis=1), c)
+        col[np.arange(runs), v] = c
+    impossible = stuck if (k is not None and mode == "ABORT") else np.zeros(runs, dtype=bool)
+    counts: dict[str, int] = {}
+    if impossible.any():
+        counts["IMPOSSIBLE"] = int(impossible.sum())
+    colourings, n_each = np.unique(col[~impossible, :n], axis=0, return_counts=True)
+    for row, cnt in zip(colourings, n_each):
+        key = colouring_key({v: int(row[index[v]]) for v in g.vertices})
+        counts[key] = counts.get(key, 0) + int(cnt)
+    return counts
+
+
 @member("RO-FF", "C3", D, "commit order uncorrelated with listing, label and answer order; first-fit colour; arbitrary-choice statements", deterministic=False)
 def ro_ff(task: ColouringTask, params: dict[str, Any]) -> Prediction:
-    """Random-order first-fit, estimated by Monte Carlo (fixed seed, so recomputation is exact)."""
+    """Random-order first-fit: 10⁴ Monte-Carlo runs (fixed seed, so recomputation is exact), every
+    observed outcome kept, add-ε smoothing (`montecarlo.smoothed`)."""
     g = effective_graph(task)
     k = params.get("k", task.k)
-    samples = params.get("samples", 2000)
+    samples = params.get("samples", SAMPLES)
+    eps = params.get("smoothing_eps", SMOOTHING_EPS)
     rng = np.random.default_rng(params.get("seed", 0))
-    counts: Counter[str] = Counter()
     free = [v for v in g.vertices if v not in task.fixed_dict()]
-    for _ in range(samples):
-        seq = [free[i] for i in rng.permutation(len(free))]
-        pred = first_fit(task, g, seq, k, params.get("mode", "ABORT"))
-        counts[colouring_key(pred.answer)] += 1
-    top = counts.most_common(params.get("keep", 25))
-    dist = {key: c / samples for key, c in top}
-    rest = 1.0 - sum(dist.values())
-    if rest > 1e-12:
-        dist["_other"] = rest
-    trace = {"samples": samples, "distinct_outcomes": len(counts), "modal_probability": top[0][1] / samples}
-    return Prediction(None, trace, dist)
+    counts = ro_ff_counts(task, g, free, random_orders(rng, len(free), samples), k, params.get("mode", "ABORT"))
+    trace = {"samples": samples, "smoothing_eps": eps, "distinct_outcomes": len(counts),
+             "modal_probability": max(counts.values()) / samples}
+    return Prediction(None, trace, smoothed(counts, eps))
 
 
 @member("GREEDY+REPAIR", "C->F", D, "a complete first-fit pass in order σ, then verification, then local recolouring confined to the top colour class or conflicted vertices")
 def greedy_repair(task: ColouringTask, params: dict[str, Any]) -> Prediction:
+    """C §1.3 GREEDY+REPAIR-σ. Fewest-colours format: FF-σ, then repeatedly try to empty the top
+    colour class by moving each of its vertices (in σ) to the lowest free colour; it stops when a
+    move fails or a fixed vertex holds the top colour. k format: FF-k-σ-INFEAS, then up to
+    `max_steps` (10n) min-conflicts moves (D/F §1.3) on the first conflicted vertex in σ: recolour
+    it to the colour with the fewest conflicts, keeping the current colour if it is among the
+    minima (then nothing can change again, so the repair stops), otherwise the lowest."""
     g = effective_graph(task)
     seq = resolve_order(task, g, params)
     k = params.get("k", task.k)
@@ -162,6 +206,8 @@ def greedy_repair(task: ColouringTask, params: dict[str, Any]) -> Prediction:
     if k is None:
         while True:
             top = max(col.values())
+            if top == 1 or any(c == top for c in fixed.values()):
+                break
             movable = [v for v in seq if col[v] == top and v not in fixed]
             trial = dict(col)
             ok = True
@@ -172,7 +218,7 @@ def greedy_repair(task: ColouringTask, params: dict[str, Any]) -> Prediction:
                     ok = False
                     break
                 trial[v] = lower[0]
-            if not ok or top == 1:
+            if not ok:
                 break
             repaired += movable
             col = trial
@@ -183,10 +229,10 @@ def greedy_repair(task: ColouringTask, params: dict[str, Any]) -> Prediction:
                 break
             v = next(x for x in seq if x in bad)
             counts = Counter(col[u] for u in g.adj[v])
-            best = min((c for c in range(1, k + 1) if c != col[v]), key=lambda c: (counts[c], c))
-            if counts[best] > counts[col[v]]:
-                break  # local minimum: no improving move
-            col[v] = best
+            least = min(counts[c] for c in range(1, k + 1))
+            if counts[col[v]] == least:
+                break  # the current colour is among the minima: kept, so the state is final
+            col[v] = min(c for c in range(1, k + 1) if counts[c] == least)
             repaired.append(v)
     trace = {"commit_order": first.trace_features["commit_order"], "repaired_vertices": repaired,
              "revisions": len(repaired), "colours_used": len(set(col.values())),

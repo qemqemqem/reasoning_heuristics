@@ -9,11 +9,12 @@ dependencies of this package. Surface matching uses a stated proxy instead:
       - every other non-space character is one token,
       - whitespace is free.
 
-Equal proxy counts do not guarantee equal counts under every panel tokenizer, but
-they do for the two edits the generators use most (swapping names drawn from a
-fixed-width pool, and permuting lines), because both preserve the multiset of
-proxy tokens. Per-tokenizer checks against the real vocabularies belong to the
-runner, before a pilot.
+Equal proxy counts do not guarantee equal counts under every panel tokenizer. Of the
+two edits the generators use most, permuting lines preserves the multiset of proxy
+tokens, but swapping names drawn from a fixed-width pool preserves only their number:
+the digits change (v37 -> v12), so a real tokenizer counts the copy the same only if
+every label in the pool has the same token count in it (the check C §1.2 asks for).
+Per-tokenizer checks against the real vocabularies belong to the runner, before a pilot.
 """
 
 from __future__ import annotations
