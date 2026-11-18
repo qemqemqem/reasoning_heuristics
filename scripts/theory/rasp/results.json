@@ -1,5 +1,5 @@
 {
- "assumptions": "Length vs accuracy for every member, the Pareto frontier, two-part MDL winners, and\naverage sensitivity.  Writes results.json and a figure next to the theory note.\n\n    python frontier.py [--n 400] [--seed 0]\n\nTraining-like distributions (stated assumptions, see T2 section 4):\n  SAT-DEC/puzzle  mixed-width CNF (15% units, 35% binary, 50% ternary), n 4-10, m/n 0.5-3\n  SAT-DEC/bench   random 3-SAT, n 8-14, alpha 3.0-5.5 (benchmark-like, near threshold)\n  SAT-VAL         satisfiable random 3-SAT, n 6-12, alpha 1.5-4.2; target = a mentioned var\n  ENT             2-4 premises over 3-4 atoms, consistent, conclusion atom mentioned\n  COL             planted 3-colourable G(n,p), n 6-12, p 0.3-0.6; success = proper, <= 3 colours\n",
+ "assumptions": "Length vs accuracy for every member, the Pareto frontier, two-part MDL winners, and\naverage sensitivity.  Writes results.json and a figure next to the theory note.\n\n    python frontier.py [--n 600] [--seed 0]\n\nTraining-like distributions (stated assumptions, see T2 section 4):\n  SAT-DEC/puzzle  mixed-width CNF (15% units, 35% binary, 50% ternary), n 4-10, m/n 0.5-3\n  SAT-DEC/bench   random 3-SAT, n 8-14, alpha 3.0-5.5 (benchmark-like, near threshold)\n  SAT-VAL         satisfiable random 3-SAT, n 6-12, alpha 1.5-4.2; target = a mentioned var\n  ENT             2-4 premises over 3-4 atoms, consistent, conclusion atom mentioned\n  COL             planted 3-colourable G(n,p), n 6-12, p 0.3-0.6; success = proper, <= 3 colours\n",
  "lengths": {
   "SAT-DEC|ALWAYS-SAT": {
    "name": "ALWAYS-SAT",
@@ -26,44 +26,44 @@
   },
   "SAT-DEC|UP-1c": {
    "name": "UP-1c",
-   "length": 31,
+   "length": 37,
    "counts": {
-    "tok_map": 10,
+    "tok_map": 12,
     "select": 4,
     "sel_width": 1,
-    "aggregate": 6,
-    "seq_map": 10
+    "aggregate": 8,
+    "seq_map": 12
    },
-   "heads": 7,
-   "layers": 3,
+   "heads": 9,
+   "layers": 5,
    "flags": []
   },
   "SAT-DEC|UP-2c": {
    "name": "UP-2c",
-   "length": 51,
+   "length": 57,
    "counts": {
-    "tok_map": 14,
+    "tok_map": 16,
     "select": 5,
     "sel_width": 1,
-    "aggregate": 11,
-    "seq_map": 20
+    "aggregate": 13,
+    "seq_map": 22
    },
-   "heads": 12,
-   "layers": 5,
+   "heads": 14,
+   "layers": 7,
    "flags": []
   },
   "SAT-DEC|UP-3c": {
    "name": "UP-3c",
-   "length": 71,
+   "length": 77,
    "counts": {
-    "tok_map": 18,
+    "tok_map": 20,
     "select": 6,
     "sel_width": 1,
-    "aggregate": 16,
-    "seq_map": 30
+    "aggregate": 18,
+    "seq_map": 32
    },
-   "heads": 17,
-   "layers": 7,
+   "heads": 19,
+   "layers": 9,
    "flags": []
   },
   "SAT-DEC|PROBE-2": {
@@ -196,14 +196,14 @@
   },
   "ENT|UP-1": {
    "name": "UP-1",
-   "length": 54,
+   "length": 48,
    "counts": {
-    "tok_map": 11,
+    "tok_map": 10,
     "select": 9,
-    "aggregate": 14,
-    "seq_map": 20
+    "aggregate": 12,
+    "seq_map": 17
    },
-   "heads": 14,
+   "heads": 12,
    "layers": 4,
    "flags": [
     "nary_map"
@@ -211,14 +211,14 @@
   },
   "ENT|UP-2": {
    "name": "UP-2",
-   "length": 93,
+   "length": 81,
    "counts": {
-    "tok_map": 14,
+    "tok_map": 13,
     "select": 16,
-    "aggregate": 25,
-    "seq_map": 38
+    "aggregate": 21,
+    "seq_map": 31
    },
-   "heads": 25,
+   "heads": 21,
    "layers": 5,
    "flags": [
     "nary_map"
@@ -239,14 +239,14 @@
   },
   "ENT|FIRST.UP-1": {
    "name": "FIRST.UP-1",
-   "length": 54,
+   "length": 48,
    "counts": {
-    "tok_map": 11,
+    "tok_map": 10,
     "select": 9,
-    "aggregate": 14,
-    "seq_map": 20
+    "aggregate": 12,
+    "seq_map": 17
    },
-   "heads": 14,
+   "heads": 12,
    "layers": 4,
    "flags": [
     "nary_map"
@@ -254,14 +254,14 @@
   },
   "ENT|FIRST.UP-2": {
    "name": "FIRST.UP-2",
-   "length": 93,
+   "length": 81,
    "counts": {
-    "tok_map": 14,
+    "tok_map": 13,
     "select": 16,
-    "aggregate": 25,
-    "seq_map": 38
+    "aggregate": 21,
+    "seq_map": 31
    },
-   "heads": 25,
+   "heads": 21,
    "layers": 5,
    "flags": [
     "nary_map"
@@ -367,9 +367,9 @@
   "acc": {
    "ALWAYS-SAT": 0.7183333333333334,
    "DENSITY": 0.7266666666666667,
-   "UP-1c": 0.7183333333333334,
-   "UP-2c": 0.865,
-   "UP-3c": 0.8933333333333333,
+   "UP-1c": 0.865,
+   "UP-2c": 0.8933333333333333,
+   "UP-3c": 0.9083333333333333,
    "PROBE-2": 0.47333333333333333,
    "PROBE-4": 0.5933333333333334,
    "UP-fix (non-causal)": 0.9966666666666667,
@@ -450,9 +450,9 @@
  "sens_SAT-DEC/puzzle": {
   "ALWAYS-SAT": 0.0,
   "DENSITY": 0.0,
-  "UP-1c": 0.0,
-  "UP-2c": 0.01633333333333333,
-  "UP-3c": 0.022999999999999996,
+  "UP-1c": 0.01633333333333333,
+  "UP-2c": 0.022999999999999996,
+  "UP-3c": 0.03022222222222222,
   "PROBE-2": 0.07935954785954785,
   "PROBE-4": 0.09002813852813851,
   "UP-fix (non-causal)": 0.04688888888888889,
@@ -480,12 +480,14 @@
    "by_length": [
     "ALWAYS-SAT",
     "DENSITY",
+    "UP-1c",
     "UP-2c",
     "UP-3c"
    ],
    "by_heads": [
     "ALWAYS-SAT",
     "DENSITY",
+    "UP-1c",
     "UP-2c",
     "UP-3c"
    ],
@@ -512,7 +514,7 @@
     ],
     [
      3000.0,
-     "UP-2c"
+     "UP-1c"
     ],
     [
      10000.0,
@@ -534,11 +536,11 @@
    "capacity_path_b1.5": [
     [
      100.0,
-     "DENSITY"
+     "UP-1c"
     ],
     [
      1000.0,
-     "UP-3c"
+     "UP-2c"
     ],
     [
      10000.0,
@@ -564,11 +566,11 @@
     ],
     [
      1000.0,
-     "DENSITY"
+     "UP-1c"
     ],
     [
      10000.0,
-     "UP-2c"
+     "UP-1c"
     ],
     [
      100000.0,
@@ -885,7 +887,7 @@
     ],
     [
      10000.0,
-     "UP-0 (ECHO)"
+     "UP-1"
     ],
     [
      100000.0,

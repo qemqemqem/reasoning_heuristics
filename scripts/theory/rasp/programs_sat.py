@@ -58,35 +58,45 @@ def density(seq, theta=6):
 
 
 def up_causal(seq, k=2):
-    """k rounds of causal unit propagation; UNSAT iff a conflict is found.
+    """Unit seeding, then k rounds of causal unit propagation; UNSAT iff a conflict is found.
 
     Derived literals live at clause-close positions; a literal looks up its variable among
-    derived literals of *earlier* clauses (previous round).  A clause whose non-false
-    literals collapse to one token (max == min) and which has no true literal is unit.
+    derived literals of *earlier* clauses.  A clause whose non-false literals collapse to
+    one token (max == min) and which has no true literal is unit.
+    Seeding (before round 1) derives every unit clause with no lookup, so round 1 already
+    propagates from them.  (Until 2026-11-17 the seeding was a full round, so "UP-k" did
+    k - 1 propagation rounds and UP-1 could never find a conflict; see docs/theory/README.md.)
     """
     tok = tokens(seq)
     s = cnf_setup(tok)
-    d = full(tok, 0)            # derived signed literal at close positions
     conflict = full(tok, 0)
-    for _ in range(k):
-        dvar = tok_map(d, np.abs)
-        dsgn = tok_map(d, np.sign)
-        look = select(dvar, s["var"], lambda kk, q: (kk == q) & (q > 0))
-        vmax = aggregate(look, dsgn, "max")
-        vmin = aggregate(look, dsgn, "min")
-        packed = seq_map(vmax, vmin, lambda a, b: 3 * a + b)              # in {-4,..,4}
-        # status: 0 unassigned, 1 false, 2 true, 3 both (contradiction); per literal
-        status = seq_map(packed, s["sgn"], _status)
-        hi_val = seq_map(status, tok, lambda st, t: np.where(is_literal(t) & (st != 1), t, -128))
-        lo_val = seq_map(status, tok, lambda st, t: np.where(is_literal(t) & (st != 1), t, 127))
-        true_v = tok_map(status, lambda st: st >= 2)
-        sat = aggregate(s["same_clause"], true_v, "max")
+    for r in range(k + 1):
+        if r == 0:      # seeding: nothing derived yet, so no lookup and no conflict possible
+            hi_val = tok_map(tok, lambda t: np.where(is_literal(t), t, -128))
+            lo_val = tok_map(tok, lambda t: np.where(is_literal(t), t, 127))
+            open_c = s["close"]
+        else:
+            dvar = tok_map(d, np.abs)
+            dsgn = tok_map(d, np.sign)
+            look = select(dvar, s["var"], lambda kk, q: (kk == q) & (q > 0))
+            vmax = aggregate(look, dsgn, "max")
+            vmin = aggregate(look, dsgn, "min")
+            packed = seq_map(vmax, vmin, lambda a, b: 3 * a + b)              # in {-4,..,4}
+            # status: 0 unassigned, 1 false, 2 true, 3 both (contradiction); per literal
+            status = seq_map(packed, s["sgn"], _status)
+            hi_val = seq_map(status, tok, lambda st, t: np.where(is_literal(t) & (st != 1), t, -128))
+            lo_val = seq_map(status, tok, lambda st, t: np.where(is_literal(t) & (st != 1), t, 127))
+            true_v = tok_map(status, lambda st: st >= 2)
+            sat = aggregate(s["same_clause"], true_v, "max")
+            open_c = seq_map(sat, s["close"], lambda a, c: (c != 0) & (a == 0))  # unsatisfied close
         hi = aggregate(s["same_clause"], hi_val, "max")
         lo = aggregate(s["same_clause"], lo_val, "min")
-        open_c = seq_map(sat, s["close"], lambda a, c: (c != 0) & (a == 0))  # unsatisfied close
         unit = seq_map(hi, lo, lambda h, l: np.where(h == -128, -128, np.where(h == l, h, 0)))
         # unit: the single free literal; -128: no free literal (all false); 0: otherwise
         new = seq_map(unit, open_c, lambda u, o: np.where(o != 0, u, 0))
+        if r == 0:
+            d = new
+            continue
         conflict = seq_map(conflict, new, lambda c, n: (c != 0) | (n == -128))
         bad_lit = tok_map(status, lambda st: st == 3)
         conflict = conflict | bad_lit
@@ -140,10 +150,11 @@ def ref_density(clauses, n, theta=6):
 
 
 def ref_up_causal(clauses, k=2):
+    """Unit seeding (iteration 0, empty derived set), then k causal propagation rounds."""
     m = len(clauses)
     d = [0] * m
     conflict = False
-    for _ in range(k):
+    for _ in range(k + 1):
         new_d = list(d)
         for j, c in enumerate(clauses):
             signs = {}

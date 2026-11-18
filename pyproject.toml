@@ -17,6 +17,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+theory = ["matplotlib", "tiktoken"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

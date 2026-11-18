@@ -1,14 +1,14 @@
 {
  "order_effect_SAT_puzzle": {
   "units first": {
-   "UP-2c": 0.885,
-   "UP-3c": 0.94,
-   "UP-4c": 0.96,
+   "UP-2c": 0.94,
+   "UP-3c": 0.96,
+   "UP-4c": 0.965,
    "UP-fix": 0.995
   },
   "as drawn": {
-   "UP-2c": 0.868,
-   "UP-3c": 0.895,
+   "UP-2c": 0.895,
+   "UP-3c": 0.908,
    "UP-4c": 0.908,
    "UP-fix": 0.995
   },
@@ -52,8 +52,8 @@
    "OOD (5-6 atoms, 4-6 premises) commission": 0.12903225806451613
   },
   "UP-1": {
-   "length": 54,
-   "heads": 14,
+   "length": 48,
+   "heads": 12,
    "layers": 4,
    "train (3-4 atoms, 2-4 premises)": 0.9625,
    "train (3-4 atoms, 2-4 premises) commission": 0.0,
@@ -61,8 +61,8 @@
    "OOD (5-6 atoms, 4-6 premises) commission": 0.0
   },
   "UP-2": {
-   "length": 93,
-   "heads": 25,
+   "length": 81,
+   "heads": 21,
    "layers": 5,
    "train (3-4 atoms, 2-4 premises)": 0.9675,
    "train (3-4 atoms, 2-4 premises) commission": 0.0,
@@ -70,8 +70,8 @@
    "OOD (5-6 atoms, 4-6 premises) commission": 0.0
   },
   "UP-3": {
-   "length": 141,
-   "heads": 38,
+   "length": 122,
+   "heads": 32,
    "layers": 6,
    "train (3-4 atoms, 2-4 premises)": 0.9675,
    "train (3-4 atoms, 2-4 premises) commission": 0.0,
@@ -79,8 +79,8 @@
    "OOD (5-6 atoms, 4-6 premises) commission": 0.0
   },
   "FIRST.UP-2": {
-   "length": 93,
-   "heads": 25,
+   "length": 81,
+   "heads": 21,
    "layers": 5,
    "train (3-4 atoms, 2-4 premises)": 0.88,
    "train (3-4 atoms, 2-4 premises) commission": 0.1522491349480969,

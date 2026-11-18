@@ -136,8 +136,8 @@
 
 **What theory predicts before the data** ([theory/T1](theory/T1_expressivity.md) §3; simulated exact search with fixed seeds):
 
-- **The line sits where the ordering rule puts it.** For exact DPLL on unsatisfiable random 3-SAT at a 32k budget, n\* ≈ 30 when branching in listing order and ≈ 50 when branching most-constrained-first (verbose traces). Terse traces add 13–30 variables. Satisfiable items cross near n ≈ 70–80.
-- **Budget buys little.** Each ×4 of budget adds only about 11–31 variables. So n\* is a fingerprint of the model's branching rule (T1 P6) and moves with the log of the budget (T1 P7).
+- **The line sits where the ordering rule puts it.** For exact DPLL on unsatisfiable random 3-SAT at a 32k budget, n\* ≈ 30 when branching in listing order and ≈ 50 with Jeroslow–Wang branching, a MOMS-like global score (verbose traces). Terse traces add 13–30 variables. Satisfiable items cross near n ≈ 40 in listing order and n ≈ 70–80 with Jeroslow–Wang branching.
+- **Budget buys little.** Each ×4 of budget adds only about 7–14 variables under listing order and 16–31 under Jeroslow–Wang branching. So n\* is a fingerprint of the model's branching rule (T1 P6) and moves with the log of the budget (T1 P7).
 - **Compute forces heuristics only in some domains.** At our sizes, colouring (≤ 40 nodes) and entailment (3–12 premises) sit *below* the line for a sensible exact method: DSATUR-ordered search needs about n node visits (listing-order search crosses at n ≈ 20–25), and truth tables fit to about 9 atoms. Heuristics are forced only on SAT above n ≈ 30–50, on TSP with 10–14 cities, and on large-capacity knapsack.
 - **Consequence for the argument.** Below the line, errors at best effort are not forced by compute. They are either noise or a shortcut the model *chose*. The paper therefore makes two claims and keeps them apart:
   - forced heuristics: SAT sizes centred on each model's n\*;
@@ -147,8 +147,8 @@
 
 | Domain | Our sizes | Exact method and ordering | Predicted n\* | Regime at our sizes |
 |---|---|---|---|---|
-| 3-SAT, UNSAT | n = 10–60 | DPLL, listing order / most-constrained-first | ≈ 30 / ≈ 50 (verbose) | Straddles the line |
-| 3-SAT, SAT | n = 10–60 | same | ≈ 70–80 | Below |
+| 3-SAT, UNSAT | n = 10–60 | DPLL, listing order / Jeroslow–Wang (MOMS-like) | ≈ 30 / ≈ 50 (verbose) | Straddles the line |
+| 3-SAT, SAT | n = 10–60 | same | ≈ 40 / ≈ 70–80 | Straddles with listing order; below with Jeroslow–Wang |
 | Colouring | 8–40 nodes | Backtracking, listing order / DSATUR order | ≈ 20–25 / ≫ 40 | Below with DSATUR order; straddles with listing order. Random graphs; re-check on the filtered items |
 | Entailment | 3–12 premises | Truth table / case split or DPLL | ≈ 9 atoms (truth table); far more by case split | Below, except possibly B4 E1L's 20-atom items |
 | TSP | 10–14 cities | Held–Karp DP (n²·2ⁿ ≈ 10⁵–3·10⁶ steps) | < 10 | Above: heuristics forced |
@@ -259,10 +259,10 @@ T1 acts as a gate (not computable cheaply means not available). T2 and T3 give t
 
 **What the priors say.**
 
-1. **The regimes split, and all three lenses agree on the split.** Direct answers favour short, shallow programs: defaults, the density cue, a few propagation rounds, one-shot scoring. Thinking flips the ranking toward truncated exact search. It fits the budget below n\* (T1). Its per-step program is about as long as greedy's and far more accurate on training-size items (T2). Reasoning-model traces build and navigate search trees, and output length tracks solver conflicts (T3).
+1. **The regimes split, and the lenses mostly agree on the split.** Direct answers favour short, shallow programs: defaults, the density cue, a few propagation rounds, one-shot scoring. Thinking flips the ranking toward truncated exact search. It fits the budget below n\* (T1). Its per-step program is estimated to be about as long as greedy's and is more accurate on training-size items (T2, weaker evidence in this column). Reasoning-model traces build and navigate search trees (T3), though systematic `DPLL-b` scores only +1 there and whether output length tracks solver conflicts is an open prediction.
 2. **In thinking mode the families compose.** Search opens with a greedy candidate (C1/C2), orders values by a one-shot score (C0), propagates units (B1), answers a default at the cap (A1), and slips (nuisance). For thinking runs the zoo therefore includes composite members `SEARCH(b, order, value, default)`, and §6.2 identifies their parameters, not a family label alone.
 3. **Restriction (B4, including ETR) is the most informative contested family.**
-   - `FIRST∘UP-k` and `BICOND∘UP-k` are exactly as long as `UP-k` and less accurate under validity labels (T2). So B4 weight, if found, comes from training data, not from simplicity.
+   - `FIRST∘UP-k` is the same length as `UP-k` (only under the convention that a table swap costs nothing), `BICOND∘UP-k` is 12–16% longer, and both are less accurate under validity labels (T2). So B4 weight, if found, comes from training data, not from simplicity.
    - Joint prediction: B4 weight is higher in natural-language than in formal framings, does not grow with size at fixed framing, and falls with thinking. Interpretive members (`BICOND`, `CLOSED-WORLD`) fall least.
    - This is the sharpest test of H6.
 4. **Position effects are architectural.** They are well documented (T3) but on no frontier (T2). The causal mask explains them. They should survive thinking as *which* correct answer is returned, and grow with trace length.
@@ -471,11 +471,11 @@ Training-as-adaptation (F3): choosing heuristics by adaptation is intractable in
 **What the first draft found** ([theory/T2](theory/T2_rasp_learnability.md); programs run and tested against reference implementations in `scripts/theory/rasp/`):
 
 1. **Two kinds of program.** For a direct answer the program computes the answer. For a thinking model the relevant program is the *per-step* function applied at each trace step, and the heuristic is its iteration. The two rank the families differently.
-2. **Direct answers: short cues and shallow propagation win.** `DENSITY` (8 primitives, 2 layers) is the only short program above base rate on random 3-SAT. `UP-k` is on the frontier for entailment and puzzle-like CNF. `POLARITY` (9) beats causal `BP-2` (81) for choosing one variable's value.
-3. **Thinking: truncated exact search wins below n\*.** Per-step programs for C, D and F share about 40–50 primitives of trace machinery and differ by only 10–40. Iterated accuracy differs a lot (random 3-SAT, n = 20: `DPLL-b` 1.00, `WALK` 0.88, `UC` 0.43). So two-part MDL favours D.
-4. **Restriction is a data effect.** B4 members cost no extra length, so the account can explain B4 weight only through training labels that endorse the restricted reading (≈ 50% for `FIRST`, ≈ 70–80% for `BICOND` on discriminating items).
-5. **The account predicts trace style.** A terse greedy step with state is not RASP-L. A verbose "restate the neighbours' colours, then decide" step is a strict 3-layer program that reproduces first-fit exactly. Traces should be copy-then-evaluate, with tokens scaling with Σdeg or with m per decision.
-6. **Out-of-distribution shadows.** With a fixed atom vocabulary, the MDL-optimal direct entailment program is a 3-layer parallel truth table (`PROBE-16`). It is exact on training-size items and becomes a fixed-probe sampler with 56% commission on larger ones. A heuristic observed on hard items can be the out-of-distribution behaviour of a program that was exact in training.
+2. **Direct answers: short cues and shallow propagation win.** `DENSITY` (8 primitives, 2 layers) is the only short program above base rate on random 3-SAT. `UP-k` is on the frontier for entailment and puzzle-like CNF. `POLARITY` (9) is as accurate as causal int8 `BP-2` (81) for choosing one variable's value (non-causal float BP is more accurate).
+3. **Thinking: truncated exact search wins below n\*.** Per-step programs for C, D and F share about 40–50 primitives of trace machinery and differ by only 10–40. Iterated accuracy differs a lot (random 3-SAT, n = 20: `DPLL-b` 0.975–1.0, `WALK` 0.875, `UC` 0.425; 40 items per cell). So two-part MDL favours D.
+4. **Restriction is a data effect.** B4 members are no shorter than `UP-k` (`FIRST` equal under the table-swap convention, `BICOND` 12–16% longer), so the account can explain B4 weight only through training labels that endorse the restricted reading (≈ 50% for `FIRST`, ≈ 70–80% for `BICOND` on discriminating items).
+5. **The account predicts trace style.** We found no RASP-L program for a terse greedy step with state (a counting argument, not a proof). A verbose "restate the neighbours' colours, then decide" step is a 3-layer program, under the n-ary-map counting convention, that reproduces first-fit exactly. Traces should be copy-then-evaluate, with tokens scaling with Σdeg or with m per decision.
+6. **Out-of-distribution shadows.** With a fixed atom vocabulary, the MDL-optimal direct entailment program is a 3-layer parallel truth table (`PROBE-16`). Under linear two-part MDL at N ≳ 10⁴, with a vocabulary of at most 4 atoms (the capacity reading delays it to N = 10⁸), it is exact on training-size items and becomes a fixed-probe sampler with 56% commission on larger ones. A heuristic observed on hard items can be the out-of-distribution behaviour of a program that was exact in training.
 7. **Caveat.** Under linear two-part MDL, every switch to a longer program happens by N ≈ 10³–10⁴ examples. At LLM scale, length alone is nearly inert. The constraints that bite are depth, the causal mask, uniformity and optimisation, so §10 leans on those, and on the toy-model test, rather than on length alone.
 
 **Table 15. Programs per family.** Lengths and the prediction were written down before the evals (first draft, T2 §8). Length = RASP-L primitives / attention heads; programs are hand-written upper bounds.
@@ -483,8 +483,8 @@ Training-as-adaptation (F3): choosing heuristics by adaptation is intractable in
 | Family (member) | RASP-L length | Depth (layers) | Depth class | Accuracy on a training-like distribution | On the frontier? | Predicted rank | Observed rank |
 |-----------------|---------------|----------------|-------------|------------------------------------------|------------------|----------------|---------------|
 | A (`DENSITY`) | 8 / 2 | 2 | const | 0.787 random 3-SAT (base 0.728); 0.727 puzzle CNF (base 0.718) | ✓ | 1 on random 3-SAT; 3 on puzzle CNF | X |
-| B1 (`UP-2`) | 51 / 12 SAT (causal); 93 / 25 ENT | 5 | const (fixed k) | 0.865 puzzle CNF; 0.728 random 3-SAT (inert); 0.967 ENT | ✓ puzzle CNF, ENT (by length) | 1 on ENT (fresh names) and puzzle CNF | X |
-| B4 (`FIRST`) | 17 / 3 alone (= `ECHO`); 93 / 25 with `UP-2` | 2 / 5 | const | 0.848 / 0.875 | ✗ (dominated at equal length) | Below `UP-k` and `ECHO` unless ≥ 50% of labels endorse it | X |
+| B1 (`UP-2`) | 57 / 14 SAT (causal); 81 / 21 ENT | 7 / 5 | const (fixed k) | 0.893 puzzle CNF; 0.728 random 3-SAT (inert); 0.967 ENT | ✓ puzzle CNF, ENT (by length) | 1 on ENT (fresh names) and puzzle CNF | X |
+| B4 (`FIRST`) | 17 / 3 alone (= `ECHO`); 81 / 21 with `UP-2` (`BICOND` 93 / 25) | 2 / 5 | const | 0.848 / 0.875 | ✗ (dominated at equal length) | Below `UP-k` and `ECHO` unless ≥ 50% of labels endorse it | X |
 | C (`FIRST-FIT`) | per step: 53 / 14 verbose; 25 / 6 terse with set-valued state (not RASP-L) | 3 per step | seq (const per step) | 0.818 (n 6–12, ≤ 3 colours) | ✓ per step | 1 for written-out colouring with thinking off; 2–3 in thinking | X |
 | C0 (`POLARITY`) | 9 / 2 | 2 | const | 0.960 (single-variable value choice) | ✓ | 1 on value choice | X |
 | E (`BP-2`) | 81 / 25 (causal) | 6 | const | 0.958 (vs `POLARITY` 0.960) | ✗ | Below `POLARITY` | X |
