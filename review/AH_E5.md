@@ -81,20 +81,20 @@ Think as carefully as you need. Then end your reply with your final answer as JS
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| A3 TT[FIRST-FIT] | A3 | Ann=1 Cal=1 Gil=1 Kit=2 Lee=2 Ned=1 Otto=3 Sue=2 Ted=3 Wes=2 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I. | restates the rule in textbook form ('pairs need different rooms'); checks use textbook semantics |
-| A3 TT[exact] | A3 | Ann=2 Cal=2 Gil=3 Kit=1 Lee=1 Ned=2 Otto=3 Sue=1 Ted=2 Wes=1 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I. | restates the rule in textbook form ('pairs need different rooms'); checks use textbook semantics |
-| B1 DROP-CONSTRAINT(last 3) | B1 | Ann=2 Cal=4 Gil=3 Kit=4 Lee=3 Ned=1 Otto=4 Sue=2 Ted=3 Wes=1 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I. | neighbourhoods quoted without the late edges; conflicts on dropped edges |
-| C1 FIRST-FIT (stated rule) | C1 | IMPOSSIBLE | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I. | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
-| C2 DSATUR (stated rule) | C2 | Ann=2 Cal=4 Gil=3 Kit=4 Lee=3 Ned=1 Otto=4 Sue=2 Ted=3 Wes=1 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I. | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
-| D DPLL (first solution) | D | Ann=1 Cal=2 Gil=3 Kit=2 Lee=3 Ned=4 Otto=2 Sue=1 Ted=3 Wes=4 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I. | chronological backtracking in order σ, smallest colour first; IMPOSSIBLE only after exhaustive refutation, or… |
-| exact | null | POSSIBLE | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I. | a completed procedure: a checked witness, or a closed refutation |
+| A3 TT[FIRST-FIT] | A3 | Ann=1 Cal=1 Gil=1 Kit=2 Lee=2 Ned=1 Otto=3 Sue=2 Ted=3 Wes=2 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | restates the rule in textbook form ('pairs need different rooms'); checks use textbook semantics |
+| A3 TT[exact] | A3 | Ann=2 Cal=2 Gil=3 Kit=1 Lee=1 Ned=2 Otto=3 Sue=1 Ted=2 Wes=1 | set-valued: uniform over its 864 solutions (valid assignment to at most 4 rooms under the textbook rule); a listed solution gets (1 - eps)/… | restates the rule in textbook form ('pairs need different rooms'); checks use textbook semantics |
+| B1 DROP-CONSTRAINT(last 3) | B1 | Ann=2 Cal=4 Gil=3 Kit=4 Lee=3 Ned=1 Otto=4 Sue=2 Ted=3 Wes=1 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | neighbourhoods quoted without the late edges; conflicts on dropped edges |
+| C1 FIRST-FIT (stated rule) | C1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| C2 DSATUR (stated rule) | C2 | Ann=2 Cal=4 Gil=3 Kit=4 Lee=3 Ned=1 Otto=4 Sue=2 Ted=3 Wes=1 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| D DPLL (first solution) | D | Ann=1 Cal=2 Gil=3 Kit=2 Lee=3 Ned=4 Otto=2 Sue=1 Ted=3 Wes=4 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | chronological backtracking with forward checking in order σ, smallest colour first; IMPOSSIBLE only after exh… |
+| exact | null | POSSIBLE | set-valued with a unique solution (valid assignment to at most 4 rooms under the stated rule): deterministic, p_h(its solution) = 0.920 (un… | a completed procedure: a checked witness, or a closed refutation |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = A3 TT[FIRST-FIT]'s prediction*: B1 DROP-CONSTRAINT(last 3) +1.57, C1 FIRST-FIT (stated rule) +1.57, C2 DSATUR (stated rule) +1.57, D DPLL (first solution) +1.57, exact +1.57, A3 TT[exact] +1.55
-- *answer = C2 DSATUR (stated rule) / D DPLL (first solution) / B1 DROP-CONSTRAINT(last 3)'s…*: A3 TT[FIRST-FIT] +1.57, A3 TT[exact] +1.57, C1 FIRST-FIT (stated rule) +1.57, B1 DROP-CONSTRAINT(last 3) +0.00, C2 DSATUR (stated rule) +0.00, D DPLL (first solution) +0.00
-- *answer = IMPOSSIBLE*: A3 TT[FIRST-FIT] +1.57, A3 TT[exact] +1.57, B1 DROP-CONSTRAINT(last 3) +1.57, C2 DSATUR (stated rule) +1.57, D DPLL (first solution) +1.57, exact +1.57
-- *answer = other*: A3 TT[FIRST-FIT] +1.57, B1 DROP-CONSTRAINT(last 3) +1.57, C1 FIRST-FIT (stated rule) +1.57, C2 DSATUR (stated rule) +1.57, D DPLL (first solution) +1.57, exact +1.57
+- *answer = A3 TT[FIRST-FIT]'s prediction*: B1 DROP-CONSTRAINT(last 3) +1.66, C1 FIRST-FIT (stated rule) +1.66, C2 DSATUR (stated rule) +1.66, D DPLL (first solution) +1.66, exact +1.66, A3 TT[exact] +1.64
+- *answer = IMPOSSIBLE*: A3 TT[FIRST-FIT] +1.66, A3 TT[exact] +1.66, B1 DROP-CONSTRAINT(last 3) +1.66, C2 DSATUR (stated rule) +1.66, D DPLL (first solution) +1.66, exact +1.66
+- *answer = exact / C2 DSATUR (stated rule) / D DPLL (first solution) / B1 DROP-CONSTRAINT(l…*: A3 TT[FIRST-FIT] +1.66, A3 TT[exact] +1.66, C1 FIRST-FIT (stated rule) +1.66, B1 DROP-CONSTRAINT(last 3) +0.00, C2 DSATUR (stated rule) +0.00, D DPLL (first solution) +0.00
+- *answer = other*: A3 TT[FIRST-FIT] +0.00, A3 TT[exact] +0.00, B1 DROP-CONSTRAINT(last 3) +0.00, C1 FIRST-FIT (stated rule) +0.00, C2 DSATUR (stated rule) +0.00, D DPLL (first solution) +0.00
 
 Notes: Rule inversion: under 'only friends may share', the answer is a proper colouring of the complement graph; the solution sets are disjoint for n > k.
 
@@ -124,20 +124,20 @@ Think as carefully as you need. Then end your reply with your final answer as JS
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| A3 TT[FIRST-FIT] | A3 | Ann=1 Cal=1 Gil=1 Kit=2 Lee=2 Ned=1 Otto=3 Sue=2 Ted=3 Wes=2 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I+R. | restates the rule in textbook form ('pairs need different rooms'); checks use textbook semantics |
-| A3 TT[exact] | A3 | Ann=2 Cal=2 Gil=3 Kit=1 Lee=1 Ned=2 Otto=3 Sue=1 Ted=2 Wes=1 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I+R. | restates the rule in textbook form ('pairs need different rooms'); checks use textbook semantics |
-| B1 DROP-CONSTRAINT(last 3) | B1 | Ann=2 Cal=4 Gil=3 Kit=4 Lee=3 Ned=1 Otto=4 Sue=2 Ted=3 Wes=1 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I+R. | neighbourhoods quoted without the late edges; conflicts on dropped edges |
-| C1 FIRST-FIT (stated rule) | C1 | IMPOSSIBLE | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I+R. | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
-| C2 DSATUR (stated rule) | C2 | Ann=2 Cal=4 Gil=3 Kit=4 Lee=3 Ned=1 Otto=4 Sue=2 Ted=3 Wes=1 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I+R. | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
-| D DPLL (first solution) | D | Ann=1 Cal=2 Gil=3 Kit=2 Lee=3 Ned=4 Otto=2 Sue=1 Ted=3 Wes=4 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I+R. | chronological backtracking in order σ, smallest colour first; IMPOSSIBLE only after exhaustive refutation, or… |
-| exact | null | POSSIBLE | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I+R. | a completed procedure: a checked witness, or a closed refutation |
+| A3 TT[FIRST-FIT] | A3 | Ann=1 Cal=1 Gil=1 Kit=2 Lee=2 Ned=1 Otto=3 Sue=2 Ted=3 Wes=2 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | restates the rule in textbook form ('pairs need different rooms'); checks use textbook semantics |
+| A3 TT[exact] | A3 | Ann=2 Cal=2 Gil=3 Kit=1 Lee=1 Ned=2 Otto=3 Sue=1 Ted=2 Wes=1 | set-valued: uniform over its 864 solutions (valid assignment to at most 4 rooms under the textbook rule); a listed solution gets (1 - eps)/… | restates the rule in textbook form ('pairs need different rooms'); checks use textbook semantics |
+| B1 DROP-CONSTRAINT(last 3) | B1 | Ann=2 Cal=4 Gil=3 Kit=4 Lee=3 Ned=1 Otto=4 Sue=2 Ted=3 Wes=1 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | neighbourhoods quoted without the late edges; conflicts on dropped edges |
+| C1 FIRST-FIT (stated rule) | C1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| C2 DSATUR (stated rule) | C2 | Ann=2 Cal=4 Gil=3 Kit=4 Lee=3 Ned=1 Otto=4 Sue=2 Ted=3 Wes=1 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| D DPLL (first solution) | D | Ann=1 Cal=2 Gil=3 Kit=2 Lee=3 Ned=4 Otto=2 Sue=1 Ted=3 Wes=4 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | chronological backtracking with forward checking in order σ, smallest colour first; IMPOSSIBLE only after exh… |
+| exact | null | POSSIBLE | set-valued with a unique solution (valid assignment to at most 4 rooms under the stated rule): deterministic, p_h(its solution) = 0.920 (un… | a completed procedure: a checked witness, or a closed refutation |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = A3 TT[FIRST-FIT]'s prediction*: B1 DROP-CONSTRAINT(last 3) +1.57, C1 FIRST-FIT (stated rule) +1.57, C2 DSATUR (stated rule) +1.57, D DPLL (first solution) +1.57, exact +1.57, A3 TT[exact] +1.55
-- *answer = C2 DSATUR (stated rule) / D DPLL (first solution) / B1 DROP-CONSTRAINT(last 3)'s…*: A3 TT[FIRST-FIT] +1.57, A3 TT[exact] +1.57, C1 FIRST-FIT (stated rule) +1.57, B1 DROP-CONSTRAINT(last 3) +0.00, C2 DSATUR (stated rule) +0.00, D DPLL (first solution) +0.00
-- *answer = IMPOSSIBLE*: A3 TT[FIRST-FIT] +1.57, A3 TT[exact] +1.57, B1 DROP-CONSTRAINT(last 3) +1.57, C2 DSATUR (stated rule) +1.57, D DPLL (first solution) +1.57, exact +1.57
-- *answer = other*: A3 TT[FIRST-FIT] +1.57, B1 DROP-CONSTRAINT(last 3) +1.57, C1 FIRST-FIT (stated rule) +1.57, C2 DSATUR (stated rule) +1.57, D DPLL (first solution) +1.57, exact +1.57
+- *answer = A3 TT[FIRST-FIT]'s prediction*: B1 DROP-CONSTRAINT(last 3) +1.66, C1 FIRST-FIT (stated rule) +1.66, C2 DSATUR (stated rule) +1.66, D DPLL (first solution) +1.66, exact +1.66, A3 TT[exact] +1.64
+- *answer = IMPOSSIBLE*: A3 TT[FIRST-FIT] +1.66, A3 TT[exact] +1.66, B1 DROP-CONSTRAINT(last 3) +1.66, C2 DSATUR (stated rule) +1.66, D DPLL (first solution) +1.66, exact +1.66
+- *answer = exact / C2 DSATUR (stated rule) / D DPLL (first solution) / B1 DROP-CONSTRAINT(l…*: A3 TT[FIRST-FIT] +1.66, A3 TT[exact] +1.66, C1 FIRST-FIT (stated rule) +1.66, B1 DROP-CONSTRAINT(last 3) +0.00, C2 DSATUR (stated rule) +0.00, D DPLL (first solution) +0.00
+- *answer = other*: A3 TT[FIRST-FIT] +0.00, A3 TT[exact] +0.00, B1 DROP-CONSTRAINT(last 3) +0.00, C1 FIRST-FIT (stated rule) +0.00, C2 DSATUR (stated rule) +0.00, D DPLL (first solution) +0.00
 
 Notes: Rule inversion: under 'only friends may share', the answer is a proper colouring of the complement graph; the solution sets are disjoint for n > k.
 
@@ -218,18 +218,18 @@ Think as carefully as you need. Then end your reply with your final answer as JS
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| A3 TT[exact] | A3 | x01=F x02=T x03=F x04=F x05=T x06=T x07=T x08=T x09=T x10=T x11=T x12=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I. | restates the rule in standard CNF form; checks use textbook semantics |
-| C0 POLARITY | C0 | x01=F x02=F x03=T x04=F x05=F x06=T x07=F x08=F x09=T x10=T x11=F x12=F | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I. | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
-| C1 GREEDY | C1 | x01=F x02=T x03=F x04=F x05=F x06=T x07=T x08=F x09=T x10=T x11=F x12=F | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I. | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
-| D DPLL (first solution) | D | x01=T x02=F x03=T x04=T x05=F x06=F x07=F x08=F x09=F x10=F x11=F x12=F | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I. | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| exact | null | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I. | a witness checked against every clause, or a closed refutation |
+| A3 TT[exact] | A3 | x01=F x02=T x03=F x04=F x05=T x06=T x07=T x08=T x09=T x10=T x11=T x12=T | set-valued with a unique solution (satisfying assignment under the textbook rule): deterministic, p_h(its solution) = 0.917 (uniform slip e… | restates the rule in standard CNF form; checks use textbook semantics |
+| C0 POLARITY | C0 | x01=F x02=F x03=T x04=F x05=F x06=T x07=F x08=F x09=T x10=T x11=F x12=F | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
+| C1 GREEDY | C1 | x01=F x02=T x03=F x04=F x05=F x06=T x07=T x08=F x09=T x10=T x11=F x12=F | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
+| D DPLL (first solution) | D | x01=T x02=F x03=T x04=T x05=F x06=F x07=F x08=F x09=F x10=F x11=F x12=F | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
+| exact | null | SAT | set-valued with a unique solution (satisfying assignment under the stated rule): deterministic, p_h(its solution) = 0.917 (uniform slip eps… | a witness checked against every clause, or a closed refutation |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = C0 POLARITY's prediction*: A3 TT[exact] +1.57, C1 GREEDY +1.57, D DPLL (first solution) +1.57, exact +1.57, C0 POLARITY +0.00
-- *answer = C1 GREEDY's prediction*: A3 TT[exact] +1.57, C0 POLARITY +1.57, D DPLL (first solution) +1.57, exact +1.57, C1 GREEDY +0.00
-- *answer = D DPLL (first solution)'s prediction*: A3 TT[exact] +1.57, C0 POLARITY +1.57, C1 GREEDY +1.57, D DPLL (first solution) +0.00, exact +0.00
-- *answer = other*: C0 POLARITY +1.57, C1 GREEDY +1.57, D DPLL (first solution) +1.57, exact +1.57, A3 TT[exact] +0.00
+- *answer = A3 TT[exact]'s prediction*: C0 POLARITY +1.74, C1 GREEDY +1.74, D DPLL (first solution) +1.74, exact +1.74, A3 TT[exact] +0.00
+- *answer = C0 POLARITY's prediction*: A3 TT[exact] +1.74, C1 GREEDY +1.74, D DPLL (first solution) +1.74, exact +1.74, C0 POLARITY +0.00
+- *answer = C1 GREEDY's prediction*: A3 TT[exact] +1.74, C0 POLARITY +1.74, D DPLL (first solution) +1.74, exact +1.74, C1 GREEDY +0.00
+- *answer = UNSAT*: A3 TT[exact] +0.00, C0 POLARITY +0.00, C1 GREEDY +0.00, D DPLL (first solution) +0.00, exact +0.00
 
 Notes: Rule inversion: F-bar = every literal flipped; F and F-bar are jointly unsatisfiable, so no textbook solution is valid under inversion.
 
@@ -311,18 +311,18 @@ Think as carefully as you need. Then end your reply with your final answer as JS
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| A3 TT[exact] | A3 | x01=F x02=T x03=F x04=F x05=T x06=T x07=T x08=T x09=T x10=T x11=T x12=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I+R. | restates the rule in standard CNF form; checks use textbook semantics |
-| C0 POLARITY | C0 | x01=F x02=F x03=T x04=F x05=F x06=T x07=F x08=F x09=T x10=T x11=F x12=F | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I+R. | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
-| C1 GREEDY | C1 | x01=F x02=T x03=F x04=F x05=F x06=T x07=T x08=F x09=T x10=T x11=F x12=F | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I+R. | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
-| D DPLL (first solution) | D | x01=T x02=F x03=T x04=T x05=F x06=F x07=F x08=F x09=F x10=F x11=F x12=F | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I+R. | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| exact | null | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing I+R. | a witness checked against every clause, or a closed refutation |
+| A3 TT[exact] | A3 | x01=F x02=T x03=F x04=F x05=T x06=T x07=T x08=T x09=T x10=T x11=T x12=T | set-valued with a unique solution (satisfying assignment under the textbook rule): deterministic, p_h(its solution) = 0.917 (uniform slip e… | restates the rule in standard CNF form; checks use textbook semantics |
+| C0 POLARITY | C0 | x01=F x02=F x03=T x04=F x05=F x06=T x07=F x08=F x09=T x10=T x11=F x12=F | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
+| C1 GREEDY | C1 | x01=F x02=T x03=F x04=F x05=F x06=T x07=T x08=F x09=T x10=T x11=F x12=F | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
+| D DPLL (first solution) | D | x01=T x02=F x03=T x04=T x05=F x06=F x07=F x08=F x09=F x10=F x11=F x12=F | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
+| exact | null | SAT | set-valued with a unique solution (satisfying assignment under the stated rule): deterministic, p_h(its solution) = 0.917 (uniform slip eps… | a witness checked against every clause, or a closed refutation |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = C0 POLARITY's prediction*: A3 TT[exact] +1.57, C1 GREEDY +1.57, D DPLL (first solution) +1.57, exact +1.57, C0 POLARITY +0.00
-- *answer = C1 GREEDY's prediction*: A3 TT[exact] +1.57, C0 POLARITY +1.57, D DPLL (first solution) +1.57, exact +1.57, C1 GREEDY +0.00
-- *answer = D DPLL (first solution)'s prediction*: A3 TT[exact] +1.57, C0 POLARITY +1.57, C1 GREEDY +1.57, D DPLL (first solution) +0.00, exact +0.00
-- *answer = other*: C0 POLARITY +1.57, C1 GREEDY +1.57, D DPLL (first solution) +1.57, exact +1.57, A3 TT[exact] +0.00
+- *answer = A3 TT[exact]'s prediction*: C0 POLARITY +1.74, C1 GREEDY +1.74, D DPLL (first solution) +1.74, exact +1.74, A3 TT[exact] +0.00
+- *answer = C0 POLARITY's prediction*: A3 TT[exact] +1.74, C1 GREEDY +1.74, D DPLL (first solution) +1.74, exact +1.74, C0 POLARITY +0.00
+- *answer = C1 GREEDY's prediction*: A3 TT[exact] +1.74, C0 POLARITY +1.74, D DPLL (first solution) +1.74, exact +1.74, C1 GREEDY +0.00
+- *answer = UNSAT*: A3 TT[exact] +0.00, C0 POLARITY +0.00, C1 GREEDY +0.00, D DPLL (first solution) +0.00, exact +0.00
 
 Notes: Rule inversion: F-bar = every literal flipped; F and F-bar are jointly unsatisfiable, so no textbook solution is valid under inversion.
 
@@ -402,17 +402,17 @@ Think as carefully as you need. Then end your reply with your final answer as JS
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| A3 TT[exact] | A3 | x01=T x02=F x03=F x04=T x05=T x06=F x07=T x08=F x09=F x10=F x11=F x12=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing N. | restates the rule in standard CNF form; checks use textbook semantics |
-| C0 POLARITY | C0 | x01=T x02=T x03=T x04=T x05=T x06=T x07=F x08=T x09=F x10=T x11=T x12=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing N. | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
-| C1 GREEDY | C1 | x01=T x02=F x03=F x04=T x05=T x06=T x07=F x08=T x09=F x10=T x11=T x12=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing N. | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
-| D DPLL (first solution) | D | x01=T x02=F x03=F x04=T x05=T x06=F x07=T x08=F x09=F x10=F x11=F x12=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing N. | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| exact | null | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Framing N. | a witness checked against every clause, or a closed refutation |
+| A3 TT[exact] | A3 | x01=T x02=F x03=F x04=T x05=T x06=F x07=T x08=F x09=F x10=F x11=F x12=T | set-valued with a unique solution (satisfying assignment under the textbook rule): deterministic, p_h(its solution) = 0.920 (uniform slip e… | restates the rule in standard CNF form; checks use textbook semantics |
+| C0 POLARITY | C0 | x01=T x02=T x03=T x04=T x05=T x06=T x07=F x08=T x09=F x10=T x11=T x12=T | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
+| C1 GREEDY | C1 | x01=T x02=F x03=F x04=T x05=T x06=T x07=F x08=T x09=F x10=T x11=T x12=T | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
+| D DPLL (first solution) | D | x01=T x02=F x03=F x04=T x05=T x06=F x07=T x08=F x09=F x10=F x11=F x12=T | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
+| exact | null | SAT | set-valued with a unique solution (satisfying assignment under the stated rule): deterministic, p_h(its solution) = 0.920 (uniform slip eps… | a witness checked against every clause, or a closed refutation |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = C0 POLARITY's prediction*: A3 TT[exact] +1.57, C1 GREEDY +1.57, D DPLL (first solution) +1.57, exact +1.57, C0 POLARITY +0.00
-- *answer = C1 GREEDY's prediction*: A3 TT[exact] +1.57, C0 POLARITY +1.57, D DPLL (first solution) +1.57, exact +1.57, C1 GREEDY +0.00
-- *answer = D DPLL (first solution)'s prediction*: C0 POLARITY +1.57, C1 GREEDY +1.57, A3 TT[exact] +0.00, D DPLL (first solution) +0.00, exact +0.00
-- *answer = other*: A3 TT[exact] +0.00, C0 POLARITY +0.00, C1 GREEDY +0.00, D DPLL (first solution) +0.00, exact +0.00
+- *answer = C0 POLARITY's prediction*: A3 TT[exact] +1.66, C1 GREEDY +1.66, D DPLL (first solution) +1.66, exact +1.66, C0 POLARITY +0.00
+- *answer = C1 GREEDY's prediction*: A3 TT[exact] +1.66, C0 POLARITY +1.66, D DPLL (first solution) +1.66, exact +1.66, C1 GREEDY +0.00
+- *answer = UNSAT*: A3 TT[exact] +0.00, C0 POLARITY +0.00, C1 GREEDY +0.00, D DPLL (first solution) +0.00, exact +0.00
+- *answer = exact / A3 TT[exact] / D DPLL (first solution)'s prediction*: C0 POLARITY +1.66, C1 GREEDY +1.66, A3 TT[exact] +0.00, D DPLL (first solution) +0.00, exact +0.00
 
 Notes: Rule inversion: F-bar = every literal flipped; F and F-bar are jointly unsatisfiable, so no textbook solution is valid under inversion.

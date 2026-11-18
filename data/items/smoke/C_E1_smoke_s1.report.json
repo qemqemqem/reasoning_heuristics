@@ -27,14 +27,13 @@
    "a GREEDY order does not reach a satisfying assignment": 145
   }
  },
- "generation_seconds": 3.3,
  "path": "data/items/smoke/C_E1_smoke_s1.jsonl",
  "validation": {
   "items": 12,
   "sets": 2,
   "items_passed": 12,
   "pass_rate": 1.0,
-  "failures": []
- },
- "validation_seconds": 2.3
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
 }

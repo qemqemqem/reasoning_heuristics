@@ -15,8 +15,9 @@ keys are:
 
 Entailment follows the prompts' definition: a conclusion follows when it "must be true whenever
 all the statements are true". Inconsistent premises therefore entail everything (vacuously): YES,
-every MC option (the strongest is chosen as usual), every literal. No design intends such items,
-and `check_item` flags them.
+every MC option (the strongest is chosen as usual), every literal. That is the zoo's
+`exact_answer` (`vacuous_answer` when the premises are inconsistent), which the exact members use
+too. No design intends such items, and `check_item` flags them.
 """
 
 from __future__ import annotations
@@ -24,26 +25,14 @@ from __future__ import annotations
 from typing import Any
 
 from reasoning_heuristics.heuristics.coloring import effective_graph, first_fit
-from reasoning_heuristics.heuristics.entailment import answer_from_premises, effective_premises, mc_choose
+from reasoning_heuristics.heuristics.entailment import effective_premises, exact_answer
 from reasoning_heuristics.heuristics.sat import effective_cnf
 from reasoning_heuristics.heuristics.tasks import ColouringTask, EntailmentTask, KnapsackTask, SatTask, TspTask
 from reasoning_heuristics.problems.coloring import graph as G
-from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.knapsack.knapsack import solve_covering_dp, solve_dp
 from reasoning_heuristics.problems.sat import cnf as S
 from reasoning_heuristics.problems.tsp.tsp import solve_held_karp
 from reasoning_heuristics.validate.independent import independent_truth  # noqa: F401  (the validator path)
-
-
-def _vacuous_answer(task: EntailmentTask) -> str | list[str]:
-    """Inconsistent premises: every conclusion must be true whenever all the premises are."""
-    if task.fmt == "YN":
-        return "YES"
-    if task.fmt == "MC":
-        return mc_choose(task, lambda option: True)
-    if task.fmt == "OPEN":
-        return sorted(F.render_lit(a, pol) for a in F.atoms_of(task.premises) for pol in (True, False)) or "NOTHING"
-    raise ValueError(task.fmt)
 
 
 def truth(task: Any) -> dict[str, Any]:
@@ -58,9 +47,7 @@ def truth(task: Any) -> dict[str, Any]:
     if isinstance(task, SatTask):
         return {"satisfiable": S.solve(effective_cnf(task), task.fixed_dict()) is not None}
     if isinstance(task, EntailmentTask):
-        prem = effective_premises(task)
-        atoms = F.atoms_of(list(prem) + ([task.probe] if task.probe is not None else []) + list(task.options))
-        ans = answer_from_premises(task, prem) if F.models(prem, atoms) else _vacuous_answer(task)
+        ans = exact_answer(task, effective_premises(task))
         out = {"answer": ans}
         if task.fmt == "YN":
             out["follows"] = ans == "YES"

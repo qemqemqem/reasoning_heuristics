@@ -6,13 +6,16 @@ edge list). Stuck graph: 3-colourable, not 2-colourable, and FF-3 in listing ord
 stuck at a vertex v* in the middle third of π_L. Factorial vertex order {A, B} x edge order
 {A, B}: B-vertex is a re-listing in which FF-3 is still stuck but at a different vertex
 v**; B-edge reverses the edge list. CONTROL: a different graph on which FF-3-LIST succeeds,
-matched on n, m (+-1) and order-free hardness = decision nodes of degree-order
+matched on n, m (+-1) and order-free hardness = the search nodes of degree-order
 backtracking (within 25%, or 2 nodes). Cells STUCK/vA/eA, vB/eA, vA/eB, vB/eB, CONTROL/vA/eA.
 
 E5-SAT (default n = 25, α = 3.5, satisfiable items only). DEAD: UC-DET and GREEDY-MENTION
 both dead-end. DEAD-PERM: the same formula with the clause order permuted so that
 GREEDY's dead end (variable or falsified clause) moves. CONTROL: a formula on which both
 succeed, same n and α, order-free DPLL nodes (MOMS order, polarity values) within 20%.
+
+Nodes are SEARCH's budget unit, decisions + flipped re-assignments (D/F §1.2;
+`trace_features["nodes"]`), for the matching and for every node count recorded in `params`.
 
 E5-STATE (controlled partial states; same formula, different fixed values). SAT (default
 n = 20, α = 3.5, the first 6 variables in mention order fixed): s1 GREEDY's completion is
@@ -176,7 +179,8 @@ def ff3(g: Graph) -> Any:
 
 
 def order_free_nodes(g: Graph) -> int:
-    return run("coloring", "SEARCH", ColouringTask(g, 3), {"order": "DEGREE", "tie": "LABEL"}).trace_features["decisions"]
+    """Search nodes (decisions + flips) of degree-order backtracking: listing-free hardness."""
+    return run("coloring", "SEARCH", ColouringTask(g, 3), {"order": "DEGREE", "tie": "LABEL"}).trace_features["nodes"]
 
 
 def col_graph(rng, n: int, deg: float) -> Graph | None:
@@ -260,7 +264,7 @@ def generate_col(tier, seed, per_cell, p, stats, attempt0) -> tuple[list, int]:
                 params={"n": gg.n, "m": gg.m, "design_cell": cell, "stuck_vertex": stuck_v, "filters": FILTERS["COL"],
                         "stuck_position": gg.position[stuck_v] if stuck_v else None,
                         "order_free_hardness_nodes": order_free_nodes(gg),
-                        "listing_dpll_nodes": run("coloring", "SEARCH", task, {"order": "LIST"}).trace_features["decisions"],
+                        "listing_dpll_nodes": run("coloring", "SEARCH", task, {"order": "LIST"}).trace_features["nodes"],
                         "prompt_tokens": tokens.count(prompt), "tokenizer_proxy": tokens.PROXY_NAME},
                 notes="Stuck-vs-control items are matched on n, m and order-free backtracking nodes; within the stuck "
                       "graph, vertex order and edge order are crossed.",
@@ -290,14 +294,15 @@ def sat_members() -> list:
         ("POLARITY (C0)", "POLARITY", {}),
         ("DPLL-MENTION (D)", "SEARCH", {"order": "MENTION", "value": "TRUE"}),
         ("DPLL-MOMS-POLARITY (D)", "SEARCH", {"order": "MOMS", "value": "POLARITY"}),
-        ("RO-GREEDY (C3)", "RO-GREEDY", {"samples": 200, "seed": 0}),
+        ("RO-GREEDY (C3)", "RO-GREEDY", {"seed": 0}),
         ("EXACT", "EXACT", {}), ("RANDOM (H)", "RANDOM", {}),
         ("ALWAYS-UNSAT (A1 give-up)", "ALWAYS-UNSAT", {}),
     ]
 
 
 def sat_nodes(cnf: S.CNF) -> int:
-    return run("sat", "SEARCH", SatTask(cnf), {"order": "MOMS", "value": "POLARITY"}).trace_features["decisions"]
+    """Search nodes (decisions + flips) of DPLL in MOMS order with polarity values: order-free hardness."""
+    return run("sat", "SEARCH", SatTask(cnf), {"order": "MOMS", "value": "POLARITY"}).trace_features["nodes"]
 
 
 def labelled_cnf(rng, n: int, alpha: float) -> S.CNF:

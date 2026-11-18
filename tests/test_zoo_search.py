@@ -10,6 +10,10 @@ straight from the doc's pseudocode.
 """
 
 import itertools
+import json
+import os
+import subprocess
+import sys
 
 import numpy as np
 import pytest
@@ -333,3 +337,35 @@ def test_colouring_search_without_budget_agrees_with_first_fit_where_it_succeeds
         hits += 1
         assert run("coloring", "SEARCH", ColouringTask(g, 3), {"order": "LIST"}).answer == ff
     assert hits >= 5
+
+
+TRACE_SCRIPT = r"""
+import json
+import numpy as np
+from reasoning_heuristics.heuristics.base import run
+from reasoning_heuristics.heuristics.tasks import ColouringTask
+from reasoning_heuristics.problems.coloring import graph as G
+
+out = []
+for seed in range(12):
+    g = G.random_gnm(tuple(f"v{10 + i}" for i in range(16)), 36, np.random.default_rng(seed))
+    for k in (None, 3):
+        p = run("coloring", "SEARCH", ColouringTask(g, k), {"order": "LIST"})
+        out.append([seed, k, p.answer, p.trace_features])
+print(json.dumps(out, sort_keys=True))
+"""
+
+
+def test_colouring_search_trace_does_not_depend_on_the_hash_seed():
+    # How many singleton domains propagate before a conflict depends on the order neighbours are
+    # queued in. The queue follows the listing, not a frozenset's hash order, so the trace is the
+    # same in every process: the validators recompute it, and CI checks that the committed items
+    # reproduce. (Queued in hash order, 9 or 10 of these 24 runs counted differently from seed to seed.)
+    runs = []
+    for seed in ("0", "1", "4242"):
+        res = subprocess.run([sys.executable, "-c", TRACE_SCRIPT], capture_output=True, text=True, timeout=300,
+                             env={**os.environ, "PYTHONHASHSEED": seed})
+        assert res.returncode == 0, res.stderr
+        runs.append(json.loads(res.stdout))
+    assert runs[0] == runs[1] == runs[2]
+    assert any(r[3]["conflicts"] and r[3]["propagations"] for r in runs[0])  # propagation cut short by conflicts

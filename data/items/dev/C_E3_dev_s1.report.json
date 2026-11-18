@@ -71,85 +71,127 @@
   "audit": {
    "d=1": {
     "N": 5,
+    "target_ff_depth": 3,
     "P(target colour 1)": 0.6,
-    "proxy_accuracy": {}
+    "proxy_accuracy": {
+     "LOCAL-1-LIST/one": 0.6,
+     "LOCAL-2-LIST/one": 0.6,
+     "LOCAL-1-LIST/free": 1.0
+    },
+    "reported_not_enforced": [
+     "LOCAL-1-LIST/free"
+    ]
    },
    "d=2": {
     "N": 5,
+    "target_ff_depth": 4,
     "P(target colour 1)": 0.4,
     "proxy_accuracy": {
      "LOCAL-1-LIST/one": 0.4,
-     "LOCAL-1-LIST/free": 0.4
-    }
+     "LOCAL-2-LIST/one": 0.4,
+     "LOCAL-3-LIST/one": 0.4,
+     "LOCAL-1-LIST/free": 0.4,
+     "LOCAL-2-LIST/free": 0.4
+    },
+    "reported_not_enforced": [
+     "LOCAL-2-LIST/free"
+    ]
    },
    "d=3": {
     "N": 5,
+    "target_ff_depth": 5,
     "P(target colour 1)": 0.6,
     "proxy_accuracy": {
      "LOCAL-1-LIST/one": 0.6,
-     "LOCAL-1-LIST/free": 0.6,
      "LOCAL-2-LIST/one": 0.6,
-     "LOCAL-2-LIST/free": 0.6
-    }
+     "LOCAL-3-LIST/one": 0.6,
+     "LOCAL-4-LIST/one": 0.6,
+     "LOCAL-1-LIST/free": 0.6,
+     "LOCAL-2-LIST/free": 0.6,
+     "LOCAL-3-LIST/free": 0.6
+    },
+    "reported_not_enforced": [
+     "LOCAL-3-LIST/free"
+    ]
    },
    "d=4": {
     "N": 5,
+    "target_ff_depth": 6,
     "P(target colour 1)": 0.4,
     "proxy_accuracy": {
      "LOCAL-1-LIST/one": 0.4,
-     "LOCAL-1-LIST/free": 0.4,
      "LOCAL-2-LIST/one": 0.4,
-     "LOCAL-2-LIST/free": 0.4,
      "LOCAL-3-LIST/one": 0.4,
-     "LOCAL-3-LIST/free": 0.4
-    }
+     "LOCAL-4-LIST/one": 0.4,
+     "LOCAL-5-LIST/one": 0.4,
+     "LOCAL-1-LIST/free": 0.4,
+     "LOCAL-2-LIST/free": 0.4,
+     "LOCAL-3-LIST/free": 0.4,
+     "LOCAL-4-LIST/free": 0.4
+    },
+    "reported_not_enforced": [
+     "LOCAL-4-LIST/free"
+    ]
    },
    "d=6": {
     "N": 5,
+    "target_ff_depth": 8,
     "P(target colour 1)": 0.6,
     "proxy_accuracy": {
      "LOCAL-1-LIST/one": 0.6,
-     "LOCAL-1-LIST/free": 0.6,
      "LOCAL-2-LIST/one": 0.6,
-     "LOCAL-2-LIST/free": 0.6,
      "LOCAL-3-LIST/one": 0.6,
-     "LOCAL-3-LIST/free": 0.6,
      "LOCAL-4-LIST/one": 0.6,
-     "LOCAL-4-LIST/free": 0.6,
      "LOCAL-5-LIST/one": 0.6,
-     "LOCAL-5-LIST/free": 0.6
-    }
+     "LOCAL-6-LIST/one": 0.6,
+     "LOCAL-7-LIST/one": 0.6,
+     "LOCAL-1-LIST/free": 0.6,
+     "LOCAL-2-LIST/free": 0.6,
+     "LOCAL-3-LIST/free": 0.6,
+     "LOCAL-4-LIST/free": 0.6,
+     "LOCAL-5-LIST/free": 0.6,
+     "LOCAL-6-LIST/free": 0.6
+    },
+    "reported_not_enforced": [
+     "LOCAL-6-LIST/free"
+    ]
    },
    "d=8": {
     "N": 5,
+    "target_ff_depth": 10,
     "P(target colour 1)": 0.4,
     "proxy_accuracy": {
      "LOCAL-1-LIST/one": 0.4,
-     "LOCAL-1-LIST/free": 0.4,
      "LOCAL-2-LIST/one": 0.4,
-     "LOCAL-2-LIST/free": 0.4,
      "LOCAL-3-LIST/one": 0.4,
-     "LOCAL-3-LIST/free": 0.4,
      "LOCAL-4-LIST/one": 0.4,
-     "LOCAL-4-LIST/free": 0.4,
      "LOCAL-5-LIST/one": 0.4,
-     "LOCAL-5-LIST/free": 0.4,
      "LOCAL-6-LIST/one": 0.4,
-     "LOCAL-6-LIST/free": 0.4,
      "LOCAL-7-LIST/one": 0.4,
-     "LOCAL-7-LIST/free": 0.4
-    }
+     "LOCAL-8-LIST/one": 0.4,
+     "LOCAL-9-LIST/one": 0.4,
+     "LOCAL-1-LIST/free": 0.4,
+     "LOCAL-2-LIST/free": 0.4,
+     "LOCAL-3-LIST/free": 0.4,
+     "LOCAL-4-LIST/free": 0.4,
+     "LOCAL-5-LIST/free": 0.4,
+     "LOCAL-6-LIST/free": 0.4,
+     "LOCAL-7-LIST/free": 0.4,
+     "LOCAL-8-LIST/free": 0.4
+    },
+    "reported_not_enforced": [
+     "LOCAL-8-LIST/free"
+    ]
    }
   }
  },
- "generation_seconds": 2.3,
  "path": "data/items/dev/C_E3_dev_s1.jsonl",
  "validation": {
   "items": 270,
   "sets": 30,
   "items_passed": 270,
   "pass_rate": 1.0,
-  "failures": []
- },
- "validation_seconds": 4.3
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
 }

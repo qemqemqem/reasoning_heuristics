@@ -224,13 +224,15 @@ def search_colouring(task: ColouringTask, k: int, params: dict[str, Any]) -> tup
     tie = (lambda v: g.position[v]) if params.get("tie", "LIST") == "LIST" else label_key
     fixed = task.fixed_dict()
     State = tuple[dict[str, int], dict[str, set[int]]]
+    listed = {v: g.neighbours_listed(v) for v in g.vertices}
 
     def colour(col: dict[str, int], dom: dict[str, set[int]], v: str, c: int, queue: list[str]) -> None:
         """Assign v = c and remove c from its uncoloured neighbours' domains (`dom` holds the
-        uncoloured vertices only); neighbours whose domain shrank are queued for checking."""
+        uncoloured vertices only); neighbours whose domain shrank are queued for checking, in
+        listing order."""
         col[v] = c
         del dom[v]
-        for u in g.adj[v]:
+        for u in listed[v]:
             if u in dom and c in dom[u]:
                 dom[u].discard(c)
                 queue.append(u)
@@ -238,7 +240,9 @@ def search_colouring(task: ColouringTask, k: int, params: dict[str, Any]) -> tup
     def propagate(col: dict[str, int], dom: dict[str, set[int]], queue: list[str]):
         """Forward checking to a fixpoint: a singleton domain assigns its vertex, an empty domain is
         a conflict. Only vertices whose domain shrank are re-checked; the fixpoint (and whether
-        a conflict is reached) does not depend on the order."""
+        a conflict is reached) does not depend on the order. The number of propagations before a
+        conflict does, so the queue order is fixed (listing order, never a set's hash order) and
+        the trace reproduces in every process."""
         while queue:
             v = queue.pop()
             if v not in dom:

@@ -42,14 +42,13 @@
    "antonym pair on one subject": 1
   }
  },
- "generation_seconds": 2.4,
  "path": "data/items/dev/B4C4_E1_dev_s1.jsonl",
  "validation": {
   "items": 140,
   "sets": 20,
   "items_passed": 140,
   "pass_rate": 1.0,
-  "failures": []
- },
- "validation_seconds": 3.8
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
 }

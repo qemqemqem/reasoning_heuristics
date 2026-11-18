@@ -36,7 +36,7 @@ def sat_members(length_theta: int, budget: int = 8, walk_runs: int = 30) -> list
         ("H SAMPLE-8", "SAMPLE-m", {"m": 8}),
         ("NOISY-EXACT-STEP", "NOISY-EXACT", {"variant": "STEP", "p": 0.02}),
         ("NOISY-EXACT-READ", "NOISY-EXACT", {"variant": "READ", "p": 0.01}),
-        ("PERCEPTION-NOISE", "PERCEPTION-NOISE", {"p_d": 0.02, "runs": 200, "seed": 0}),
+        ("PERCEPTION-NOISE", "PERCEPTION-NOISE", {"p_d": 0.02, "p_f": 0.01, "runs": 200, "seed": 0}),
         ("C0 POLARITY", "POLARITY", {}),
         ("C1 GREEDY", "GREEDY", {"order": "MENTION", "mode": "ABORT"}),
         ("C2 UC", "UC", {}),

@@ -15,13 +15,16 @@ edge list). Stuck graph: 3-colourable, not 2-colourable, and FF-3 in listing ord
 stuck at a vertex v* in the middle third of π_L. Factorial vertex order {A, B} x edge order
 {A, B}: B-vertex is a re-listing in which FF-3 is still stuck but at a different vertex
 v**; B-edge reverses the edge list. CONTROL: a different graph on which FF-3-LIST succeeds,
-matched on n, m (+-1) and order-free hardness = decision nodes of degree-order
+matched on n, m (+-1) and order-free hardness = the search nodes of degree-order
 backtracking (within 25%, or 2 nodes). Cells STUCK/vA/eA, vB/eA, vA/eB, vB/eB, CONTROL/vA/eA.
 
 E5-SAT (default n = 25, α = 3.5, satisfiable items only). DEAD: UC-DET and GREEDY-MENTION
 both dead-end. DEAD-PERM: the same formula with the clause order permuted so that
 GREEDY's dead end (variable or falsified clause) moves. CONTROL: a formula on which both
 succeed, same n and α, order-free DPLL nodes (MOMS order, polarity values) within 20%.
+
+Nodes are SEARCH's budget unit, decisions + flipped re-assignments (D/F §1.2;
+`trace_features["nodes"]`), for the matching and for every node count recorded in `params`.
 
 E5-STATE (controlled partial states; same formula, different fixed values). SAT (default
 n = 20, α = 3.5, the first 6 variables in mention order fixed): s1 GREEDY's completion is
@@ -44,548 +47,257 @@ Readings of the doc (also in docs/GENERATORS.md):
 - MIN-CONFLICTS (F) is not in the zoo; C4 is ONLINE-FF (edge-list order, never recolours).
 - E5-P (the prefilled single-decision twin) is a runner condition, not a new item set.
 - The SAT control uses "both members succeed" for "non-dead-end".
+- Every part lists the A1 constant give-up (ALWAYS-IMPOSSIBLE, ALWAYS-UNSAT, NONE), so a
+  give-up answer is not credited to the members that abort at a dead end (FF-3-ABORT,
+  GREEDY-ABORT, PHANTOM). On ENT items NONE equals EXACT (no conclusion follows).
+- Selection filters (recorded in `params.filters`): STUCK items need FF-3-LIST to get stuck in
+  the middle third, DEAD items need GREEDY-MENTION and UC-DET to dead-end, FAIL pairs need
+  GREEDY-CM to miss the countermodel. These follow the doc's §2.8 but select on named
+  members' behaviour (SCOPE §6 rule 6 says never on one heuristic's errors): a design
+  question for the project owner, so analyses can condition on the filter.
 ```
 
 ## Items
 
-### SAT/CONTROL — set `0109315fc8`
+### COL/CONTROL/vA/eA — set `2ab244d772`
 
-- **Domain / framing:** 3-SAT / textbook
-- **Ground truth:** `{"n_solutions": 119, "satisfiable": true}`
-- **Hashes:** content `20e3147aa2e52009`, base `23c2455f3ac125cb`, source `None`; seed 559636 (dev)
-- **Params:** `{"alpha": 3.5, "design_cell": "CONTROL", "greedy_dead_end": null, "m": 88, "n": 25, "order_free_dpll_nodes": 13, "prompt_tokens": 1619, "tokenizer_proxy": "regex-digit-split-v1", "uc_dead_end": null}`
-- **Prompt tokens (regex-digit-split-v1):** 1619
+- **Domain / framing:** colouring (k=3) / textbook
+- **Ground truth:** `{"colourable": true, "example": {"v10": 1, "v13": 2, "v23": 1, "v45": 3, "v50": 2, "v52": 1, "v54": 3, "v55": 2, "v60": 3, "v63": 3, "v64": 2, "v65": 1, "v66": 1, "v67": 2, "v74": 2, "v79": 1, "v80": 1, "v83": 1, "v85": 3, "v89": 2, "v91": 3, "v95": 2, "v97": 3, "v98": 3}, "k": 3, "n_colourings_up_…`
+- **Hashes:** content `1776b21e2dcc6140`, base `1776b21e2dcc6140`, source `None`; seed 723169 (dev)
+- **Params:** `{"design_cell": "CONTROL/vA/eA", "filters": ["3-colourable, not 2-colourable", "FF-3-LIST (ABORT) gets stuck at a vertex in the middle third of the listing (selects on FF's failure)", "vertex order B: FF-3-LIST still stuck, at a different vertex (selects on FF's failure)", "CONTROL: FF-3-LIST succe…`
+- **Prompt tokens (regex-digit-split-v1):** 681
 
 <details><summary>Prompt</summary>
 
 ```text
-A formula over 25 true/false variables. Every clause must contain at least one true literal.
-C1: x17 or x18 or x36
-C2: not x39 or x36 or x43
-C3: x49 or not x39 or x55
-C4: x17 or not x56 or not x57
-C5: not x58 or not x17 or x39
-C6: x62 or x65 or not x70
-C7: x17 or x72 or not x76
-C8: not x77 or x70 or not x17
-C9: x79 or x65 or not x80
-C10: not x43 or not x72 or not x56
-C11: x57 or x82 or not x86
-C12: not x18 or x89 or not x90
-C13: not x90 or not x86 or not x62
-C14: not x39 or not x79 or x80
-C15: not x89 or not x76 or x79
-C16: not x55 or not x36 or not x72
-C17: not x65 or not x80 or x62
-C18: x62 or x43 or not x86
-C19: not x72 or not x58 or not x65
-C20: x96 or not x57 or x76
-C21: x82 or x76 or x18
-C22: x79 or not x49 or x17
-C23: not x82 or not x62 or x97
-C24: x39 or x82 or not x79
-C25: not x36 or x99 or not x96
-C26: x79 or not x86 or not x70
-C27: x97 or x65 or not x77
-C28: not x49 or not x55 or not x17
-C29: not x39 or not x79 or x18
-C30: x17 or not x36 or not x86
-C31: not x96 or not x36 or not x82
-C32: not x70 or not x39 or x97
-C33: not x97 or x72 or not x96
-C34: x36 or not x79 or not x77
-C35: not x57 or not x72 or x62
-C36: x80 or not x96 or x17
-C37: x43 or x99 or x89
-C38: x36 or not x86 or x70
-C39: not x49 or not x65 or x99
-C40: not x56 or not x39 or x80
-C41: not x96 or x39 or not x18
-C42: x57 or not x90 or not x70
-C43: not x76 or not x58 or x17
-C44: x58 or x49 or x55
-C45: not x17 or not x77 or not x56
-C46: not x79 or x49 or x86
-C47: x80 or x65 or x90
-C48: not x79 or x57 or x65
-C49: x99 or x70 or x36
-C50: x62 or x79 or not x18
-C51: not x18 or not x49 or not x80
-C52: not x55 or x36 or x17
-C53: x89 or not x65 or not x76
-C54: x82 or not x80 or not x99
-C55: x43 or not x49 or x56
-C56: not x55 or not x80 or x79
-C57: x17 or not x76 or not x90
-C58: not x70 or not x65 or x90
-C59: not x55 or not x97 or x96
-C60: x79 or x65 or x49
-C61: x36 or not x58 or x99
-C62: not x86 or not x56 or x36
-C63: x96 or not x99 or not x72
-C64: x49 or not x39 or x82
-C65: not x65 or not x56 or not x57
-C66: x89 or not x90 or x76
-C67: x49 or not x43 or not x18
-C68: not x96 or x49 or x65
-C69: not x18 or x49 or not x57
-C70: x65 or x79 or not x80
-C71: not x58 or not x65 or x80
-C72: x55 or x80 or x62
-C73: not x62 or not x70 or not x49
-C74: not x72 or x96 or x97
-C75: not x65 or x99 or x70
-C76: x80 or not x58 or x72
-C77: x80 or not x76 or not x90
-C78: not x62 or not x18 or not x55
-C79: x62 or not x89 or not x57
-C80: not x77 or not x76 or x86
-C81: x80 or x49 or not x65
-C82: x72 or x70 or x80
-C83: x96 or not x70 or x90
-C84: not x65 or x76 or not x62
-C85: x70 or x17 or x36
-C86: x39 or not x62 or not x90
-C87: x56 or x55 or not x96
-C88: not x89 or x55 or not x58
+Graph with 24 vertices and 51 edges.
+Vertices (in this order): v80, v63, v65, v66, v23, v13, v91, v50, v95, v10, v98, v52, v85, v79, v89, v64, v67, v74, v83, v60, v97, v45, v54, v55
+Edges: v79-v95, v74-v83, v55-v97, v66-v89, v83-v89, v54-v55, v65-v98, v52-v60, v80-v91, v52-v91, v63-v80, v13-v23, v54-v65, v13-v65, v74-v98, v45-v74, v55-v85, v64-v80, v60-v65, v54-v79, v50-v65, v10-v95, v13-v52, v52-v64, v67-v91, v55-v98, v66-v85, v52-v89, v64-v79, v65-v97, v45-v79, v63-v95, v74-v97, v64-v98, v10-v74, v63-v83, v52-v54, v83-v85, v74-v80, v83-v98, v45-v67, v80-v85, v79-v91, v67-v80, v60-v64, v83-v95, v66-v95, v23-v67, v63-v66, v52-v55, v10-v45
 
-Find values for all variables that make every clause true, or say UNSAT if none exist.
-After the line ANSWER:, write UNSAT or the values as `x=T` / `x=F`, comma-separated, in this order: x17, x18, x36, x39, x43, x49, x55, x56, x57, x58, x62, x65, x70, x72, x76, x77, x79, x80, x82, x86, x89, x90, x96, x97, x99.
+Colour every vertex with one of the colours 1, 2, ..., 3 so that the two ends of every edge get different colours. If this is impossible, answer IMPOSSIBLE.
+After the line ANSWER:, write IMPOSSIBLE or one line `<vertex>: <colour>` per vertex, in this order: v80, v63, v65, v66, v23, v13, v91, v50, v95, v10, v98, v52, v85, v79, v89, v64, v67, v74, v83, v60, v97, v45, v54, v55.
 ```
 
 </details>
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| DPLL-MENTION (D) | D | x17=T x18=T x36=T x39=T x43=T x49=T x55=F x56=F x57=F x58=F x62=T x65=F x70=F x72=T x76=F x77=F x79=F x80=F x82=T x86=F… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell CONTROL. | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| DPLL-MOMS-POLARITY (D) | D | x17=T x18=F x36=T x39=F x43=T x49=T x55=F x56=F x57=T x58=F x62=T x65=F x70=F x72=F x76=T x77=F x79=T x80=T x82=T x86=F… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell CONTROL. | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| EXACT | null | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell CONTROL. | a witness checked against every clause, or a closed refutation |
-| GREEDY-MENTION-ABORT (C1) | C1 | x17=T x18=F x36=T x39=F x43=T x49=T x55=F x56=F x57=T x58=F x62=T x65=F x70=F x72=T x76=T x77=F x79=T x80=T x82=T x86=F… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell CONTROL. | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
-| GREEDY-MENTION-INFEAS (C1) | C1 | x17=T x18=F x36=T x39=F x43=T x49=T x55=F x56=F x57=T x58=F x62=T x65=F x70=F x72=T x76=T x77=F x79=T x80=T x82=T x86=F… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell CONTROL. | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
-| GUC-DET (C2) | C2 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell CONTROL. | satisfies a literal of a shortest open clause at every step |
-| POLARITY (C0) | C0 | x17=T x18=F x36=T x39=F x43=T x49=T x55=F x56=F x57=F x58=F x62=T x65=F x70=F x72=F x76=F x77=F x79=T x80=T x82=T x86=F… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell CONTROL. | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
-| RANDOM (H) | H | P(SAT)=0.50; P(UNSAT)=0.50 | p_h(outcome) = its distribution, mixed with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell CONTROL. | no procedure determines the verdict |
-| RO-GREEDY (C3) | C3 | P(UNSAT)=0.90; P(x17=T,x18=F,x36=T,x39=F,x43=T…)=0.03 | p_h(outcome) = its distribution, mixed with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell CONTROL. | GREEDY in a uniformly random order; the order varies across samples |
-| SC-DET (C2) | C2 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell CONTROL. | prefers unit, then 2-literal open clauses; otherwise the first free variable set true |
-| UC-DET (C2) | C2 | x17=T x18=T x36=T x39=T x43=T x49=T x55=F x56=F x57=F x58=F x62=T x65=F x70=F x72=T x76=F x77=F x79=F x80=F x82=T x86=F… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell CONTROL. | next commitment comes from a unit clause given the state ('forced'); else the first free variable set true; U… |
+| ALWAYS-IMPOSSIBLE (A1 give-up) | A1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | GIVEUP early ('too many constraints'); no assignment attempted |
+| DPLL-LIST (D) | D | v10=1 v13=2 v23=1 v45=2 v50=2 v52=1 v54=2 v55=3 v60=2 v63=2 v64=3 v65=1 v66=1 v67=3 v74=3 v79=1 v80=1 v83=1 v85=2 v89=2… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | chronological backtracking with forward checking in order σ, smallest colour first; IMPOSSIBLE only after exh… |
+| DROP-LAST-3-EDGES + exact (B1) | B1 | v10=1 v13=2 v23=1 v45=3 v50=2 v52=1 v54=2 v55=1 v60=3 v63=3 v64=2 v65=1 v66=1 v67=2 v74=2 v79=1 v80=1 v83=1 v85=2 v89=2… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | neighbourhoods quoted without the late edges; conflicts on dropped edges |
+| DSATUR-3 (C2) | C2 | v10=1 v13=2 v23=1 v45=3 v50=2 v52=1 v54=3 v55=2 v60=3 v63=2 v64=2 v65=1 v66=1 v67=2 v74=2 v79=1 v80=1 v83=1 v85=3 v89=2… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| EXACT | null | POSSIBLE | set-valued: uniform over its 50 solutions (proper colouring with at most 3 colours); a listed solution gets (1 - eps)/50 + eps/K, its unlis… | a completed procedure: a checked witness, or a closed refutation |
+| FF-3-EDGE-MENTION-ABORT (C1 variant) | C1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| FF-3-LIST-ABORT (C1) | C1 | v10=1 v13=2 v23=1 v45=2 v50=2 v52=1 v54=2 v55=3 v60=2 v63=2 v64=3 v65=1 v66=1 v67=3 v74=3 v79=1 v80=1 v83=1 v85=2 v89=2… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| FF-3-LIST-INFEAS (C1) | C1 | v10=1 v13=2 v23=1 v45=2 v50=2 v52=1 v54=2 v55=3 v60=2 v63=2 v64=3 v65=1 v66=1 v67=3 v74=3 v79=1 v80=1 v83=1 v85=2 v89=2… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| GREEDY+REPAIR-LIST (C->F) | C->F | v10=1 v13=2 v23=1 v45=2 v50=2 v52=1 v54=2 v55=3 v60=2 v63=2 v64=3 v65=1 v66=1 v67=3 v74=3 v79=1 v80=1 v83=1 v85=2 v89=2… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | a complete first-fit pass in order σ, then verification, then local recolouring confined to the top colour cl… |
+| NOISY-EXACT | nuisance | P(_exact)=0.60; P(_other)=0.40 | p_h(outcome) = (1 - eps)·its distribution + eps/K (uniform slip eps = 0.1 over the K = 7 outcome classes); the cell rate is Σ_h π_h·p_h. Ce… | correct procedure with sporadic violations of its own stated rule |
+| ONLINE-FF (C4) | C4 | v10=1 v13=1 v23=2 v45=2 v50=2 v52=1 v54=2 v55=1 v60=2 v63=2 v64=2 v65=1 v66=1 v67=1 v74=1 v79=1 v80=1 v83=2 v85=2 v89=2… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | reads the edge list once in order; colours a vertex at first appearance; never recolours |
+| PHANTOM-ADJACENT (B4) | B4 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | quotes constraints that are not in the instance (phantom edges); false IMPOSSIBLE |
+| RANDOM (H) | H | — | uniform over all answers (uniform over the 3^24 colourings with colours 1..3): its mass on the listed answers and solution sets is at most … | no procedure determines the answer; trace content and verdict unrelated |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = DPLL-MOMS-POLARITY (D)'s prediction*: DPLL-MENTION (D) +1.74, GREEDY-MENTION-ABORT (C1) +1.74, GREEDY-MENTION-INFEAS (C1) +1.74, GUC-DET (C2) +1.74, POLARITY (C0) +1.74, RANDOM (H) +1.74
-- *answer = GREEDY-MENTION-ABORT (C1) / GREEDY-MENTION-INFEAS (C1)'s prediction*: DPLL-MENTION (D) +1.74, DPLL-MOMS-POLARITY (D) +1.74, GUC-DET (C2) +1.74, POLARITY (C0) +1.74, RANDOM (H) +1.74, RO-GREEDY (C3) +1.74
-- *answer = POLARITY (C0)'s prediction*: DPLL-MENTION (D) +1.74, DPLL-MOMS-POLARITY (D) +1.74, EXACT +1.74, GREEDY-MENTION-ABORT (C1) +1.74, GREEDY-MENTION-INFEAS (C1) +1.74, GUC-DET (C2) +1.74
-- *answer = UC-DET (C2) / DPLL-MENTION (D)'s prediction*: DPLL-MOMS-POLARITY (D) +1.74, GREEDY-MENTION-ABORT (C1) +1.74, GREEDY-MENTION-INFEAS (C1) +1.74, GUC-DET (C2) +1.74, POLARITY (C0) +1.74, RANDOM (H) +1.74
+- *answer = DROP-LAST-3-EDGES + exact (B1)'s prediction*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.81, DPLL-LIST (D) +1.81, DSATUR-3 (C2) +1.81, EXACT +1.81, FF-3-EDGE-MENTION-ABORT (C1 variant) +1.81, FF-3-LIST-ABORT (C1) +1.81
+- *answer = DSATUR-3 (C2)'s prediction*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.81, DPLL-LIST (D) +1.81, DROP-LAST-3-EDGES + exact (B1) +1.81, FF-3-EDGE-MENTION-ABORT (C1 variant) +1.81, FF-3-LIST-ABORT (C1) +1.81, FF-3-LIST-INFEAS (C1) +1.81
+- *answer = FF-3-LIST-ABORT (C1) / FF-3-LIST-INFEAS (C1) / GREEDY+REPAIR-LIST (C->F) / DPLL-…*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.81, DROP-LAST-3-EDGES + exact (B1) +1.81, DSATUR-3 (C2) +1.81, FF-3-EDGE-MENTION-ABORT (C1 variant) +1.81, ONLINE-FF (C4) +1.81, PHANTOM-ADJACENT (B4) +1.81
+- *answer = IMPOSSIBLE*: DPLL-LIST (D) +1.81, DROP-LAST-3-EDGES + exact (B1) +1.81, DSATUR-3 (C2) +1.81, EXACT +1.81, FF-3-LIST-ABORT (C1) +1.81, FF-3-LIST-INFEAS (C1) +1.81
 
-Notes: Dead-end items (UC-DET and GREEDY both get stuck) against a matched control; the permuted copy moves GREEDY's dead end.
+Notes: Stuck-vs-control items are matched on n, m and order-free backtracking nodes; within the stuck graph, vertex order and edge order are crossed.
 
-### SAT/DEAD — set `0109315fc8`
+### COL/STUCK/vA/eA — set `2ab244d772`
 
-- **Domain / framing:** 3-SAT / textbook
-- **Ground truth:** `{"n_solutions": 80, "satisfiable": true}`
-- **Hashes:** content `e082e008e627bbc8`, base `15c022c5c92ecfca`, source `None`; seed 559636 (dev)
-- **Params:** `{"alpha": 3.5, "design_cell": "DEAD", "greedy_dead_end": {"clause": "C31", "variable": "x73"}, "m": 88, "n": 25, "order_free_dpll_nodes": 14, "prompt_tokens": 1617, "tokenizer_proxy": "regex-digit-split-v1", "uc_dead_end": "C78"}`
-- **Prompt tokens (regex-digit-split-v1):** 1617
+- **Domain / framing:** colouring (k=3) / textbook
+- **Ground truth:** `{"colourable": true, "example": {"v13": 2, "v18": 3, "v20": 2, "v22": 1, "v32": 3, "v37": 1, "v46": 2, "v50": 3, "v53": 2, "v58": 1, "v62": 3, "v66": 1, "v67": 3, "v68": 1, "v71": 2, "v72": 2, "v76": 1, "v78": 1, "v79": 3, "v82": 1, "v89": 1, "v92": 2, "v95": 2, "v99": 3}, "k": 3, "n_colourings_up_…`
+- **Hashes:** content `eca46f431ede58ab`, base `eca46f431ede58ab`, source `None`; seed 723169 (dev)
+- **Params:** `{"design_cell": "STUCK/vA/eA", "filters": ["3-colourable, not 2-colourable", "FF-3-LIST (ABORT) gets stuck at a vertex in the middle third of the listing (selects on FF's failure)", "vertex order B: FF-3-LIST still stuck, at a different vertex (selects on FF's failure)", "CONTROL: FF-3-LIST succeed…`
+- **Prompt tokens (regex-digit-split-v1):** 681
 
 <details><summary>Prompt</summary>
 
 ```text
-A formula over 25 true/false variables. Every clause must contain at least one true literal.
-C1: not x12 or not x19 or not x28
-C2: not x39 or x40 or not x45
-C3: x46 or x39 or x40
-C4: not x12 or x47 or not x56
-C5: not x57 or x12 or x39
-C6: not x40 or x58 or not x62
-C7: x47 or x63 or x65
-C8: not x66 or x19 or x56
-C9: x28 or not x45 or not x68
-C10: not x72 or x73 or not x62
-C11: not x66 or x58 or x68
-C12: x75 or not x63 or x58
-C13: not x76 or not x68 or x83
-C14: x76 or not x65 or not x75
-C15: x65 or not x63 or x47
-C16: not x40 or x47 or not x75
-C17: x75 or x40 or x45
-C18: not x63 or x75 or not x28
-C19: x85 or not x47 or not x65
-C20: x75 or not x65 or x45
-C21: not x45 or x83 or not x57
-C22: not x65 or x28 or x12
-C23: not x57 or not x39 or x73
-C24: not x28 or x57 or x83
-C25: x28 or x47 or not x46
-C26: not x28 or not x87 or not x73
-C27: not x93 or x65 or not x83
-C28: x63 or not x66 or x96
-C29: x73 or not x12 or not x57
-C30: not x96 or not x85 or x40
-C31: not x65 or x63 or not x73
-C32: x62 or x72 or not x68
-C33: x72 or x39 or not x46
-C34: not x93 or x57 or not x56
-C35: x85 or x45 or not x75
-C36: not x85 or not x19 or not x28
-C37: x39 or x12 or not x96
-C38: not x66 or x12 or not x96
-C39: x46 or not x47 or x28
-C40: not x46 or not x93 or not x12
-C41: x83 or x46 or x28
-C42: not x85 or x87 or not x63
-C43: not x19 or x58 or not x40
-C44: x57 or not x39 or not x28
-C45: x56 or not x83 or x58
-C46: x12 or x45 or not x68
-C47: x28 or x58 or x73
-C48: not x93 or not x19 or x83
-C49: x83 or x28 or not x75
-C50: x63 or not x47 or x57
-C51: x56 or not x45 or x40
-C52: not x56 or not x28 or not x63
-C53: x57 or not x12 or x93
-C54: x45 or not x65 or not x85
-C55: not x83 or x65 or not x66
-C56: x65 or not x68 or x85
-C57: x56 or x28 or x46
-C58: not x68 or x83 or not x87
-C59: not x19 or x85 or not x39
-C60: x96 or not x83 or x62
-C61: not x72 or x58 or not x19
-C62: not x45 or x39 or not x96
-C63: not x66 or not x45 or not x62
-C64: x62 or not x19 or x76
-C65: not x93 or not x47 or x83
-C66: not x57 or x75 or not x47
-C67: not x40 or x73 or not x76
-C68: x76 or not x58 or x56
-C69: x39 or not x19 or not x66
-C70: x46 or x45 or x63
-C71: not x45 or not x56 or x46
-C72: not x58 or not x62 or x68
-C73: not x75 or x45 or not x83
-C74: x58 or not x56 or not x73
-C75: not x39 or not x56 or not x46
-C76: not x39 or not x83 or x87
-C77: x76 or x93 or not x63
-C78: not x47 or x56 or not x83
-C79: not x19 or not x96 or x76
-C80: not x46 or x39 or not x45
-C81: not x68 or not x87 or not x93
-C82: x58 or x73 or x47
-C83: x57 or x68 or not x46
-C84: x28 or not x40 or x63
-C85: not x56 or x62 or x75
-C86: not x56 or x47 or x62
-C87: x73 or x12 or not x87
-C88: x85 or not x62 or x66
+Graph with 24 vertices and 51 edges.
+Vertices (in this order): v66, v78, v82, v37, v20, v71, v79, v46, v53, v18, v58, v89, v68, v62, v92, v95, v22, v99, v76, v72, v13, v50, v67, v32
+Edges: v68-v72, v46-v50, v37-v50, v89-v92, v50-v66, v46-v78, v20-v58, v37-v99, v50-v82, v22-v72, v76-v95, v22-v32, v13-v58, v18-v68, v32-v92, v67-v82, v13-v89, v78-v92, v22-v99, v13-v50, v37-v53, v78-v95, v20-v67, v79-v82, v18-v92, v67-v78, v50-v78, v66-v95, v62-v78, v20-v78, v18-v22, v20-v99, v58-v62, v53-v99, v71-v76, v53-v89, v53-v58, v50-v71, v18-v95, v46-v58, v46-v68, v89-v95, v18-v76, v46-v79, v62-v68, v46-v62, v13-v62, v37-v62, v79-v95, v58-v95, v76-v79
 
-Find values for all variables that make every clause true, or say UNSAT if none exist.
-After the line ANSWER:, write UNSAT or the values as `x=T` / `x=F`, comma-separated, in this order: x12, x19, x28, x39, x40, x45, x46, x47, x56, x57, x58, x62, x63, x65, x66, x68, x72, x73, x75, x76, x83, x85, x87, x93, x96.
+Colour every vertex with one of the colours 1, 2, ..., 3 so that the two ends of every edge get different colours. If this is impossible, answer IMPOSSIBLE.
+After the line ANSWER:, write IMPOSSIBLE or one line `<vertex>: <colour>` per vertex, in this order: v66, v78, v82, v37, v20, v71, v79, v46, v53, v18, v58, v89, v68, v62, v92, v95, v22, v99, v76, v72, v13, v50, v67, v32.
 ```
 
 </details>
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| DPLL-MENTION (D) | D | x12=T x19=F x28=T x39=T x40=T x45=F x46=T x47=T x56=F x57=T x58=T x62=F x63=F x65=F x66=F x68=F x72=T x73=T x75=T x76=T… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell DEAD. | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| DPLL-MOMS-POLARITY (D) | D | x12=T x19=F x28=T x39=T x40=T x45=F x46=T x47=T x56=F x57=T x58=T x62=F x63=F x65=F x66=F x68=F x72=T x73=T x75=T x76=T… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell DEAD. | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| EXACT | null | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell DEAD. | a witness checked against every clause, or a closed refutation |
-| GREEDY-MENTION-ABORT (C1) | C1 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell DEAD. | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
-| GREEDY-MENTION-INFEAS (C1) | C1 | x12=T x19=F x28=T x39=F x40=T x45=T x46=F x47=T x56=F x57=T x58=T x62=F x63=F x65=T x66=F x68=F x72=T x73=T x75=T x76=T… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell DEAD. | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
-| GUC-DET (C2) | C2 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell DEAD. | satisfies a literal of a shortest open clause at every step |
-| POLARITY (C0) | C0 | x12=T x19=F x28=T x39=T x40=T x45=F x46=T x47=T x56=F x57=T x58=T x62=T x63=T x65=F x66=F x68=F x72=T x73=T x75=T x76=T… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell DEAD. | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
-| RANDOM (H) | H | P(SAT)=0.50; P(UNSAT)=0.50 | p_h(outcome) = its distribution, mixed with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell DEAD. | no procedure determines the verdict |
-| RO-GREEDY (C3) | C3 | P(UNSAT)=0.97; P(x12=F,x19=F,x28=T,x39=T,x40=F…)=0.01 | p_h(outcome) = its distribution, mixed with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell DEAD. | GREEDY in a uniformly random order; the order varies across samples |
-| SC-DET (C2) | C2 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell DEAD. | prefers unit, then 2-literal open clauses; otherwise the first free variable set true |
-| UC-DET (C2) | C2 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Cell DEAD. | next commitment comes from a unit clause given the state ('forced'); else the first free variable set true; U… |
+| ALWAYS-IMPOSSIBLE (A1 give-up) | A1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | GIVEUP early ('too many constraints'); no assignment attempted |
+| DPLL-LIST (D) | D | v13=2 v18=3 v20=2 v22=1 v32=3 v37=1 v46=2 v50=3 v53=2 v58=1 v62=3 v66=1 v67=3 v68=1 v71=2 v72=2 v76=1 v78=1 v79=3 v82=1… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | chronological backtracking with forward checking in order σ, smallest colour first; IMPOSSIBLE only after exh… |
+| DROP-LAST-3-EDGES + exact (B1) | B1 | v13=3 v18=2 v20=2 v22=1 v32=2 v37=1 v46=3 v50=2 v53=2 v58=1 v62=2 v66=1 v67=3 v68=1 v71=3 v72=2 v76=1 v78=1 v79=2 v82=1… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | neighbourhoods quoted without the late edges; conflicts on dropped edges |
+| DSATUR-3 (C2) | C2 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| EXACT | null | POSSIBLE | set-valued: uniform over its 24 solutions (proper colouring with at most 3 colours); a listed solution gets (1 - eps)/24 + eps/K, its unlis… | a completed procedure: a checked witness, or a closed refutation |
+| FF-3-EDGE-MENTION-ABORT (C1 variant) | C1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| FF-3-LIST-ABORT (C1) | C1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| FF-3-LIST-INFEAS (C1) | C1 | v13=3 v18=1 v20=2 v22=2 v32=1 v37=1 v46=3 v50=2 v53=2 v58=1 v62=2 v66=1 v67=3 v68=2 v71=1 v72=1 v76=2 v78=1 v79=2 v82=1… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| GREEDY+REPAIR-LIST (C->F) | C->F | v13=3 v18=1 v20=2 v22=2 v32=1 v37=1 v46=3 v50=2 v53=2 v58=1 v62=2 v66=1 v67=3 v68=2 v71=1 v72=1 v76=2 v78=1 v79=2 v82=1… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | a complete first-fit pass in order σ, then verification, then local recolouring confined to the top colour cl… |
+| NOISY-EXACT | nuisance | P(_exact)=0.60; P(_other)=0.40 | p_h(outcome) = (1 - eps)·its distribution + eps/K (uniform slip eps = 0.1 over the K = 7 outcome classes); the cell rate is Σ_h π_h·p_h. Ce… | correct procedure with sporadic violations of its own stated rule |
+| ONLINE-FF (C4) | C4 | v13=1 v18=2 v20=1 v22=1 v32=2 v37=1 v46=1 v50=2 v53=2 v58=2 v62=1 v66=1 v67=2 v68=1 v71=2 v72=2 v76=1 v78=2 v79=2 v82=1… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | reads the edge list once in order; colours a vertex at first appearance; never recolours |
+| PHANTOM-ADJACENT (B4) | B4 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | quotes constraints that are not in the instance (phantom edges); false IMPOSSIBLE |
+| RANDOM (H) | H | — | uniform over all answers (uniform over the 3^24 colourings with colours 1..3): its mass on the listed answers and solution sets is at most … | no procedure determines the answer; trace content and verdict unrelated |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = DPLL-MENTION (D)'s prediction*: DPLL-MOMS-POLARITY (D) +1.74, GREEDY-MENTION-ABORT (C1) +1.74, GREEDY-MENTION-INFEAS (C1) +1.74, GUC-DET (C2) +1.74, POLARITY (C0) +1.74, RANDOM (H) +1.74
-- *answer = DPLL-MOMS-POLARITY (D)'s prediction*: DPLL-MENTION (D) +1.74, GREEDY-MENTION-ABORT (C1) +1.74, GREEDY-MENTION-INFEAS (C1) +1.74, GUC-DET (C2) +1.74, POLARITY (C0) +1.74, RANDOM (H) +1.74
-- *answer = GREEDY-MENTION-INFEAS (C1)'s prediction*: DPLL-MENTION (D) +1.74, DPLL-MOMS-POLARITY (D) +1.74, EXACT +1.74, GREEDY-MENTION-ABORT (C1) +1.74, GUC-DET (C2) +1.74, POLARITY (C0) +1.74
-- *answer = POLARITY (C0)'s prediction*: DPLL-MENTION (D) +1.74, DPLL-MOMS-POLARITY (D) +1.74, EXACT +1.74, GREEDY-MENTION-ABORT (C1) +1.74, GREEDY-MENTION-INFEAS (C1) +1.74, GUC-DET (C2) +1.74
+- *answer = DPLL-LIST (D)'s prediction*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.81, DROP-LAST-3-EDGES + exact (B1) +1.81, DSATUR-3 (C2) +1.81, FF-3-EDGE-MENTION-ABORT (C1 variant) +1.81, FF-3-LIST-ABORT (C1) +1.81, FF-3-LIST-INFEAS (C1) +1.81
+- *answer = DROP-LAST-3-EDGES + exact (B1)'s prediction*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.81, DPLL-LIST (D) +1.81, DSATUR-3 (C2) +1.81, FF-3-EDGE-MENTION-ABORT (C1 variant) +1.81, FF-3-LIST-ABORT (C1) +1.81, FF-3-LIST-INFEAS (C1) +1.81
+- *answer = FF-3-LIST-INFEAS (C1) / GREEDY+REPAIR-LIST (C->F)'s prediction*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.81, DPLL-LIST (D) +1.81, DROP-LAST-3-EDGES + exact (B1) +1.81, DSATUR-3 (C2) +1.81, EXACT +1.81, FF-3-EDGE-MENTION-ABORT (C1 variant) +1.81
+- *answer = IMPOSSIBLE*: DPLL-LIST (D) +1.81, DROP-LAST-3-EDGES + exact (B1) +1.81, EXACT +1.81, FF-3-LIST-INFEAS (C1) +1.81, GREEDY+REPAIR-LIST (C->F) +1.81, NOISY-EXACT +1.81
 
-Notes: Dead-end items (UC-DET and GREEDY both get stuck) against a matched control; the permuted copy moves GREEDY's dead end.
+Notes: Stuck-vs-control items are matched on n, m and order-free backtracking nodes; within the stuck graph, vertex order and edge order are crossed.
 
-### STATE/SAT/s1 — set `22d112a523`
+### COL/STUCK/vA/eB — set `2c2dfe9dad`
 
-- **Domain / framing:** 3-SAT (partial assignment given) / textbook
-- **Ground truth:** `{"n_completions": 5, "satisfiable": true}`
-- **Hashes:** content `7dad5247e167a23c`, base `56f341e10e8a244d`, source `None`; seed 583393 (dev)
-- **Params:** `{"design_cell": "s1", "fixed": {"x13": false, "x20": false, "x23": false, "x28": false, "x32": false, "x34": false}, "prompt_tokens": 1344, "tokenizer_proxy": "regex-digit-split-v1"}`
-- **Prompt tokens (regex-digit-split-v1):** 1344
+- **Domain / framing:** colouring (k=3) / textbook
+- **Ground truth:** `{"colourable": true, "example": {"v11": 2, "v13": 2, "v19": 1, "v22": 3, "v23": 3, "v24": 3, "v27": 2, "v32": 2, "v36": 1, "v41": 1, "v45": 3, "v48": 1, "v55": 2, "v64": 1, "v67": 1, "v70": 1, "v72": 3, "v79": 2, "v80": 1, "v90": 2, "v92": 3, "v95": 2, "v96": 2, "v98": 3}, "k": 3, "n_colourings_up_…`
+- **Hashes:** content `b0ccf30292b66ffc`, base `b0ccf30292b66ffc`, source `b0ccf30292b66ffc`; seed 873630 (dev)
+- **Params:** `{"design_cell": "STUCK/vA/eB", "filters": ["3-colourable, not 2-colourable", "FF-3-LIST (ABORT) gets stuck at a vertex in the middle third of the listing (selects on FF's failure)", "vertex order B: FF-3-LIST still stuck, at a different vertex (selects on FF's failure)", "CONTROL: FF-3-LIST succeed…`
+- **Prompt tokens (regex-digit-split-v1):** 673
 
 <details><summary>Prompt</summary>
 
 ```text
-A formula over 20 true/false variables. Every clause must contain at least one true literal.
-C1: x13 or not x20 or x23
-C2: x28 or not x32 or x34
-C3: not x35 or x53 or x54
-C4: not x56 or not x13 or x59
-C5: x54 or not x32 or x73
-C6: x73 or not x77 or not x20
-C7: x34 or not x35 or x81
-C8: x83 or x88 or not x32
-C9: not x77 or x23 or x90
-C10: x73 or x56 or not x91
-C11: not x56 or x92 or x13
-C12: not x13 or x23 or x59
-C13: x91 or not x32 or not x90
-C14: x88 or x81 or not x23
-C15: x88 or not x77 or x56
-C16: x20 or x93 or not x23
-C17: not x77 or x92 or x35
-C18: not x77 or x83 or not x35
-C19: x93 or x91 or not x59
-C20: not x56 or not x91 or not x59
-C21: not x59 or not x56 or not x90
-C22: x83 or x35 or x20
-C23: not x34 or x83 or x20
-C24: not x56 or not x32 or not x53
-C25: x28 or not x91 or not x81
-C26: not x56 or x88 or not x77
-C27: not x32 or not x93 or x88
-C28: not x20 or x28 or not x92
-C29: x53 or x20 or x59
-C30: x73 or not x90 or x20
-C31: not x32 or not x56 or x53
-C32: not x81 or not x34 or x77
-C33: not x59 or x73 or not x20
-C34: not x73 or x54 or x91
-C35: x83 or x59 or not x34
-C36: not x90 or not x88 or x93
-C37: not x53 or not x13 or not x81
-C38: x90 or x34 or not x92
-C39: x83 or x53 or not x32
-C40: x90 or x54 or not x23
-C41: not x20 or not x13 or not x34
-C42: x91 or not x20 or x35
-C43: x54 or x83 or x32
-C44: x23 or not x88 or x34
-C45: x93 or x81 or x83
-C46: not x13 or x83 or x54
-C47: not x28 or x32 or x53
-C48: not x32 or x23 or not x56
-C49: not x35 or x23 or not x83
-C50: not x54 or x81 or not x77
-C51: not x92 or not x77 or x73
-C52: x90 or x59 or not x88
-C53: x53 or not x92 or not x54
-C54: not x32 or x91 or not x23
-C55: x34 or x32 or not x56
-C56: not x90 or not x13 or not x92
-C57: x28 or not x56 or not x20
-C58: not x54 or x59 or x81
-C59: x32 or x53 or not x93
-C60: x20 or not x32 or not x59
-C61: not x81 or not x92 or x13
-C62: x88 or x59 or not x90
-C63: x77 or x92 or x73
-C64: not x23 or x53 or x20
-C65: x13 or not x73 or x92
-C66: x56 or not x20 or not x88
-C67: x91 or not x92 or x35
-C68: not x73 or not x56 or x20
-C69: not x35 or x28 or x53
-C70: x34 or x83 or not x13
+Graph with 24 vertices and 50 edges.
+Vertices (in this order): v80, v13, v45, v90, v79, v72, v36, v67, v24, v55, v11, v41, v98, v22, v92, v19, v95, v23, v64, v48, v96, v70, v32, v27
+Edges: v11-v45, v70-v72, v23-v96, v19-v55, v19-v90, v11-v22, v48-v79, v64-v98, v19-v92, v92-v95, v11-v48, v67-v98, v32-v48, v23-v64, v95-v98, v48-v55, v13-v70, v24-v80, v22-v32, v27-v67, v13-v36, v72-v95, v45-v67, v24-v64, v67-v90, v13-v67, v19-v22, v23-v90, v67-v96, v22-v90, v22-v27, v70-v96, v27-v48, v24-v96, v80-v92, v24-v32, v48-v90, v19-v23, v55-v67, v32-v45, v19-v95, v19-v45, v13-v72, v11-v80, v36-v72, v23-v67, v64-v95, v64-v72, v22-v55, v19-v32
 
-These values are already fixed and must not be changed: x13=F, x20=F, x23=F, x28=F, x32=F, x34=F.
-
-Find values for all variables that make every clause true (keeping the fixed values), or say UNSAT if none exist.
-After the line ANSWER:, write UNSAT or the values as `x=T` / `x=F`, comma-separated, in this order: x13, x20, x23, x28, x32, x34, x35, x53, x54, x56, x59, x73, x77, x81, x83, x88, x90, x91, x92, x93.
+Colour every vertex with one of the colours 1, 2, ..., 3 so that the two ends of every edge get different colours. If this is impossible, answer IMPOSSIBLE.
+After the line ANSWER:, write IMPOSSIBLE or one line `<vertex>: <colour>` per vertex, in this order: v80, v13, v45, v90, v79, v72, v36, v67, v24, v55, v11, v41, v98, v22, v92, v19, v95, v23, v64, v48, v96, v70, v32, v27.
 ```
 
 </details>
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| DPLL from state (D) | D | x13=F x20=F x23=F x28=F x32=F x34=F x35=F x53=T x54=T x56=F x59=T x73=T x77=F x81=F x83=T x88=F x90=T x91=T x92=T x93=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s1. | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| EXACT | null | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s1. | a witness checked against every clause, or a closed refutation |
-| GREEDY-MENTION from state (C1) | C1 | x13=F x20=F x23=F x28=F x32=F x34=F x35=F x53=T x54=T x56=F x59=T x73=T x77=F x81=F x83=T x88=F x90=T x91=T x92=T x93=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s1. | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
-| GREEDY-MENTION-ABORT from state (C1) | C1 | x13=F x20=F x23=F x28=F x32=F x34=F x35=F x53=T x54=T x56=F x59=T x73=T x77=F x81=F x83=T x88=F x90=T x91=T x92=T x93=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s1. | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
-| GUC-DET from state (C2) | C2 | x13=F x20=F x23=F x28=F x32=F x34=F x35=F x53=T x54=T x56=F x59=T x73=T x77=F x81=F x83=T x88=F x90=T x91=T x92=T x93=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s1. | satisfies a literal of a shortest open clause at every step |
-| POLARITY (C0, ignores state) | C0 | x13=F x20=F x23=F x28=F x32=F x34=F x35=F x53=T x54=T x56=F x59=T x73=T x77=F x81=T x83=T x88=T x90=F x91=T x92=F x93=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s1. | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
-| RANDOM (H) | H | P(SAT)=0.50; P(UNSAT)=0.50 | p_h(outcome) = its distribution, mixed with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s1. | no procedure determines the verdict |
-| SC-DET from state (C2) | C2 | x13=F x20=F x23=F x28=F x32=F x34=F x35=F x53=T x54=T x56=F x59=T x73=T x77=F x81=F x83=T x88=F x90=T x91=T x92=T x93=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s1. | prefers unit, then 2-literal open clauses; otherwise the first free variable set true |
-| UC-DET from state (C2) | C2 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s1. | next commitment comes from a unit clause given the state ('forced'); else the first free variable set true; U… |
+| ALWAYS-IMPOSSIBLE (A1 give-up) | A1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.911, eps/K = 0.011 on each other class (uniform slip eps = 0.1 over the K = 9 outcome classes); the ce… | GIVEUP early ('too many constraints'); no assignment attempted |
+| DPLL-LIST (D) | D | v11=3 v13=1 v19=3 v22=2 v23=2 v24=2 v27=1 v32=1 v36=3 v41=1 v45=2 v48=2 v55=1 v64=3 v67=3 v70=3 v72=2 v79=1 v80=1 v90=1… | p_h(its class) = 1 - eps + eps/K = 0.911, eps/K = 0.011 on each other class (uniform slip eps = 0.1 over the K = 9 outcome classes); the ce… | chronological backtracking with forward checking in order σ, smallest colour first; IMPOSSIBLE only after exh… |
+| DROP-LAST-3-EDGES + exact (B1) | B1 | v11=2 v13=2 v19=1 v22=3 v23=3 v24=3 v27=2 v32=2 v36=3 v41=1 v45=3 v48=1 v55=2 v64=1 v67=1 v70=3 v72=1 v79=2 v80=1 v90=2… | p_h(its class) = 1 - eps + eps/K = 0.911, eps/K = 0.011 on each other class (uniform slip eps = 0.1 over the K = 9 outcome classes); the ce… | neighbourhoods quoted without the late edges; conflicts on dropped edges |
+| DSATUR-3 (C2) | C2 | v11=1 v13=2 v19=1 v22=3 v23=3 v24=3 v27=2 v32=2 v36=1 v41=1 v45=3 v48=3 v55=2 v64=1 v67=1 v70=1 v72=3 v79=1 v80=2 v90=2… | p_h(its class) = 1 - eps + eps/K = 0.911, eps/K = 0.011 on each other class (uniform slip eps = 0.1 over the K = 9 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| EXACT | null | POSSIBLE | set-valued: uniform over its 30 solutions (proper colouring with at most 3 colours); a listed solution gets (1 - eps)/30 + eps/K, its unlis… | a completed procedure: a checked witness, or a closed refutation |
+| FF-3-EDGE-MENTION-ABORT (C1 variant) | C1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.911, eps/K = 0.011 on each other class (uniform slip eps = 0.1 over the K = 9 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| FF-3-LIST-ABORT (C1) | C1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.911, eps/K = 0.011 on each other class (uniform slip eps = 0.1 over the K = 9 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| FF-3-LIST-INFEAS (C1) | C1 | v11=2 v13=1 v19=2 v22=3 v23=3 v24=2 v27=1 v32=1 v36=3 v41=1 v45=1 v48=3 v55=1 v64=1 v67=2 v70=3 v72=2 v79=1 v80=1 v90=1… | p_h(its class) = 1 - eps + eps/K = 0.911, eps/K = 0.011 on each other class (uniform slip eps = 0.1 over the K = 9 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| GREEDY+REPAIR-LIST (C->F) | C->F | v11=2 v13=1 v19=2 v22=3 v23=3 v24=2 v27=1 v32=1 v36=3 v41=1 v45=3 v48=3 v55=1 v64=1 v67=2 v70=3 v72=2 v79=1 v80=1 v90=1… | p_h(its class) = 1 - eps + eps/K = 0.911, eps/K = 0.011 on each other class (uniform slip eps = 0.1 over the K = 9 outcome classes); the ce… | a complete first-fit pass in order σ, then verification, then local recolouring confined to the top colour cl… |
+| NOISY-EXACT | nuisance | P(_exact)=0.61; P(_other)=0.39 | p_h(outcome) = (1 - eps)·its distribution + eps/K (uniform slip eps = 0.1 over the K = 9 outcome classes); the cell rate is Σ_h π_h·p_h. Ce… | correct procedure with sporadic violations of its own stated rule |
+| ONLINE-FF (C4) | C4 | v11=1 v13=2 v19=1 v22=2 v23=1 v24=1 v27=2 v32=2 v36=1 v41=1 v45=2 v48=1 v55=2 v64=1 v67=1 v70=1 v72=2 v79=2 v80=2 v90=2… | p_h(its class) = 1 - eps + eps/K = 0.911, eps/K = 0.011 on each other class (uniform slip eps = 0.1 over the K = 9 outcome classes); the ce… | reads the edge list once in order; colours a vertex at first appearance; never recolours |
+| PHANTOM-ADJACENT (B4) | B4 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.911, eps/K = 0.011 on each other class (uniform slip eps = 0.1 over the K = 9 outcome classes); the ce… | quotes constraints that are not in the instance (phantom edges); false IMPOSSIBLE |
+| RANDOM (H) | H | — | uniform over all answers (uniform over the 3^24 colourings with colours 1..3): its mass on the listed answers and solution sets is at most … | no procedure determines the answer; trace content and verdict unrelated |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = GREEDY-MENTION from state (C1) / GREEDY-MENTION-ABORT from state (C1) / GUC-DET …*: POLARITY (C0, ignores state) +1.57, RANDOM (H) +1.57, UC-DET from state (C2) +1.57, EXACT +0.65, DPLL from state (D) +0.00, GREEDY-MENTION from state (C1) +0.00
-- *answer = POLARITY (C0, ignores state)'s prediction*: DPLL from state (D) +1.57, EXACT +1.57, GREEDY-MENTION from state (C1) +1.57, GREEDY-MENTION-ABORT from state (C1) +1.57, GUC-DET from state (C2) +1.57, RANDOM (H) +1.57
-- *answer = UNSAT*: DPLL from state (D) +1.57, EXACT +1.57, GREEDY-MENTION from state (C1) +1.57, GREEDY-MENTION-ABORT from state (C1) +1.57, GUC-DET from state (C2) +1.57, POLARITY (C0, ignores state) +1.57
-- *answer = other*: DPLL from state (D) +1.47, GREEDY-MENTION from state (C1) +1.47, GREEDY-MENTION-ABORT from state (C1) +1.47, GUC-DET from state (C2) +1.47, POLARITY (C0, ignores state) +1.47, SC-DET from state (C2) +1.47
+- *answer = DPLL-LIST (D)'s prediction*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.91, DROP-LAST-3-EDGES + exact (B1) +1.91, DSATUR-3 (C2) +1.91, FF-3-EDGE-MENTION-ABORT (C1 variant) +1.91, FF-3-LIST-ABORT (C1) +1.91, FF-3-LIST-INFEAS (C1) +1.91
+- *answer = DROP-LAST-3-EDGES + exact (B1)'s prediction*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.91, DPLL-LIST (D) +1.91, DSATUR-3 (C2) +1.91, EXACT +1.91, FF-3-EDGE-MENTION-ABORT (C1 variant) +1.91, FF-3-LIST-ABORT (C1) +1.91
+- *answer = DSATUR-3 (C2)'s prediction*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.91, DPLL-LIST (D) +1.91, DROP-LAST-3-EDGES + exact (B1) +1.91, FF-3-EDGE-MENTION-ABORT (C1 variant) +1.91, FF-3-LIST-ABORT (C1) +1.91, FF-3-LIST-INFEAS (C1) +1.91
+- *answer = FF-3-LIST-INFEAS (C1)'s prediction*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.91, DPLL-LIST (D) +1.91, DROP-LAST-3-EDGES + exact (B1) +1.91, DSATUR-3 (C2) +1.91, EXACT +1.91, FF-3-EDGE-MENTION-ABORT (C1 variant) +1.91
 
-Notes: Same instance in every state; only the fixed values differ. C0 ignores them, C1 counts only the clauses they leave open, C2 follows the clauses they make unit.
+Notes: Stuck-vs-control items are matched on n, m and order-free backtracking nodes; within the stuck graph, vertex order and edge order are crossed.
 
-### STATE/SAT/s2 — set `22d112a523`
+### COL/STUCK/vB/eA — set `2c2dfe9dad`
 
-- **Domain / framing:** 3-SAT (partial assignment given) / textbook
-- **Ground truth:** `{"n_completions": 6, "satisfiable": true}`
-- **Hashes:** content `3810680ea3a062f2`, base `56f341e10e8a244d`, source `56f341e10e8a244d`; seed 583393 (dev)
-- **Params:** `{"design_cell": "s2", "fixed": {"x13": false, "x20": false, "x23": true, "x28": false, "x32": false, "x34": false}, "prompt_tokens": 1344, "tokenizer_proxy": "regex-digit-split-v1"}`
-- **Prompt tokens (regex-digit-split-v1):** 1344
+- **Domain / framing:** colouring (k=3) / textbook
+- **Ground truth:** `{"colourable": true, "example": {"v11": 3, "v13": 2, "v19": 1, "v22": 2, "v23": 2, "v24": 2, "v27": 3, "v32": 3, "v36": 1, "v41": 1, "v45": 2, "v48": 1, "v55": 3, "v64": 1, "v67": 1, "v70": 1, "v72": 3, "v79": 2, "v80": 1, "v90": 3, "v92": 3, "v95": 2, "v96": 3, "v98": 3}, "k": 3, "n_colourings_up_…`
+- **Hashes:** content `b0ccf30292b66ffc`, base `b0ccf30292b66ffc`, source `b0ccf30292b66ffc`; seed 873630 (dev)
+- **Params:** `{"design_cell": "STUCK/vB/eA", "filters": ["3-colourable, not 2-colourable", "FF-3-LIST (ABORT) gets stuck at a vertex in the middle third of the listing (selects on FF's failure)", "vertex order B: FF-3-LIST still stuck, at a different vertex (selects on FF's failure)", "CONTROL: FF-3-LIST succeed…`
+- **Prompt tokens (regex-digit-split-v1):** 673
 
 <details><summary>Prompt</summary>
 
 ```text
-A formula over 20 true/false variables. Every clause must contain at least one true literal.
-C1: x13 or not x20 or x23
-C2: x28 or not x32 or x34
-C3: not x35 or x53 or x54
-C4: not x56 or not x13 or x59
-C5: x54 or not x32 or x73
-C6: x73 or not x77 or not x20
-C7: x34 or not x35 or x81
-C8: x83 or x88 or not x32
-C9: not x77 or x23 or x90
-C10: x73 or x56 or not x91
-C11: not x56 or x92 or x13
-C12: not x13 or x23 or x59
-C13: x91 or not x32 or not x90
-C14: x88 or x81 or not x23
-C15: x88 or not x77 or x56
-C16: x20 or x93 or not x23
-C17: not x77 or x92 or x35
-C18: not x77 or x83 or not x35
-C19: x93 or x91 or not x59
-C20: not x56 or not x91 or not x59
-C21: not x59 or not x56 or not x90
-C22: x83 or x35 or x20
-C23: not x34 or x83 or x20
-C24: not x56 or not x32 or not x53
-C25: x28 or not x91 or not x81
-C26: not x56 or x88 or not x77
-C27: not x32 or not x93 or x88
-C28: not x20 or x28 or not x92
-C29: x53 or x20 or x59
-C30: x73 or not x90 or x20
-C31: not x32 or not x56 or x53
-C32: not x81 or not x34 or x77
-C33: not x59 or x73 or not x20
-C34: not x73 or x54 or x91
-C35: x83 or x59 or not x34
-C36: not x90 or not x88 or x93
-C37: not x53 or not x13 or not x81
-C38: x90 or x34 or not x92
-C39: x83 or x53 or not x32
-C40: x90 or x54 or not x23
-C41: not x20 or not x13 or not x34
-C42: x91 or not x20 or x35
-C43: x54 or x83 or x32
-C44: x23 or not x88 or x34
-C45: x93 or x81 or x83
-C46: not x13 or x83 or x54
-C47: not x28 or x32 or x53
-C48: not x32 or x23 or not x56
-C49: not x35 or x23 or not x83
-C50: not x54 or x81 or not x77
-C51: not x92 or not x77 or x73
-C52: x90 or x59 or not x88
-C53: x53 or not x92 or not x54
-C54: not x32 or x91 or not x23
-C55: x34 or x32 or not x56
-C56: not x90 or not x13 or not x92
-C57: x28 or not x56 or not x20
-C58: not x54 or x59 or x81
-C59: x32 or x53 or not x93
-C60: x20 or not x32 or not x59
-C61: not x81 or not x92 or x13
-C62: x88 or x59 or not x90
-C63: x77 or x92 or x73
-C64: not x23 or x53 or x20
-C65: x13 or not x73 or x92
-C66: x56 or not x20 or not x88
-C67: x91 or not x92 or x35
-C68: not x73 or not x56 or x20
-C69: not x35 or x28 or x53
-C70: x34 or x83 or not x13
+Graph with 24 vertices and 50 edges.
+Vertices (in this order): v80, v96, v41, v24, v19, v27, v70, v95, v67, v79, v45, v13, v36, v23, v22, v32, v72, v48, v92, v55, v64, v90, v11, v98
+Edges: v19-v32, v22-v55, v64-v72, v64-v95, v23-v67, v36-v72, v11-v80, v13-v72, v19-v45, v19-v95, v32-v45, v55-v67, v19-v23, v48-v90, v24-v32, v80-v92, v24-v96, v27-v48, v70-v96, v22-v27, v22-v90, v67-v96, v23-v90, v19-v22, v13-v67, v67-v90, v24-v64, v45-v67, v72-v95, v13-v36, v27-v67, v22-v32, v24-v80, v13-v70, v48-v55, v95-v98, v23-v64, v32-v48, v67-v98, v11-v48, v92-v95, v19-v92, v64-v98, v48-v79, v11-v22, v19-v90, v19-v55, v23-v96, v70-v72, v11-v45
 
-These values are already fixed and must not be changed: x13=F, x20=F, x23=T, x28=F, x32=F, x34=F.
-
-Find values for all variables that make every clause true (keeping the fixed values), or say UNSAT if none exist.
-After the line ANSWER:, write UNSAT or the values as `x=T` / `x=F`, comma-separated, in this order: x13, x20, x23, x28, x32, x34, x35, x53, x54, x56, x59, x73, x77, x81, x83, x88, x90, x91, x92, x93.
+Colour every vertex with one of the colours 1, 2, ..., 3 so that the two ends of every edge get different colours. If this is impossible, answer IMPOSSIBLE.
+After the line ANSWER:, write IMPOSSIBLE or one line `<vertex>: <colour>` per vertex, in this order: v80, v96, v41, v24, v19, v27, v70, v95, v67, v79, v45, v13, v36, v23, v22, v32, v72, v48, v92, v55, v64, v90, v11, v98.
 ```
 
 </details>
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| DPLL from state (D) | D | x13=F x20=F x23=T x28=F x32=F x34=F x35=T x53=T x54=T x56=F x59=T x73=F x77=T x81=T x83=T x88=T x90=F x91=F x92=F x93=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s2. | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| EXACT | null | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s2. | a witness checked against every clause, or a closed refutation |
-| GREEDY-MENTION from state (C1) | C1 | x13=F x20=F x23=T x28=F x32=F x34=F x35=F x53=T x54=T x56=F x59=T x73=T x77=F x81=T x83=T x88=F x90=T x91=T x92=T x93=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s2. | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
-| GREEDY-MENTION-ABORT from state (C1) | C1 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s2. | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
-| GUC-DET from state (C2) | C2 | x13=F x20=F x23=T x28=F x32=F x34=F x35=F x53=T x54=F x56=F x59=T x73=T x77=T x81=F x83=T x88=T x90=T x91=T x92=T x93=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s2. | satisfies a literal of a shortest open clause at every step |
-| POLARITY (C0, ignores state) | C0 | x13=F x20=F x23=T x28=F x32=F x34=F x35=F x53=T x54=T x56=F x59=T x73=T x77=F x81=T x83=T x88=T x90=F x91=T x92=F x93=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s2. | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
-| RANDOM (H) | H | P(SAT)=0.50; P(UNSAT)=0.50 | p_h(outcome) = its distribution, mixed with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s2. | no procedure determines the verdict |
-| SC-DET from state (C2) | C2 | x13=F x20=F x23=T x28=F x32=F x34=F x35=F x53=T x54=F x56=F x59=T x73=T x77=T x81=F x83=T x88=T x90=T x91=T x92=T x93=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s2. | prefers unit, then 2-literal open clauses; otherwise the first free variable set true |
-| UC-DET from state (C2) | C2 | x13=F x20=F x23=T x28=F x32=F x34=F x35=T x53=T x54=T x56=F x59=T x73=F x77=T x81=T x83=T x88=T x90=F x91=F x92=F x93=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s2. | next commitment comes from a unit clause given the state ('forced'); else the first free variable set true; U… |
+| ALWAYS-IMPOSSIBLE (A1 give-up) | A1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | GIVEUP early ('too many constraints'); no assignment attempted |
+| DPLL-LIST (D) | D | v11=3 v13=1 v19=3 v22=2 v23=2 v24=2 v27=1 v32=1 v36=3 v41=1 v45=2 v48=2 v55=1 v64=3 v67=3 v70=3 v72=2 v79=1 v80=1 v90=1… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | chronological backtracking with forward checking in order σ, smallest colour first; IMPOSSIBLE only after exh… |
+| DROP-LAST-3-EDGES + exact (B1) | B1 | v11=3 v13=2 v19=1 v22=2 v23=2 v24=2 v27=3 v32=3 v36=1 v41=1 v45=2 v48=1 v55=3 v64=1 v67=1 v70=1 v72=3 v79=2 v80=1 v90=3… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | neighbourhoods quoted without the late edges; conflicts on dropped edges |
+| DSATUR-3 (C2) | C2 | v11=3 v13=2 v19=1 v22=2 v23=2 v24=2 v27=3 v32=3 v36=1 v41=1 v45=2 v48=1 v55=3 v64=1 v67=1 v70=1 v72=3 v79=2 v80=1 v90=3… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| EXACT | null | POSSIBLE | set-valued: uniform over its 30 solutions (proper colouring with at most 3 colours); a listed solution gets (1 - eps)/30 + eps/K, its unlis… | a completed procedure: a checked witness, or a closed refutation |
+| FF-3-EDGE-MENTION-ABORT (C1 variant) | C1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| FF-3-LIST-ABORT (C1) | C1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| FF-3-LIST-INFEAS (C1) | C1 | v11=1 v13=1 v19=1 v22=2 v23=3 v24=2 v27=1 v32=1 v36=2 v41=1 v45=3 v48=2 v55=3 v64=1 v67=2 v70=2 v72=3 v79=1 v80=1 v90=1… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| GREEDY+REPAIR-LIST (C->F) | C->F | v11=1 v13=1 v19=1 v22=2 v23=3 v24=2 v27=1 v32=1 v36=2 v41=1 v45=3 v48=2 v55=3 v64=1 v67=2 v70=2 v72=3 v79=1 v80=1 v90=1… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | a complete first-fit pass in order σ, then verification, then local recolouring confined to the top colour cl… |
+| NOISY-EXACT | nuisance | P(_exact)=0.61; P(_other)=0.39 | p_h(outcome) = (1 - eps)·its distribution + eps/K (uniform slip eps = 0.1 over the K = 7 outcome classes); the cell rate is Σ_h π_h·p_h. Ce… | correct procedure with sporadic violations of its own stated rule |
+| ONLINE-FF (C4) | C4 | v11=1 v13=1 v19=1 v22=1 v23=1 v24=1 v27=2 v32=2 v36=1 v41=1 v45=2 v48=1 v55=2 v64=1 v67=2 v70=1 v72=2 v79=2 v80=2 v90=2… | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | reads the edge list once in order; colours a vertex at first appearance; never recolours |
+| PHANTOM-ADJACENT (B4) | B4 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.914, eps/K = 0.014 on each other class (uniform slip eps = 0.1 over the K = 7 outcome classes); the ce… | quotes constraints that are not in the instance (phantom edges); false IMPOSSIBLE |
+| RANDOM (H) | H | — | uniform over all answers (uniform over the 3^24 colourings with colours 1..3): its mass on the listed answers and solution sets is at most … | no procedure determines the answer; trace content and verdict unrelated |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = GREEDY-MENTION from state (C1)'s prediction*: DPLL from state (D) +1.74, EXACT +1.74, GREEDY-MENTION-ABORT from state (C1) +1.74, GUC-DET from state (C2) +1.74, POLARITY (C0, ignores state) +1.74, RANDOM (H) +1.74
-- *answer = GUC-DET from state (C2) / SC-DET from state (C2)'s prediction*: DPLL from state (D) +1.74, GREEDY-MENTION from state (C1) +1.74, GREEDY-MENTION-ABORT from state (C1) +1.74, POLARITY (C0, ignores state) +1.74, RANDOM (H) +1.74, UC-DET from state (C2) +1.74
-- *answer = POLARITY (C0, ignores state)'s prediction*: DPLL from state (D) +1.74, EXACT +1.74, GREEDY-MENTION from state (C1) +1.74, GREEDY-MENTION-ABORT from state (C1) +1.74, GUC-DET from state (C2) +1.74, RANDOM (H) +1.74
-- *answer = UC-DET from state (C2) / DPLL from state (D)'s prediction*: GREEDY-MENTION from state (C1) +1.74, GREEDY-MENTION-ABORT from state (C1) +1.74, GUC-DET from state (C2) +1.74, POLARITY (C0, ignores state) +1.74, RANDOM (H) +1.74, SC-DET from state (C2) +1.74
+- *answer = DPLL-LIST (D)'s prediction*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.81, DROP-LAST-3-EDGES + exact (B1) +1.81, DSATUR-3 (C2) +1.81, FF-3-EDGE-MENTION-ABORT (C1 variant) +1.81, FF-3-LIST-ABORT (C1) +1.81, FF-3-LIST-INFEAS (C1) +1.81
+- *answer = DSATUR-3 (C2) / DROP-LAST-3-EDGES + exact (B1)'s prediction*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.81, DPLL-LIST (D) +1.81, FF-3-EDGE-MENTION-ABORT (C1 variant) +1.81, FF-3-LIST-ABORT (C1) +1.81, FF-3-LIST-INFEAS (C1) +1.81, GREEDY+REPAIR-LIST (C->F) +1.81
+- *answer = FF-3-LIST-INFEAS (C1) / GREEDY+REPAIR-LIST (C->F)'s prediction*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.81, DPLL-LIST (D) +1.81, DROP-LAST-3-EDGES + exact (B1) +1.81, DSATUR-3 (C2) +1.81, EXACT +1.81, FF-3-EDGE-MENTION-ABORT (C1 variant) +1.81
+- *answer = IMPOSSIBLE*: DPLL-LIST (D) +1.81, DROP-LAST-3-EDGES + exact (B1) +1.81, DSATUR-3 (C2) +1.81, EXACT +1.81, FF-3-LIST-INFEAS (C1) +1.81, GREEDY+REPAIR-LIST (C->F) +1.81
 
-Notes: Same instance in every state; only the fixed values differ. C0 ignores them, C1 counts only the clauses they leave open, C2 follows the clauses they make unit.
+Notes: Stuck-vs-control items are matched on n, m and order-free backtracking nodes; within the stuck graph, vertex order and edge order are crossed.
 
-### STATE/COL/s1 — set `2782035477`
+### STATE/COL/s1 — set `3bc2851b4d`
 
 - **Domain / framing:** colouring (k=3, partial colouring given) / textbook
-- **Ground truth:** `{"colourable": true, "k": 3, "n_completions": 4}`
-- **Hashes:** content `523078594e2e20f1`, base `096a7d57ce04952f`, source `None`; seed 733854 (dev)
-- **Params:** `{"design_cell": "s1", "fixed": {"v10": 2, "v51": 1, "v58": 3, "v59": 1, "v61": 3, "v69": 2}, "prompt_tokens": 563, "tokenizer_proxy": "regex-digit-split-v1"}`
-- **Prompt tokens (regex-digit-split-v1):** 563
+- **Ground truth:** `{"colourable": true, "k": 3, "n_completions": 2}`
+- **Hashes:** content `bbd8e90fe733757f`, base `bbd8e90fe733757f`, source `None`; seed 337904 (dev)
+- **Params:** `{"design_cell": "s1", "filters": ["s1: the FF-3 continuation dead-ends but a completion exists (cell defined by FF's failure); s3: no completion"], "fixed": {"v33": 2, "v40": 2, "v45": 3, "v51": 3, "v58": 1, "v76": 2}, "prompt_tokens": 575, "tokenizer_proxy": "regex-digit-split-v1"}`
+- **Prompt tokens (regex-digit-split-v1):** 575
 
 <details><summary>Prompt</summary>
 
 ```text
 Graph with 16 vertices.
-Vertices (in this order): v10, v61, v51, v58, v59, v69, v45, v78, v86, v66, v54, v88, v93, v12, v75, v37
+Vertices (in this order): v45, v76, v51, v40, v33, v58, v99, v93, v64, v53, v21, v83, v29, v62, v11, v94
 Neighbours (one line per vertex, same order):
-v10: v59, v45, v93
-v61: v51, v59, v45, v54, v88
-v51: v61, v58, v78, v88, v93
-v58: v51, v69, v86, v88, v37
-v59: v10, v61, v69, v78, v75, v37
-v69: v58, v59, v45, v86, v93, v75
-v45: v10, v61, v69, v66, v88, v37
-v78: v51, v59
-v86: v58, v69, v88, v93
-v66: v45, v88
-v54: v61
-v88: v61, v51, v58, v45, v86, v66
-v93: v10, v51, v69, v86, v12
-v12: v93, v37
-v75: v59, v69
-v37: v58, v59, v45, v12
+v45: v58, v99, v94
+v76: v51, v58, v99, v53, v11, v94
+v51: v76, v33, v11, v94
+v40: v99, v93, v53, v29, v11, v94
+v33: v51, v64, v29
+v58: v45, v76, v53, v83
+v99: v45, v76, v40, v64, v83, v62
+v93: v40, v29, v62, v94
+v64: v33, v99
+v53: v76, v40, v58, v21, v29
+v21: v53, v94
+v83: v58, v99, v11
+v29: v40, v33, v93, v53, v62
+v62: v99, v93, v29
+v11: v76, v51, v40, v83
+v94: v45, v76, v51, v40, v93, v21
 
-These vertices are already coloured and must not be changed: v10: 2, v61: 3, v51: 1, v58: 3, v59: 1, v69: 2.
+These vertices are already coloured and must not be changed: v45: 3, v76: 2, v51: 3, v40: 2, v33: 2, v58: 1.
 
 Colour every vertex with one of the colours 1, 2, ..., 3 so that neighbours get different colours. If this is impossible (keeping the fixed colours), say IMPOSSIBLE.
-After the line ANSWER:, write IMPOSSIBLE or one line `vertex: colour` per vertex, in this order: v10, v61, v51, v58, v59, v69, v45, v78, v86, v66, v54, v88, v93, v12, v75, v37.
+After the line ANSWER:, write IMPOSSIBLE or one line `<vertex>: <colour>` per vertex, in this order: v45, v76, v51, v40, v33, v58, v99, v93, v64, v53, v21, v83, v29, v62, v11, v94.
 ```
 
 </details>
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| DPLL-LIST from state (D) | D | v10=2 v12=1 v37=2 v45=1 v51=1 v54=1 v58=3 v59=1 v61=3 v66=3 v69=2 v75=3 v78=2 v86=1 v88=2 v93=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s1. | chronological backtracking in order σ, smallest colour first; IMPOSSIBLE only after exhaustive refutation, or… |
-| DSATUR-3 from state (C2) | C2 | v10=2 v12=1 v37=2 v45=1 v51=1 v54=1 v58=3 v59=1 v61=3 v66=3 v69=2 v75=3 v78=2 v86=1 v88=2 v93=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s1. | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
-| EXACT | null | POSSIBLE | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s1. | a completed procedure: a checked witness, or a closed refutation |
-| FF-3-LIST from state (C1, ABORT) | C1 | IMPOSSIBLE | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s1. | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
-| FF-3-LIST from state (C1, INFEAS) | C1 | v10=2 v12=1 v37=2 v45=1 v51=1 v54=1 v58=3 v59=1 v61=3 v66=2 v69=2 v75=3 v78=2 v86=1 v88=2 v93=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s1. | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
-| GREEDY+REPAIR-LIST (C->F) | C->F | v10=2 v12=1 v37=2 v45=1 v51=1 v54=1 v58=3 v59=1 v61=3 v66=3 v69=2 v75=3 v78=2 v86=1 v88=2 v93=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. State s1. | a complete first-fit pass in order σ, then verification, then local recolouring confined to the top colour cl… |
-| RANDOM (H) | H | — | set-valued: uniform over its solution set; the cell rate is Σ_h π_h·p_h. State s1. | no procedure determines the answer; trace content and verdict unrelated |
+| ALWAYS-IMPOSSIBLE (A1 give-up) | A1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | GIVEUP early ('too many constraints'); no assignment attempted |
+| DPLL-LIST from state (D) | D | v11=1 v21=2 v29=1 v33=2 v40=2 v45=3 v51=3 v53=3 v58=1 v62=2 v64=3 v76=2 v83=2 v93=3 v94=1 v99=1 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | chronological backtracking with forward checking in order σ, smallest colour first; IMPOSSIBLE only after exh… |
+| DSATUR-3 from state (C2) | C2 | v11=1 v21=2 v29=1 v33=2 v40=2 v45=3 v51=3 v53=3 v58=1 v62=2 v64=3 v76=2 v83=2 v93=3 v94=1 v99=1 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| EXACT | null | POSSIBLE | set-valued: uniform over its 2 solutions (proper colouring with at most 3 colours, keeping the fixed colours (up to renaming the others)); … | a completed procedure: a checked witness, or a closed refutation |
+| FF-3-LIST from state (C1, ABORT) | C1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| FF-3-LIST from state (C1, INFEAS) | C1 | v11=1 v21=1 v29=1 v33=2 v40=2 v45=3 v51=3 v53=3 v58=1 v62=2 v64=3 v76=2 v83=2 v93=1 v94=1 v99=1 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| GREEDY+REPAIR-LIST (C->F) | C->F | v11=1 v21=2 v29=1 v33=2 v40=2 v45=3 v51=3 v53=3 v58=1 v62=2 v64=3 v76=2 v83=2 v93=3 v94=1 v99=1 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | a complete first-fit pass in order σ, then verification, then local recolouring confined to the top colour cl… |
+| RANDOM (H) | H | — | uniform over all answers (uniform over the 3^16 colourings with colours 1..3): its mass on the listed answers and solution sets is at most … | no procedure determines the answer; trace content and verdict unrelated |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = DSATUR-3 from state (C2) / GREEDY+REPAIR-LIST (C->F) / DPLL-LIST from state (D)'…*: FF-3-LIST from state (C1, ABORT) +1.57, FF-3-LIST from state (C1, INFEAS) +1.57, EXACT +0.57, DPLL-LIST from state (D) +0.00, DSATUR-3 from state (C2) +0.00, GREEDY+REPAIR-LIST (C->F) +0.00
-- *answer = FF-3-LIST from state (C1, INFEAS)'s prediction*: DPLL-LIST from state (D) +1.57, DSATUR-3 from state (C2) +1.57, EXACT +1.57, FF-3-LIST from state (C1, ABORT) +1.57, GREEDY+REPAIR-LIST (C->F) +1.57, FF-3-LIST from state (C1, INFEAS) +0.00
-- *answer = IMPOSSIBLE*: DPLL-LIST from state (D) +1.57, DSATUR-3 from state (C2) +1.57, EXACT +1.57, FF-3-LIST from state (C1, INFEAS) +1.57, GREEDY+REPAIR-LIST (C->F) +1.57, FF-3-LIST from state (C1, ABORT) +0.00
-- *answer = other*: DPLL-LIST from state (D) +1.45, DSATUR-3 from state (C2) +1.45, FF-3-LIST from state (C1, ABORT) +1.45, FF-3-LIST from state (C1, INFEAS) +1.45, GREEDY+REPAIR-LIST (C->F) +1.45, EXACT +0.00
+- *answer = DSATUR-3 from state (C2) / GREEDY+REPAIR-LIST (C->F) / DPLL-LIST from state (D)'…*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.66, FF-3-LIST from state (C1, ABORT) +1.66, FF-3-LIST from state (C1, INFEAS) +1.66, RANDOM (H) +1.66, EXACT +0.29, DPLL-LIST from state (D) +0.00
+- *answer = FF-3-LIST from state (C1, INFEAS)'s prediction*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.66, DPLL-LIST from state (D) +1.66, DSATUR-3 from state (C2) +1.66, EXACT +1.66, FF-3-LIST from state (C1, ABORT) +1.66, GREEDY+REPAIR-LIST (C->F) +1.66
+- *answer = IMPOSSIBLE*: DPLL-LIST from state (D) +1.66, DSATUR-3 from state (C2) +1.66, EXACT +1.66, FF-3-LIST from state (C1, INFEAS) +1.66, GREEDY+REPAIR-LIST (C->F) +1.66, RANDOM (H) +1.66
+- *answer = other*: ALWAYS-IMPOSSIBLE (A1 give-up) +1.66, DPLL-LIST from state (D) +1.66, DSATUR-3 from state (C2) +1.66, EXACT +1.66, FF-3-LIST from state (C1, ABORT) +1.66, FF-3-LIST from state (C1, INFEAS) +1.66
 
 Notes: Same instance in every state; only the fixed values differ. C0 ignores them, C1 counts only the clauses they leave open, C2 follows the clauses they make unit.

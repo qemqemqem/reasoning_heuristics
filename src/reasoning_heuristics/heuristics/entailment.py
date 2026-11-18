@@ -147,7 +147,7 @@ def answer_from_premises(task: EntailmentTask, premises: list[F.Formula]) -> str
 def vacuous_answer(task: EntailmentTask) -> str | list[str]:
     """What inconsistent premises entail under the prompts' definition ("must be true whenever all
     the statements are true"): everything. YN: YES; MC: every option, so the strongest is chosen as
-    usual; OPEN: every literal over the premises' atoms. Matches validate.truth."""
+    usual; OPEN: every literal over the premises' atoms. The ground truth (validate.truth) uses it."""
     if task.fmt == "YN":
         return "YES"
     if task.fmt == "MC":

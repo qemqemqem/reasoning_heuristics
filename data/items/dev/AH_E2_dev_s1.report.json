@@ -39,14 +39,13 @@
    "SAT: padding changes POLARITY on the core": 8
   }
  },
- "generation_seconds": 32.6,
  "path": "data/items/dev/AH_E2_dev_s1.jsonl",
  "validation": {
   "items": 120,
   "sets": 25,
   "items_passed": 120,
   "pass_rate": 1.0,
-  "failures": []
- },
- "validation_seconds": 21.1
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
 }

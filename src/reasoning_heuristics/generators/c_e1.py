@@ -89,7 +89,7 @@ def col_members(copy: str) -> list:
         ("DPLL-LIST (D)", "SEARCH", {"order": "LIST"}),
         ("DPLL-LABEL (D)", "SEARCH", {"order": "LABEL"}),
         ("GREEDY+REPAIR-LIST (C->F)", "GREEDY+REPAIR", {"order": "LIST"}),
-        ("RO-FF (C3)", "RO-FF", {"samples": 2000, "seed": 0}),
+        ("RO-FF (C3)", "RO-FF", {"seed": 0}),
         ("LOCAL-2-ID (E)", "LOCAL-t", {"t": 2, "ids": "LABEL", "default": "one"}),
         ("EXACT", "EXACT", {}),
         ("RANDOM (H)", "RANDOM", {}),
@@ -236,7 +236,7 @@ def sat_members(copy: str) -> list:
         ("GUC-DET (C2)", "GUC", {}),
         ("DPLL-MENTION (D, T first)", "SEARCH", {"order": "MENTION", "value": "TRUE"}),
         ("DPLL-INDEX (D, T first)", "SEARCH", {"order": "INDEX", "value": "TRUE"}),
-        ("RO-GREEDY (C3)", "RO-GREEDY", {"samples": 300, "seed": 0}),
+        ("RO-GREEDY (C3)", "RO-GREEDY", {"seed": 0}),
         ("EXACT", "EXACT", {}),
         ("RANDOM (H)", "RANDOM", {}),
     ]

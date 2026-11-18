@@ -25,32 +25,30 @@
   "ENT/MATCHED/ORDER-B"
  ],
  "generation": {
-  "attempts": 242,
+  "attempts": 141,
   "accepted": 25,
   "rejections": {
-   "COL: FF-3-LIST not stuck in the middle third": 24,
-   "COL: no matched control found": 15,
-   "COL: not exactly 3-chromatic": 68,
-   "ENT: ETR agrees with GREEDY-CM (keeping the differ share >= 1/2)": 47,
+   "COL: FF-3-LIST not stuck in the middle third": 12,
+   "COL: no matched control found": 4,
+   "COL: not exactly 3-chromatic": 30,
    "ENT: GREEDY-CM pattern not needed": 34,
-   "ENT: inconsistent premises or the conclusion follows": 3,
-   "SAT: GREEDY and UC do not both dead-end": 1,
-   "STATE-COL: not 3-colourable": 15,
-   "STATE-SAT: not every state reachable": 5
+   "ENT: inconsistent premises or the conclusion follows": 2,
+   "SAT: GREEDY and UC do not both dead-end": 2,
+   "STATE-COL: not 3-colourable": 18,
+   "STATE-SAT: not every state reachable": 9
   },
   "ent": {
    "pairs": 10,
    "pairs_where_ETR_differs_from_GREEDY_CM": 6
   }
  },
- "generation_seconds": 15.1,
  "path": "data/items/dev/C_E5_dev_s1.jsonl",
  "validation": {
   "items": 85,
   "sets": 25,
   "items_passed": 85,
   "pass_rate": 1.0,
-  "failures": []
- },
- "validation_seconds": 5.7
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
 }
