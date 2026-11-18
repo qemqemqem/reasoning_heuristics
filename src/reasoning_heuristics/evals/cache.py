@@ -20,6 +20,7 @@ import tempfile
 from pathlib import Path
 from typing import Any, Iterable
 
+from reasoning_heuristics.evals.client import usable
 from reasoning_heuristics.hashing import canonical_json
 
 CACHE_KEY_VERSION = 1
@@ -72,7 +73,7 @@ class ResponseCache:
             with gzip.open(f, "rt", encoding="utf-8") as fh:
                 for line in fh:
                     rec = json.loads(line)
-                    if rec.get("response") is None or rec.get("cache_key") is None or rec["cache_key"] in self:
+                    if not usable(rec.get("response")) or rec.get("cache_key") is None or rec["cache_key"] in self:
                         continue
                     self.put(rec["cache_key"], {"request": rec["request"], "response": rec["response"],
                                                 "sample": rec.get("sample", 0), "source": str(f)})
