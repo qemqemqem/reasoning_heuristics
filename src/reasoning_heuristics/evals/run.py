@@ -115,7 +115,7 @@ class Runner:
         rec = {"run_id": self.run_id, "item_id": it["item_id"], "content_hash": it["content_hash"],
                "presentation_hash": it["presentation_hash"], "vertical": it["vertical"], "eval_id": it["eval_id"],
                "sample": job["sample"], "cache_key": key, "prompt_hash": prompt_hash(body["messages"]),
-               "request": body, "requested_at": utc_now()}
+               "request": body, "requested_at": None, "completed_at": utc_now()}
         rec.update(kw)
         return rec
 
@@ -153,6 +153,7 @@ class Runner:
             try:
                 # failed attempts that the API charged are booked as they happen, and a retry is
                 # refused when it could take the spend past the cap
+                requested_at = utc_now()
                 res = self.client.chat(body, on_failed_attempt=self.guard.book_failed_attempt)
             except FatalAPIError as e:
                 if e.charged:
@@ -164,7 +165,8 @@ class Runner:
                     self.charged += e.charged
                 self._append(self._record(job, body, key, response=None, error=str(e), errors=[str(e)], attempts=1,
                                           status=None, latency_s=0.0, from_cache=False, cached_from=None,
-                                          charged_usd=e.charged, cost_usd=None, failed_attempt_costs=[e.charged]))
+                                          charged_usd=e.charged, cost_usd=None, failed_attempt_costs=[e.charged],
+                                          requested_at=requested_at))
                 return
             except MissingKeyError as e:
                 self.guard.release(worst)
@@ -192,7 +194,8 @@ class Runner:
             rec = self._record(job, body, key, response=res.response, error=res.error, errors=res.errors,
                                attempts=res.attempts, status=res.status, latency_s=round(res.latency_s, 2),
                                from_cache=False, cached_from=None, charged_usd=charged,
-                               cost_usd=(usage or {}).get("cost"), failed_attempt_costs=res.failed_attempt_costs)
+                               cost_usd=(usage or {}).get("cost"), failed_attempt_costs=res.failed_attempt_costs,
+                               requested_at=requested_at)
             if res.ok and self.cache is not None:
                 self.cache.put(key, {"request": body, "response": res.response, "sample": job["sample"],
                                      "source": f"{self.run_id}"})
@@ -227,6 +230,7 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
     ap.add_argument("--cap-usd", type=float, help="hard cap on API-reported spend for this run (required for live runs)")
     ap.add_argument("--out", required=True, help="run directory, data/runs/<run_id>")
     ap.add_argument("--dry-run", action="store_true", help="print the cost estimate and exit; no network")
+    ap.add_argument("--tokens-from", help="estimate output tokens from this run's measured means per eval and kind (data/runs/<run_id>)")
     ap.add_argument("--exclude-eval", action="append", default=[], help="eval to skip (E8, or AH-E8); repeatable")
     ap.add_argument("--include-eval", action="append", default=[], help="run only these evals; repeatable")
     ap.add_argument("--limit", type=int, help="only the first N items (after filters)")
@@ -259,10 +263,14 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
     if a.limit:
         items = items[: a.limit]
     provider = routing(cfg, a.provider, a.quantization, a.no_pin or a.dry_run)
+    if not a.provider and cfg.max_completion_tokens and cond.max_tokens > cfg.max_completion_tokens:
+        raise SystemExit(f"{cfg.slug}: max_tokens {cond.max_tokens} is above the pinned endpoint's completion limit "
+                         f"{cfg.max_completion_tokens}; the condition cannot run there ({cfg.notes})")
     price: Pricing = cfg.pinned_price if (cfg.pinned_price and not a.provider) else cfg.list_price
     if a.price:
         price = Pricing(a.price[0], a.price[1], "--price")
-    est = C.estimate(items, cond, price, a.samples)
+    measured = C.measured_output_tokens(Path(a.tokens_from) / "scored.jsonl.gz") if a.tokens_from else None
+    est = C.estimate(items, cond, price, a.samples, measured, a.tokens_from)
     print(C.format_estimate(est, f"Cost estimate: {run_id} ({cfg.slug}, {len(items)} items, skipped {skipped})"))
     if a.dry_run:
         return 0
@@ -300,6 +308,16 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
         "client": {"timeout_s": client.timeout_s, "max_attempts": client.max_attempts, "concurrency": a.concurrency},
         "notes": a.notes, "resumed_from": len(done),
     }
+    old_manifest = out / "manifest.json"
+    if old_manifest.exists():  # a resumed run keeps every earlier invocation's provenance
+        old = json.loads(old_manifest.read_text(encoding="utf-8"))
+        history = old.pop("previous_invocations", [])
+        keep = ("started_at", "finished_at", "status", "stop_reason", "git", "versions", "cap_usd", "charged_usd",
+                "spend", "responses", "failed_calls", "resumed_from", "providers_served", "models_returned",
+                "key_usage", "wall_s", "client", "notes")
+        manifest["previous_invocations"] = history + [{k: old.get(k) for k in keep}]
+        if old.get("condition") != manifest["condition"] or old.get("items", {}).get("files") != manifest["items"]["files"]:
+            raise SystemExit(f"{out}: resuming with a different condition or item set than the run was started with")
     write_json(out / "manifest.json", manifest)
     runner = Runner(client, None if a.no_cache else ResponseCache(a.cache_dir), guard, out, run_id, a.concurrency)
     key_before = client.key_usage() if jobs else {}
@@ -326,12 +344,13 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
             "providers_served": _counts(served_provider(r) for r in responses),
             "responses": len(responses), "failed_calls": runner.failures, "cache_hits": runner.cache_hits,
             "spend": guard.to_json(), "charged_usd": round(runner.charged, 6),
+            "charged_usd_all_invocations": round(runner.charged + sum((p.get("charged_usd") or 0) for p in manifest.get("previous_invocations", [])), 6),
             "api_reported_cost_usd_all_responses": round(sum(float((r.get("usage") or {}).get("cost") or 0) for r in responses), 6),
         })
         write_json(out / "manifest.json", manifest)
         if guard.calls or runner.failures:
             ledger.append(Path(a.ledger), date=utc_now()[:10], run_id=run_id, model=cfg.slug, condition=cond.label,
-                          items=len({r["item_id"] for r in recs if r.get("response")}), cost_usd=runner.charged,
+                          items=len({r["item_id"] for r in recs if r.get("response")}) - len(done), cost_usd=runner.charged,
                           budget_tag=a.budget_tag or "-", notes=(a.notes + f" status={status}").strip())
     from reasoning_heuristics.evals.score import score_run
     score_run(out)

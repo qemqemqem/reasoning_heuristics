@@ -1,0 +1,146 @@
+{
+  "run_id": "2026-11-18-smoke-qwen3-32b-thinking-high",
+  "status": "complete",
+  "started_at": "2026-11-18T02:39:29Z",
+  "model_requested": "qwen/qwen3-32b",
+  "condition": {
+    "name": "thinking",
+    "label": "thinking-high",
+    "effort": "high",
+    "max_tokens": 32768,
+    "system_prompt": null,
+    "reasoning": {
+      "effort": "high"
+    },
+    "sampling": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20
+    },
+    "prompt_suffix": ""
+  },
+  "provider_routing": {
+    "order": [
+      "deepinfra/fp8/flex"
+    ],
+    "allow_fallbacks": false,
+    "require_parameters": true,
+    "quantizations": [
+      "fp8"
+    ]
+  },
+  "price": {
+    "prompt": 0.064,
+    "completion": 0.224,
+    "source": "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
+  },
+  "model_notes": "Hybrid thinking checkpoint. Every OpenRouter endpoint is fp8 (DeepInfra tiers, SiliconFlow, Tenstorrent), so fp8 is pinned; Phase 2 should use the official FP8 checkpoint or say how bf16 differs. deepinfra/fp8 (standard) caps completions at 16,384 and Tenstorrent's context is 20,000, so the flex tier is pinned (36,864 completion tokens, 40,960 context, cheapest). reasoning {enabled: false} and {effort: none} are honoured (0 reasoning tokens) on every endpoint; /no_think leaves an empty think block (1 token).",
+  "samples_per_item": 1,
+  "seed_base": null,
+  "items": {
+    "files": {
+      "data/items/smoke/AH_E1_smoke_s1.jsonl.gz": "2215e385b40e0fbf4744397c87d1f6dd469f38a5267d74172e854a07602206b3",
+      "data/items/smoke/AH_E2_smoke_s1.jsonl.gz": "6d96c9283629351592f43c8cfc9c86fc137157f1dd018f1d4a3ddd6c54d573bc",
+      "data/items/smoke/AH_E5_smoke_s1.jsonl.gz": "bd69a8bdc20320380c6e48665d2e055e1e875de9a0e744c43ff92771b8d2d365",
+      "data/items/smoke/AH_E8_smoke_s1.jsonl.gz": "68d3ed87ff888e663e3deaf76773a000a7ba73c76e7a6a7aced6d9846ae72fb3",
+      "data/items/smoke/B4C4_E1_smoke_s1.jsonl.gz": "63a3a45ca9e9b0dd59daed16e7a478db51a44a09df2caaffe1ad35b3249cc264",
+      "data/items/smoke/B4C4_E2_smoke_s1.jsonl.gz": "676ec55b6d9f88eb15147d156fc3b82caeb97a0cb34274d5480798d7726de467",
+      "data/items/smoke/C_E1_smoke_s1.jsonl.gz": "a7fe20c7af4761efcd2b2bc6133bb23eddc52ccb1c37decd744e06dbdb41c9c4",
+      "data/items/smoke/C_E2_smoke_s1.jsonl.gz": "d62197b2c48968bd5f4ad4537294e6e88cd376d5137399af6a2a5268226259f0",
+      "data/items/smoke/C_E3_smoke_s1.jsonl.gz": "94364cbc4ea3826dd0c99c5211eb28aecd1ccd0d786f5f4d320fc3782a2ad1ad",
+      "data/items/smoke/C_E5_smoke_s1.jsonl.gz": "aedbdd0102a9ac1a11d6e2ab0544e9a36fa5ea26af6fd46da3ac3a482d352531"
+    },
+    "n_items": 254,
+    "skipped": {
+      "excluded_eval": 12,
+      "unsupported": 0,
+      "not_included": 0
+    },
+    "exclude_eval": [
+      "E8"
+    ],
+    "include_eval": [],
+    "limit": null
+  },
+  "estimate": {
+    "cost_usd": 0.4353,
+    "worst_case_usd": 1.8764,
+    "output_tokens": 1889600,
+    "prompt_tokens_proxy": 188588
+  },
+  "cap_usd": 1.75,
+  "cap_requested_usd": 1.75,
+  "budget_tag": "runner-agent",
+  "budget_usd": 3.0,
+  "budget_spent_before_usd": 0.024918,
+  "git": {
+    "sha": "03a87c1a14f64d320edbf389ed7975829f0c14db",
+    "dirty": false,
+    "branch": "smoke-runs"
+  },
+  "versions": {
+    "python": "3.12.12",
+    "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "reasoning_heuristics": "0.1.0",
+    "scorer": "scorer-1.1.0",
+    "tokenizer_proxy": "regex-digit-split-v1",
+    "python-sat": "1.9.dev22",
+    "pyetr": "1.0.0",
+    "numpy": "2.5.5",
+    "networkx": "3.7",
+    "jsonschema": "4.26.0"
+  },
+  "client": {
+    "timeout_s": 1800.0,
+    "max_attempts": 6,
+    "concurrency": 24
+  },
+  "notes": "acceptance run (b)",
+  "resumed_from": 0,
+  "key_usage": {
+    "before": {
+      "usage": 80.705926413,
+      "usage_daily": 0.061318553,
+      "limit": null,
+      "limit_remaining": null
+    },
+    "after": {
+      "usage": 81.584369722,
+      "usage_daily": 0.939761862,
+      "limit": null,
+      "limit_remaining": null
+    },
+    "delta_usd": 0.878443,
+    "note": "the key's own usage counter (GET /key); other users of the key move it too"
+  },
+  "stop_reason": null,
+  "finished_at": "2026-11-18T03:35:44Z",
+  "wall_s": 3375.1,
+  "models_returned": [
+    "qwen/qwen3-32b"
+  ],
+  "system_fingerprints": [],
+  "providers_served": {
+    "DeepInfra": 254
+  },
+  "responses": 254,
+  "failed_calls": 0,
+  "cache_hits": 0,
+  "spend": {
+    "cap_usd": 1.75,
+    "spent_usd": 0.494084,
+    "calls": 254,
+    "refused_reservations": 0,
+    "calls_without_reported_cost": 0,
+    "failed_attempt_cost_usd": 0.0,
+    "failed_attempts_charged": 0,
+    "safety_factor": 1.25,
+    "price": {
+      "prompt": 0.064,
+      "completion": 0.224,
+      "source": "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
+    }
+  },
+  "charged_usd": 0.494084,
+  "api_reported_cost_usd_all_responses": 0.494084
+}
