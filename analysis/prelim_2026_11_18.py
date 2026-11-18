@@ -138,6 +138,8 @@ SCHEMA = {
     "recovery_at_estimate": "unit -> run_id -> fake models planted at the fitted mixture: per-quantity truth, mean, bias, "
                             "coverage and width (percentile and BCa), gate verdicts, and the simulated reach statistics",
     "gated_units": "item set -> the units fitted at that size; every other unit is descriptive only (not_fitted gives why)",
+    "not_fitted": "item set -> unit -> why it is descriptive only there, from RECOVERY.md's verdicts; a dev entry also gives "
+                  "the unit's status at larger sizes",
 }
 
 CATS = ("ok", "parse_fail", "partial", "truncated", "refusal", "declared_impossible", "api_error")
@@ -170,9 +172,18 @@ def unit_name(item: dict[str, Any]) -> str:
     return f"{eval_name(item)}/{item['domain']}"
 
 
+def larger_size_status(name: str) -> str:
+    """A unit's gate status at the larger sizes RECOVERY.md swept: where it is fitted, or why it is not."""
+    sizes = {"pc20": 20, "pc40": 40}
+    gated = [s for s, units in GATED.items() if name in units]
+    if gated:
+        return f"passes at {sizes[gated[0]]} per cell; fitted on the {sizes[gated[0]]}-per-cell runs"
+    return NOT_FITTED.get(name) or NOT_FITTED.get(name.split("/")[0], "")
+
+
 def not_fitted_reason(name: str, item_set: str) -> str:
-    if item_set == "dev":
-        return "dev size (5 per cell): no unit passes the gates there (RECOVERY.md, Bottom line)"
+    if item_set == "dev":  # with the unit's status at larger sizes, so the JSON alone explains every unit
+        return f"dev size (5 per cell): no unit passes the gates there (RECOVERY.md, Bottom line). At larger sizes: {larger_size_status(name)}"
     if name in NOT_FITTED:
         return NOT_FITTED[name]
     return NOT_FITTED[name.split("/")[0]]
@@ -704,15 +715,7 @@ def table_units(special: dict[str, dict[str, Any]], unit_items: dict[str, int]) 
 
 
 def table_dev_units(unit_items: dict[str, int]) -> str:
-    sizes = {"pc20": 20, "pc40": 40}
-    rows = []
-    for name in sorted(unit_items):
-        gated = [s for s, units in GATED.items() if name in units]
-        if gated:
-            status = f"passes at {sizes[gated[0]]} per cell; fitted on the {sizes[gated[0]]}-per-cell runs"
-        else:
-            status = NOT_FITTED.get(name) or NOT_FITTED.get(name.split("/")[0], "")
-        rows.append([name, unit_items[name], status])
+    rows = [[name, unit_items[name], larger_size_status(name)] for name in sorted(unit_items)]
     return md_table(["Unit (5 per cell)", "Items", "Gate status at larger sizes (docs/RECOVERY.md)"], rows)
 
 
