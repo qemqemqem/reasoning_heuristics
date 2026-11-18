@@ -77,8 +77,9 @@ def write_jsonl_gz(path: Path, recs: list[dict[str, Any]]) -> None:
     tmp.replace(path)
 
 
-def score_raw(manifest: dict[str, Any], raw: list[dict[str, Any]], items: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
-    git = git_info()
+def score_raw(manifest: dict[str, Any], raw: list[dict[str, Any]], items: dict[str, dict[str, Any]],
+              git: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    git = git or git_info()
     ctxs: dict[str, ItemContext] = {}
     out = []
     for r in raw:
@@ -106,9 +107,10 @@ def score_run(run_dir: Path, allow_item_drift: bool = False, items_at_run_sha: b
             raise SystemExit(f"{run_dir}: the manifest records no git SHA")
     items = load_run_items(manifest, allow_item_drift, items_ref)
     raw = read_jsonl_gz(run_dir / "raw.jsonl.gz")
-    scored = score_raw(manifest, raw, items)
+    git = git_info()  # before anything is written
+    scored = score_raw(manifest, raw, items, git)
     write_jsonl_gz(run_dir / SCORED, scored)
-    summary = {"scorer_version": SCORER_VERSION, "git": git_info(), "versions": versions(), "scored_at": utc_now(),
+    summary = {"scorer_version": SCORER_VERSION, "git": git, "versions": versions(), "scored_at": utc_now(),
                "items_source": f"git {items_ref}" if items_ref else "working tree",
                "records": len(scored), "categories": dict(Counter(r["category"] for r in scored))}
     write_json(run_dir / "scoring.json", summary)
