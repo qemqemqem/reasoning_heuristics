@@ -61,7 +61,7 @@ from reasoning_heuristics.problems.coloring import graph as G
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.sat import cnf as S
 
-SCORER_VERSION = "scorer-1.4.0"
+SCORER_VERSION = "scorer-1.4.1"
 # 1.1.0: a reply that is nothing but the answer, without the ANSWER: marker, is parsed (flag no_answer_marker).
 # 1.1.1: answer_only_in_reasoning is not set on truncated replies (their reasoning often quotes the format).
 # 1.2.0: LaTeX answer decoration (\\boxed{..}, \\text{..}, $$ ... $$) is unwrapped before the ANSWER: formats are parsed.
@@ -70,6 +70,7 @@ SCORER_VERSION = "scorer-1.4.0"
 # 1.3.1: commentary after such a run of values (e.g. "---" and a sentence) is tolerated (flag extra_text_in_block).
 # 1.4.0: a line-initial answer marker may follow any symbols, not only markdown ("### ✅ Final Answer"); with no
 #        marker at all, the last fenced code block is read if it holds nothing but an answer (flag fenced_answer_no_marker).
+# 1.4.1: positional values may also use the generators' new placeholders (`<variable>=T`, `<vertex>: 1`).
 
 CATEGORIES = ("ok", "parse_fail", "refusal", "declared_impossible", "partial", "truncated", "api_error")
 
@@ -484,7 +485,8 @@ def _bare_answer(ctx: ItemContext, text: str) -> Parse | None:
     elif kind == "ans_knap":
         pure = len(lines) == 1 and re.fullmatch(rf"(?i)(?:none|(?:(?:{ctx.name_pattern})(?:\s*[,;]\s*|\s+|$))+)", one)
     elif kind in ("ans_col", "ans_sat"):
-        word, ph, value = ("IMPOSSIBLE", "vertex", r"-?\d+") if kind == "ans_col" else ("UNSAT", "x", r"(?:TRUE|FALSE|T|F|1|0)")
+        word, ph, value = (("IMPOSSIBLE", PLACEHOLDER["vertex"], r"-?\d+") if kind == "ans_col"
+                           else ("UNSAT", PLACEHOLDER["variable"], r"(?:TRUE|FALSE|T|F|1|0)"))
         pure = (len(lines) == 1 and one.upper() == word) or all(
             re.fullmatch(rf"(?i)(?:(?:{ctx.name_pattern})\s*[:=]\s*\S+?\s*[,;]?\s*)+", ln) for ln in lines) or all(
             re.fullmatch(rf"(?i)(?:(?:{ph}\s*[:=]\s*)?{value}(?:\s*[,;]\s*|\s+|$))+", ln.rstrip(".")) for ln in lines)
@@ -585,7 +587,9 @@ def _parse_pairs(ctx: ItemContext, block: str, value_rx: str, convert, negative_
     return _complete_or_partial(ctx, values, flags, what)
 
 
-PLACEHOLDER = {"variable": "x", "vertex": "vertex"}  # the generic names in the C formats' `x=T` / `vertex: colour`
+# the generic slot names in the C answer lines: the library wording (`x=T`, `vertex: colour`) and the
+# placeholder wording the generators switched to on 2026-11-18 (`<variable>=T`, `<vertex>: <colour>`)
+PLACEHOLDER = {"variable": r"(?:x|<variable>|variable)", "vertex": r"(?:<vertex>|vertex)"}
 
 
 def _positional(ctx: ItemContext, block: str, value_rx: str, convert, what: str) -> Parse | None:
@@ -609,7 +613,7 @@ def _positional(ctx: ItemContext, block: str, value_rx: str, convert, what: str)
     vals = [m.group(1) for ln in head for m in re.finditer(rf"(?i)(?<![\w]){item}(?![\w])", ln)]
     if len(vals) != len(order):
         return Parse("parse_fail", detail=f"{len(vals)} values without names for {len(order)} {what}s")
-    flags = ["positional_values"] + (["placeholder_names"] if re.search(rf"(?i)\b{ph}\s*[:=]", "\n".join(head)) else [])
+    flags = ["positional_values"] + (["placeholder_names"] if re.search(rf"(?i)(?<![\w]){ph}\s*[:=]", "\n".join(head)) else [])
     if len(head) < len(lines):
         flags.append("extra_text_in_block")
     return _complete_or_partial(ctx, {n: convert(v) for n, v in zip(order, vals)}, flags, what)
