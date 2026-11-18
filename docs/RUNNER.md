@@ -208,6 +208,16 @@ Estimate = items × (proxy prompt tokens × prompt price + assumed output tokens
 
 These are assumptions until a smoke run measures them. Each run's `REPORT.md` gives measured completion tokens per eval and kind, and the dev projections should be redone from those.
 
+**Dev projections from the smoke runs** (2026-11-18). These come from `run --dry-run --tokens-from data/runs/<run_id>` on the dev tier (1,270 items, E8 excluded), at the pinned prices:
+
+| Model, condition | Dev, assumed tokens | Dev, measured tokens | Dev worst case |
+|---|---|---|---|
+| gpt-oss-20b, thinking-high | $1.35 | $3.08 | $5.85 |
+| Qwen3-32B, thinking-high | $2.18 | $2.47 | $9.38 |
+| Qwen3-32B, direct | $0.09 | $0.10 | $0.35 |
+
+The measured projection counts each truncated response at the 32,768 cap. With a higher cap it would be a floor: 35% of gpt-oss-20b's smoke responses hit the cap.
+
 **The cap.** Before a request is sent, it reserves its worst case: prompt bytes as a token upper bound plus the full max_tokens, at the configured price, times 1.25. The reservation is settled to the API-reported `usage.cost` when the call returns. A request whose reservation would take spend plus in-flight reservations past `--cap-usd` is not sent; the run stops cleanly with status `stopped`, keeps everything already returned, and scores it. A call that costs more than its reservation means the configured price is wrong, and it also stops the run. A failed attempt can still be charged (a 200 whose body carries an error after the provider generated): any `usage.cost` it reports is booked at once, and the call retries only while spend plus every reservation, its own included, stays within the cap.
 
 ## Provider probes and pins (2026-11-17)
@@ -237,7 +247,7 @@ Three acceptance runs, each on all 254 smoke items except A/H E8, on the pinned 
 
 | Run | Model, condition | Provider served | Responses | ok | Truncated | Other categories | Correct of ok | API cost | Wall time |
 |---|---|---|---|---|---|---|---|---|---|
-| `2026-11-18-smoke-gpt-oss-20b-thinking-high` | gpt-oss-20b, thinking-high | DekaLLM | (running) | | | | | | |
+| `2026-11-18-smoke-gpt-oss-20b-thinking-high` | gpt-oss-20b, thinking-high | DekaLLM (254) | 254 | 165 | 89 | – | 160/165 (97%) | $0.6159 | 111 min (2 invocations) |
 | `2026-11-18-smoke-qwen3-32b-thinking-high` | qwen3-32b, thinking-high | DeepInfra (254) | 254 | 248 | 6 | – | 188/248 (76%) | $0.4941 | 56 min |
 | `2026-11-18-smoke-qwen3-32b-direct` | qwen3-32b, direct | DeepInfra (254) | 254 | 250 | 3 | parse_fail 1 | 93/250 (37%) | $0.0194 | 1 min |
 
@@ -245,6 +255,16 @@ Three acceptance runs, each on all 254 smoke items except A/H E8, on the pinned 
 
 | Model | Condition | Vertical | Eval | n | Completion tokens, median | mean | Truncated at cap | $/item | Run cost |
 |---|---|---|---|---|---|---|---|---|---|
+| gpt-oss-20b | thinking-high | A/H | E1 | 14 | 15,271 | 18,379 | 5 (36%) | 0.00259 | 0.0363 |
+| gpt-oss-20b | thinking-high | A/H | E2 | 24 | 31,099 | 21,655 | 11 (46%) | 0.00306 | 0.0735 |
+| gpt-oss-20b | thinking-high | A/H | E5 | 17 | 13,409 | 16,479 | 4 (24%) | 0.00232 | 0.0395 |
+| gpt-oss-20b | thinking-high | B4/C4 | E1 | 28 | 2,378 | 2,621 | 0 (0%) | 0.00037 | 0.0104 |
+| gpt-oss-20b | thinking-high | B4/C4 | E2 | 48 | 642 | 684 | 0 (0%) | 0.00010 | 0.0048 |
+| gpt-oss-20b | thinking-high | C | E1 | 12 | 22,545 | 21,770 | 1 (8%) | 0.00307 | 0.0368 |
+| gpt-oss-20b | thinking-high | C | E2 | 40 | 32,768 | 28,699 | 27 (68%) | 0.00403 | 0.1614 |
+| gpt-oss-20b | thinking-high | C | E3 | 54 | 32,768 | 28,065 | 36 (67%) | 0.00397 | 0.2143 |
+| gpt-oss-20b | thinking-high | C | E5 | 17 | 16,135 | 16,197 | 5 (29%) | 0.00229 | 0.0389 |
+| **gpt-oss-20b** | **thinking-high** | **all** | | **254** | **17,564** | **17,179** | **89 (35%)** | **0.00242** | **0.6159** |
 | qwen3-32b | thinking-high | A/H | E1 | 14 | 11,656 | 10,896 | 0 (0%) | 0.00249 | 0.0349 |
 | qwen3-32b | thinking-high | A/H | E2 | 24 | 12,036 | 13,508 | 4 (17%) | 0.00310 | 0.0744 |
 | qwen3-32b | thinking-high | A/H | E5 | 17 | 9,140 | 10,154 | 0 (0%) | 0.00231 | 0.0392 |
@@ -268,10 +288,16 @@ Three acceptance runs, each on all 254 smoke items except A/H E8, on the pinned 
 
 What the runs showed:
 
-- **gpt-oss-20b at high effort uses far more tokens than the vertical docs assumed**, often about 2× (table above).
-  - A/H E2 SAT (n = 24, m = 101) truncates on every smoke item at 32,768 tokens.
-  - Truncated responses are censored (SCOPE §6 rule 2) and carry no answer. The sizes need calibrating per SCOPE §6 rule 1.
-- **Qwen3-32B with thinking is shorter, and truncates less.** It writes its answer in four ways the scorer did not expect, each now handled with a flag:
+- **gpt-oss-20b at high effort writes 2.3× the output tokens the vertical docs assume** (4.36M against 1.89M on smoke), even though 89 of its 254 responses (35%) stop at the 32,768 cap.
+  - The truncation is concentrated in a few kinds of item:
+    - every C E3 full-colouring response (arm U, 36 of 36);
+    - every A/H E2 SAT and C E5 SAT response;
+    - 14 of 15 C E2 knapsack and 7 of 10 C E2 SAT responses.
+  - B4/C4 never truncates, and neither does C E3's single-vertex arm I.
+  - The truncated traces are still working, not looping. Their last 20k characters compress like those of finished traces (gzip ratio about 0.3), and few lines repeat.
+  - The responses that finish are nearly all right (160 of 165), so the censoring removes the hard items, not random ones.
+  - Truncated responses are censored (SCOPE §6 rule 2) and carry no answer. Before a pilot, the item sizes need calibrating for this model (SCOPE §6 rule 1), or the cap needs raising. The pinned endpoint allows 117,964 completion tokens.
+- **Qwen3-32B with thinking is shorter, and truncates less**: 1.14× the assumed tokens, and 6 of 254 responses truncated. It writes its answer in four ways the scorer did not expect, each now handled with a flag:
   - LaTeX (`$$\boxed{C}$$`; runs-1.2.0);
   - the C SAT values without their names, or with the format's placeholder `x=T` (runs-1.3.x);
   - a stray `---` and commentary after the values (runs-1.3.1);
@@ -283,8 +309,12 @@ What the runs showed:
   - A few replies still work in the visible output: see `pre_answer_tokens` in its REPORT.md.
 - **Providers.**
   - DekaLLM answered HTTP 429 to some first attempts at 16 concurrent requests; all were retried successfully. DeepInfra flex sent none.
-  - Streams ran at about 55–65 tokens/s (gpt-oss-20b, DekaLLM) and about 40 tokens/s (Qwen3-32B, DeepInfra flex). A 254-item thinking run takes 45–75 minutes at 16–24 concurrent requests.
-- **Prompt tokens.** API-reported prompt tokens are 1.06× the proxy count on gpt-oss-20b and 1.07× on Qwen3-32B, chat template included.
+  - One DekaLLM response broke off mid-body (`IncompleteRead`) and stopped run (a) at 188 of 254. The client now retries that error, and the run was resumed into the same directory.
+  - Streams ran at a median of 52 tokens/s on gpt-oss-20b (DekaLLM; 10th–90th percentile 43–64) and 34 tokens/s on Qwen3-32B (DeepInfra flex; 30–38).
+  - Run (a) took 111 minutes over its two invocations at 16 concurrent requests. Run (b) took 56 minutes at 24.
+- **Prompt tokens** (API-reported against the proxy, chat template included):
+  - Qwen3-32B: 1.06× (1.03–1.11 by eval); 1.07× in the direct condition, which adds a system prompt.
+  - gpt-oss-20b: 0.93× overall, from 0.83× on C E3 to 1.64× on B4/C4. On B4/C4's short prompts it reports about 65 tokens per request more than the proxy, against about 10 for Qwen3-32B. That is most likely its chat template's system header. On the C prompts, which are full of vertex and variable numbers, it reports fewer tokens than the proxy: its tokenizer groups up to three digits, while the proxy splits every digit.
 - **One prompt bug, since fixed in the generators.** The C SAT answer line "the values as `x=T` / `x=F`" used `x` as a placeholder, which collides with the variable names `x15`…. PR #12 changed it to `<variable>=T`. Items regenerated from main carry the new wording; the scorer reads both.
 
 ## Before any pilot (SCOPE §1)
@@ -301,7 +331,7 @@ Checked on the probes and the 2026-11-18 smoke runs:
   - In run (c), all 254 Qwen3-32B direct responses had no reasoning text and 0 reasoning tokens.
 - [x] **max_tokens behaves as configured** (DESIGN §5 rule 11). Truncated responses stop at exactly max_tokens: 32,768 for thinking, 1,024 for direct. Reasoning tokens are reported on every response of the pinned endpoints.
 - [ ] **Proxy and real prompt-token counts compared.**
-  - Done for counts: API-reported prompt tokens are 1.07× the proxy count on Qwen3-32B (1.04–1.16 by eval) and 1.06× on gpt-oss-20b, chat template included.
+  - Done for counts. API-reported prompt tokens are 1.06–1.07× the proxy count on Qwen3-32B (1.03–1.16 by eval and condition). On gpt-oss-20b they are 0.93× (0.83–1.64 by eval), chat template included; see the runs section.
   - Not done: the per-tokenizer check of the surface-matched pairs (`tokens.py` docstring) needs the tokenizers themselves.
 - [x] **Measured tokens per eval are in the runs section below**, for recalibrating the dev-run estimate.
 
@@ -320,3 +350,5 @@ E8 items are specs: each continuation is built from the model's own earlier resp
 - **Single-vertex items (C E3 arm I)** cannot be compared with members on `answer_key` (members predict full colourings); use `channel_value`.
 - **C E5 partial colouring / assignment given:** a response that omits the already-fixed vertices is `partial` (flagged `missing_only_fixed`), because the prompt asks for every vertex. Relax this only by a scorer version bump.
 - **A/H decision items with a malformed witness** stay `ok` on the decision channel, with a witness flag. If witness-invalid SAT claims ("infeasible SAT claim") should be a category of their own, that is a scorer change.
+- **gpt-oss-20b at 32,768 tokens censors 35% of the smoke responses**, including all of C E3 arm U. The options are to shrink those items for every model, to raise the cap (the pinned endpoint allows 117,964), or to accept the censoring. That is a design decision (SCOPE §6 rules 1–2), not a runner one.
+- **IMPOSSIBLE on C E3 target-bit items.** The stored outcome classes put it in `answer = other`, and so `channel_value` is null and `outcome_class` is other. The identification engine's bit space counts it as a value of its own. One of the two should change.

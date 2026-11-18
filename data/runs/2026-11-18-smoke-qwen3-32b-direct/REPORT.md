@@ -7,8 +7,8 @@ Descriptive summary, written by `python -m reasoning_heuristics.evals.score`. No
 - **Condition:** `direct`; max_tokens 1024; reasoning `{'enabled': False}`; sampling `{'temperature': 0.7, 'top_p': 0.8, 'top_k': 20}`; system prompt: "Respond with only the final answer in the requested format. Do not explain or show your working.".
 - **Items:** 254 (data/items/smoke/AH_E1_smoke_s1.jsonl.gz, data/items/smoke/AH_E2_smoke_s1.jsonl.gz, data/items/smoke/AH_E5_smoke_s1.jsonl.gz, data/items/smoke/AH_E8_smoke_s1.jsonl.gz, data/items/smoke/B4C4_E1_smoke_s1.jsonl.gz, data/items/smoke/B4C4_E2_smoke_s1.jsonl.gz, data/items/smoke/C_E1_smoke_s1.jsonl.gz, data/items/smoke/C_E2_smoke_s1.jsonl.gz, data/items/smoke/C_E3_smoke_s1.jsonl.gz, data/items/smoke/C_E5_smoke_s1.jsonl.gz); skipped {'excluded_eval': 12, 'unsupported': 0, 'not_included': 0}.
 - **Status:** complete; 254 responses, 0 failed calls, 0 from cache.
-- **Spend:** $0.0194 API-reported (cap $0.10; dry-run estimate $0.02, worst case $0.07).
-- **Code:** git `950c540656155ed970083b9786dcdaf2b7be6c95`; scorer `scorer-1.4.0` at `3b748a7dee1eb938a3d2a2247a59d57a51ceef7c`.
+- **Spend:** $0.0194 API-reported over 1 invocation(s) (last cap $0.10; dry-run estimate $0.02, worst case $0.07).
+- **Code:** git `950c540656155ed970083b9786dcdaf2b7be6c95`; scorer `scorer-1.5.0` at `3e9851d22b27d83be96d36180aa8bb87a94ba6f0`.
 
 ## Response categories
 

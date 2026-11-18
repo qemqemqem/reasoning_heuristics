@@ -1,7 +1,7 @@
 {
-  "scorer_version": "scorer-1.4.0",
+  "scorer_version": "scorer-1.5.0",
   "git": {
-    "sha": "3b748a7dee1eb938a3d2a2247a59d57a51ceef7c",
+    "sha": "3e9851d22b27d83be96d36180aa8bb87a94ba6f0",
     "dirty": false,
     "branch": "smoke-runs"
   },
@@ -9,7 +9,7 @@
     "python": "3.12.12",
     "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
     "reasoning_heuristics": "0.1.0",
-    "scorer": "scorer-1.4.0",
+    "scorer": "scorer-1.5.0",
     "tokenizer_proxy": "regex-digit-split-v1",
     "python-sat": "1.9.dev22",
     "pyetr": "1.0.0",
@@ -17,8 +17,8 @@
     "networkx": "3.7",
     "jsonschema": "4.26.0"
   },
-  "scored_at": "2026-11-18T03:25:26Z",
-  "items_source": "working tree",
+  "scored_at": "2026-11-18T04:23:11Z",
+  "items_source": "git 950c540656155ed970083b9786dcdaf2b7be6c95",
   "records": 254,
   "categories": {
     "ok": 250,
