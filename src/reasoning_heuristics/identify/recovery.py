@@ -625,6 +625,30 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
                 cells.append(f"{u['items_per_cell']}: {tag}")
             sw.append(f"| {n} | " + " | ".join(cells) + " |")
         sections["sweep"] = "\n".join(sw)
+        # the smallest size at which the 60/30/10 mixture passes bias + width, and all three gates
+        need = ["| Unit | bias and width pass from (items/cell) | all three gates pass at |", "|---|---|---|"]
+        for n in names:
+            bw, allg = None, []
+            for l in labels:
+                u = next((x for x in sizes[l]["units"] if x["unit"] == n and "error" not in x), None)
+                m = u["scenarios"].get("mix") if u else None
+                if not m or m.get("testable") is False:
+                    continue
+                if bw is None and m["gates"]["bias"] and m["gates"]["width"]:
+                    bw = f"{u['items_per_cell']:g}"
+                if m["pass"]:
+                    allg.append(f"{u['items_per_cell']:g}")
+            mixes = [((next((x for x in sizes[l]["units"] if x["unit"] == n and "error" not in x), {}) or {})
+                      .get("scenarios", {}).get("mix")) for l in labels]
+            mixes = [m for m in mixes if m]
+            if not mixes:
+                status = "no planted triple (fewer than 3 members on every item)"
+            elif all(m.get("testable") is False for m in mixes):
+                status = "not testable"
+            else:
+                status = bw if bw is not None else "not reached"
+            need.append(f"| {n} | {status} | {', '.join(allg) if allg else '–'} |")
+        sections["needed"] = "\n".join(need)
     return "\n\n".join(f"<!-- {k} -->\n{v}" for k, v in sections.items())
 
 
