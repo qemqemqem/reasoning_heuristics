@@ -14,8 +14,10 @@ Atoms are strings. "subject:predicate" renders as "the subject is predicate";
 "Name@phrase" renders as "Name is phrase" (people theme); any other atom renders as
 itself (letters style, C E5).
 
-Generator path: truth tables (`entails`, `models`). Validator path: `entails_sat`
-(CNF expansion + python-sat), which shares no code with the truth table.
+Generator path: truth tables (`entails`, `models`). `entails_sat` (CNF expansion +
+python-sat) shares no code with the truth table; the tests cross-check the two, and some zoo
+members reuse the CNF expansion. The validators recompute ground truth with their own code
+(`validate/independent.py`).
 """
 
 from __future__ import annotations
