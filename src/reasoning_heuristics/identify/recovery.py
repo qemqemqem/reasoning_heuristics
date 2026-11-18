@@ -511,8 +511,11 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
     off-zoo leakage, checks, and the items-per-cell sweep."""
     dev = json.loads(Path(dev_path).read_text())
     units = [u for u in dev["units"] if "error" not in u]
-    out = [f"Item set `{dev['items']}`, git {dev['provenance']['git_sha'][:10]}"
-           f"{' (dirty)' if dev['provenance']['git_dirty'] else ''}, {dev['config']['reps']} replicates × "
+    def _sha(p: dict[str, Any]) -> str:
+        return f"{(p.get('git_sha') or '?')[:10]}{' (dirty)' if p.get('git_dirty') else ''}"
+
+    merged = "".join(f"; {', '.join(m['units'])} rerun at git {_sha(m['provenance'])}" for m in dev.get("merged", []))
+    out = [f"Item set `{dev['items']}`, git {_sha(dev['provenance'])}{merged}; {dev['config']['reps']} replicates × "
            f"{dev['config']['boot']} bootstrap draws"
            + (f" ({dev['config']['single_reps']} per single member)" if "single" in dev["config"]["scenarios"] else "") + ".\n"]
     out.append("| Unit | items | clusters | single | mix | mix, uniform slips | feature | null q | null ALWAYS | all |")
