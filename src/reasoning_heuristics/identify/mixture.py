@@ -45,11 +45,11 @@ class EMResult:
     converged: np.ndarray  # (B,)
 
 
-def _mixture_terms(T: Tensors, pi: np.ndarray, eps: np.ndarray, rho: np.ndarray):
+def _mixture_terms(T: Tensors, pi: np.ndarray, eps: np.ndarray, rho: np.ndarray, rho_free: bool):
     """Per-replicate likelihood pieces: L (B,N,G), S (slip part), num (B,N,G), numq (B,N), tot, Savail."""
     G = T.A.shape[1]
-    if T.rho_free:
-        S = np.broadcast_to(T.B0[None], (len(eps),) + T.B0.shape)
+    if rho_free:
+        S = T.B0[None]
     else:
         g = trunc_geom(rho)  # (B, D+1)
         S = T.B0[None] + np.einsum("ngd,bd->bng", T.C, g)
@@ -62,12 +62,70 @@ def _mixture_terms(T: Tensors, pi: np.ndarray, eps: np.ndarray, rho: np.ndarray)
     return L, S, num, numq, tot, savail
 
 
+class _Stepper:
+    """One EM (MM) update of (pi, eps, rho) for a batch of replicates; returns the log-likelihood at its input."""
+
+    def __init__(self, T: Tensors, W: np.ndarray, fix_eps: float | None, fix_rho: float | None, eps_max: float):
+        self.T, self.W = T, W
+        self.fix_eps, self.fix_rho, self.eps_max = fix_eps, fix_rho, eps_max
+        self.rho_free = T.rho_free
+        self.slip_cols = T.slips.astype(float)
+        self.avail = T.avail.astype(float)
+        self.log_g_grid = np.log(np.maximum(trunc_geom(RHO_GRID), TINY))  # (grid, D+1)
+        self.G = T.A.shape[1]
+
+    def loglik(self, pi: np.ndarray, eps: np.ndarray, rho: np.ndarray) -> np.ndarray:
+        _, _, _, _, tot, savail = _mixture_terms(self.T, pi, eps, rho, self.rho_free)
+        return (self.W * (np.log(np.maximum(tot, TINY)) - np.log(savail) + self.T.log_scale[None])).sum(1)
+
+    def __call__(self, pi: np.ndarray, eps: np.ndarray, rho: np.ndarray):
+        T, W, G = self.T, self.W, self.G
+        L, S, num, numq, tot, savail = _mixture_terms(T, pi, eps, rho, self.rho_free)
+        tot_safe = np.maximum(tot, TINY)
+        ll = (W * (np.log(tot_safe) - np.log(savail) + T.log_scale[None])).sum(1)
+        R = num / tot_safe[..., None]
+        Rq = numq / tot_safe
+        # weights: Luce MM step
+        numer = np.einsum("bn,bng->bg", W, R)
+        numer_q = (W * Rq).sum(1)
+        Wd = W / savail
+        denom = Wd @ self.avail
+        denom_q = Wd.sum(1)
+        new = np.empty_like(pi)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            new[:, :G] = np.where(denom > 0, numer / np.maximum(denom, TINY), pi[:, :G])
+            new[:, G] = numer_q / np.maximum(denom_q, TINY)
+        new = np.maximum(new, 0.0)
+        new /= new.sum(1, keepdims=True)
+        eps_new, rho_new = eps, rho
+        if self.fix_eps is None:  # slip rate
+            with np.errstate(invalid="ignore", divide="ignore"):
+                share = np.where(L > 0, eps[:, None, None] * S / np.maximum(L, TINY), 0.0)
+            Rs = R * self.slip_cols[None, None, :]
+            top = np.einsum("bn,bng->b", W, Rs * share)
+            bot = np.einsum("bn,bng->b", W, Rs)
+            eps_new = np.where(bot > 0, np.minimum(top / np.maximum(bot, TINY), self.eps_max), eps)
+        if self.fix_rho is None and not self.rho_free:  # slip shape: expected slips by distance, grid M-step
+            g = trunc_geom(rho)
+            with np.errstate(invalid="ignore", divide="ignore"):
+                inv_L = np.where(L > 0, 1.0 / np.maximum(L, TINY), 0.0)
+            Ed = np.einsum("bn,bng,ngd->bd", W, R * inv_L * self.slip_cols[None, None, :], T.C) * g * eps[:, None]
+            has = Ed.sum(1) > 0
+            if has.any():
+                rho_new = np.where(has, RHO_GRID[np.argmax(Ed @ self.log_g_grid.T, 1)], rho)
+        return new, eps_new, rho_new, ll
+
+
 def em(T: Tensors, W: np.ndarray | None = None, pi0: np.ndarray | None = None, eps0: Any = 0.1, rho0: Any = 0.3,
        fix_eps: float | None = None, fix_rho: float | None = None, eps_max: float = EPS_MAX,
-       max_iter: int = 5000, tol: float = 1e-8) -> EMResult:
+       max_iter: int = 3000, tol: float = 1e-8, accelerate: bool = True) -> EMResult:
     """EM for (pi, eps, rho), batched over the rows of W (bootstrap weights; default one all-ones row).
 
-    tol is the largest log-likelihood gain per unit weight at which a replicate counts as converged."""
+    With `accelerate`, SQUAREM (Varadhan & Roland 2008): two EM steps give a direction, the step is
+    extrapolated, projected back onto the simplex, stabilised with one more EM step, and kept only
+    when it does not lower the likelihood (otherwise the plain second EM step is kept). tol is the
+    largest log-likelihood gain per unit weight at which a replicate counts as converged; max_iter
+    counts EM steps."""
     N, G = T.A.shape
     if fix_eps is None and not T.slip_identified:
         fix_eps = 0.0
@@ -79,58 +137,40 @@ def em(T: Tensors, W: np.ndarray | None = None, pi0: np.ndarray | None = None, e
         pi = np.array(np.broadcast_to(pi0, (B, G + 1)), dtype=float)
     eps = np.full(B, float(fix_eps)) if fix_eps is not None else np.array(np.broadcast_to(np.asarray(eps0, dtype=float), (B,)))
     rho = np.array(np.broadcast_to(np.asarray(fix_rho if fix_rho is not None else rho0, dtype=float), (B,)))
-    slip_cols = T.slips.astype(float)
+    step = _Stepper(T, W, fix_eps, fix_rho, eps_max)
     wsum = W.sum(1)
     prev = np.full(B, -np.inf)
     converged = np.zeros(B, dtype=bool)
-    log_g_grid = np.log(np.maximum(trunc_geom(RHO_GRID), TINY))  # (grid, D+1)
-    it = 0
-    for it in range(1, max_iter + 1):
-        L, S, num, numq, tot, savail = _mixture_terms(T, pi, eps, rho)
-        tot_safe = np.maximum(tot, TINY)
-        ll = (W * (np.log(tot_safe) - np.log(savail) + T.log_scale[None])).sum(1)
-        R = num / tot_safe[..., None]
-        Rq = numq / tot_safe
-        # weights: Luce MM step
-        numer = np.einsum("bn,bng->bg", W, R)
-        numer_q = (W * Rq).sum(1)
-        Wd = W / savail
-        denom = Wd @ T.avail.astype(float)
-        denom_q = Wd.sum(1)
-        new = np.empty_like(pi)
-        with np.errstate(invalid="ignore", divide="ignore"):
-            new[:, :G] = np.where(denom > 0, numer / np.maximum(denom, TINY), pi[:, :G])
-            new[:, G] = numer_q / np.maximum(denom_q, TINY)
-        new = np.maximum(new, 0.0)
-        new /= new.sum(1, keepdims=True)
-        # slip rate
-        if fix_eps is None:
-            with np.errstate(invalid="ignore", divide="ignore"):
-                share = np.where(L > 0, eps[:, None, None] * S / np.maximum(L, TINY), 0.0)
-            Rs = R * slip_cols[None, None, :]
-            top = np.einsum("bn,bng->b", W, Rs * share)
-            bot = np.einsum("bn,bng->b", W, Rs)
-            eps = np.where(bot > 0, np.minimum(top / np.maximum(bot, TINY), eps_max), eps)
-        # slip shape
-        if fix_rho is None and not T.rho_free:
-            g = trunc_geom(rho)
-            with np.errstate(invalid="ignore", divide="ignore"):
-                inv_L = np.where(L > 0, 1.0 / np.maximum(L, TINY), 0.0)
-            # expected slip counts by distance: sum_n W R eps C_ngd g_bd / L
-            Ed = np.einsum("bn,bng,ngd->bd", W, R * inv_L * slip_cols[None, None, :], T.C) * g * eps[:, None]
-            if Ed.sum() > 0:
-                score = Ed @ log_g_grid.T  # (B, grid)
-                has = Ed.sum(1) > 0
-                rho = np.where(has, RHO_GRID[np.argmax(score, 1)], rho)
-        pi = new
-        gain = (ll - prev) / wsum
-        converged = np.abs(gain) < tol
-        prev = ll
+    steps = 0
+    while steps < max_iter:
+        p1, e1, r1, ll0 = step(pi, eps, rho)
+        steps += 1
+        converged = np.abs(ll0 - prev) / wsum < tol
+        prev = ll0
         if converged.all():
             break
-    L, S, num, numq, tot, savail = _mixture_terms(T, pi, eps, rho)
-    ll = (W * (np.log(np.maximum(tot, TINY)) - np.log(savail) + T.log_scale[None])).sum(1)
-    return EMResult(pi, eps, rho, ll, it, converged)
+        if not accelerate:
+            pi, eps, rho = p1, e1, r1
+            continue
+        p2, e2, r2, ll1 = step(p1, e1, r1)
+        rp, vp = p1 - pi, p2 - 2 * p1 + pi
+        re, ve = e1 - eps, e2 - 2 * e1 + eps
+        nr = np.sqrt((rp ** 2).sum(1) + re ** 2)
+        nv = np.sqrt((vp ** 2).sum(1) + ve ** 2)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            alpha = np.where(nv > 0, -nr / np.maximum(nv, TINY), -1.0)
+        alpha = np.clip(alpha, -64.0, -1.0)
+        pe = np.maximum(pi - 2 * alpha[:, None] * rp + alpha[:, None] ** 2 * vp, 0.0)
+        pe /= pe.sum(1, keepdims=True)
+        ee = np.clip(eps - 2 * alpha * re + alpha ** 2 * ve, 0.0, eps_max) if fix_eps is None else eps
+        p3, e3, r3, ll_ext = step(pe, ee, r2)
+        steps += 2
+        ok = ll_ext >= ll1
+        pi = np.where(ok[:, None], p3, p2)
+        eps = np.where(ok, e3, e2)
+        rho = np.where(ok, r3, r2)
+    ll = step.loglik(pi, eps, rho)
+    return EMResult(pi, eps, rho, ll, steps, converged)
 
 
 def cluster_bootstrap(cluster: np.ndarray, n_boot: int, rng: np.random.Generator) -> np.ndarray:
@@ -176,7 +216,7 @@ UNEXPLAINED = "unexplained (q)"
 
 
 def fit(T: Tensors, n_boot: int = 200, rng: np.random.Generator | None = None, chunk: int = 50,
-        fix_eps: float | None = None, fix_rho: float | None = None, max_iter: int = 5000, tol: float = 1e-8,
+        fix_eps: float | None = None, fix_rho: float | None = None, max_iter: int = 3000, tol: float = 1e-8,
         q_label: str = UNEXPLAINED) -> FitResult:
     """Point estimate plus cluster-bootstrap percentile intervals."""
     rng = rng or np.random.default_rng(0)
@@ -199,7 +239,7 @@ def fit(T: Tensors, n_boot: int = 200, rng: np.random.Generator | None = None, c
     for start in range(0, n_boot, chunk):
         Wb = Wall[start:start + chunk]
         r = em(T, Wb, pi0=starts[start:start + chunk], eps0=eps_hat, rho0=rho_hat, fix_eps=fix_eps, fix_rho=fix_rho,
-               max_iter=max_iter, tol=tol)
+               max_iter=min(max_iter, 1500), tol=tol)
         pis.append(r.pi)
         epss.append(r.eps)
         rhos.append(r.rho)

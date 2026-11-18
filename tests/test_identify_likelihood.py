@@ -111,11 +111,12 @@ def test_exclusions_declared_impossible_and_censoring():
           Response("T-3", "h3", "m", "truncated", reasoning_tokens=32000),
           Response("T-0", "h0", "m", "refusal")]
     obs, exc = um.observations(rs)
-    assert [o.key for o in obs] == ["SAT", "UNSAT"]  # declared impossible read as UNSAT
-    assert exc.counts["c0"] == {"parse_fail": 1, "refusal": 1} and exc.counts["c1"] == {"truncated": 1}
+    assert [o.key for o in obs] == ["SAT"]  # give-ups are not answers by default
+    assert exc.counts["c0"] == {"parse_fail": 1, "refusal": 1}
+    assert exc.counts["c1"] == {"truncated": 1, "declared_impossible": 1}
     assert abs(exc.rates()["c1"]["truncated"] - 0.5) < 1e-12
-    obs2, _ = um.observations(rs, declared_impossible="exclude")
-    assert len(obs2) == 1
+    obs2, _ = um.observations(rs, declared_impossible="as-token")
+    assert [o.key for o in obs2] == ["SAT", "UNSAT"]  # the sensitivity option reads them as UNSAT
     tm = TruncationTable({("T-3", "A"): 0.8, ("T-3", "B"): 0.1}, default=0.2)
     obs3, exc3 = um.observations(rs, token_model=tm)
     assert obs3[-1].censored and "truncated" not in exc3.counts["c1"]

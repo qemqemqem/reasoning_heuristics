@@ -55,3 +55,49 @@ def test_fit_all_keys_on_model_and_condition():
     assert w["B"]["pi"] > 0.9
     w = out[("m1", "direct", "T_E0", "SAT")]["fit"]["weights"]
     assert w["C"]["pi"] > 0.9
+
+
+def test_from_scored_reads_real_scorer_records(tmp_path):
+    """Records made by the real scorer (evals.scoring.score_response) on committed smoke items, with the
+    run metadata `evals.score` adds, go straight into the engine; api_error rows are dropped and counted."""
+    import gzip
+    import json
+
+    from evals_helpers import api_response, committed_items, render, runnable
+
+    from reasoning_heuristics.evals.scoring import ResponseView, score_response
+    from reasoning_heuristics.identify.records import from_scored
+    from reasoning_heuristics.identify.units import make_units
+
+    units = make_units(runnable(committed_items("smoke")))
+    picks = []
+    for name in ("C_E2/knapsack", "AH_E1/SAT", "C_E1/colouring"):
+        unit = units[name]
+        um = UnitModel(unit)
+        for i, it in enumerate(unit.items):
+            label = next((g.members[0] for g in um.columns if um.pred(i, g.members[0]).kind == "det"), None)
+            text = render(it, it["predictions"][label]["answer"]) if label else None
+            if text is not None:
+                picks.append((um, i, it, label, text))
+                break
+    assert len(picks) == 3
+    records = []
+    for k, (um, i, it, label, text) in enumerate(picks):
+        rec = score_response(it, ResponseView.from_api(api_response("Working it out.\n" + text), max_tokens=32768))
+        rec.update({"run_id": "test-run", "model_requested": "openai/gpt-oss-20b", "condition": "thinking-high",
+                    "sample": k, "from_cache": False})
+        records.append(rec)
+    err = score_response(picks[0][2], ResponseView.from_api(None, error="HTTP 503 after 6 attempts"))
+    err.update({"run_id": "test-run", "model_requested": "openai/gpt-oss-20b", "condition": "thinking-high", "sample": 9})
+    records.append(err)
+    path = tmp_path / "scored.jsonl.gz"
+    with gzip.open(path, "wt", encoding="utf-8") as f:
+        for rec in records:
+            f.write(json.dumps(rec) + "\n")
+    responses, dropped = from_scored(path)
+    assert dropped == {"api_error": 1} and len(responses) == 3
+    for r, (um, i, it, label, text) in zip(responses, picks):
+        assert r.category == "ok", (it["item_id"], r.extra.get("parse_detail"))
+        assert r.condition == "thinking-high" and r.model == "openai/gpt-oss-20b"
+        obs, _ = um.observations([r])
+        assert len(obs) == 1 and obs[0].key == um.pred(i, label).key

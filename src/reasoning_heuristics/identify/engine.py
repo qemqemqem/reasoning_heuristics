@@ -48,7 +48,7 @@ def diagnostics(um: UnitModel) -> dict[str, Any]:
 
 
 def fit_unit(um: UnitModel, responses: list[Response], n_boot: int = 200, seed: int = 0,
-             token_model: TokenModel | None = None, declared_impossible: str = "as-token",
+             token_model: TokenModel | None = None, declared_impossible: str = "exclude",
              n_perm: int = 100, ea_ties: str = "include") -> dict[str, Any]:
     rng = np.random.default_rng(seed)
     obs, exc = um.observations(responses, token_model, declared_impossible)
