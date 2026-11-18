@@ -1,6 +1,6 @@
 # Status
 
-*Current state of the work as of 2026-11-17. Update this file when a stage finishes or a decision is made.*
+*Current state of the work as of 2026-11-17 (evening). Update this file when a stage finishes or a decision is made.*
 
 ## Summary
 
@@ -14,7 +14,9 @@ The design work and the first stage of question generators are finished. No mode
   - a paper outline with stand-in values;
   - a scope and budget plan for real results at about $95.
 - The Stage 1 generators produce 1,330 dev items across ten evals, and all of them pass automatic validation.
-- Those items now need a human pass on the [review page](https://claude.ai/artifact/AEidKBQZisLzHB8BudFtb1). After that comes the runner, the identification engine, and the first dev runs on gpt-oss-20b.
+- **A project review on 2026-11-17 found real defects** ([reviews/2026-11-17-project-review.md](reviews/2026-11-17-project-review.md)). Ground truth is right on every item. But several zoo members collapse into trivial ones, the per-item likelihood tables credit the exact solver with invalid answers, item identity has gaps, and B4/C4 E1 doesn't reproduce. Fixes are in progress, then every item set is regenerated.
+- **Don't mark the review page yet.** Its items will change after the fixes. The human pass comes after the regeneration and a rebuilt page.
+- The runner and scorer are built (#8). The identification engine and recovery harness are in progress. Smoke runs on OpenRouter have started, within the $40 budget set on 2026-11-17.
 
 ## Where each part stands
 
@@ -25,18 +27,18 @@ The design work and the first stage of question generators are finished. No mode
 | Heuristic zoo | 9 families, about 57 named heuristics, two nuisance models (slips and misreading) | [PAPER_SKELETON.md](PAPER_SKELETON.md) §5, [verticals/](verticals/) |
 | Eval designs | 7 verticals, about 50 evals (8 of them in the cross-formalism vertical). Each eval names the heuristic it supports, the competitors it disconfirms, and hypotheses about the answer, the aggregate result and the chain of thought | [verticals/](verticals/) |
 | Example questions | 649 hand-checked items, every prediction computed by code | [data/examples/](../data/examples/) |
-| Theoretical priors | Done. Three lenses (what transformers can compute, what RASP-L simplicity predicts they learn, what LLMs already do), with a verdict per family in direct and thinking mode | [theory/README.md](theory/README.md) |
-| Paper outline | Stand-in values, with theory priors filled in. Freeze the priors before the first run | [PAPER_SKELETON.md](PAPER_SKELETON.md) |
+| Theoretical priors | Done. Three lenses (what transformers can compute, what RASP-L simplicity predicts they learn, what LLMs already do), with a verdict per family in direct and thinking mode. Corrected on 2026-11-17 after a reproducibility audit, before any model output was analysed (no verdict changed; see the corrections log). **Frozen at git tag `priors-frozen-2026-11-17`** | [theory/README.md](theory/README.md) |
+| Paper outline | Stand-in values, with theory priors filled in. Priors frozen (tag `priors-frozen-2026-11-17`) | [PAPER_SKELETON.md](PAPER_SKELETON.md) |
 | Scope and budget | About $15–20 for preliminary results and about $95 for real results (gpt-oss-20b and 120b) | [SCOPE.md](SCOPE.md) |
-| Shared engineering: item schema, domain library, heuristic zoo code, counterfactual tooling, validators | Built and tested (246 tests) | `src/reasoning_heuristics/`, [GENERATORS.md](GENERATORS.md) |
+| Shared engineering: item schema, domain library, heuristic zoo code, counterfactual tooling, validators | Built and tested. The 2026-11-17 review found defects in the zoo, the validators and the likelihood tables; fixes in progress on `fix-zoo`, `fix-validators`, `fix-generators`. CI runs the tests on every PR (#3) | `src/reasoning_heuristics/`, [GENERATORS.md](GENERATORS.md), [review](reviews/2026-11-17-project-review.md) |
 | Stage 1 generators | Built: A/H E1, E2, E5, E8; C E1, E2, E3, E5; B4/C4 E1, E2. Output is 266 smoke and 1,330 dev items, all passing validation, with no dev-to-test leakage. A few lower-priority cells aren't built (listed in GENERATORS.md) | `src/reasoning_heuristics/generators/`, `data/items/` |
-| Manual review of items | Page is live, no marks yet | [Review page](https://claude.ai/artifact/AEidKBQZisLzHB8BudFtb1), `scripts/review_page/` |
+| Manual review of items | Page is live, no marks yet. **Wait:** the items change after the fixes, so the page needs a rebuild first (and a home other than claude.ai) | [Review page](https://claude.ai/artifact/AEidKBQZisLzHB8BudFtb1), `scripts/review_page/` |
 | Runner (OpenRouter client, cache, cost guard, manifests) and scorer | Built and tested with the HTTP layer mocked: thin custom runner, thinking and direct conditions, one versioned scorer. No batch endpoint yet; E8 continuations not built | [RUNNER.md](RUNNER.md), `src/reasoning_heuristics/evals/` |
-| Identification engine (mixture fit with a slip model) | Not started | SCOPE §4 item 4 |
-| Recovery harness (fake models with planted mixtures) | Not started. The C and cross-formalism designs ran their own recovery simulations | SCOPE §4 item 5, `scripts/cross_formalism/recovery_sim.py` |
+| Identification engine (mixture fit with a slip model) | In progress (branch `identify`) | SCOPE §4 item 4 |
+| Recovery harness (fake models with planted mixtures) | In progress (branch `identify`). The C and cross-formalism designs ran their own recovery simulations | SCOPE §4 item 5, `scripts/cross_formalism/recovery_sim.py` |
 | Trace pipeline (codebook, parsers, LLM coder, faithfulness probes) | Not started. The E8 specs for faithfulness probes exist | SCOPE §4 item 6 |
 | Stage 2 generators (B1/G, D/F, E, cross-formalism) | Not started. The cross-formalism vertical has a working library builder | SCOPE §5, `scripts/cross_formalism/` |
-| Model runs | None | |
+| Model runs | Provider probes and smoke runs in progress on the pre-fix items (gpt-oss-20b thinking; Qwen3-32B thinking and direct), at most $3. Dev runs wait for the regenerated items. Budget: up to $40 on 2026-11-17 | `data/runs/`, `data/runs/LEDGER.md` |
 | Phase 2 (mechanistic interpretability) | Gated on behavioural evidence | SCOPE §8 |
 
 ## What we've learned so far, before any data
@@ -62,13 +64,23 @@ The design work and the first stage of question generators are finished. No mode
 
 ## Next steps
 
-1. **Review the items.** Mark the 50 items on the review page keep, fix or drop. The marks become generator changes, not edits to single items.
-2. **Build the runner.** First decide between a thin custom runner and Inspect AI (DESIGN §9 question 5).
-3. **Build the identification engine and recovery harness.** Pass the recovery gates on fake models (free): |bias| ≤ 0.05, 95% coverage ≥ 0.9, median interval width ≤ 0.2.
-4. **First runs on gpt-oss-20b.** Smoke, then dev (about $8 per pass over all verticals). Then calibrate sizes so the hardest cell scores 40–80%, and freeze.
-5. **Pilot and power analysis**, then the Stage 2 generators (SCOPE §5).
+1. **Land the review fixes** (zoo, validators, generators and likelihood tables), then regenerate every item set and add a CI check that the committed sets reproduce.
+2. **Review the items.** Rebuild the review page from the regenerated items, then mark the 50 items keep, fix or drop. The marks become generator changes, not edits to single items.
+3. ~~Build the runner.~~ Done (#8): a thin custom OpenRouter runner, as SCOPE §4 specifies, with thinking and direct conditions and one versioned scorer.
+4. **Build the identification engine and recovery harness** (in progress). Pass the recovery gates on fake models (free): |bias| ≤ 0.05, 95% coverage ≥ 0.9, median interval width ≤ 0.2.
+5. **First runs.** Smoke (in progress), then dev on gpt-oss-20b, Qwen3-32B and Qwen3-14B (thinking and direct) and gpt-oss-120b, within the budget. Then calibrate sizes so the hardest cell scores 40–80%, and freeze.
+6. **Pilot and power analysis**, then the Stage 2 generators (SCOPE §5).
 
 ## Open decisions
+
+- **Decided 2026-11-17:**
+  - Phase 1 stays mostly on thinking models, with a cheap direct-answer (thinking off) arm on every eval ([decision](decisions/2026-11-17-direct-answer-arm.md)).
+  - The runner is a thin custom one (DESIGN §9 question 5).
+  - Agents open and merge PRs regularly ([RULES.md](../RULES.md)).
+- **From the 2026-11-17 review** (its "Design questions" section):
+  - selection filters that depend on one member's behaviour vs SCOPE §6 rule 6;
+  - where the rebuilt review page lives;
+  - `MM-S1` vs mSentential, and the CW-MIN reading.
 
 - **Theory-driven design changes** ([theory/README.md](theory/README.md) §5): composite members, SAT sizes centred on each model's budget line, depth up to 12–16, prompt given twice, adjacency vs shuffled edge lists. The generators support all of them as options. Whether they become defaults is undecided.
 - **Scope decisions** ([SCOPE.md](SCOPE.md) §9):
