@@ -111,9 +111,18 @@ def forced_outcomes(scored: list[dict[str, Any]]) -> dict[str, int]:
 
 def _forced_section(manifest: dict[str, Any], scored: list[dict[str, Any]]) -> list[str]:
     f, counts, out = manifest["forced"], manifest.get("counts") or {}, forced_outcomes(scored)
-    source, check = manifest["source"], manifest.get("raw_check") or {}
-    what = ("that finished with a reasoning trace and an answer, each whole trace replayed with the answer forced (the f = 1 "
-            "acceptance test)") if f.get("select") == "done" else "that stopped at the cap with a reasoning trace, replayed with the thinking closed"
+    source, check, budget = manifest["source"], manifest.get("raw_check") or {}, f.get("budget")
+    whose = {"done": "that finished with a reasoning trace and an answer", "cut": "that stopped at the cap with a reasoning trace",
+             "all": "that finished with a reasoning trace and an answer, or stopped at the cap with one"}[f.get("select", "cut")]
+    if budget is not None:
+        cut = (f"its first {budget['truncate_at']} tokens" if "truncate_at" in budget
+               else f"the first ⌊{budget['truncate_frac']:g} × n⌋ of its n tokens")
+        what = (f"{whose}, each trace cut to {cut} by the model's tokenizer (`{(manifest.get('tokenizer') or {}).get('name')}`) "
+                "and the answer forced there")
+    elif f.get("select") == "done":
+        what = f"{whose}, each whole trace replayed with the answer forced (the f = 1 acceptance test)"
+    else:
+        what = f"{whose}, replayed with the thinking closed"
     skipped = "; ".join(f"{v} skipped ({k.removeprefix('skipped_').replace('_', ' ')})" for k, v in counts.items() if k.startswith("skipped_"))
     L = ["## Forced final answers", "",
          f"The responses of `{source['run_id']}` {what} (template `{f['template']}`, `{f['endpoint']}`, max_tokens {f['max_tokens']}"
@@ -123,6 +132,10 @@ def _forced_section(manifest: dict[str, Any], scored: list[dict[str, Any]]) -> l
          f"and stopped at max_tokens again (`truncated` below). {out['parsed']} parsed (`ok`); {out['renewed_reasoning']} carried "
          "reasoning again (`renewed_reasoning`, which should be 0 under force-2).", "",
          f"- **Routing:** forced calls `{manifest.get('provider_routing')}`; the source run `{source.get('provider_routing', '–')}`."]
+    if budget is not None:
+        L.append(f"- **Budget:** {counts.get('within_budget')} of the selected traces were within budget and not sent: their "
+                 f"natural answers stand. {counts.get('sent')} were cut and sent. `budget.jsonl.gz` has each trace's fate and "
+                 "token counts.")
     if check.get("passed"):
         L.append(f"- **Raw-prompt check:** the same text gave {check['completions']['prompt_tokens']} prompt tokens as a raw prompt and "
                  f"{check['chat']['prompt_tokens']} as a chat user message, so the provider passed the raw prompt through.")

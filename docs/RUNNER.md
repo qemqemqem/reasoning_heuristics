@@ -440,10 +440,11 @@ The manifest records both routings: `source.provider_routing` (the source run's)
 
 - **`cut`** (the default): responses that stopped for length (finish_reason `length`) with a non-empty `reasoning`. Those that stopped there without a trace (the direct condition's) are counted (`skipped_no_trace`) and skipped.
 - **`done`**: responses that finished (finish_reason `stop`) with a non-empty trace and non-empty content. The whole trace is replayed and the answer forced: the f = 1 acceptance test. Each forced raw record keeps the source response, its reasoning removed (`natural_response`), and each scored record adds the source response's own scoring: `natural_category`, `natural_correct`, `natural_answer_key`, and `same_as_natural` (the same answer key, both `ok`). Skipped: `skipped_no_trace`, `skipped_no_content`.
+- **`all`**: both, in the source's order: every response with a non-empty trace that finished with content or stopped for length. It is for sweeps over all items ([below](#budget-forcing-and-early-answering)). Records from finished responses carry the `done` fields above.
 - **`--per-unit N`** keeps at most N records per unit (vertical, eval, item domain), in the source's order: a stratified acceptance sample. **`--limit N`** then keeps the first N.
 - **`--samples S`** sends S forced calls per record. Sample indices 0..S−1 (`forced_sample`) give distinct cache keys and records.
 
-**Where the outputs live.** Beside the source run: force-2 in `data/runs/forced-2/<select>/<source_run_id>/` (run id `forced-2/<select>/<source_run_id>`), force-1 in `data/runs/forced/<source_run_id>/`.
+**Where the outputs live.** Beside the source run: force-2 in `data/runs/forced-2/<select>/<source_run_id>/` (run id `forced-2/<select>/<source_run_id>`), a budget pass in `forced-2/<select>-k<K>/` or `<select>-f<F>/` ([below](#budget-forcing-and-early-answering)), force-1 in `data/runs/forced/<source_run_id>/`.
 
 | File | Contents |
 |---|---|
@@ -515,6 +516,82 @@ python -m reasoning_heuristics.evals.score --allow-item-drift data/runs/forced-2
 | pc20, Qwen3-32B / Qwen3-14B | 14 / 21 | 0.03–0.04 / 0.07–0.09 | 27 / 27 (9) | 0.02–0.05 / 0.03–0.05 |
 | pc40, Qwen3-32B / Qwen3-14B | 14 / 21 | 0.03–0.04 / 0.07–0.09 | 15 / 15 (5) | 0.01–0.03 / 0.02–0.03 |
 | smoke, gpt-oss-20b / Qwen3-32B | 89 / 6 | 0.09–0.14 / 0.01–0.02 | 58 (21) / 67 (23) | 0.02–0.06 / 0.04–0.11 |
+
+### Budget forcing and early answering
+
+`--truncate-at K` and `--truncate-frac F` replay each selected trace cut short, with the thinking closed and the answer forced there. This is the machinery behind the design's thinking-budget conditions and its early answering:
+
+- **Budgets:** C E3's T1k and T4k ([C §2.1](verticals/C_constructive.md)), and DESIGN's budgets of 0, 1k, 4k and 16k ([DESIGN](DESIGN.md)).
+- **Early answering:** SCOPE §6 rule 4, A/H E8, and C E6 at f ∈ {0, .1, .25, .5, .75}.
+
+The two options are mutually exclusive, and force-2 only.
+
+- **K** keeps the first K tokens of each trace, counted by the model's own tokenizer. A trace of at most K tokens is not sent. It is counted `within_budget`, and its natural answer stands, as a finished response's would under that budget. A response cut at the source's cap has no natural answer, so if its trace fits, it counts as not correct.
+- **F** keeps the first ⌊F × n⌋ of a trace's n tokens, 0 ≤ F < 1, computed exactly (F is read as a decimal). F = 0 sends an empty trace: what the model answers before any reasoning (C E6's pre-commitment check). A fraction below 1 always cuts, so nothing is within budget.
+- **A cut trace is a prefix of an unlimited run.** The model did not know the budget. The trace is what it wrote under the source's 32k cap, stopped at K tokens. That is the design's budget forcing (C E3: "truncate the thinking at the cap and force the answer") and Lanham et al.'s (2023) early answering. A model told its budget (run.py's `--budget-notice`) or trained for short budgets might reason differently, so accuracy at K measures what an unhurried run knew after K tokens.
+- **The cut** is made on token ids and decoded back to text. A cut inside a UTF-8 character moves back to the character's start (at most 3 tokens), and `cut_tokens` records what was kept.
+- **The prompt is force-2's**, with the cut trace in place of the whole one. The template, routing, logit_bias and raw-prompt check are unchanged.
+- **`--select all`** takes every response with a trace, finished or cut at the cap, so a sweep covers all items. Records from finished responses keep `--select done`'s natural-answer fields. For a cut trace, `same_as_natural` is the early-answering agreement: whether the answer at K is the model's final answer.
+
+**Tokenizers** (`evals/tokenizer.py`). They are an optional extra, `pip install -e '.[force]'`; CI does not install them, and the tests use a fake tokenizer.
+
+| Model | Tokenizer | Pinned file |
+|---|---|---|
+| gpt-oss-20b, gpt-oss-120b | tiktoken `o200k_harmony` | `o200k_base.tiktoken`, sha256 `446a9538…`. The loaded ranks are checked against it. |
+| Qwen3-32B, Qwen3-14B | HF `tokenizers`, `tokenizer.json` from `Qwen/Qwen3-32B` at commit `9216db57…` | sha256 `aeb13307…`. Qwen3-14B's file at its commit `40c06982…` is byte-identical, so both use it. |
+
+- **Special-token text in a trace is encoded as plain text:** `disallowed_special=()` for gpt-oss, `encode_special_tokens` for Qwen3.
+- **The Qwen3 file is downloaded on first use** to `data/cache/tokenizers/` (gitignored), even by a dry run. Its sha256 is checked on download and on every load, and a mismatch stops the pass. tiktoken downloads and checks `o200k_base.tiktoken` into its own cache the same way.
+- **Any other model is refused**, before anything is read or sent.
+- **Re-tokenizing the returned trace text can differ slightly from the model's own token stream.** The provider returns text, and the same text can have more than one tokenization. Each record carries `provider_reasoning_tokens` (the source usage's reasoning_tokens) beside `trace_tokens`, so the difference is visible. The manifest's `tokens` sums both, and also compares the traces of responses with no answer text with their completion_tokens, which are then the trace alone. On the dev thinking-high runs (2026-11-18):
+  - **gpt-oss-20b:** 22,365,561 tokens by o200k_harmony, against 22,370,820 reasoning tokens reported by DekaLLM (0.9998). A trace typically counts 3–4 tokens fewer than reported, about the harmony framing.
+  - **Qwen3-32B:** DeepInfra's `reasoning_tokens` are not a count of the trace. They are 0.30–1.14 of the response's completion tokens (median 0.65): 6,929,125 in all, against 10,663,379 by the tokenizer. Where a response has no answer text, the tokenizer matches its completion tokens exactly (21 traces, 688,128 = 688,128). Over all 1,270 responses, trace plus answer come to 0.983–1.000 of completion_tokens (median 0.9996); the rest is the `<think>` tags and the newlines around them. So for Qwen3, judge drift by `tokens.vs_completion_tokens_without_answer`, not by `provider_reasoning_tokens`.
+
+**Outputs.** A budget pass writes `data/runs/forced-2/<select>-k<K>/<source_run_id>/` or `<select>-f<F>/` (e.g. `all-k4096`, `done-f0.25`, `all-f0`). The run id matches, and the condition is `<source label>-forced-k<K>` (or `-f<F>`).
+
+- **Raw and scored records add** `trace_tokens` (the whole trace, by our tokenizer), `cut_tokens`, `budget_k` or `budget_frac`, and `provider_reasoning_tokens`.
+- **`budget.jsonl.gz`** has one record per selected trace: its fate (`within_budget`, `sent` or `no_room`), `trace_tokens`, `cut_tokens`, `provider_reasoning_tokens`, `budget_k` or `budget_frac`, the source's `finish_reason`, `item_id`, `source_sample` and `source_cache_key`. Within-budget traces appear only here.
+- **The manifest** adds `forced.budget` (`{"truncate_at": K}` or `{"truncate_frac": F}`) and `forced.tokenizer` (name, revision and sha256, which a resume must match). It also records `tokenizer` (adding the library, its version and the file's URL), `tokens`, and the counts `within_budget` and `sent`: `selected` = `within_budget` + `sent`, and `calls` = `sent` × samples.
+- **The context rule** (`call_max_tokens`) uses the cut prompt's size: the source's prompt tokens plus `cut_tokens`, not the whole trace. The cost guard's reservation is priced the same way.
+
+**Costs.** A dry run takes a list (`--truncate-at 1024,2048,4096,8192,16384`) and prints one row per value: traces, within budget, sent, no room, calls, prompt tokens, and USD. Prompt tokens per sent call are its source's prompt tokens plus its cut. USD runs from the prompt alone (every call answers at once) to every call at max_tokens 4,096. A live pass takes one value.
+
+The table covers the dev thinking-high runs with `--select all` (1,270 traces each), on 2026-11-18. The force-2 passes that sent calls charged within 4% of the low end. Early cuts may draw longer answers, since the model has not finished its reasoning.
+
+| Budget | gpt-oss-20b: calls | gpt-oss-20b: USD | Qwen3-32B: calls | Qwen3-32B: USD |
+|---|---|---|---|---|
+| K = 1,024 | 1,014 | 0.06–0.64 | 933 | 0.12–0.98 |
+| K = 2,048 | 932 | 0.08–0.62 | 828 | 0.17–0.93 |
+| K = 4,096 | 865 | 0.13–0.63 | 779 | 0.26–0.98 |
+| K = 8,192 | 783 | 0.22–0.67 | 582 | 0.35–0.88 |
+| K = 16,384 | 676 | 0.35–0.74 | 198 | 0.23–0.41 |
+| **All five** | **4,270** | **0.84–3.29** | **3,320** | **1.14–4.18** |
+| `--per-unit 5`, all five | 452 (115 traces) | 0.09–0.34 | 375 (115 traces) | 0.13–0.48 |
+| F = 0, .1, .25, .5, .75 | 1,270 each | 0.03–0.76 to 0.53–1.26 | 1,270 each | 0.07–1.23 to 0.58–1.74 |
+
+**Running it.**
+
+```bash
+# estimates per value: no API call, and nothing written but the tokenizer's file on first use
+python -m reasoning_heuristics.evals.force data/runs/<source_run_id> --dry-run --allow-item-drift \
+    --select all --truncate-at 1024,2048,4096,8192,16384
+
+# live: one pass per value (the key comes from the environment)
+for k in 1024 2048 4096 8192 16384; do
+    python -m reasoning_heuristics.evals.force data/runs/<source_run_id> --allow-item-drift \
+        --select all --truncate-at $k --cap-usd 1 [--per-unit 5] [--budget-tag T --budget-usd B]
+done
+
+# scoring
+python analysis/budget_sweep.py
+```
+
+**Scoring: `analysis/budget_sweep.py`.** It reads the committed `forced-2/*-k*` and `*-f*` passes and their source runs. It writes `analysis/out/budget_sweep.json` and `budget_sweep.md`. Rows are kept apart by source run and selection, so one model on two item sets gives two tables.
+
+- **Columns,** per unit and budget: items, within_budget, forced, answered, parsed, correct and accuracy. no_room and missing (a sent trace with no forced answer, in an incomplete pass) are shown too, and natural_correct gives the same items at the source's own cap.
+- **Accuracy at a budget counts each item once:** the natural answer if its trace fit within the budget, else the forced answer there (forced sample 0).
+- **An unparsed forced answer counts as not correct.** The parsed column shows how many forced answers parsed.
+- **`--check`** recomputes the outputs and compares them with the committed files (`tests/test_budget_sweep.py`). While no budget pass is committed, it has nothing to check and passes.
 
 ## E8: continuations and prefill
 

@@ -3,7 +3,7 @@ everything is re-scored from raw outputs).
 
     python -m reasoning_heuristics.evals.score data/runs/<run_id> [data/runs/<other> ...]
     python -m reasoning_heuristics.evals.score data/runs/forced-2/<select>/<source_run_id>    (a forced-answer pass;
-        force-1's are in data/runs/forced/<source_run_id>)
+        a budget pass's are in forced-2/<select>-k<K>/ or <select>-f<F>/, force-1's in data/runs/forced/<source_run_id>)
 
 Reads manifest.json (which item files, with their SHA-256) and raw.jsonl.gz; writes
 scored.jsonl.gz, scoring.json (scorer version, git SHA, counts) and REPORT.md. The item files
@@ -29,6 +29,8 @@ from reasoning_heuristics.evals.report import build_report
 from reasoning_heuristics.evals.scoring import SCORER_VERSION, ItemContext, ResponseView, score_response
 
 SCORED = "scored.jsonl.gz"
+# a budget pass's fields (force.py --truncate-at, --truncate-frac), carried from each raw record to its scored one
+BUDGET_FIELDS = ("trace_tokens", "cut_tokens", "budget_k", "budget_frac", "provider_reasoning_tokens")
 
 
 def git_show(ref: str, rel: str) -> bytes:
@@ -97,7 +99,7 @@ def score_raw(manifest: dict[str, Any], raw: list[dict[str, Any]], items: dict[s
                     "scorer_git_dirty": git.get("dirty")})
         if r.get("forced_template"):  # a forced final answer (force.py): a stratum of its own, never the source's
             rec.update({"forced": True, "forced_template": r["forced_template"], "source_run_id": r["source_run_id"]})
-            rec.update({k: r[k] for k in ("forced_select", "forced_sample", "source_sample") if k in r})
+            rec.update({k: r[k] for k in ("forced_select", "forced_sample", "source_sample", *BUDGET_FIELDS) if k in r})
             if r.get("natural_response") is not None:  # --select done: the source response's own answer
                 rec.update(natural_scoring(it, r, ctx, rec))
         out.append(rec)

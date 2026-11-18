@@ -1,25 +1,30 @@
 """The forced-answer pass with the HTTP layer mocked: the force-1 prompt, the forcing routes and the raw-prompt
-check, force-2's logit_bias, selection (cut and done, per unit, samples), a forced call recorded and scored
+check, force-2's logit_bias, selection (cut, done and all, per unit, samples), a forced call recorded and scored
 from a text-completions response, the cost cap, resumption, the ledger, the dry run, output directories,
-force-1 reproduced, and the API key never leaving the environment."""
+force-1 reproduced, budget forcing and early answering (--truncate-at, --truncate-frac, with a fake tokenizer),
+and the API key never leaving the environment."""
 
 from __future__ import annotations
 
+import argparse
 import ast
 import gzip
 import hashlib
 import json
 import math
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
 from evals_helpers import ITEMS, api_response
 
+from reasoning_heuristics.evals import force as F
 from reasoning_heuristics.evals import ledger
+from reasoning_heuristics.evals import tokenizer as T
 from reasoning_heuristics.evals.cache import cache_key
 from reasoning_heuristics.evals.client import HttpResponse, OpenRouterClient
-from reasoning_heuristics.evals.force import (FORCING_ROUTES, GPT_OSS_LOGIT_BIAS, UnsupportedModel, call_max_tokens,
-                                              forced_body, forced_prompt, raw_check_prompt, select)
+from reasoning_heuristics.evals.force import (FORCING_ROUTES, GPT_OSS_LOGIT_BIAS, Budget, UnsupportedModel, call_max_tokens,
+                                              cut_traces, forced_body, forced_prompt, parse_budgets, raw_check_prompt, select)
 from reasoning_heuristics.evals.force import main as force_main
 from reasoning_heuristics.evals.models import get_model
 from reasoning_heuristics.evals.run import main as run_main
@@ -104,9 +109,10 @@ class Transport:
             assert url.endswith("/api/v1/completions")
             self.forced.append(req)
             self.calls.append("forced")
-            if "Item 2:" in text:
+            if "Item 2:" in text:  # priced like the others: a whole cut trace is long, and so is its prompt
                 resp = completion("", reasoning="Wait, let me redo the last case.", finish="length",
-                                  completion_tokens=req["max_tokens"], cost=self.cost, model=req["model"])
+                                  completion_tokens=req["max_tokens"], cost=self.cost if "Still checking" in text else 0.0001,
+                                  model=req["model"])
             else:  # a finished trace is short (2,100 tokens), and so is its forced call's price
                 resp = completion(answer(text, other="Item 5:" in text), cost=self.cost if "Still checking" in text else 0.0001,
                                   model=req["model"], gen_id=f"gen-forced-{len(self.forced)}")
@@ -150,10 +156,26 @@ def source_run(tmp_path: Path, transport: Transport, model: str = "openai/gpt-os
     return out
 
 
-def force(src: Path, transport: Transport, *extra: str) -> int:
+class ByteTokenizer:
+    """A fake tokenizer: one token per UTF-8 byte, so an ASCII trace has one token per character."""
+
+    def __init__(self, sha256: str = "0" * 64):
+        self.sha256 = sha256
+
+    def encode(self, text: str) -> list[int]:
+        return list(text.encode("utf-8"))
+
+    def decode(self, ids) -> str:
+        return bytes(ids).decode("utf-8", errors="replace")
+
+    def info(self) -> dict:
+        return {"name": "bytes", "library": "test", "version": "0", "revision": None, "file": "-", "sha256": self.sha256}
+
+
+def force(src: Path, transport: Transport, *extra: str, tokenizer=None) -> int:
     root = src.parent.parent
     return force_main([str(src), "--cap-usd", "1", "--cache-dir", str(root / "cache"), "--ledger", str(root / "LEDGER.md"),
-                       "--concurrency", "1", *extra], client=client(transport))
+                       "--concurrency", "1", *extra], client=client(transport), tokenizer=tokenizer or ByteTokenizer())
 
 
 def read_gz(p: Path) -> list[dict]:
@@ -273,6 +295,8 @@ def test_selection_takes_responses_cut_at_the_cap_or_finished_with_a_trace():
     assert [r["item_id"] for r in picked] == ["a", "f"] and skipped == {"no_trace": 2}
     picked, skipped = select(raw, "done")
     assert [r["item_id"] for r in picked] == ["d", "j"] and skipped == {"no_trace": 1, "no_content": 2}
+    picked, skipped = select(raw, "all")  # both, in the source's order
+    assert [r["item_id"] for r in picked] == ["a", "d", "f", "j"] and skipped == {"no_trace": 3, "no_content": 2}
 
 
 def test_response_view_reads_text_completions():
@@ -475,7 +499,10 @@ def test_output_dirs_and_run_ids_stay_out_of_the_analysis(tmp_path, key):
     src = source_run(tmp_path, t)
     runs = tmp_path / "runs"
     for args, rel in ((("--select", "cut"), "forced-2/cut"), (("--select", "done"), "forced-2/done"),
-                      (("--template", "force-1"), "forced")):
+                      (("--select", "all"), "forced-2/all"), (("--template", "force-1"), "forced"),
+                      (("--select", "all", "--truncate-at", "30"), "forced-2/all-k30"),
+                      (("--select", "done", "--truncate-frac", "0.25"), "forced-2/done-f0.25"),
+                      (("--select", "cut", "--truncate-frac", "0"), "forced-2/cut-f0")):
         assert force(src, t, *args) == 0
         out = runs / rel / SOURCE
         assert manifest_of(out)["run_id"] == f"{rel}/{SOURCE}"
@@ -539,6 +566,7 @@ def test_the_key_is_never_written_anywhere(tmp_path, key):
     src = source_run(tmp_path, t)
     force(src, t)
     force(src, t, "--select", "done")
+    force(src, t, "--select", "all", "--truncate-at", "20")
     for p in tmp_path.rglob("*"):
         if p.is_file():
             data = gzip.decompress(p.read_bytes()) if p.suffix == ".gz" else p.read_bytes()
@@ -636,3 +664,212 @@ def test_a_qwen3_pass_lowers_max_tokens_per_call_to_fit_the_context(tmp_path, ke
     m = manifest_of(out)
     assert m["forced"]["max_tokens"] == 8000 and m["forced"]["logit_bias"] is None
     assert m["counts"]["max_tokens_lowered"] == 3 and m["counts"]["skipped_no_room"] == 0
+
+
+# --- budget forcing and early answering (--select all, --truncate-at, --truncate-frac) ---------------------------------
+# The source run's traces (Transport): items 0-2 stopped at the cap with traces of 47 tokens under the fake byte
+# tokenizer, item 3 stopped there without one, and items 4-5 finished with traces of 27 tokens and an answer.
+
+
+def trace_of_source(rec: dict) -> str:
+    return rec["response"]["choices"][0]["message"]["reasoning"]
+
+
+def test_select_all_forces_finished_and_cut_responses_alike(tmp_path, key):
+    t = Transport()
+    src = source_run(tmp_path, t)
+    source_raw = read_gz(src / "raw.jsonl.gz")
+    assert force(src, t, "--select", "all") == 0
+    out = tmp_path / "runs" / "forced-2" / "all" / SOURCE
+    raw = read_gz(out / "raw.jsonl.gz")
+    assert [r["item_id"] for r in raw] == [source_raw[i]["item_id"] for i in (0, 1, 2, 4, 5)]
+    assert [req["prompt"] for req in t.forced] == [forced_prompt(source_raw[i]["request"], trace_of_source(source_raw[i]))
+                                                   for i in (0, 1, 2, 4, 5)]  # whole traces: no budget
+    assert ["natural_response" in r for r in raw] == [False] * 3 + [True] * 2  # finished ones keep their natural answer
+    assert not any(k in r for r in raw for k in ("trace_tokens", "cut_tokens", "budget_k", "budget_frac"))
+    scored = read_gz(out / "scored.jsonl.gz")
+    assert [r.get("same_as_natural") for r in scored] == [None, None, None, True, False]
+    m = manifest_of(out)
+    assert m["run_id"] == f"forced-2/all/{SOURCE}" and "budget" not in m["forced"] and "tokenizer" not in m
+    assert m["counts"] == {"candidates": 5, "selected": 5, "units": 1, "samples": 1, "calls": 5, "skipped_no_trace": 1,
+                           "skipped_no_content": 0, "skipped_no_room": 0, "max_tokens_lowered": 0, "responses": 5,
+                           "answered": 4, "parsed": 4, "still_reasoning": 1, "renewed_reasoning": 1, "natural_ok": 2,
+                           "same_as_natural": 1}
+    assert not (out / "budget.jsonl.gz").exists()
+
+
+def test_budgets_parse_and_cut_at_k_or_at_a_fraction():
+    assert [b.label for b in parse_budgets("1024, 4096", frac=False)] == ["k1024", "k4096"]
+    assert [b.label for b in parse_budgets("0,0.10,.25,0.5,0.750", frac=True)] == ["f0", "f0.1", "f0.25", "f0.5", "f0.75"]
+    assert parse_budgets("-0.0", frac=True)[0].label == "f0"
+    for bad, frac in (("-1", False), ("1.5", False), ("x", False), ("8,8", False), ("1", True), ("-0.1", True), ("nan", True),
+                      ("inf", True), ("0.5,0.50", True)):
+        with pytest.raises(argparse.ArgumentTypeError):
+            parse_budgets(bad, frac)
+    k = Budget(k=30)
+    assert (k.keep(30), k.keep(31), k.keep(0)) == (None, 30, None)  # at most K tokens: within budget, not sent
+    assert Budget(frac=Decimal("0.29")).keep(100) == 29  # exact (in floats 0.29 x 100 = 28.999...)
+    assert (Budget(frac=Decimal(0)).keep(47), Budget(frac=Decimal("0.5")).keep(27), Budget(frac=Decimal("0.75")).keep(1)) == (0, 13, 0)
+    assert (k.to_json(), k.fields()) == ({"truncate_at": 30}, {"budget_k": 30})
+    assert (Budget(frac=Decimal("0.25")).to_json(), Budget(frac=Decimal("0.25")).fields()) == ({"truncate_frac": 0.25}, {"budget_frac": 0.25})
+
+
+def test_a_cut_is_the_traces_first_tokens_and_never_ends_inside_a_character():
+    tok = ByteTokenizer()
+    recs = [{"response": api_response("ANSWER: YES", reasoning=trace)} for trace in ("Item 0: let me check each case.", "café 🙂 ok")]
+    at, zero = cut_traces(recs, tok, [Budget(k=8), Budget(frac=Decimal(0))], keep_text=True)
+    assert at[0] == F.TraceCut(31, 8, "Item 0: ")
+    assert at[1] == F.TraceCut(13, 6, "café ")  # 8 bytes end inside the emoji: back to 6
+    assert zero == [F.TraceCut(31, 0, ""), F.TraceCut(13, 0, "")]  # F = 0: an empty trace
+    assert cut_traces(recs, tok, [Budget(k=8)], keep_text=False)[0][1] == F.TraceCut(13, 6, None)  # a dry run's counts only
+    assert cut_traces(recs, tok, [Budget(k=31)], keep_text=True)[0] == [F.TraceCut(31, None), F.TraceCut(13, None)]
+    held = tok.encode("ab" + "\ufffd" * 4)  # replacement characters the trace itself holds: the cut stays
+    assert T.prefix(tok, held, 14) == ("ab" + "\ufffd" * 4, 14)
+
+
+def test_truncate_at_sends_the_first_k_tokens_and_keeps_traces_within_budget(tmp_path, key):
+    t = Transport()
+    src = source_run(tmp_path, t)
+    source_raw = read_gz(src / "raw.jsonl.gz")
+    first = len(t.calls)
+    assert force(src, t, "--select", "all", "--truncate-at", "30") == 0
+    out = tmp_path / "runs" / "forced-2" / "all-k30" / SOURCE
+    assert t.calls[first:] == ["check", "check", "forced", "forced", "forced"]  # items 0-2; items 4-5 are within budget
+    for req, s in zip(t.forced, source_raw[:3]):
+        assert len(trace_of_source(s)) == 47 and req["prompt"] == forced_prompt(s["request"], trace_of_source(s)[:30])
+        assert (req["provider"], req["logit_bias"], req["max_tokens"]) == (DEEPINFRA_BF16, BAN, 4096)  # routing unchanged
+
+    fields = {"trace_tokens": 47, "cut_tokens": 30, "budget_k": 30, "provider_reasoning_tokens": 32768}
+    raw = read_gz(out / "raw.jsonl.gz")
+    assert len(raw) == 3 and all({k: r[k] for k in fields} == fields and "budget_frac" not in r for r in raw)
+    assert all(r["run_id"] == f"forced-2/all-k30/{SOURCE}" and r["forced_select"] == "all" for r in raw)
+    scored = read_gz(out / "scored.jsonl.gz")
+    assert all({k: r[k] for k in fields} == fields and r["run_id"] == f"forced-2/all-k30/{SOURCE}" for r in scored)
+    assert all(r["condition"] == "thinking-high-forced-k30" for r in scored)
+
+    budget = read_gz(out / "budget.jsonl.gz")  # every selected trace and its fate
+    assert [(b["item_id"], b["status"], b["source_finish_reason"], b["trace_tokens"], b["cut_tokens"]) for b in budget] == (
+        [(s["item_id"], "sent", "length", 47, 30) for s in source_raw[:3]]
+        + [(s["item_id"], "within_budget", "stop", 27, None) for s in source_raw[4:6]])
+    assert [b["source_cache_key"] for b in budget] == [source_raw[i]["cache_key"] for i in (0, 1, 2, 4, 5)]
+    assert [b["provider_reasoning_tokens"] for b in budget] == [32768] * 3 + [1000] * 2 and all(b["budget_k"] == 30 for b in budget)
+
+    m = manifest_of(out)
+    assert m["run_id"] == f"forced-2/all-k30/{SOURCE}" and m["condition"]["label"] == "thinking-high-forced-k30"
+    assert m["forced"] == {"template": "force-2", "endpoint": "https://openrouter.ai/api/v1/completions", "max_tokens": 4096,
+                           "select": "all", "logit_bias": BAN, "budget": {"truncate_at": 30},
+                           "tokenizer": {"name": "bytes", "revision": None, "sha256": "0" * 64}}
+    assert m["tokenizer"] == ByteTokenizer().info() and m["raw_check"]["passed"] is True
+    assert m["counts"] == {"candidates": 5, "selected": 5, "units": 1, "samples": 1, "within_budget": 2, "sent": 3, "calls": 3,
+                           "skipped_no_trace": 1, "skipped_no_content": 0, "skipped_no_room": 0, "max_tokens_lowered": 0,
+                           "responses": 3, "answered": 2, "parsed": 2, "still_reasoning": 1, "renewed_reasoning": 1,
+                           "natural_ok": 0, "same_as_natural": 0}
+    assert m["estimate"]["prompt_tokens"] == 3 * (900 + 30) and m["estimate"]["within_budget"] == 2  # the cut prompts
+    assert m["tokens"]["trace_tokens"] == 3 * 47 + 2 * 27
+    assert m["tokens"]["vs_reasoning_tokens"] == {"traces": 5, "trace_tokens": 195, "provider_tokens": 3 * 32768 + 2 * 1000,
+                                                  "ratio": round(195 / (3 * 32768 + 2000), 4)}
+    assert m["tokens"]["vs_completion_tokens_without_answer"]["traces"] == 3
+    report = (out / "REPORT.md").read_text()
+    assert "each trace cut to its first 30 tokens by the model's tokenizer (`bytes`)" in report
+    assert "2 of the selected traces were within budget and not sent" in report
+    rows = [r for r in ledger.rows(tmp_path / "LEDGER.md") if r["run_id"] == f"forced-2/all-k30/{SOURCE}"]
+    assert len(rows) == 1 and rows[0]["condition"] == "thinking-high-forced-k30" and rows[0]["items"] == "3"
+
+
+def test_truncate_frac_cuts_a_share_of_each_trace_and_zero_empties_it(tmp_path, key):
+    t = Transport()
+    src = source_run(tmp_path, t)
+    source_raw = read_gz(src / "raw.jsonl.gz")
+    assert force(src, t, "--select", "done", "--truncate-frac", "0") == 0
+    out = tmp_path / "runs" / "forced-2" / "done-f0" / SOURCE
+    assert [req["prompt"] for req in t.forced] == [forced_prompt(s["request"], "") for s in source_raw[4:6]]
+    assert t.forced[0]["prompt"].endswith("<|channel|>analysis<|message|><|end|><|start|>assistant<|channel|>final<|message|>")
+    raw = read_gz(out / "raw.jsonl.gz")
+    assert [(r["trace_tokens"], r["cut_tokens"], r["budget_frac"]) for r in raw] == [(27, 0, 0.0)] * 2
+    assert all(r["natural_max_tokens"] == 32768 and "natural_response" in r and "budget_k" not in r for r in raw)
+    scored = read_gz(out / "scored.jsonl.gz")
+    assert [(r["natural_category"], r["category"], r["same_as_natural"]) for r in scored] == [("ok", "ok", True)] * 2
+    m = manifest_of(out)
+    assert m["forced"]["budget"] == {"truncate_frac": 0.0} and m["condition"]["label"] == "thinking-high-forced-f0"
+    assert (m["counts"]["within_budget"], m["counts"]["sent"], m["counts"]["natural_ok"], m["counts"]["same_as_natural"]) == (0, 2, 2, 2)
+
+    sent = len(t.forced)
+    assert force(src, t, "--select", "done", "--truncate-frac", "0.5") == 0  # floor(0.5 x 27) = 13 tokens
+    raw = read_gz(tmp_path / "runs" / "forced-2" / "done-f0.5" / SOURCE / "raw.jsonl.gz")
+    assert [(r["cut_tokens"], r["budget_frac"]) for r in raw] == [(13, 0.5)] * 2 and len(t.forced) == sent + 2
+    assert [r["request"]["prompt"] for r in raw] == [forced_prompt(s["request"], trace_of_source(s)[:13]) for s in source_raw[4:6]]
+    scored = read_gz(tmp_path / "runs" / "forced-2" / "done-f0.5" / SOURCE / "scored.jsonl.gz")
+    assert [r["same_as_natural"] for r in scored] == [True, False]  # item 5's forced answer differs (Transport)
+
+
+def test_max_tokens_follows_the_cut_prompt_not_the_whole_trace(tmp_path, key):
+    rec = {"response": {"usage": {"prompt_tokens": 4121, "completion_tokens": 32768}}}
+    assert F.prompt_tokens_estimate(rec) == 4121 + 32768 and F.prompt_tokens_estimate(rec, 1024) == 4121 + 1024
+    assert call_max_tokens(rec, 4096, 40960) < 4096  # the whole trace leaves too little room
+    assert call_max_tokens(rec, 4096, 40960, cut_tokens=16384) == call_max_tokens(rec, 4096, 40960, cut_tokens=0) == 4096
+    assert call_max_tokens(rec, 8000, 40960, cut_tokens=30000) == 40960 - math.ceil(1.01 * 34121) - 64
+    t = Transport()
+    src = source_run(tmp_path, t, model="qwen/qwen3-32b")
+    assert force(src, t, "--max-tokens", "8000", "--truncate-at", "30") == 0
+    out = tmp_path / "runs" / "forced-2" / "cut-k30" / SOURCE
+    raw = read_gz(out / "raw.jsonl.gz")
+    assert len(raw) == 3 and all(r["request"]["max_tokens"] == 8000 for r in raw)  # 900 + 30 prompt tokens: room enough
+    assert manifest_of(out)["counts"]["max_tokens_lowered"] == 0  # the whole traces lower it to 6,891 (test above)
+
+
+def test_a_model_without_a_tokenizer_is_refused(tmp_path, key, monkeypatch):
+    for model in ("deepseek/deepseek-r1-0528", "qwen/qwen3-30b-a3b"):
+        with pytest.raises(T.UnknownTokenizer, match="no tokenizer"):
+            T.for_model(model)
+    # a model with a forcing route but no tokenizer: refused before any call, even with a tokenizer passed in
+    monkeypatch.setitem(FORCING_ROUTES, "qwen/qwen3-30b-a3b", F._source_pin("qwen/qwen3-30b-a3b"))
+    t = Transport()
+    src = source_run(tmp_path, t, model="qwen/qwen3-30b-a3b")
+    for extra in (("--truncate-at", "30"), ("--truncate-frac", "0.5", "--dry-run")):
+        with pytest.raises(SystemExit, match="qwen/qwen3-30b-a3b: no tokenizer"):
+            force(src, t, *extra)
+    assert not t.forced and not t.checks and not (src.parent / "forced-2").exists()
+    assert force(src, t) == 0 and len(t.forced) == 3  # a pass without a budget needs no tokenizer
+
+
+def test_budget_options_are_checked():
+    for argv in (["src", "--truncate-at", "1024,2048"],  # a live pass takes one value
+                 ["src", "--truncate-at", "1024", "--truncate-frac", "0.5"],  # one or the other
+                 ["src", "--template", "force-1", "--truncate-at", "1024"],  # force-2 only
+                 ["src", "--truncate-frac", "1"], ["src", "--truncate-at", "-1"]):
+        with pytest.raises(SystemExit):
+            F.parse_args(argv)
+    a = F.parse_args(["src", "--truncate-at", "1024,2048", "--dry-run"])
+    assert [b.label for b in a.budgets] == ["k1024", "k2048"] and F.parse_args(["src"]).budgets == []
+
+
+def test_a_budget_dry_run_estimates_each_value_and_sends_nothing(tmp_path, key, capsys, monkeypatch):
+    src = source_run(tmp_path, Transport())
+    capsys.readouterr()
+    monkeypatch.delenv("OPENROUTER_API_KEY")
+    assert force_main([str(src), "--dry-run", "--select", "all", "--truncate-at", "20,30,50"], client=client(NoCalls()),
+                      tokenizer=ByteTokenizer()) == 0
+    text = capsys.readouterr().out
+    assert "The 5 traces hold 195 tokens by it" in text and "Tokenizer: bytes" in text
+    # each call's prompt: the source's 900 prompt tokens plus its cut
+    assert "| k20 | 5 | 0 | 5 | 0 | 5 | 4,600 | 0.0001 | 0.0030 |" in text
+    assert "| k30 | 5 | 2 | 3 | 0 | 3 | 2,790 | 0.0001 | 0.0018 |" in text
+    assert "| k50 | 5 | 5 | 0 | 0 | 0 | 0 | 0.0000 | 0.0000 |" in text
+    assert force_main([str(src), "--dry-run", "--truncate-frac", "0,0.5"], client=client(NoCalls()), tokenizer=ByteTokenizer()) == 0
+    text = capsys.readouterr().out
+    assert "| f0 | 3 | 0 | 3 | 0 | 3 | 2,700 |" in text and "| f0.5 | 3 | 0 | 3 | 0 | 3 | 2,769 |" in text  # 3 x (900 + 23)
+    assert not (src.parent / "forced-2").exists()
+
+
+def test_a_budget_pass_resumes_only_with_its_own_budget_and_tokenizer(tmp_path, key):
+    t = Transport()
+    src = source_run(tmp_path, t)
+    out = tmp_path / "runs" / "forced-2" / "all-k30" / SOURCE
+    assert force(src, t, "--select", "all", "--truncate-at", "30", "--limit", "2") == 0 and len(t.forced) == 2
+    assert [b["status"] for b in read_gz(out / "budget.jsonl.gz")] == ["sent", "sent"]
+    assert force(src, t, "--select", "all", "--truncate-at", "30") == 0 and len(t.forced) == 3  # only the missing call
+    assert [b["status"] for b in read_gz(out / "budget.jsonl.gz")] == ["sent"] * 3 + ["within_budget"] * 2
+    checks = len(t.checks)
+    with pytest.raises(SystemExit, match="budget, tokenizer"):
+        force(src, t, "--select", "all", "--truncate-at", "30", tokenizer=ByteTokenizer(sha256="1" * 64))
+    assert len(t.forced) == 3 and len(t.checks) == checks  # refused before any call
