@@ -115,7 +115,7 @@ class Runner:
         rec = {"run_id": self.run_id, "item_id": it["item_id"], "content_hash": it["content_hash"],
                "presentation_hash": it["presentation_hash"], "vertical": it["vertical"], "eval_id": it["eval_id"],
                "sample": job["sample"], "cache_key": key, "prompt_hash": prompt_hash(body["messages"]),
-               "request": body, "requested_at": utc_now()}
+               "request": body, "requested_at": None, "completed_at": utc_now()}
         rec.update(kw)
         return rec
 
@@ -153,6 +153,7 @@ class Runner:
             try:
                 # failed attempts that the API charged are booked as they happen, and a retry is
                 # refused when it could take the spend past the cap
+                requested_at = utc_now()
                 res = self.client.chat(body, on_failed_attempt=self.guard.book_failed_attempt)
             except FatalAPIError as e:
                 if e.charged:
@@ -164,7 +165,8 @@ class Runner:
                     self.charged += e.charged
                 self._append(self._record(job, body, key, response=None, error=str(e), errors=[str(e)], attempts=1,
                                           status=None, latency_s=0.0, from_cache=False, cached_from=None,
-                                          charged_usd=e.charged, cost_usd=None, failed_attempt_costs=[e.charged]))
+                                          charged_usd=e.charged, cost_usd=None, failed_attempt_costs=[e.charged],
+                                          requested_at=requested_at))
                 return
             except MissingKeyError as e:
                 self.guard.release(worst)
@@ -192,7 +194,8 @@ class Runner:
             rec = self._record(job, body, key, response=res.response, error=res.error, errors=res.errors,
                                attempts=res.attempts, status=res.status, latency_s=round(res.latency_s, 2),
                                from_cache=False, cached_from=None, charged_usd=charged,
-                               cost_usd=(usage or {}).get("cost"), failed_attempt_costs=res.failed_attempt_costs)
+                               cost_usd=(usage or {}).get("cost"), failed_attempt_costs=res.failed_attempt_costs,
+                               requested_at=requested_at)
             if res.ok and self.cache is not None:
                 self.cache.put(key, {"request": body, "response": res.response, "sample": job["sample"],
                                      "source": f"{self.run_id}"})

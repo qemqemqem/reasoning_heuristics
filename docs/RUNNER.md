@@ -71,7 +71,7 @@ Decision record: [decisions/2026-11-17-direct-answer-arm.md](decisions/2026-11-1
 | File | Contents |
 |---|---|
 | `manifest.json` | run id; status and stop reason; start and finish times; model requested and `models_returned`; `system_fingerprints`; provider routing sent and `providers_served`; the full condition (reasoning, sampling, max_tokens, system prompt); prices; item files with SHA-256, item count, skipped items; the dry-run estimate; cap, budget and spend (`spend.spent_usd` is API-reported, including `failed_attempt_cost_usd`); the key's own usage counter before and after (`key_usage`, numbers only; other users of the key move it too, so its delta is an upper bound); git SHA, branch and dirty flag; Python, python-sat, PyETR, numpy, networkx, tokenizer-proxy and scorer versions; client settings |
-| `raw.jsonl.gz` | one record per (item, sample): `item_id`, `content_hash`, `presentation_hash`, `sample`, `cache_key`, `prompt_hash`, the exact `request` body, the full API `response` (content, reasoning, reasoning_details, usage, provider, model, id, finish reasons), `error` / `errors`, `attempts`, `latency_s`, `from_cache`, `failed_attempt_costs` (API-reported cost of each failed attempt, 0 if none), `charged_usd` (all attempts; 0 for a cache hit) and `cost_usd` (the returned response's) |
+| `raw.jsonl.gz` | one record per (item, sample): `item_id`, `content_hash`, `presentation_hash`, `sample`, `cache_key`, `prompt_hash`, the exact `request` body, the full API `response` (content, reasoning, reasoning_details, usage, provider, model, id, finish reasons), `error` / `errors`, `attempts`, `requested_at` and `completed_at` (UTC), `latency_s`, `from_cache`, `failed_attempt_costs` (API-reported cost of each failed attempt, 0 if none), `charged_usd` (all attempts; 0 for a cache hit) and `cost_usd` (the returned response's) |
 | `scored.jsonl.gz` | one scored record per raw record (below) |
 | `scoring.json` | scorer version, git SHA, scoring time, category counts |
 | `REPORT.md` | descriptive summary: categories and accuracy per eval, tokens per eval and kind, truncation by cell, parse flags, the responses that were not ok. No mixture fits and no claims about heuristics |
@@ -189,6 +189,27 @@ Estimate = items × (proxy prompt tokens × prompt price + assumed output tokens
 These are assumptions until a smoke run measures them. Each run's `REPORT.md` gives measured completion tokens per eval and kind, and the dev projections should be redone from those.
 
 **The cap.** Before a request is sent, it reserves its worst case: prompt bytes as a token upper bound plus the full max_tokens, at the configured price, times 1.25. The reservation is settled to the API-reported `usage.cost` when the call returns. A request whose reservation would take spend plus in-flight reservations past `--cap-usd` is not sent; the run stops cleanly with status `stopped`, keeps everything already returned, and scores it. A call that costs more than its reservation means the configured price is wrong, and it also stops the run. A failed attempt can still be charged (a 200 whose body carries an error after the provider generated): any `usage.cost` it reports is booked at once, and the call retries only while spend plus every reservation, its own included, stays within the cap.
+
+## Provider probes and pins (2026-11-17)
+
+Endpoint listings and 62 tiny calls ("What is 17 + 25?") over the SCOPE §1 models cost $0.0055: [data/runs/probes/2026-11-17/PROBES.md](../data/runs/probes/2026-11-17/PROBES.md). Every probed endpoint returned the reasoning text. The pins, and why each was chosen, are in `models.py`:
+
+| Model | Pinned endpoint | Precision | $/M in / out | Max completion | Thinking off |
+|---|---|---|---|---|---|
+| gpt-oss-20b | `dekallm/bf16` | bf16 | 0.029 / 0.14 | 117,964 | rejected on every endpoint (HTTP 400 "Reasoning is mandatory") |
+| gpt-oss-120b | `dekallm/bf16` | bf16 | 0.03 / 0.18 | 117,964 | rejected |
+| Qwen3-32B | `deepinfra/fp8/flex` | fp8 (no bf16 endpoint exists) | 0.064 / 0.224 | 36,864 | honoured: `enabled: false` and `effort: none` give 0 reasoning tokens; `/no_think` leaves an empty think block |
+| Qwen3-14B | `deepinfra/fp8/flex` | fp8 (or int4 elsewhere) | 0.096 / 0.192 | 36,864 | honoured |
+| Qwen3-30B-A3B | `deepinfra/fp8/flex` | fp8 (only provider) | 0.096 / 0.40 | 36,864 | honoured |
+| DeepSeek-R1-0528 | `siliconflow/fp8` | fp8 (its release precision) | 0.50 / 2.18 | 147,456 | rejected |
+| Qwen3-235B-A22B-thinking | `venice/fp8` | fp8 (only endpoint) | 0.45 / 3.50 | **16,384** | rejected; `/no_think` ignored |
+
+- **gpt-oss:** bf16 holds the released MXFP4 expert weights exactly. The endpoints not pinned were rejected for these reasons:
+  - DeepInfra bf16 was rate-limited upstream (HTTP 429 on all 6 attempts);
+  - AkashML fp4 reported 0 reasoning tokens alongside reasoning text;
+  - the fp8 endpoints are a lossy re-quantisation.
+- **Qwen3 hybrids are fp8-only on OpenRouter.** Phase 2 should use the official FP8 checkpoint or say how bf16 differs. DeepInfra's standard tier caps completions at 16,384 and Tenstorrent's context is 20,000, so the flex tier is pinned.
+- **Qwen3-235B-thinking cannot run the 32k condition on OpenRouter today.** The runner refuses a max_tokens above the pinned endpoint's completion limit.
 
 ## Before any pilot (SCOPE §1)
 
