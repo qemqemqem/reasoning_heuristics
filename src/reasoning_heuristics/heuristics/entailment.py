@@ -9,7 +9,8 @@ set (ties: first in canonical order; none: the "None of these" letter); OPEN -> 
 list of entailed literals, or "NOTHING".
 
 Mental models (MM-S1, MM-G) are the simplified form the B4/C4 doc specifies (initial
-models with the principle of truth, an implicit model for conditionals, Girotto fleshing);
+models with the principle of truth, an implicit model for conditionals, Girotto fleshing),
+conjoined premise by premise with the system-1 rules the doc points to (`conjoin_models`);
 the doc itself marks them as a provisional port, to be validated against mSentential.
 """
 
@@ -123,7 +124,13 @@ def entailed_literals(premises: list[F.Formula], atoms: list[str]) -> list[str]:
 
 
 def answer_from_premises(task: EntailmentTask, premises: list[F.Formula]) -> str | list[str]:
-    """EXACT on a (possibly rewritten) premise list, in the task's format."""
+    """Exact entailment from a member's (possibly rewritten) premise list, in the task's format.
+
+    If that list is inconsistent the answer is "X", B4/C4 §1.1's output for "the member's state
+    is contradictory" (e.g. FIRST: "X if P' inconsistent"). That is a heuristic answer, distinct
+    from the ground truth: it arises when a member's rewrite of consistent premises contradicts
+    itself. Members that reason exactly about premises as given use `exact_answer`, which, like
+    the ground truth, lets inconsistent premises entail everything."""
     all_atoms = F.atoms_of(list(premises) + ([task.probe] if task.probe is not None else []) + list(task.options))
     if not F.models(premises, all_atoms):
         return "X"
@@ -135,6 +142,25 @@ def answer_from_premises(task: EntailmentTask, premises: list[F.Formula]) -> str
         lits = entailed_literals(premises, F.atoms_of(task.premises))
         return lits or "NOTHING"
     raise ValueError(task.fmt)
+
+
+def vacuous_answer(task: EntailmentTask) -> str | list[str]:
+    """What inconsistent premises entail under the prompts' definition ("must be true whenever all
+    the statements are true"): everything. YN: YES; MC: every option, so the strongest is chosen as
+    usual; OPEN: every literal over the premises' atoms. Matches validate.truth."""
+    if task.fmt == "YN":
+        return "YES"
+    if task.fmt == "MC":
+        return mc_choose(task, lambda option: True)
+    if task.fmt == "OPEN":
+        return sorted(F.render_lit(a, pol) for a in F.atoms_of(task.premises) for pol in (True, False)) or "NOTHING"
+    raise ValueError(task.fmt)
+
+
+def exact_answer(task: EntailmentTask, premises: list[F.Formula]) -> str | list[str]:
+    """Exact entailment as the prompts and the ground truth define it (no "X")."""
+    atoms = F.atoms_of(list(premises) + ([task.probe] if task.probe is not None else []) + list(task.options))
+    return answer_from_premises(task, premises) if F.models(premises, atoms) else vacuous_answer(task)
 
 
 def answer_from_states(task: EntailmentTask, states: list, implicit: bool = False) -> str:
@@ -165,7 +191,7 @@ def exact(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
     trace = {}
     if task.probe is not None:
         trace["countermodels"] = len(F.countermodels(prem, task.probe))
-    return Prediction(answer_from_premises(task, prem), trace)
+    return Prediction(exact_answer(task, prem), trace)
 
 
 # --- B4 restriction ------------------------------------------------------------------------------
@@ -178,23 +204,35 @@ def first(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
 
 
 def _match(task: EntailmentTask, later_only: bool, polarity: bool) -> Prediction:
-    prem = list(effective_premises(task))
+    """SELECT-BY-MATCH (B4/C4 §1.1). A disjunction keeps the disjuncts that share a literal (an atom,
+    for MATCH-atom) with the categorical premise(s) it is matched against, when that keeps some but
+    not all of them. Matching reads the premises as stated: a disjunction rewritten to one
+    disjunct does not become a categorical premise for the others.
+
+    MATCH-L: the first categorical premise after the disjunction. MATCH-A ("any j != i",
+    order-invariant): every categorical premise, so the result cannot depend on premise order
+    (reading: with several categoricals, "the first such j" would)."""
+    stated = list(effective_premises(task))
+    prem = list(stated)
     rewrites = []
-    for i, p in enumerate(prem):
-        if p[0] != "or":
+    for i, p in enumerate(stated):
+        if p[0] != "or" or not all(is_categorical(d) for d in p[1]):
             continue
-        js = [j for j in range(len(prem)) if j != i and (j > i or not later_only) and is_categorical(prem[j])]
-        for j in js:
-            cat = cat_lits(prem[j])
-            if polarity:
-                share = [d for d in p[1] if set(cat_lits(d)) & set(cat)] if all(is_categorical(d) for d in p[1]) else []
-            else:
-                atoms_j = {a for a, _ in cat}
-                share = [d for d in p[1] if {a for a, _ in cat_lits(d)} & atoms_j] if all(is_categorical(d) for d in p[1]) else []
-            if 0 < len(share) < len(p[1]):
-                prem[i] = share[0] if len(share) == 1 else ("or", tuple(share))
-                rewrites.append({"premise": i + 1, "by": j + 1, "kept": F.render(prem[i])})
-            break  # only the first categorical j is consulted
+        cats = [j for j in range(len(stated)) if j != i and (j > i or not later_only) and is_categorical(stated[j])]
+        if later_only:
+            cats = cats[:1]
+        if not cats:
+            continue
+        lits = {l for j in cats for l in cat_lits(stated[j])}
+        if polarity:
+            share = [d for d in p[1] if set(cat_lits(d)) & lits]
+        else:
+            atoms = {a for a, _ in lits}
+            share = [d for d in p[1] if {a for a, _ in cat_lits(d)} & atoms]
+        if 0 < len(share) < len(p[1]):
+            prem[i] = share[0] if len(share) == 1 else ("or", tuple(share))
+            by = cats[0] + 1 if later_only else [j + 1 for j in cats]
+            rewrites.append({"premise": i + 1, "by": by, "kept": F.render(prem[i])})
     return Prediction(answer_from_premises(task, prem), {"rewrites": rewrites})
 
 
@@ -224,7 +262,7 @@ def bicond_pragmatic(task: EntailmentTask, params: dict[str, Any]) -> Prediction
     """B4/C4 E2's pragmatic variant: BICOND unless the item carries the anti-converse instruction
     (params["instruction"]), in which case the conditional is read as stated."""
     if params["instruction"]:
-        return Prediction(answer_from_premises(task, effective_premises(task)), {"reading": "as stated (instructed)"})
+        return Prediction(exact_answer(task, effective_premises(task)), {"reading": "as stated (instructed)"})
     pred = bicond(task, {})
     return Prediction(pred.answer, {"reading": "biconditional", **pred.trace_features})
 
@@ -298,9 +336,37 @@ def fully_explicit_if(p: F.Formula) -> list[State]:
     return out
 
 
+def _represented(models: list) -> set[str]:
+    return {a for m in models if m != IMPLICIT for a, _ in m}
+
+
+def conjoin_models(state: list, models: list) -> list:
+    """System-1 conjunction of two model sets (Johnson-Laird & Savary 1999; mSentential):
+    explicit x explicit = the union, or null if it is contradictory; an implicit model x an
+    explicit model m = null if an atom of m is represented in the set the implicit model belongs
+    to, otherwise m; implicit x implicit = implicit. Nulls are dropped."""
+    in_state, in_models = _represented(state), _represented(models)
+    out: list = []
+    for s in state:
+        for m in models:
+            if s == IMPLICIT and m == IMPLICIT:
+                r = IMPLICIT
+            elif s == IMPLICIT:
+                r = None if {a for a, _ in m} & in_state else m
+            elif m == IMPLICIT:
+                r = None if {a for a, _ in s} & in_models else s
+            else:
+                r = s | m if consistent(s | m) else None
+            if r is not None and r not in out:
+                out.append(r)
+    return out
+
+
 def mental_models(task: EntailmentTask, variant: str) -> tuple[list[State], bool, dict]:
-    """variant: 'open' (MM-S1 default), 'elim' (categoricals eliminate unmatched disjunction models),
-    'girotto' (MM-G: a categorical read before a conditional fleshes it out)."""
+    """The premises' initial models (`mm_initial`), conjoined in presentation order by
+    `conjoin_models`. Returns (the surviving explicit models, whether an implicit model survives,
+    trace). variant: 'open' (MM-S1 default), 'elim' (categoricals eliminate unmatched disjunction
+    models), 'girotto' (MM-G: a categorical read before a conditional fleshes it out)."""
     prem = effective_premises(task)
     per = [mm_initial(p) for p in prem]
     per = [(list(ms), imp) for ms, imp in per]
@@ -326,24 +392,14 @@ def mental_models(task: EntailmentTask, variant: str) -> tuple[list[State], bool
                 if any(l in m for m in survivors):
                     ms = [m for m in survivors if l in m]
             per[j] = (ms, per[j][1])
-    states: list[State] = [frozenset()]
-    implicit_alive = False
-    for j, (ms, imp) in enumerate(per):
-        nxt = []
-        for s in states:
-            for m in ms:
-                u = s | m
-                if consistent(u) and u not in nxt:
-                    nxt.append(u)
-        if imp:
-            # The implicit model survives a categorical context only if nothing in the other
-            # premises matches a literal of this conditional's explicit models.
-            explicit_lits = set().union(*ms)
-            others = [l for i, p in enumerate(prem) if i != j and is_categorical(p) for l in cat_lits(p)]
-            if not any(l in explicit_lits for l in others):
-                implicit_alive = True
-        states = nxt
-    return states, implicit_alive, {"models": describe(states), "implicit": implicit_alive}
+    combined: list | None = None
+    for ms, imp in per:
+        models = list(ms) + ([IMPLICIT] if imp else [])
+        combined = models if combined is None else conjoin_models(combined, models)
+    combined = combined or []
+    states = [m for m in combined if m != IMPLICIT]
+    implicit = IMPLICIT in combined
+    return states, implicit, {"models": describe(states), "implicit": implicit}
 
 
 @member("MM-S1", "B4", D, "lists only the possibilities in which the clauses are true (negative literals rare); conditionals get one explicit case plus 'other cases'")
@@ -604,7 +660,7 @@ def atmosphere(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
 @member("TT", "A3", D, "restates 'either ... or' in its textbook (inclusive) meaning; checks use textbook semantics")
 def textbook_transfer(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
     std = EntailmentTask(task.premises, task.probe, task.fmt, task.options, "standard")
-    return Prediction(answer_from_premises(std, list(task.premises)), {"reading": "standard"})
+    return Prediction(exact_answer(std, list(task.premises)), {"reading": "standard"})
 
 
 # --- H and nuisance ----------------------------------------------------------------------------------------
@@ -633,7 +689,7 @@ def noisy_exact(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
     p = params.get("p", 0.01)
     L = sum(len(F.literals(x)) for x in task.premises)
     eps = 0.5 * (1 - (1 - p) ** L)
-    g = answer_from_premises(task, effective_premises(task))
+    g = exact_answer(task, effective_premises(task))
     if task.fmt == "YN":
         other = "NO" if g == "YES" else "YES"
         return Prediction(None, {"L": L, "eps": round(eps, 4)}, {g: 1 - eps, other: eps})
@@ -646,7 +702,9 @@ def noisy_exact(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
 @member("PERCEPTION-NOISE", "nuisance", D, "a misquoted premise that predicts the error", deterministic=False)
 def perception_noise(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
     """Exact on a misread instance: at most one event, either a dropped premise (p_d each) or a
-    flipped literal occurrence (p_f each); probabilities renormalised over 0-1 events."""
+    flipped literal occurrence (p_f each); probabilities renormalised over 0-1 events. "Exact" is
+    the ground truth's reading, so a misreading that makes the premises inconsistent entails
+    everything (`exact_answer`)."""
     p_d, p_f = params.get("p_d", 0.02), params.get("p_f", 0.01)
     prem = list(effective_premises(task))
     events: list[tuple[float, list]] = []
@@ -660,9 +718,7 @@ def perception_noise(task: EntailmentTask, params: dict[str, Any]) -> Prediction
     total = sum(w for w, _ in events)
     dist: Counter = Counter()
     for w, ps in events:
-        dist[answer_from_premises(task, ps) if ps else ("NO" if task.fmt == "YN" else mc_letter(task, None))] += w / total
-    if "X" in dist:
-        dist["NO" if task.fmt == "YN" else mc_letter(task, None)] += dist.pop("X")
+        dist[exact_answer(task, ps) if ps else ("NO" if task.fmt == "YN" else mc_letter(task, None))] += w / total
     return Prediction(None, {"p_d": p_d, "p_f": p_f}, dict(dist))
 
 

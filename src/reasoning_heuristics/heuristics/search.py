@@ -6,14 +6,29 @@ picks values by a one-shot score (C0), propagates units inside (B1), and answers
 default (A1/A2) when it hits its budget. Here that is one parameterised member:
 
     SEARCH(b, order, value, default)
-      b        decision budget (None = unbounded, i.e. a complete solver)
+      b        node budget: decisions + flipped re-assignments (D/F §1.2); None = unbounded,
+               i.e. a complete solver
       order    variable / vertex order: SAT MENTION | INDEX | MOMS (dynamic);
-               colouring LIST | LABEL | DEGREE | DSATUR (dynamic)
-      value    SAT TRUE | FALSE | POLARITY; colouring SMALLEST
+               colouring LIST | LABEL | DEGREE | DSATUR (dynamic), or any static order
+               `resolve_order` knows
+      value    SAT TRUE | FALSE | POLARITY; colouring: smallest colour first
       default  answer when the budget runs out: UNSAT / IMPOSSIBLE (A1), SAT-FILL
-               (complete the current partial state with T; a SAT claim), DENSITY (A2 cue),
-               or FF-INFEAS (colouring: finish the current state by first-fit)
+               (complete the last conflict-free state A* by the value rule; a SAT claim),
+               DENSITY (A2 cue), or FF-INFEAS (colouring: finish A* by first-fit)
       up       unit propagation inside the search (SAT; default True)
+      pure     pure-literal elimination inside the search (SAT; default False)
+
+SAT is D/F §1.3 `DPLL-b(H, V, Δ, CHR)`: unit propagation to a fixpoint after every
+assignment; SAT as soon as every clause is satisfied; on a falsified clause, flip the
+latest unflipped decision; UNSAT only when no unflipped decision is left. Colouring is
+D/F §1.3 `DPLL-b` with forward checking (FC-BT): each vertex keeps a domain, a singleton
+domain assigns its vertex for free (the analogue of UP), an empty domain is a conflict,
+colours are tried lowest first, and every colour tried at a vertex is a node.
+
+Readings (docs/GENERATORS.md): the order only branches on variables that occur in a clause
+and vertices that have an edge, so declared-but-unused variables and isolated vertices are
+filled by the value rule once every constraint holds and never cost budget (A/H E2 level U
+predicts no change for D); on a fewest-colours task the colouring search is given k = χ.
 
 `DPLL-σ-b` (D) is SEARCH(b, σ, TRUE|SMALLEST, UNSAT|IMPOSSIBLE); with b = None and the
 same σ it coincides with FF-σ wherever first-fit succeeds (C §1.4).
@@ -34,7 +49,11 @@ from reasoning_heuristics.problems.sat.cnf import CNF
 
 
 class BudgetExhausted(Exception):
-    pass
+    """The node budget ran out. args = (A*, the last conflict-free state; the trace so far)."""
+
+
+def _new_trace() -> dict[str, Any]:
+    return {"nodes": 0, "decisions": 0, "flips": 0, "conflicts": 0, "propagations": 0, "decision_order": []}
 
 
 def _clause_state(c, values):
@@ -45,22 +64,48 @@ def _clause_state(c, values):
     return ("falsified", []) if not open_lits else ("open", open_lits)
 
 
+# --- SAT ------------------------------------------------------------------------------------------
+
+
+def _value_rule(cnf: CNF, value: str):
+    """V(v): the value tried first, and the value FILL gives an unassigned variable."""
+    pos, neg = Counter(), Counter()
+    for c in cnf.clauses:
+        for l in c:
+            (pos if l > 0 else neg)[abs(l)] += 1
+    if value == "TRUE":
+        return lambda v: True
+    if value == "FALSE":
+        return lambda v: False
+    if value == "POLARITY":
+        return lambda v: pos[v] >= neg[v]
+    raise ValueError(value)
+
+
+def fill_sat(cnf: CNF, values: dict[int, bool], value: str) -> dict[int, bool]:
+    """fill(A, V): complete a partial assignment by the value rule."""
+    rule = _value_rule(cnf, value)
+    return {v: values[v] if v in values else rule(v) for v in range(1, cnf.n + 1)}
+
+
 def search_sat(cnf: CNF, start: dict[int, bool], params: dict[str, Any]) -> tuple[dict[int, bool] | None, dict[str, Any]]:
-    """Chronological DPLL. Raises BudgetExhausted after b decisions."""
+    """D/F §1.3 DPLL-b with chronological backtracking.
+
+    Returns (a total assignment, trace), or (None, trace) after an exhaustive refutation.
+    Raises BudgetExhausted(A*, trace) when the nodes reach b first."""
     order = params.get("order", "MENTION")
     value = params.get("value", "TRUE")
     b = params.get("b")
     use_up = params.get("up", True)
     pure = params.get("pure", False)
-    trace = {"decisions": 0, "backtracks": 0, "propagations": 0, "decision_order": []}
-    mention = cnf.mention_order() + [v for v in range(1, cnf.n + 1) if v not in cnf.mention_order()]
-    index_order = sorted(range(1, cnf.n + 1), key=lambda v: label_key(cnf.var_names[v - 1]))
-    pos, neg = Counter(), Counter()
-    for c in cnf.clauses:
-        for l in c:
-            (pos if l > 0 else neg)[abs(l)] += 1
+    trace = _new_trace()
+    mention = cnf.mention_order()  # the variables that occur in some clause, by first mention
+    mention_pos = {v: i for i, v in enumerate(mention)}
+    index_order = sorted(mention, key=lambda v: label_key(cnf.var_names[v - 1]))
+    first_value = _value_rule(cnf, value)
 
-    def propagate(values):
+    def propagate(values: dict[int, bool]) -> tuple[dict[int, bool], bool]:
+        """UP to a fixpoint (D/F §1.2), then pure literals if asked. Returns (values, conflict)."""
         values = dict(values)
         changed = True
         while changed:
@@ -68,7 +113,7 @@ def search_sat(cnf: CNF, start: dict[int, bool], params: dict[str, Any]) -> tupl
             for c in cnf.clauses:
                 state, lits = _clause_state(c, values)
                 if state == "falsified":
-                    return None
+                    return values, True
                 if use_up and state == "open" and len(lits) == 1:
                     values[abs(lits[0])] = lits[0] > 0
                     trace["propagations"] += 1
@@ -84,54 +129,54 @@ def search_sat(cnf: CNF, start: dict[int, bool], params: dict[str, Any]) -> tupl
                     if len(s) == 1:
                         values[v] = next(iter(s))
                         changed = True
-        return values
+        return values, False
 
-    def pick(values):
-        free = [v for v in range(1, cnf.n + 1) if v not in values]
-        if not free:
-            return None
+    def pick(values: dict[int, bool]) -> int:
         if order == "MENTION":
             return next(v for v in mention if v not in values)
         if order == "INDEX":
             return next(v for v in index_order if v not in values)
         if order == "MOMS":
+            # most occurrences in the shortest open clauses; ties: OCC (occurrences in all open
+            # clauses), then MENTION (D/F §1.2)
             open_c = [lits for c in cnf.clauses for st, lits in [_clause_state(c, values)] if st == "open"]
-            if not open_c:
-                return next(v for v in mention if v not in values)
-            w = min(len(l) for l in open_c)
-            cnt = Counter(abs(l) for lits in open_c if len(lits) == w for l in lits)
-            return max(free, key=lambda v: (cnt[v], -mention.index(v)))
+            w = min(len(lits) for lits in open_c)
+            moms = Counter(abs(l) for lits in open_c if len(lits) == w for l in lits)
+            occ = Counter(abs(l) for lits in open_c for l in lits)
+            return max((v for v in mention if v not in values), key=lambda v: (moms[v], occ[v], -mention_pos[v]))
         raise ValueError(order)
 
-    def first_value(v):
-        if value == "TRUE":
-            return True
-        if value == "FALSE":
-            return False
-        if value == "POLARITY":
-            return pos[v] >= neg[v]
-        raise ValueError(value)
+    def all_satisfied(values: dict[int, bool]) -> bool:
+        return all(any(S.lit_value(l, values) is True for l in c) for c in cnf.clauses)
 
-    def rec(values):
-        values = propagate(values)
-        if values is None:
-            return None
-        v = pick(values)
-        if v is None:
-            return values
-        if b is not None and trace["decisions"] >= b:
-            raise BudgetExhausted(values)
-        trace["decisions"] += 1
-        trace["decision_order"].append(cnf.var_names[v - 1])
-        first = first_value(v)
-        for val in (first, not first):
-            res = rec({**values, v: val})
-            if res is not None:
-                return res
-            trace["backtracks"] += 1
-        return None
-
-    return rec(dict(start)), trace
+    A, conflict = propagate(dict(start))
+    best = dict(start) if conflict else A  # A*: the last conflict-free state
+    trail: list[tuple[int, bool, bool, dict[int, bool]]] = []  # (var, value, flipped, state before)
+    while True:
+        if not conflict and all_satisfied(A):
+            return fill_sat(cnf, A, value), trace
+        if b is not None and trace["nodes"] >= b:
+            raise BudgetExhausted(dict(best), trace)
+        if conflict:
+            trace["conflicts"] += 1
+            while trail and trail[-1][2]:
+                trail.pop()
+            if not trail:
+                return None, trace
+            var, val, _, before = trail.pop()
+            trail.append((var, not val, True, before))
+            A, conflict = propagate({**before, var: not val})
+            trace["flips"] += 1
+        else:
+            v = pick(A)
+            val = first_value(v)
+            trail.append((v, val, False, A))
+            A, conflict = propagate({**A, v: val})
+            trace["decisions"] += 1
+            trace["decision_order"].append(cnf.var_names[v - 1])
+        trace["nodes"] += 1
+        if not conflict:
+            best = A
 
 
 @member("SEARCH", "D", "sat", "branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the default after the budget")
@@ -143,14 +188,13 @@ def search_sat_member(task: SatTask, params: dict[str, Any]) -> Prediction:
     try:
         values, trace = search_sat(cnf, start, params)
     except BudgetExhausted as exc:
-        partial = exc.args[0]
+        partial, trace = exc.args
         default = params.get("default", "UNSAT")
-        trace = {"exhausted": True, "decisions": params.get("b")}
+        trace = {**trace, "exhausted": True}
         if default == "UNSAT":
             return Prediction("UNSAT", trace)
         if default == "SAT-FILL":
-            filled = {v: partial.get(v, True) for v in range(1, cnf.n + 1)}
-            return Prediction(S.to_assignment(cnf, filled), trace)
+            return Prediction(S.to_assignment(cnf, fill_sat(cnf, partial, params.get("value", "TRUE"))), trace)
         if default == "DENSITY":
             alpha = cue_values(task)["alpha_U"]
             return Prediction("UNSAT" if alpha >= params.get("theta", 4.26) else "SAT", trace)
@@ -158,59 +202,114 @@ def search_sat_member(task: SatTask, params: dict[str, Any]) -> Prediction:
     trace["exhausted"] = False
     if values is None:
         return Prediction("UNSAT", trace)
-    full = {v: values.get(v, True) for v in range(1, cnf.n + 1)}
-    return Prediction(S.to_assignment(cnf, full), trace)
+    return Prediction(S.to_assignment(cnf, values), trace)
+
+
+# --- colouring ------------------------------------------------------------------------------------
 
 
 def search_colouring(task: ColouringTask, k: int, params: dict[str, Any]) -> tuple[dict[str, int] | None, dict[str, Any]]:
+    """D/F §1.3 colouring DPLL-b: backtracking with forward checking (FC-BT).
+
+    Returns (a proper k-colouring, trace), or (None, trace) after an exhaustive refutation.
+    Raises BudgetExhausted(A*, trace) when the nodes reach b first."""
     g = effective_graph(task)
     order = params.get("order", "LIST")
     b = params.get("b")
-    trace = {"decisions": 0, "backtracks": 0, "decision_order": []}
-    static = None if order == "DSATUR" else resolve_order(task, g, {"order": order, "tie": params.get("tie", "LIST")})
+    trace = _new_trace()
+    constrained = [v for v in g.vertices if g.degree(v) > 0]
+    static = None
+    if order != "DSATUR":
+        static = [v for v in resolve_order(task, g, {"order": order, "tie": params.get("tie", "LIST")}) if g.degree(v) > 0]
     tie = (lambda v: g.position[v]) if params.get("tie", "LIST") == "LIST" else label_key
-    col = task.fixed_dict()
+    fixed = task.fixed_dict()
+    State = tuple[dict[str, int], dict[str, set[int]]]
 
-    def pick():
-        free = [v for v in g.vertices if v not in col]
-        if not free:
-            return None
+    def colour(col: dict[str, int], dom: dict[str, set[int]], v: str, c: int, queue: list[str]) -> None:
+        """Assign v = c and remove c from its uncoloured neighbours' domains (`dom` holds the
+        uncoloured vertices only); neighbours whose domain shrank are queued for checking."""
+        col[v] = c
+        del dom[v]
+        for u in g.adj[v]:
+            if u in dom and c in dom[u]:
+                dom[u].discard(c)
+                queue.append(u)
+
+    def propagate(col: dict[str, int], dom: dict[str, set[int]], queue: list[str]):
+        """Forward checking to a fixpoint: a singleton domain assigns its vertex, an empty domain is
+        a conflict. Only vertices whose domain shrank are re-checked; the fixpoint (and whether
+        a conflict is reached) does not depend on the order."""
+        while queue:
+            v = queue.pop()
+            if v not in dom:
+                continue
+            if not dom[v]:
+                return col, dom, True
+            if len(dom[v]) == 1:
+                (c,) = dom[v]
+                colour(col, dom, v, c, queue)
+                trace["propagations"] += 1
+        return col, dom, False
+
+    def assign(state: State, v: str, c: int):
+        col, dom = dict(state[0]), {x: set(d) for x, d in state[1].items()}
+        queue: list[str] = []
+        colour(col, dom, v, c, queue)
+        return propagate(col, dom, queue)
+
+    def pick(col: dict[str, int], dom: dict[str, set[int]]) -> str:
         if static is not None:
             return next(v for v in static if v not in col)
-        return min(free, key=lambda v: (-len({col[u] for u in g.adj[v] if u in col}), -sum(1 for u in g.adj[v] if u not in col), tie(v)))
+        free = [v for v in constrained if v not in col]
+        return min(free, key=lambda v: (len(dom[v]), -sum(1 for u in g.adj[v] if u not in col), tie(v)))
 
-    def rec() -> bool:
-        v = pick()
-        if v is None:
-            return True
-        used = {col[u] for u in g.adj[v] if u in col}
-        for c in range(1, k + 1):
-            if c in used:
-                continue
-            if b is not None and trace["decisions"] >= b:
-                raise BudgetExhausted(dict(col))
+    def fill(col: dict[str, int]) -> dict[str, int]:
+        return {v: col.get(v, 1) for v in g.vertices}  # only isolated vertices are left: smallest colour
+
+    col0 = dict(fixed)
+    dom0 = {v: set(range(1, k + 1)) - {fixed[u] for u in g.adj[v] if u in fixed} for v in g.vertices if v not in fixed}
+    if any(u in fixed and v in fixed and fixed[u] == fixed[v] for u, v in g.edges):
+        col, dom, conflict = col0, dom0, True
+    else:
+        col, dom, conflict = propagate(col0, dom0, list(reversed(g.vertices)))
+    best = dict(fixed) if conflict else col  # A*: the last conflict-free state
+    trail: list[tuple[str, list[int], State]] = []  # (vertex, colours still to try, state before)
+    while True:
+        if not conflict and all(v in col for v in constrained):
+            return fill(col), trace
+        if b is not None and trace["nodes"] >= b:
+            raise BudgetExhausted(dict(best), trace)
+        if conflict:
+            trace["conflicts"] += 1
+            while trail and not trail[-1][1]:
+                trail.pop()
+            if not trail:
+                return None, trace
+            v, rest, before = trail[-1]
+            col, dom, conflict = assign(before, v, rest.pop(0))
+            trace["flips"] += 1
+        else:
+            v = pick(col, dom)
+            colours = sorted(dom[v])
+            trail.append((v, colours[1:], (col, dom)))
+            col, dom, conflict = assign((col, dom), v, colours[0])
             trace["decisions"] += 1
             trace["decision_order"].append(v)
-            col[v] = c
-            if rec():
-                return True
-            del col[v]
-            trace["backtracks"] += 1
-        return False
-
-    return (dict(col) if rec() else None), trace
+        trace["nodes"] += 1
+        if not conflict:
+            best = col
 
 
-@member("SEARCH", "D", "coloring", "chronological backtracking in order σ, smallest colour first; IMPOSSIBLE only after exhaustive refutation, or the default after the budget")
+@member("SEARCH", "D", "coloring", "chronological backtracking with forward checking in order σ, smallest colour first; IMPOSSIBLE only after exhaustive refutation, or the default after the budget")
 def search_colouring_member(task: ColouringTask, params: dict[str, Any]) -> Prediction:
     g = effective_graph(task)
     k = task.k if task.k is not None else G.chromatic_number(g)
     try:
         col, trace = search_colouring(task, k, params)
     except BudgetExhausted as exc:
-        partial = exc.args[0]
+        partial, trace = exc.args
         default = params.get("default", "IMPOSSIBLE")
-        trace = {"exhausted": True, "decisions": params.get("b")}
+        trace = {**trace, "exhausted": True}
         if default == "IMPOSSIBLE":
             return Prediction("IMPOSSIBLE", trace)
         if default == "FF-INFEAS":
