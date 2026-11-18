@@ -350,7 +350,7 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
         write_json(out / "manifest.json", manifest)
         if guard.calls or runner.failures:
             ledger.append(Path(a.ledger), date=utc_now()[:10], run_id=run_id, model=cfg.slug, condition=cond.label,
-                          items=len({r["item_id"] for r in recs if r.get("response")}), cost_usd=runner.charged,
+                          items=len({r["item_id"] for r in recs if r.get("response")}) - len(done), cost_usd=runner.charged,
                           budget_tag=a.budget_tag or "-", notes=(a.notes + f" status={status}").strip())
     from reasoning_heuristics.evals.score import score_run
     score_run(out)
