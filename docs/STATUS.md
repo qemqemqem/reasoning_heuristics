@@ -13,9 +13,9 @@ The design work and the first stage of question generators are finished. No mode
   - theoretical priors for every heuristic family;
   - a paper outline with stand-in values;
   - a scope and budget plan for real results at about $95.
-- The Stage 1 generators produce 1,330 dev items across ten evals, and all of them pass automatic validation.
-- **A project review on 2026-11-17 found real defects** ([reviews/2026-11-17-project-review.md](reviews/2026-11-17-project-review.md)). Ground truth is right on every item. But several zoo members collapse into trivial ones, the per-item likelihood tables credit the exact solver with invalid answers, item identity has gaps, and B4/C4 E1 doesn't reproduce. Fixes are in progress, then every item set is regenerated.
-- **Don't mark the review page yet.** Its items will change after the fixes. The human pass comes after the regeneration and a rebuilt page.
+- The Stage 1 item sets were regenerated after the review fixes (#16): 266 smoke and 1,330 dev items across ten evals. All of them pass automatic validation, with no leakage and no hash collisions. CI checks that the committed sets reproduce.
+- **A project review on 2026-11-17 found real defects** ([reviews/2026-11-17-project-review.md](reviews/2026-11-17-project-review.md)). Ground truth was right on every item. But several zoo members collapsed into trivial ones, the per-item likelihood tables credited the exact solver with invalid answers, item identity had gaps, and B4/C4 E1 didn't reproduce. The fixes have merged (#7, #12, #13, #14), and every item set was regenerated with them (#16). What is still open is listed in the review, under [Open after the fixes](reviews/2026-11-17-project-review.md#open-after-the-fixes).
+- **Don't mark the review page yet.** It still shows the pre-fix items, so it is stale until it is rebuilt from the regenerated sets. It also needs a home other than claude.ai.
 - The runner and scorer are built (#8). The identification engine and recovery harness are in progress. Smoke runs on OpenRouter have started, within the $40 budget set on 2026-11-17.
 
 ## Where each part stands
@@ -30,15 +30,15 @@ The design work and the first stage of question generators are finished. No mode
 | Theoretical priors | Done. Three lenses (what transformers can compute, what RASP-L simplicity predicts they learn, what LLMs already do), with a verdict per family in direct and thinking mode. Corrected on 2026-11-17 after a reproducibility audit, before any model output was analysed (no verdict changed; see the corrections log). **Frozen at git tag `priors-frozen-2026-11-17`** | [theory/README.md](theory/README.md) |
 | Paper outline | Stand-in values, with theory priors filled in. Priors frozen (tag `priors-frozen-2026-11-17`) | [PAPER_SKELETON.md](PAPER_SKELETON.md) |
 | Scope and budget | About $15–20 for preliminary results and about $95 for real results (gpt-oss-20b and 120b) | [SCOPE.md](SCOPE.md) |
-| Shared engineering: item schema, domain library, heuristic zoo code, counterfactual tooling, validators | Built and tested. The 2026-11-17 review found defects in the zoo, the validators and the likelihood tables; fixes in progress on `fix-zoo`, `fix-validators`, `fix-generators`. CI runs the tests on every PR (#3) | `src/reasoning_heuristics/`, [GENERATORS.md](GENERATORS.md), [review](reviews/2026-11-17-project-review.md) |
-| Stage 1 generators | Built: A/H E1, E2, E5, E8; C E1, E2, E3, E5; B4/C4 E1, E2. Output is 266 smoke and 1,330 dev items, all passing validation, with no dev-to-test leakage. A few lower-priority cells aren't built (listed in GENERATORS.md) | `src/reasoning_heuristics/generators/`, `data/items/` |
-| Manual review of items | Page is live, no marks yet. **Wait:** the items change after the fixes, so the page needs a rebuild first (and a home other than claude.ai) | [Review page](https://claude.ai/artifact/AEidKBQZisLzHB8BudFtb1), `scripts/review_page/` |
+| Shared engineering: item schema, domain library, heuristic zoo code, counterfactual tooling, validators | Built and tested. The 2026-11-17 review found defects in the zoo, the validators and the likelihood tables, fixed in #12 (validators), #13 (generators and tables) and #14 (zoo). CI runs the tests on every PR (#3) | `src/reasoning_heuristics/`, [GENERATORS.md](GENERATORS.md), [review](reviews/2026-11-17-project-review.md) |
+| Stage 1 generators | Built: A/H E1, E2, E5, E8; C E1, E2, E3, E5; B4/C4 E1, E2. **Regenerated after the review fixes (#16):** 266 smoke and 1,330 dev items (3.3 MB of `.jsonl.gz`), all passing validation, every designed cell filled, no dev-to-test leakage, no hash collisions. The sets reproduce byte for byte (checked under four hash seeds), and CI's `reproduce-items` job checks that on every PR. A few lower-priority cells aren't built (listed in GENERATORS.md) | `src/reasoning_heuristics/generators/`, `data/items/`, [review/summary.md](../review/summary.md) |
+| Manual review of items | Page is live, no marks yet. **Stale:** it shows the pre-fix items. Rebuild it from the regenerated sets, and give it a home other than claude.ai, before marking | [Review page](https://claude.ai/artifact/AEidKBQZisLzHB8BudFtb1), `scripts/review_page/` |
 | Runner (OpenRouter client, cache, cost guard, manifests) and scorer | Built and tested with the HTTP layer mocked: thin custom runner, thinking and direct conditions, one versioned scorer. No batch endpoint yet; E8 continuations not built | [RUNNER.md](RUNNER.md), `src/reasoning_heuristics/evals/` |
 | Identification engine (mixture fit with a slip model) | In progress (branch `identify`) | SCOPE §4 item 4 |
 | Recovery harness (fake models with planted mixtures) | In progress (branch `identify`). The C and cross-formalism designs ran their own recovery simulations | SCOPE §4 item 5, `scripts/cross_formalism/recovery_sim.py` |
 | Trace pipeline (codebook, parsers, LLM coder, faithfulness probes) | Not started. The E8 specs for faithfulness probes exist | SCOPE §4 item 6 |
 | Stage 2 generators (B1/G, D/F, E, cross-formalism) | Not started. The cross-formalism vertical has a working library builder | SCOPE §5, `scripts/cross_formalism/` |
-| Model runs | Provider probes and smoke runs in progress on the pre-fix items (gpt-oss-20b thinking; Qwen3-32B thinking and direct), at most $3. Dev runs wait for the regenerated items. Budget: up to $40 on 2026-11-17 | `data/runs/`, `data/runs/LEDGER.md` |
+| Model runs | Provider probes and smoke runs in progress on the pre-fix items (gpt-oss-20b thinking; Qwen3-32B thinking and direct), at most $3. Dev runs wait for the regenerated items, which land with #16. Budget: up to $40 on 2026-11-17 | `data/runs/`, `data/runs/LEDGER.md` |
 | Phase 2 (mechanistic interpretability) | Gated on behavioural evidence | SCOPE §8 |
 
 ## What we've learned so far, before any data
@@ -64,7 +64,7 @@ The design work and the first stage of question generators are finished. No mode
 
 ## Next steps
 
-1. **Land the review fixes** (zoo, validators, generators and likelihood tables), then regenerate every item set and add a CI check that the committed sets reproduce.
+1. ~~Land the review fixes, then regenerate every item set and add a CI check that the committed sets reproduce.~~ Done: the fixes in #7, #12, #13 and #14; the regeneration and the CI check in #16.
 2. **Review the items.** Rebuild the review page from the regenerated items, then mark the 50 items keep, fix or drop. The marks become generator changes, not edits to single items.
 3. ~~Build the runner.~~ Done (#8): a thin custom OpenRouter runner, as SCOPE §4 specifies, with thinking and direct conditions and one versioned scorer.
 4. **Build the identification engine and recovery harness** (in progress). Pass the recovery gates on fake models (free): |bias| ≤ 0.05, 95% coverage ≥ 0.9, median interval width ≤ 0.2.
