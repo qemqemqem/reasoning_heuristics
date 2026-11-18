@@ -16,7 +16,7 @@ Edit kinds per domain:
 from __future__ import annotations
 
 import itertools
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any, Callable, Iterator
 
 from reasoning_heuristics.heuristics.answers import answer_key
@@ -48,10 +48,12 @@ def colouring_edits(task: ColouringTask, kinds=("add_edge", "delete_edge")) -> I
 
 
 def sat_edits(task: SatTask, kinds=("flip_sign", "replace_var", "delete_clause")) -> Iterator[tuple[Edit, SatTask]]:
+    """Every field of the task carries over; clauses marked for the inverted rule (A/H E5 P) keep
+    their marks, renumbered when a clause is deleted or two clauses swap."""
     cnf = task.cnf
 
-    def with_clauses(cl):
-        return SatTask(cnf.with_clauses(cl), task.fixed, task.answer_order, task.declared, task.inverted)
+    def with_clauses(cl, marks=task.inverted_clauses):
+        return replace(task, cnf=cnf.with_clauses(cl), inverted_clauses=tuple(sorted(marks)))
 
     for i, c in enumerate(cnf.clauses):
         for j, lit in enumerate(c):
@@ -68,12 +70,14 @@ def sat_edits(task: SatTask, kinds=("flip_sign", "replace_var", "delete_clause")
                     yield Edit("replace_var", (i, j, v), f"replace {cnf.name(lit)} by {cnf.var_names[v - 1]} in C{i + 1}"), with_clauses(new)
         if "delete_clause" in kinds:
             new = list(cnf.clauses[:i]) + list(cnf.clauses[i + 1:])
-            yield Edit("delete_clause", (i,), f"delete C{i + 1}"), with_clauses(new)
+            marks = [x - (x > i) for x in task.inverted_clauses if x != i]
+            yield Edit("delete_clause", (i,), f"delete C{i + 1}"), with_clauses(new, marks)
     if "swap_clauses" in kinds:
         for i in range(cnf.m - 1):
             new = list(cnf.clauses)
             new[i], new[i + 1] = new[i + 1], new[i]
-            yield Edit("swap_clauses", (i, i + 1), f"swap C{i + 1} and C{i + 2}"), with_clauses(new)
+            marks = [{i: i + 1, i + 1: i}.get(x, x) for x in task.inverted_clauses]
+            yield Edit("swap_clauses", (i, i + 1), f"swap C{i + 1} and C{i + 2}"), with_clauses(new, marks)
 
 
 def knapsack_edits(task: KnapsackTask, deltas=range(1, 7)) -> Iterator[tuple[Edit, KnapsackTask]]:
