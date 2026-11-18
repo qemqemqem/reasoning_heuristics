@@ -2,6 +2,7 @@
 everything is re-scored from raw outputs).
 
     python -m reasoning_heuristics.evals.score data/runs/<run_id> [data/runs/<other> ...]
+    python -m reasoning_heuristics.evals.score data/runs/forced/<source_run_id>    (a forced-answer pass)
 
 Reads manifest.json (which item files, with their SHA-256) and raw.jsonl.gz; writes
 scored.jsonl.gz, scoring.json (scorer version, git SHA, counts) and REPORT.md. The item files
@@ -93,6 +94,8 @@ def score_raw(manifest: dict[str, Any], raw: list[dict[str, Any]], items: dict[s
                     "condition": manifest["condition"]["label"], "sample": r.get("sample", 0),
                     "from_cache": bool(r.get("from_cache")), "scorer_git_sha": git.get("sha"),
                     "scorer_git_dirty": git.get("dirty")})
+        if r.get("forced_template"):  # a forced final answer (force.py): a stratum of its own, never the source's
+            rec.update({"forced": True, "forced_template": r["forced_template"], "source_run_id": r["source_run_id"]})
         out.append(rec)
     return out
 

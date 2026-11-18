@@ -24,12 +24,12 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from reasoning_heuristics.evals import cost as C
 from reasoning_heuristics.evals import ledger
 from reasoning_heuristics.evals.cache import ResponseCache, cache_key, prompt_hash
-from reasoning_heuristics.evals.client import KEY_ENV, FatalAPIError, MissingKeyError, OpenRouterClient
+from reasoning_heuristics.evals.client import KEY_ENV, CallResult, FatalAPIError, MissingKeyError, OpenRouterClient
 from reasoning_heuristics.evals.manifest import (REPO, file_hashes, git_info, item_files, load_items, utc_now, versions,
                                                  write_json)
 from reasoning_heuristics.evals.models import Condition, ModelConfig, Pricing, condition, get_model, request_body
@@ -88,11 +88,14 @@ def write_raw(out: Path, recs: list[dict[str, Any]], order: dict[str, int]) -> N
 
 
 class Runner:
-    """Sends the requests with bounded concurrency under a CostGuard, caching every completed response."""
+    """Sends the requests with bounded concurrency under a CostGuard, caching every completed response.
+    `send` posts one body (default `client.chat`; the forced-answer pass sends with `client.complete`)."""
 
     def __init__(self, client: OpenRouterClient, cache: ResponseCache | None, guard: C.CostGuard, out: Path,
-                 run_id: str, concurrency: int = 8, progress_every: int = 10):
+                 run_id: str, concurrency: int = 8, progress_every: int = 10,
+                 send: Callable[..., CallResult] | None = None):
         self.client, self.cache, self.guard, self.out, self.run_id = client, cache, guard, out, run_id
+        self.send = send or client.chat
         self.concurrency = concurrency
         self.progress_every = progress_every
         self._write_lock = threading.Lock()
@@ -112,9 +115,13 @@ class Runner:
 
     def _record(self, job: dict[str, Any], body: dict[str, Any], key: str, **kw: Any) -> dict[str, Any]:
         it = job["item"]
+        if "messages" in body:
+            phash = prompt_hash(body["messages"])
+        else:  # a raw text-completions prompt (force.py)
+            phash = hashlib.sha256(body["prompt"].encode("utf-8")).hexdigest()[:16]
         rec = {"run_id": self.run_id, "item_id": it["item_id"], "content_hash": it["content_hash"],
                "presentation_hash": it["presentation_hash"], "vertical": it["vertical"], "eval_id": it["eval_id"],
-               "sample": job["sample"], "cache_key": key, "prompt_hash": prompt_hash(body["messages"]),
+               "sample": job["sample"], "cache_key": key, "prompt_hash": phash,
                "request": body, "requested_at": None, "completed_at": utc_now()}
         rec.update(kw)
         return rec
@@ -135,7 +142,7 @@ class Runner:
                                               cost_usd=(cached["response"].get("usage") or {}).get("cost"),
                                               failed_attempt_costs=[]))
                     continue
-                worst = self.guard.worst_case(json.dumps(body))
+                worst = self.worst_case(job)
                 slots.acquire()
                 if self.stop_reason:
                     slots.release()
@@ -147,6 +154,10 @@ class Runner:
                     break
                 pool.submit(self._call, job, worst, slots)
 
+    def worst_case(self, job: dict[str, Any]) -> float:
+        """A job's reservation: the body's bytes as a prompt-token upper bound, plus max_tokens."""
+        return self.guard.worst_case(json.dumps(job["body"]))
+
     def _call(self, job: dict[str, Any], worst: float, slots: threading.BoundedSemaphore) -> None:
         body, key = job["body"], job["key"]
         try:
@@ -154,7 +165,7 @@ class Runner:
                 # failed attempts that the API charged are booked as they happen, and a retry is
                 # refused when it could take the spend past the cap
                 requested_at = utc_now()
-                res = self.client.chat(body, on_failed_attempt=self.guard.book_failed_attempt)
+                res = self.send(body, on_failed_attempt=self.guard.book_failed_attempt)
             except FatalAPIError as e:
                 if e.charged:
                     self.guard.book_failed_attempt(e.charged)

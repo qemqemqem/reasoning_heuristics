@@ -1,4 +1,5 @@
-"""OpenRouter chat-completions client: retries with backoff, long timeouts, full response capture.
+"""OpenRouter chat-completions client (and raw text completions): retries with backoff, long timeouts,
+full response capture.
 
 Fields follow OpenRouter's public API reference (openrouter.ai/docs, read 2026-11-17):
 
@@ -10,7 +11,11 @@ Fields follow OpenRouter's public API reference (openrouter.ai/docs, read 2026-1
   reasoning_details, refusal}`, `choices[0].finish_reason` (normalised: stop / length /
   content_filter / tool_calls / error) and `native_finish_reason`, and `usage` with
   `prompt_tokens`, `completion_tokens`, `completion_tokens_details.reasoning_tokens` and `cost`
-  (always returned; the old `usage: {include: true}` flag is deprecated and has no effect).
+  (always returned; the old `usage: {include: true}` flag is deprecated and has no effect);
+- raw text completions (`POST /completions`, used by the forced-answer pass, evals/force.py): the
+  request carries `prompt` (the chat template written by the caller) instead of `messages`, and the
+  choice carries `text` instead of `message`. For gpt-oss the provider parses the harmony output:
+  `text` is the final channel and `reasoning` any analysis the model wrote (probes, 2026-11-18).
 
 The whole response JSON is kept; nothing is dropped. The API key is read from the environment
 (`OPENROUTER_API_KEY`) inside each request and never stored, returned, logged or written.
@@ -148,6 +153,15 @@ class OpenRouterClient:
         `failed_attempt_costs` and passed to `on_failed_attempt`, which books it and returns whether
         another attempt is allowed (the cost guard says no when a retry could pass the cap).
         """
+        return self._post("/chat/completions", body, on_failed_attempt)
+
+    def complete(self, body: dict[str, Any], on_failed_attempt: Callable[[float], bool] | None = None) -> CallResult:
+        """POST /completions (raw text completions: `prompt`, not `messages`) with exactly `chat`'s
+        retries and cost booking."""
+        return self._post("/completions", body, on_failed_attempt)
+
+    def _post(self, path: str, body: dict[str, Any], on_failed_attempt: Callable[[float], bool] | None) -> CallResult:
+        """The retry loop behind `chat` and `complete`."""
         payload = json.dumps(body).encode("utf-8")
         errors: list[str] = []
         failed_costs: list[float] = []
@@ -157,7 +171,7 @@ class OpenRouterClient:
             retry_after = None
             charged = 0.0
             try:
-                resp = self.transport("POST", f"{API_BASE}/chat/completions", self._headers(), payload, self.timeout_s)
+                resp = self.transport("POST", f"{API_BASE}{path}", self._headers(), payload, self.timeout_s)
             except (urllib.error.URLError, http.client.HTTPException, TimeoutError, ConnectionError, OSError) as e:
                 # HTTPException covers a body cut short (IncompleteRead) and a dropped connection
                 errors.append(f"attempt {attempt}: network {type(e).__name__}: {str(e)[:200]}")
