@@ -534,8 +534,8 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
             bits.append(f"{g} ({', '.join(why)}; bias {r['max_abs_bias']:.2f} on {r['worst_bias_quantity']})")
         out.append(f"- **{u['unit']}**: " + "; ".join(bits))
     out.append("\n**Linear dependencies** (`engine.identifiability`: rank of the (item, outcome) × (groups + q) "
-               "matrix; witness channels on sampled outcomes). Pivots are not identified; the other weights "
-               "are reported as the identified combinations shown:\n")
+               "matrix; witness channels on sampled outcomes). Every member of a dependency is identified only in "
+               "combination; the fits report the identified combinations shown (one basis of them):\n")
     for u in units:
         d = (u.get("identifiability") or {}).get("near-miss")
         if not d or not d["deficiency"]:
