@@ -9,7 +9,8 @@ Outputs:
   committed form) and .report.json; test batches go to the gitignored data/items/test/ and
   are used only for the dev-vs-test leakage check;
 - review/<V>_<E>.md: ~5 representative dev items (prompt, truth, member predictions, hypotheses);
-- review/summary.md: items per eval and tier, cell coverage, validator pass rates, failures, leakage.
+- review/summary.md: items per eval and tier, cell coverage, validator pass rates, failures, leakage,
+  the known lineage gaps, and 16-hex hash collisions across every set built.
 """
 
 from __future__ import annotations
@@ -24,7 +25,7 @@ from reasoning_heuristics import tokens
 from reasoning_heuristics.generate import ROOT, generate_and_validate, output_path
 from reasoning_heuristics.generators import REGISTRY, load
 from reasoning_heuristics.schema.item import Item, compress, read_jsonl
-from reasoning_heuristics.validate.checks import check_leakage
+from reasoning_heuristics.validate.checks import LINEAGE_RULES, Failure, check_hash_collisions, check_leakage
 
 ITEMS = ROOT / "data" / "items"
 REVIEW = ROOT / "review"
@@ -137,8 +138,10 @@ def coverage(items: list[Item], designed: list[str]) -> dict[str, Any]:
             "undesigned_cells": extra, "min_per_cell": min(per) if per else 0, "max_per_cell": max(per) if per else 0}
 
 
-def build(only: list[tuple[str, str]] | None, seed: int, reuse: bool, dev_per_cell: int | None) -> list[dict[str, Any]]:
-    rows = []
+def build(only: list[tuple[str, str]] | None, seed: int, reuse: bool,
+          dev_per_cell: int | None) -> tuple[list[dict[str, Any]], list[Failure]]:
+    """Rows for the summary, and the hash collisions across every set built (all evals and tiers)."""
+    rows, everything = [], []
     for (vertical, eval_id) in REGISTRY:
         if only and (vertical, eval_id) not in only:
             continue
@@ -149,14 +152,21 @@ def build(only: list[tuple[str, str]] | None, seed: int, reuse: bool, dev_per_ce
             rpath = path.with_suffix(".report.json")
             if reuse and rpath.exists():
                 reports[tier] = json.loads(rpath.read_text())
+                # the committed form is the .jsonl.gz (the .jsonl is gitignored); test batches stay uncompressed
+                reports[tier]["items_list"] = read_jsonl(path if tier == "test" else path.with_name(path.name + ".gz"))
             else:
                 print(f"generating {vertical} {eval_id} {tier} ...", flush=True)
                 reports[tier] = generate_and_validate(mod.VERTICAL, mod.EVAL_ID, tier, seed, per, {}, ITEMS,
                                                       validate=(tier != "test"))
-            reports[tier]["items_list"] = read_jsonl(path)
-            if tier != "test":
-                compress(path)
+                # timings go to stdout only: the committed reports and summary must regenerate byte for byte
+                print("  seconds (wall / CPU): " + ", ".join(
+                    f"{k} {reports[tier]['seconds'][k]} / {reports[tier]['seconds'][k + '_cpu']}"
+                    for k in ("generation", "validation") if k in reports[tier]["seconds"]), flush=True)
+                reports[tier]["items_list"] = read_jsonl(path)
+                if tier != "test":
+                    compress(path)
         smoke, dev, test = (reports[t]["items_list"] for t in ("smoke", "dev", "test"))
+        everything += smoke + dev + test
         leak = check_leakage(dev + smoke + test, lexicon_partitioned=mod.LEXICON_PARTITIONED)
         overlap = {it.base_hash for it in smoke} & {it.base_hash for it in dev}
         write_packet(mod, dev, reports["dev"])
@@ -166,7 +176,6 @@ def build(only: list[tuple[str, str]] | None, seed: int, reuse: bool, dev_per_ce
             "tiers": {t: {"items": len(reports[t]["items_list"]),
                           "bases": reports[t]["generation"]["accepted"],
                           "attempts": reports[t]["generation"]["attempts"],
-                          "seconds": reports[t].get("generation_seconds"),
                           "coverage": coverage(reports[t]["items_list"], designed),
                           "validation": {k: v for k, v in reports[t].get("validation", {}).items()}}
                       for t in ("smoke", "dev")},
@@ -174,10 +183,10 @@ def build(only: list[tuple[str, str]] | None, seed: int, reuse: bool, dev_per_ce
             "smoke_dev_shared_bases": len(overlap),
             "test_items_checked": len(test),
         })
-    return rows
+    return rows, check_hash_collisions(everything)
 
 
-def write_summary(rows: list[dict[str, Any]], seed: int) -> Path:
+def write_summary(rows: list[dict[str, Any]], seed: int, collisions: list[Failure] = ()) -> Path:
     lines = [
         "# Stage 1 item sets: summary",
         "",
@@ -186,8 +195,8 @@ def write_summary(rows: list[dict[str, Any]], seed: int) -> Path:
         "(smoke [0, 1e5), dev [1e5, 1e6), test [1e6, 2e6)). A one-item-per-cell test batch is generated",
         "only to check dev-vs-test leakage; it is not committed.",
         "",
-        "| Eval | Smoke items | Dev items | Dev bases (attempts) | Cells covered (dev) | Items per cell (dev) | Smoke pass | Dev pass | Leakage | Dev gen. time |",
-        "|---|---|---|---|---|---|---|---|---|---|",
+        "| Eval | Smoke items | Dev items | Dev bases (attempts) | Cells covered (dev) | Items per cell (dev) | Smoke pass | Dev pass | Leakage |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
     failures = []
     for r in rows:
@@ -197,7 +206,7 @@ def write_summary(rows: list[dict[str, Any]], seed: int) -> Path:
         lines.append(
             f"| {r['vertical']} {r['eval_id']} | {s['items']} | {d['items']} | {d['bases']} ({d['attempts']}) | "
             f"{cov['covered']}/{cov['designed_cells']} | {cov['min_per_cell']}–{cov['max_per_cell']} | "
-            f"{s['validation'].get('pass_rate', 0):.0%} | {d['validation'].get('pass_rate', 0):.0%} | {leak} | {d['seconds']} s |")
+            f"{s['validation'].get('pass_rate', 0):.0%} | {d['validation'].get('pass_rate', 0):.0%} | {leak} |")
         for t in ("smoke", "dev"):
             for f in r["tiers"][t]["validation"].get("failures", []):
                 failures.append(f"| {r['vertical']} {r['eval_id']} | {t} | `{f['item_id']}` | {f['check']} | {_short(f['message'], 120)} |")
@@ -216,13 +225,35 @@ def write_summary(rows: list[dict[str, Any]], seed: int) -> Path:
     if failures:
         lines += ["| Eval | Tier | Item | Check | Message |", "|---|---|---|---|---|"] + failures
     else:
-        lines.append("None. Every smoke and dev item passed every validator, and no dev base leaks into the test batch.")
+        lines.append("None. Every smoke and dev item passed every validator, and no dev instance leaks into the test batch.")
+    gaps = [(r, t, gen, rule, n) for r in rows for t in ("smoke", "dev")
+            for gen, by_rule in r["tiers"][t]["validation"].get("lineage_known_gaps", {}).items() for rule, n in by_rule.items()]
+    lines += ["", "## Known lineage gaps (reported, not failed)", "",
+              "The lineage check (`validate/checks.py`) enforces: " + "; ".join(f"**{k}**: {v}" for k, v in LINEAGE_RULES.items()) + ".",
+              "The (generator, rule) pairs below are listed in `KNOWN_LINEAGE_GAPS`: they are reported here instead of",
+              "failing validation until their generators are fixed. Any other lineage violation fails.", ""]
+    if gaps:
+        lines += ["| Eval | Tier | Generator | Rule | Items |", "|---|---|---|---|---|"]
+        lines += [f"| {r['vertical']} {r['eval_id']} | {t} | `{gen.rsplit('.', 1)[-1]}` | {rule} | {n} |" for r, t, gen, rule, n in gaps]
+    else:
+        lines.append("None.")
+    lines += ["", "## Hash collisions across sets", ""]
+    if collisions:
+        lines += [f"- `{f.item_id}`: {f.message}" for f in collisions]
+    else:
+        lines.append("None: no 16-hex content or presentation hash is shared by two different contents or prompts "
+                     "across every smoke, dev and test set built here.")
     lines += ["", "## Validators", "",
-              "Item checks: schema, hashes, seed range, ground truth recomputed by an independent solver, every",
-              "prediction recomputed from (instance, member, params), and discrimination (two or more members",
-              "disagree). Set checks: each generator's designed invariants (see the review packets). Leakage:",
-              "dev vs test bases by hash and by isomorphism (graphs, CNF, premise structure), or by lexicon",
-              "partition for B4/C4.", ""]
+              "Item checks: schema, hashes, the seed's tier range, ground truth and the readouts behind the likelihood",
+              "tables (solution, completion and optimal-partition counts, optimal sets, the C E3 asked answer)",
+              "recomputed by `validate/independent.py` (its own instance reading and stated-rule transforms,",
+              "CaDiCaL instead of the generators' MiniSat), consistent premises, every prediction recomputed from",
+              "(instance, member, params), and discrimination (two or more members differ on the item's scoring",
+              "channel, and its likelihood table is non-degenerate). Set checks: hash",
+              "collisions, lineage, and each generator's designed invariants (see the review packets). Leakage: every",
+              "test instance against every dev instance, by base hash and by isomorphism of the stated problem",
+              "(graphs, canonical CNF, premise structure, knapsack item multisets, TSP distance matrices), or by",
+              "lexicon partition for B4/C4.", ""]
     path = REVIEW / "summary.md"
     path.write_text("\n".join(lines))
     (REVIEW / "summary.json").write_text(json.dumps(rows, indent=1, ensure_ascii=False, default=str))
@@ -239,16 +270,16 @@ def main(argv: list[str] | None = None) -> int:
     from reasoning_heuristics.generators import canonical_vertical
 
     only = [(canonical_vertical(o.split(":")[0]), o.split(":")[1].upper()) for o in args.only] or None
-    rows = build(only, args.seed, args.reuse, args.dev_per_cell)
+    rows, collisions = build(only, args.seed, args.reuse, args.dev_per_cell)
     if only:
         # Merge with existing rows for other evals so the summary stays complete.
         old = REVIEW / "summary.json"
         if old.exists():
             keep = [r for r in json.loads(old.read_text()) if (r["vertical"], r["eval_id"]) not in set(only)]
             rows = sorted(keep + rows, key=lambda r: list(REGISTRY).index((r["vertical"], r["eval_id"])))
-    print(write_summary(rows, args.seed))
+    print(write_summary(rows, args.seed, collisions))
     bad = sum(len(r["tiers"][t]["validation"].get("failures", [])) for r in rows for t in ("smoke", "dev"))
-    bad += sum(len(r["leakage_failures"]) + r["smoke_dev_shared_bases"] for r in rows)
+    bad += sum(len(r["leakage_failures"]) + r["smoke_dev_shared_bases"] for r in rows) + len(collisions)
     return 1 if bad else 0
 
 

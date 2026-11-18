@@ -61,14 +61,13 @@
    "unbalanced": 11
   }
  },
- "generation_seconds": 99.0,
  "path": "data/items/dev/C_E2_dev_s1.jsonl",
  "validation": {
   "items": 200,
   "sets": 40,
   "items_passed": 200,
   "pass_rate": 1.0,
-  "failures": []
- },
- "validation_seconds": 14.7
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
 }

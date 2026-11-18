@@ -154,13 +154,13 @@ def item_members(domain: str) -> list:
                 ("DSATUR", "DSATUR", {"tie": "LIST"}), ("DSATUR-LABEL", "DSATUR", {"tie": "LABEL"}),
                 ("LF", "LF", {"tie": "LIST"}), ("DPLL-LIST (D)", "SEARCH", {"order": "LIST"}),
                 ("GREEDY+REPAIR-LIST (C->F)", "GREEDY+REPAIR", {"order": "LIST"}),
-                ("RO-FF (C3)", "RO-FF", {"samples": 1000, "seed": 0}), ("EXACT", "EXACT", {}),
+                ("RO-FF (C3)", "RO-FF", {"seed": 0}), ("EXACT", "EXACT", {}),
                 ("RANDOM (H)", "RANDOM", {}), ("NOISY-EXACT", "NOISY-EXACT", {"p": 0.01})]
     if domain == "SAT":
         return [("GREEDY-MENTION", "GREEDY", {"order": "MENTION"}), ("GREEDY-INDEX", "GREEDY", {"order": "INDEX"}),
                 ("UC-DET (C2)", "UC", {}), ("GUC-DET (C2)", "GUC", {}), ("SC-DET (C2)", "SC", {}),
                 ("POLARITY (C0)", "POLARITY", {}), ("DPLL-MENTION (D, T first)", "SEARCH", {"order": "MENTION"}),
-                ("RO-GREEDY (C3)", "RO-GREEDY", {"samples": 200, "seed": 0}), ("EXACT", "EXACT", {}),
+                ("RO-GREEDY (C3)", "RO-GREEDY", {"seed": 0}), ("EXACT", "EXACT", {}),
                 ("RANDOM (H)", "RANDOM", {})]
     return [(n, n, {}) for n in ("INPUT-FIT", "RATIO-SKIP", "RATIO-PREFIX", "VALUE", "LARGEST-FIT", "DIFF",
                                  "RATIO+BEST-SINGLE", "EXACT")]
@@ -168,9 +168,9 @@ def item_members(domain: str) -> list:
 
 def channel_of(domain: str, task, gt: dict[str, Any]) -> Channel:
     if domain == "COL":
-        return CC.colouring_channel(task.graph, gt["chromatic_number"], gt["n_optimal_partitions"])
+        return CC.colouring_channel(task, gt["chromatic_number"], gt["n_optimal_partitions"])
     if domain == "SAT":
-        return CC.sat_channel(task.cnf, gt["n_solutions"])
+        return CC.sat_channel(task, gt["n_solutions"])
     return witness_channel("knapsack")
 
 

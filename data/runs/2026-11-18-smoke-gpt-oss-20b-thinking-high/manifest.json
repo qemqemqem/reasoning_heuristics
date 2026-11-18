@@ -1,0 +1,220 @@
+{
+  "run_id": "2026-11-18-smoke-gpt-oss-20b-thinking-high",
+  "status": "complete",
+  "started_at": "2026-11-18T03:39:30Z",
+  "model_requested": "openai/gpt-oss-20b",
+  "condition": {
+    "name": "thinking",
+    "label": "thinking-high",
+    "effort": "high",
+    "max_tokens": 32768,
+    "system_prompt": null,
+    "reasoning": {
+      "effort": "high"
+    },
+    "sampling": {
+      "temperature": 1.0,
+      "top_p": 1.0
+    },
+    "prompt_suffix": ""
+  },
+  "provider_routing": {
+    "order": [
+      "dekallm/bf16"
+    ],
+    "allow_fallbacks": false,
+    "require_parameters": true,
+    "quantizations": [
+      "bf16"
+    ]
+  },
+  "price": {
+    "prompt": 0.029,
+    "completion": 0.14,
+    "source": "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
+  },
+  "model_notes": "Reasoning cannot be turned off (every endpoint answers HTTP 400 'Reasoning is mandatory' to enabled:false and effort:none); effort low is a budget arm, not the direct condition. Pinned to DekaLLM bf16: bf16 holds the released MXFP4 expert weights exactly, and it reports reasoning tokens. Not DeepInfra bf16 (HTTP 429 rate-limited upstream on all 6 attempts), not AkashML fp4 (reports 0 reasoning tokens alongside reasoning text), not the fp8 endpoints (a lossy re-quantisation). Fallback if DekaLLM fails: coreweave/fp4.",
+  "samples_per_item": 1,
+  "seed_base": null,
+  "items": {
+    "files": {
+      "data/items/smoke/AH_E1_smoke_s1.jsonl.gz": "2215e385b40e0fbf4744397c87d1f6dd469f38a5267d74172e854a07602206b3",
+      "data/items/smoke/AH_E2_smoke_s1.jsonl.gz": "6d96c9283629351592f43c8cfc9c86fc137157f1dd018f1d4a3ddd6c54d573bc",
+      "data/items/smoke/AH_E5_smoke_s1.jsonl.gz": "bd69a8bdc20320380c6e48665d2e055e1e875de9a0e744c43ff92771b8d2d365",
+      "data/items/smoke/AH_E8_smoke_s1.jsonl.gz": "68d3ed87ff888e663e3deaf76773a000a7ba73c76e7a6a7aced6d9846ae72fb3",
+      "data/items/smoke/B4C4_E1_smoke_s1.jsonl.gz": "63a3a45ca9e9b0dd59daed16e7a478db51a44a09df2caaffe1ad35b3249cc264",
+      "data/items/smoke/B4C4_E2_smoke_s1.jsonl.gz": "676ec55b6d9f88eb15147d156fc3b82caeb97a0cb34274d5480798d7726de467",
+      "data/items/smoke/C_E1_smoke_s1.jsonl.gz": "a7fe20c7af4761efcd2b2bc6133bb23eddc52ccb1c37decd744e06dbdb41c9c4",
+      "data/items/smoke/C_E2_smoke_s1.jsonl.gz": "d62197b2c48968bd5f4ad4537294e6e88cd376d5137399af6a2a5268226259f0",
+      "data/items/smoke/C_E3_smoke_s1.jsonl.gz": "94364cbc4ea3826dd0c99c5211eb28aecd1ccd0d786f5f4d320fc3782a2ad1ad",
+      "data/items/smoke/C_E5_smoke_s1.jsonl.gz": "aedbdd0102a9ac1a11d6e2ab0544e9a36fa5ea26af6fd46da3ac3a482d352531"
+    },
+    "n_items": 254,
+    "skipped": {
+      "excluded_eval": 12,
+      "unsupported": 0,
+      "not_included": 0
+    },
+    "exclude_eval": [
+      "E8"
+    ],
+    "include_eval": [],
+    "limit": null
+  },
+  "estimate": {
+    "cost_usd": 0.27,
+    "worst_case_usd": 1.1707,
+    "output_tokens": 1889600,
+    "prompt_tokens_proxy": 188588
+  },
+  "cap_usd": 0.82,
+  "cap_requested_usd": 0.82,
+  "budget_tag": "runner-agent",
+  "budget_usd": 3.0,
+  "budget_spent_before_usd": 0.8965210000000001,
+  "git": {
+    "sha": "97163b6225b68ac9cede6aa9aa262cc0d22c8b45",
+    "dirty": false,
+    "branch": "smoke-runs"
+  },
+  "versions": {
+    "python": "3.12.12",
+    "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "reasoning_heuristics": "0.1.0",
+    "scorer": "scorer-1.4.0",
+    "tokenizer_proxy": "regex-digit-split-v1",
+    "python-sat": "1.9.dev22",
+    "pyetr": "1.0.0",
+    "numpy": "2.5.5",
+    "networkx": "3.7",
+    "jsonschema": "4.26.0"
+  },
+  "client": {
+    "timeout_s": 1800.0,
+    "max_attempts": 6,
+    "concurrency": 16
+  },
+  "notes": "acceptance run (a), resumed after IncompleteRead",
+  "resumed_from": 188,
+  "previous_invocations": [
+    {
+      "started_at": "2026-11-18T02:29:01Z",
+      "finished_at": "2026-11-18T03:36:57Z",
+      "status": "stopped",
+      "stop_reason": "runner error: IncompleteRead: IncompleteRead(1991 bytes read)",
+      "git": {
+        "sha": "a0658865b5f492a704dcb3551a480d3982561a67",
+        "dirty": false,
+        "branch": "smoke-runs"
+      },
+      "versions": {
+        "python": "3.12.12",
+        "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+        "reasoning_heuristics": "0.1.0",
+        "scorer": "scorer-1.0.0",
+        "tokenizer_proxy": "regex-digit-split-v1",
+        "python-sat": "1.9.dev22",
+        "pyetr": "1.0.0",
+        "numpy": "2.5.5",
+        "networkx": "3.7",
+        "jsonschema": "4.26.0"
+      },
+      "cap_usd": 1.2,
+      "charged_usd": 0.377519,
+      "spend": {
+        "cap_usd": 1.2,
+        "spent_usd": 0.377519,
+        "calls": 188,
+        "refused_reservations": 0,
+        "calls_without_reported_cost": 0,
+        "failed_attempt_cost_usd": 0.0,
+        "failed_attempts_charged": 0,
+        "safety_factor": 1.25,
+        "price": {
+          "prompt": 0.029,
+          "completion": 0.14,
+          "source": "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
+        }
+      },
+      "responses": 188,
+      "failed_calls": 0,
+      "resumed_from": 0,
+      "providers_served": {
+        "DekaLLM": 188
+      },
+      "models_returned": [
+        "openai/gpt-oss-20b"
+      ],
+      "key_usage": {
+        "before": {
+          "usage": 80.65014674,
+          "usage_daily": 0.00553888,
+          "limit": null,
+          "limit_remaining": null
+        },
+        "after": {
+          "usage": 81.596448295,
+          "usage_daily": 0.951840435,
+          "limit": null,
+          "limit_remaining": null
+        },
+        "delta_usd": 0.946302,
+        "note": "the key's own usage counter (GET /key); other users of the key move it too"
+      },
+      "wall_s": 4075.1,
+      "client": {
+        "timeout_s": 1800.0,
+        "max_attempts": 6,
+        "concurrency": 16
+      },
+      "notes": "acceptance run (a)"
+    }
+  ],
+  "key_usage": {
+    "before": {
+      "usage": 81.631644769,
+      "usage_daily": 0.987036909,
+      "limit": null,
+      "limit_remaining": null
+    },
+    "after": {
+      "usage": 81.914150842,
+      "usage_daily": 1.269542982,
+      "limit": null,
+      "limit_remaining": null
+    },
+    "delta_usd": 0.282506,
+    "note": "the key's own usage counter (GET /key); other users of the key move it too"
+  },
+  "stop_reason": null,
+  "finished_at": "2026-11-18T04:23:04Z",
+  "wall_s": 2613.7,
+  "models_returned": [
+    "openai/gpt-oss-20b"
+  ],
+  "system_fingerprints": [],
+  "providers_served": {
+    "DekaLLM": 254
+  },
+  "responses": 254,
+  "failed_calls": 0,
+  "cache_hits": 0,
+  "spend": {
+    "cap_usd": 0.82,
+    "spent_usd": 0.23839,
+    "calls": 66,
+    "refused_reservations": 0,
+    "calls_without_reported_cost": 0,
+    "failed_attempt_cost_usd": 0.0,
+    "failed_attempts_charged": 0,
+    "safety_factor": 1.25,
+    "price": {
+      "prompt": 0.029,
+      "completion": 0.14,
+      "source": "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
+    }
+  },
+  "charged_usd": 0.23839,
+  "charged_usd_all_invocations": 0.615909,
+  "api_reported_cost_usd_all_responses": 0.615909
+}

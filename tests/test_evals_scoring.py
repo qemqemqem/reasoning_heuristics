@@ -39,6 +39,15 @@ def independent_class_key(item, answer):
     return answer_key(load_task(item["instance"]).domain, answer)
 
 
+def set_valued(item, label, pred):
+    """Set-valued on this item's channel: from `extra.channel_spec` (scorer-1.1.0 items), else the
+    member's own trace flag (older items)."""
+    spec = item["extra"].get("channel_spec")
+    if spec is not None:
+        return label in spec["set_valued"]
+    return bool((pred.get("trace_features") or {}).get("set_valued"))
+
+
 def test_smoke_items_cover_every_answer_format():
     kinds = Counter(answer_format(it).kind for it in runnable(committed_items("smoke")))
     assert sorted(kinds) == sorted(FORMATS)
@@ -61,7 +70,7 @@ def test_member_predictions_score_back_to_their_outcome_class(kind):
         classes = it["extra"]["outcome_classes"]
         for label, pred in it["predictions"].items():
             ans = pred["answer"]
-            if ans is None or (pred.get("trace_features") or {}).get("set_valued"):
+            if ans is None or set_valued(it, label, pred):
                 continue
             text = render(it, ans)
             if text is None:
@@ -98,12 +107,14 @@ def test_channel_reconstruction_matches_every_committed_item():
             ctx = ItemContext(it)
             values = set(it["extra"]["outcome_classes"].values())
             for label, pred in it["predictions"].items():
-                if pred["answer"] is None or (pred.get("trace_features") or {}).get("set_valued"):
+                if pred["answer"] is None or set_valued(it, label, pred):
                     continue
                 key = ctx.channel.key(pred["answer"])
                 if key is None:  # the member has no reading on this channel (e.g. "POSSIBLE" on a bit channel)
                     continue
-                assert key in values or label.lower().startswith(("exact", "a3 tt[exact]")), (it["item_id"], label, key)
+                legacy = "channel_spec" not in it["extra"]  # older items list EXACT / TT witnesses only when another member does
+                assert key in values or (legacy and label.lower().startswith(("exact", "a3 tt[exact]"))), (
+                    it["item_id"], label, key)
                 n += 1
     assert n > 5000
 
@@ -177,6 +188,84 @@ def test_inverted_rule_items_are_judged_under_the_stated_rule():
             assert rec["correct"] == (pred["answer"] == gt["answer"]), it["item_id"]
         seen[rec["correct"]] += 1
     assert seen[True] and seen[False]  # the textbook answer is right in T cells and wrong in some inverted ones
+
+
+def test_bare_answer_without_marker_only_when_it_is_nothing_but_the_answer():
+    """Direct replies often drop the ANSWER: marker (seen live: Qwen3-32B direct wrote just "UNSAT", "NO")."""
+    sat = first_with("ans_sat", vertical="C", eval_id="E1")
+    rec = score_text(sat, "UNSAT")
+    assert rec["category"] == "ok" and rec["parsed"] == "UNSAT" and "no_answer_marker" in rec["flags"]
+    pred = next(p["answer"] for p in sat["predictions"].values() if isinstance(p["answer"], dict))
+    assert score_text(sat, render(sat, pred).split("\n", 1)[1])["parsed"] == pred
+    assert score_text(sat, "The formula is UNSAT.")["category"] == "parse_fail"
+    yn = first_with("ans_yn", vertical="C")
+    assert score_text(yn, "NO")["parsed"] == "NO" and score_text(yn, "no.")["parsed"] == "NO"
+    assert score_text(yn, "I think NO")["category"] == "parse_fail"
+    mc = first_with("ans_letter")
+    assert score_text(mc, "(C)")["parsed"] == "C" and score_text(mc, "Probably C")["category"] == "parse_fail"
+    one = first_with("ans_single_colour")
+    assert score_text(one, "2")["parsed"] == {answer_format(one).target: 2}
+    knap = first_with("ans_knap")
+    assert score_text(knap, "A, C, H")["parsed"] == ["A", "C", "H"]
+    col = first_with("ans_col", vertical="C", eval_id="E1")
+    sol = col["predictions"]["DSATUR"]["answer"]
+    lines = render(col, sol).split("\n", 1)[1]
+    assert score_text(col, lines)["category"] == "ok"
+    assert score_text(col, "Here is my colouring:\n" + lines)["category"] == "parse_fail"
+
+
+def test_latex_answer_decoration_is_unwrapped():
+    """Seen live in Qwen3-32B thinking replies to B4/C4 MC items."""
+    mc = first_with("ans_letter")
+    for tail in ("### Final Answer\n\n$$\n\\text{ANSWER: C}\n$$",
+                 "**Final Answer:**  \n$$\n\\boxed{C}\n$$",
+                 "**Final Answer:**\n\n$$\n\\boxed{\\text{C}}\n$$"):
+        rec = score_text(mc, "(D) can be true, so it is not entailed.\n\n---\n\n" + tail)
+        assert rec["category"] == "ok" and rec["parsed"] == "C" and "latex_unwrapped" in rec["flags"], tail
+    yn = first_with("ans_yn", vertical="B4/C4")
+    assert score_text(yn, "ANSWER: $\\boxed{\\text{NO}}$")["parsed"] == "NO"
+    # seen live (scorer 1.4.0): an emoji between the heading marks and "Final Answer"
+    one = first_with("ans_single_colour")
+    rec = score_text(one, "- The smallest positive integer not used is **1**.\n\n---\n\n### ✅ Final Answer\n\n$$\n\\boxed{1}\n$$")
+    assert rec["category"] == "ok" and rec["parsed"] == {answer_format(one).target: 1}
+    col = first_with("ans_col", vertical="C", eval_id="E1")
+    lines = render(col, col["predictions"]["DSATUR"]["answer"]).split("\n", 1)[1]
+    assert score_text(col, "Working...\n\n### ✅ Final Answer\n\n```\n" + lines + "\n```")["category"] == "ok"
+    # seen live: no marker at all, a sentence, then the answer in a code fence
+    rec = score_text(col, "The graph can be colored using these colors. Here is the coloring for each vertex in the "
+                          "specified order:\n\n```\n" + lines + "\n```")
+    assert rec["category"] == "ok" and "fenced_answer_no_marker" in rec["flags"] and rec["pre_answer_tokens"] > 5
+    assert score_text(col, "Some thoughts.\n\n```\nthis is not an answer\n```")["category"] == "parse_fail"
+    js = first_with("json_ent_yn")  # JSON formats are left alone
+    assert "latex_unwrapped" not in score_text(js, '$x$ so {"follows": true}')["flags"]
+
+
+def test_positional_values_in_the_requested_order():
+    """The C SAT format says "the values as `x=T` / `x=F` ... in this order: x15, x18, ...": seen live,
+    Qwen3-32B wrote "ANSWER: x=T, x=T, ..." and "ANSWER: T, T, F, ...". Read positionally only when the
+    item states an order and the count is exact."""
+    sat = first_with("ans_sat", vertical="C", eval_id="E1")
+    order = list(load_task(sat["instance"]).answer_order)
+    bits = ["T" if i % 3 else "F" for i in range(len(order))]
+    want = {v: b == "T" for v, b in zip(order, bits)}
+    for text in ("### Final Answer:\n\n```\nANSWER: " + ", ".join(bits) + "\n```",
+                 "ANSWER: " + ", ".join(f"x={b}" for b in bits)):
+        rec = score_text(sat, text)
+        assert rec["category"] == "ok" and rec["parsed"] == {v: want[v] for v in load_task(sat["instance"]).cnf.var_names}
+        assert "positional_values" in rec["flags"]
+    assert "placeholder_names" in score_text(sat, "ANSWER: " + ", ".join(f"x={b}" for b in bits))["flags"]
+    new = score_text(sat, "ANSWER: " + ", ".join(f"<variable>={b}" for b in bits))  # the generators' new wording
+    assert new["category"] == "ok" and "placeholder_names" in new["flags"]
+    trailing = score_text(sat, "ANSWER: " + ", ".join(f"x={b}" for b in bits) +
+                          "\n\n---\n\nThis assignment ensures that every clause evaluates to true.")  # seen live
+    assert trailing["category"] == "ok" and "extra_text_in_block" in trailing["flags"]
+    short = score_text(sat, "ANSWER: " + ", ".join(bits[:-1]))
+    assert short["category"] == "parse_fail" and "without names" in short["parse_detail"]
+    free = next(it for it in runnable(committed_items("smoke")) if answer_format(it).kind == "ans_sat"
+                and load_task(it["instance"]).answer_order is None)
+    n = len(load_task(free["instance"]).cnf.var_names)
+    assert score_text(free, "ANSWER: " + ", ".join(["T"] * n))["category"] == "parse_fail"  # FREE order: no positions
+    assert score_text(sat, ", ".join(bits))["category"] == "ok"  # a bare positional reply (direct condition)
 
 
 def test_trailing_periods_after_values():
@@ -299,6 +388,11 @@ def test_empty_content_inline_think_and_loose_json():
     it = first_with("ans_yn", vertical="B4/C4")
     rec = score_text(it, "", reasoning="... so ANSWER: YES")
     assert rec["category"] == "parse_fail" and "answer_only_in_reasoning" in rec["flags"]
+    # a trace cut at the cap that merely quotes the prompt's format is not "an answer in the reasoning"
+    js = first_with("json_sat", eval_id="E1")
+    rec = score_text(js, None, reasoning='The answer must look like {"satisfiable": true, "assignment": "0101"} ... C008: (x04',
+                     finish="length", completion_tokens=32768)
+    assert rec["category"] == "truncated" and "answer_only_in_reasoning" not in rec["flags"]
     rec = score_text(it, "<think>ANSWER: YES</think>\nANSWER: NO")
     assert rec["parsed"] == "NO" and "think_in_content" in rec["flags"] and rec["n_answer_blocks"] == 1
     js = first_with("json_ent_yn")
@@ -350,3 +444,40 @@ def test_every_category_is_reachable():
         score_response(it, ResponseView.from_api(None, error="boom"))["category"],
     }
     assert cats == set(CATEGORIES)
+
+
+# --- scorer-1.1.0: outcome classes from the serialised channel -------------------------------------------
+
+
+def _new_style_colouring_item():
+    """A fewest-colours item built with the current generator code (three disjoint edges: chi = 2,
+    four optimal partitions): FF lists one, EXACT is set-valued over all four."""
+    from reasoning_heuristics.generators import c_common as CC
+    from reasoning_heuristics.generators.common import make_item
+    from reasoning_heuristics.heuristics.tasks import ColouringTask
+    from reasoning_heuristics.problems.coloring.graph import Graph
+
+    g = Graph(("v10", "v11", "v12", "v13", "v14", "v15"), (("v10", "v11"), ("v12", "v13"), ("v14", "v15")))
+    task = ColouringTask(g, None, (), tuple(g.vertices))
+    it = make_item(vertical="C", eval_id="TEST", set_id="s", cell="c", domain="colouring", framing="textbook",
+                   prompt="p", answer_format=CC.COLOUR_FEWEST_FORMAT, task=task, ground_truth={"chromatic_number": 2},
+                   specs=[("FF-LIST", "FF", {"order": "LIST"}), ("EXACT", "EXACT", {}), ("RANDOM (H)", "RANDOM", {})],
+                   channel=CC.colouring_channel(task, 2, 4), seed=100_001, tier="dev", generator="test", base_hash="")
+    return it.to_json()
+
+
+def test_unlisted_valid_answers_and_invalid_answers_get_their_own_classes():
+    it = _new_style_colouring_item()
+    classes = it["extra"]["outcome_classes"]
+
+    def answer(cols):
+        return "ANSWER:\n" + "\n".join(f"v{10 + i}: {c}" for i, c in enumerate(cols))
+
+    ff = score_text(it, answer([1, 2, 1, 2, 1, 2]))
+    assert ff["outcome_class"] != "answer = other" and "FF-LIST" in ff["members_matched"] and ff["sets_matched"] == ["EXACT"]
+    unlisted = score_text(it, answer([1, 2, 2, 1, 1, 2]))  # optimal, but no member predicts it
+    assert classes[unlisted["outcome_class"]] == "_in:EXACT" and unlisted["sets_matched"] == ["EXACT"]
+    assert it["disconfirms"][unlisted["outcome_class"]]["EXACT"] == 0.0
+    invalid = score_text(it, answer([1, 1, 1, 1, 1, 1]))
+    assert invalid["outcome_class"] == "answer = other" and invalid["sets_matched"] == []
+    assert it["disconfirms"]["answer = other"]["EXACT"] > 0.5

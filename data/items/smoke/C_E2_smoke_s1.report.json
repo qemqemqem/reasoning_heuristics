@@ -51,23 +51,22 @@
   "attempts": 186,
   "accepted": 8,
   "rejections": {
-   "base ground truth not unique / enumeration cap": 8,
-   "not every cell reachable for an open contrast": 152,
-   "round ratio in the base": 18
+   "base ground truth not unique / enumeration cap": 6,
+   "not every cell reachable for an open contrast": 159,
+   "round ratio in the base": 13
   },
   "competitor_balance": {
    "balanced": 6,
    "unbalanced": 2
   }
  },
- "generation_seconds": 20.3,
  "path": "data/items/smoke/C_E2_smoke_s1.jsonl",
  "validation": {
   "items": 40,
   "sets": 8,
   "items_passed": 40,
   "pass_rate": 1.0,
-  "failures": []
- },
- "validation_seconds": 3.0
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
 }

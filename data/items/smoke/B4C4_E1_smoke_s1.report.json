@@ -42,14 +42,13 @@
    "antonym pair on one subject": 1
   }
  },
- "generation_seconds": 0.5,
  "path": "data/items/smoke/B4C4_E1_smoke_s1.jsonl",
  "validation": {
   "items": 28,
   "sets": 4,
   "items_passed": 28,
   "pass_rate": 1.0,
-  "failures": []
- },
- "validation_seconds": 0.7
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
 }

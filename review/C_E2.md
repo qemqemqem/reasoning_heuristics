@@ -56,8 +56,8 @@ Readings of the doc (also in docs/GENERATORS.md):
 - **Domain / framing:** colouring / textbook
 - **Ground truth:** `{"chromatic_number": 3, "n_optimal_partitions": 1}`
 - **Hashes:** content `15e305746bda4436`, base `15e305746bda4436`, source `None`; seed 651898 (dev)
-- **Params:** `{"balance": {"D(h1|h2)": {"DSATUR": false}, "D(h2|h1)": {"DSATUR": false}, "balanced": true, "competitors": ["DSATUR"]}, "contrast": ["FF", "LF"], "design_cell": "BASE", "edit": "none", "m": 32, "n": 16, "prompt_tokens": 497, "repeat_prompt": false, "signature": null, "tokenizer_proxy": "regex-digi…`
-- **Prompt tokens (regex-digit-split-v1):** 497
+- **Params:** `{"balance": {"D(h1|h2)": {"DSATUR": false}, "D(h2|h1)": {"DSATUR": false}, "balanced": true, "competitors": ["DSATUR"]}, "contrast": ["FF", "LF"], "design_cell": "BASE", "edit": "none", "m": 32, "n": 16, "prompt_tokens": 501, "repeat_prompt": false, "signature": null, "tokenizer_proxy": "regex-digi…`
+- **Prompt tokens (regex-digit-split-v1):** 501
 
 <details><summary>Prompt</summary>
 
@@ -83,28 +83,28 @@ v72: v30, v64, v55
 v55: v27, v84, v72
 
 Colour every vertex with a positive integer so that neighbours get different colours, using as few colours as possible.
-After the line ANSWER:, write one line `vertex: colour` per vertex, in this order: v46, v23, v27, v13, v52, v30, v25, v40, v76, v84, v12, v15, v78, v64, v72, v55.
+After the line ANSWER:, write one line `<vertex>: <colour>` per vertex, in this order: v46, v23, v27, v13, v52, v30, v25, v40, v76, v84, v12, v15, v78, v64, v72, v55.
 ```
 
 </details>
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| DPLL-LIST (D) | D | v12=3 v13=3 v15=2 v23=2 v25=2 v27=3 v30=1 v40=1 v46=1 v52=2 v55=1 v64=3 v72=2 v76=3 v78=1 v84=2 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell BASE. | chronological backtracking in order σ, smallest colour first; IMPOSSIBLE only after exhaustive refutation, or… |
-| DSATUR | C2 | v12=2 v13=2 v15=3 v23=3 v25=3 v27=2 v30=1 v40=1 v46=1 v52=3 v55=1 v64=2 v72=3 v76=2 v78=1 v84=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell BASE. | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
-| DSATUR-LABEL | C2 | v12=2 v13=2 v15=3 v23=3 v25=3 v27=2 v30=1 v40=1 v46=1 v52=3 v55=1 v64=2 v72=3 v76=2 v78=1 v84=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell BASE. | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
-| EXACT | null | CHI=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell BASE. | a completed procedure: a checked witness, or a closed refutation |
-| FF-LABEL | C1 | v12=1 v13=1 v15=2 v23=2 v25=1 v27=1 v30=3 v40=2 v46=3 v52=2 v55=2 v64=1 v72=4 v76=2 v78=3 v84=4 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell BASE. | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
-| FF-LIST | C1 | v12=4 v13=2 v15=3 v23=2 v25=1 v27=1 v30=4 v40=1 v46=1 v52=3 v55=2 v64=2 v72=1 v76=2 v78=1 v84=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell BASE. | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
-| GREEDY+REPAIR-LIST (C->F) | C->F | v12=4 v13=2 v15=3 v23=2 v25=1 v27=1 v30=4 v40=1 v46=1 v52=3 v55=2 v64=2 v72=1 v76=2 v78=1 v84=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell BASE. | a complete first-fit pass in order σ, then verification, then local recolouring confined to the top colour cl… |
-| LF | C1 | v12=4 v13=2 v15=3 v23=2 v25=3 v27=2 v30=1 v40=3 v46=1 v52=3 v55=4 v64=2 v72=3 v76=2 v78=3 v84=1 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell BASE. | commits vertices by degree, highest first; first-fit colour; cites degree |
-| NOISY-EXACT | nuisance | P(_exact)=0.72; P(_other)=0.28 | p_h(outcome) = its distribution, mixed with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell BASE. | correct procedure with sporadic violations of its own stated rule |
-| RANDOM (H) | H | — | set-valued: uniform over its solution set; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell BASE. | no procedure determines the answer; trace content and verdict unrelated |
-| RO-FF (C3) | C3 | P(_other)=0.77; P(v12,v13,v27,v64,v76|v15,v23,v…)=0.02 | p_h(outcome) = its distribution, mixed with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell BASE. | commit order uncorrelated with listing, label and answer order; first-fit colour; arbitrary-choice statements |
+| DPLL-LIST (D) | D | v12=3 v13=3 v15=2 v23=2 v25=2 v27=3 v30=1 v40=1 v46=1 v52=2 v55=1 v64=3 v72=2 v76=3 v78=1 v84=2 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | chronological backtracking with forward checking in order σ, smallest colour first; IMPOSSIBLE only after exh… |
+| DSATUR | C2 | v12=2 v13=2 v15=3 v23=3 v25=3 v27=2 v30=1 v40=1 v46=1 v52=3 v55=1 v64=2 v72=3 v76=2 v78=1 v84=3 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| DSATUR-LABEL | C2 | v12=2 v13=2 v15=3 v23=3 v25=3 v27=2 v30=1 v40=1 v46=1 v52=3 v55=1 v64=2 v72=3 v76=2 v78=1 v84=3 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| EXACT | null | CHI=3 | set-valued with a unique solution (proper colouring with exactly 3 colours (optimal)): deterministic, p_h(its solution) = 0.920 (uniform sl… | a completed procedure: a checked witness, or a closed refutation |
+| FF-LABEL | C1 | v12=1 v13=1 v15=2 v23=2 v25=1 v27=1 v30=3 v40=2 v46=3 v52=2 v55=2 v64=1 v72=4 v76=2 v78=3 v84=4 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| FF-LIST | C1 | v12=4 v13=2 v15=3 v23=2 v25=1 v27=1 v30=4 v40=1 v46=1 v52=3 v55=2 v64=2 v72=1 v76=2 v78=1 v84=3 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| GREEDY+REPAIR-LIST (C->F) | C->F | v12=4 v13=2 v15=3 v23=2 v25=1 v27=1 v30=4 v40=1 v46=1 v52=3 v55=2 v64=2 v72=1 v76=2 v78=1 v84=3 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | a complete first-fit pass in order σ, then verification, then local recolouring confined to the top colour cl… |
+| LF | C1 | v12=4 v13=2 v15=3 v23=2 v25=3 v27=2 v30=1 v40=3 v46=1 v52=3 v55=4 v64=2 v72=3 v76=2 v78=3 v84=1 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | commits vertices by degree, highest first; first-fit colour; cites degree |
+| NOISY-EXACT | nuisance | P(_exact)=0.72; P(_other)=0.28 | p_h(outcome) = (1 - eps)·its distribution + eps/K (uniform slip eps = 0.1 over the K = 5 outcome classes); the cell rate is Σ_h π_h·p_h. Co… | correct procedure with sporadic violations of its own stated rule |
+| RANDOM (H) | H | — | uniform over all answers (uniform over the 16^16 colourings with colours 1..16): its mass on the listed answers and solution sets is at mos… | no procedure determines the answer; trace content and verdict unrelated |
+| RO-FF (C3) | C3 | P(v12,v13,v27,v64,v76|v15,v23,v…)=0.02; P(v12,v30,v40,v55,v64,v76|v13,v…)=0.02 | p_h(outcome) = (1 - eps)·its distribution + eps/K (uniform slip eps = 0.1 over the K = 5 outcome classes); the cell rate is Σ_h π_h·p_h. Co… | commit order uncorrelated with listing, label and answer order; first-fit colour; arbitrary-choice statements |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = DSATUR / DSATUR-LABEL / DPLL-LIST (D)'s prediction*: FF-LABEL +1.66, FF-LIST +1.66, GREEDY+REPAIR-LIST (C->F) +1.66, LF +1.66, RO-FF (C3) +1.37, NOISY-EXACT +0.14
+- *answer = DSATUR / DSATUR-LABEL / DPLL-LIST (D) / EXACT's prediction*: FF-LABEL +1.66, FF-LIST +1.66, GREEDY+REPAIR-LIST (C->F) +1.66, LF +1.66, RANDOM (H) +1.66, RO-FF (C3) +1.38
 - *answer = FF-LABEL's prediction*: DPLL-LIST (D) +1.66, DSATUR +1.66, DSATUR-LABEL +1.66, EXACT +1.66, FF-LIST +1.66, GREEDY+REPAIR-LIST (C->F) +1.66
 - *answer = FF-LIST / GREEDY+REPAIR-LIST (C->F)'s prediction*: DPLL-LIST (D) +1.66, DSATUR +1.66, DSATUR-LABEL +1.66, EXACT +1.66, FF-LABEL +1.66, LF +1.66
 - *answer = LF's prediction*: DPLL-LIST (D) +1.66, DSATUR +1.66, DSATUR-LABEL +1.66, EXACT +1.66, FF-LABEL +1.66, FF-LIST +1.66
@@ -116,8 +116,8 @@ Notes: Single edits of the base. Cell = which members' outputs change (computed 
 - **Domain / framing:** colouring / textbook
 - **Ground truth:** `{"chromatic_number": 3, "n_optimal_partitions": 1}`
 - **Hashes:** content `55042cf693944c68`, base `15e305746bda4436`, source `15e305746bda4436`; seed 651898 (dev)
-- **Params:** `{"balance": {"D(h1|h2)": {"DSATUR": false}, "D(h2|h1)": {"DSATUR": false}, "balanced": true, "competitors": ["DSATUR"]}, "contrast": ["FF", "LF"], "design_cell": "D(h1|h2)", "edit": {"args": ["v46", "v72"], "kind": "add_edge", "text": "add edge v46-v72"}, "m": 32, "n": 16, "prompt_tokens": 505, "re…`
-- **Prompt tokens (regex-digit-split-v1):** 505
+- **Params:** `{"balance": {"D(h1|h2)": {"DSATUR": false}, "D(h2|h1)": {"DSATUR": false}, "balanced": true, "competitors": ["DSATUR"]}, "contrast": ["FF", "LF"], "design_cell": "D(h1|h2)", "edit": {"args": ["v46", "v72"], "kind": "add_edge", "text": "add edge v46-v72"}, "m": 32, "n": 16, "prompt_tokens": 509, "re…`
+- **Prompt tokens (regex-digit-split-v1):** 509
 
 <details><summary>Prompt</summary>
 
@@ -143,28 +143,28 @@ v72: v46, v30, v64, v55
 v55: v27, v84, v72
 
 Colour every vertex with a positive integer so that neighbours get different colours, using as few colours as possible.
-After the line ANSWER:, write one line `vertex: colour` per vertex, in this order: v46, v23, v27, v13, v52, v30, v25, v40, v76, v84, v12, v15, v78, v64, v72, v55.
+After the line ANSWER:, write one line `<vertex>: <colour>` per vertex, in this order: v46, v23, v27, v13, v52, v30, v25, v40, v76, v84, v12, v15, v78, v64, v72, v55.
 ```
 
 </details>
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| DPLL-LIST (D) | D | v12=3 v13=3 v15=2 v23=2 v25=2 v27=3 v30=1 v40=1 v46=1 v52=2 v55=1 v64=3 v72=2 v76=3 v78=1 v84=2 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell D(FF|LF). | chronological backtracking in order σ, smallest colour first; IMPOSSIBLE only after exhaustive refutation, or… |
-| DSATUR | C2 | v12=2 v13=2 v15=3 v23=3 v25=3 v27=2 v30=1 v40=1 v46=1 v52=3 v55=1 v64=2 v72=3 v76=2 v78=1 v84=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell D(FF|LF). | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
-| DSATUR-LABEL | C2 | v12=2 v13=2 v15=3 v23=3 v25=3 v27=2 v30=1 v40=1 v46=1 v52=3 v55=1 v64=2 v72=3 v76=2 v78=1 v84=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell D(FF|LF). | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
-| EXACT | null | CHI=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell D(FF|LF). | a completed procedure: a checked witness, or a closed refutation |
-| FF-LABEL | C1 | v12=1 v13=1 v15=2 v23=2 v25=1 v27=1 v30=3 v40=2 v46=3 v52=2 v55=2 v64=1 v72=4 v76=2 v78=3 v84=4 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell D(FF|LF). | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
-| FF-LIST | C1 | v12=4 v13=2 v15=3 v23=2 v25=1 v27=1 v30=4 v40=1 v46=1 v52=3 v55=2 v64=2 v72=3 v76=2 v78=1 v84=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell D(FF|LF). | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
-| GREEDY+REPAIR-LIST (C->F) | C->F | v12=4 v13=2 v15=3 v23=2 v25=1 v27=1 v30=4 v40=1 v46=1 v52=3 v55=2 v64=2 v72=3 v76=2 v78=1 v84=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell D(FF|LF). | a complete first-fit pass in order σ, then verification, then local recolouring confined to the top colour cl… |
-| LF | C1 | v12=4 v13=2 v15=3 v23=2 v25=3 v27=2 v30=1 v40=3 v46=1 v52=3 v55=4 v64=2 v72=3 v76=2 v78=3 v84=1 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell D(FF|LF). | commits vertices by degree, highest first; first-fit colour; cites degree |
-| NOISY-EXACT | nuisance | P(_exact)=0.72; P(_other)=0.28 | p_h(outcome) = its distribution, mixed with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell D(FF|LF). | correct procedure with sporadic violations of its own stated rule |
-| RANDOM (H) | H | — | set-valued: uniform over its solution set; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell D(FF|LF). | no procedure determines the answer; trace content and verdict unrelated |
-| RO-FF (C3) | C3 | P(_other)=0.75; P(v12,v13,v27,v64,v76|v15,v23,v…)=0.03 | p_h(outcome) = its distribution, mixed with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast FF vs LF, cell D(FF|LF). | commit order uncorrelated with listing, label and answer order; first-fit colour; arbitrary-choice statements |
+| DPLL-LIST (D) | D | v12=3 v13=3 v15=2 v23=2 v25=2 v27=3 v30=1 v40=1 v46=1 v52=2 v55=1 v64=3 v72=2 v76=3 v78=1 v84=2 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | chronological backtracking with forward checking in order σ, smallest colour first; IMPOSSIBLE only after exh… |
+| DSATUR | C2 | v12=2 v13=2 v15=3 v23=3 v25=3 v27=2 v30=1 v40=1 v46=1 v52=3 v55=1 v64=2 v72=3 v76=2 v78=1 v84=3 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| DSATUR-LABEL | C2 | v12=2 v13=2 v15=3 v23=3 v25=3 v27=2 v30=1 v40=1 v46=1 v52=3 v55=1 v64=2 v72=3 v76=2 v78=1 v84=3 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| EXACT | null | CHI=3 | set-valued with a unique solution (proper colouring with exactly 3 colours (optimal)): deterministic, p_h(its solution) = 0.920 (uniform sl… | a completed procedure: a checked witness, or a closed refutation |
+| FF-LABEL | C1 | v12=1 v13=1 v15=2 v23=2 v25=1 v27=1 v30=3 v40=2 v46=3 v52=2 v55=2 v64=1 v72=4 v76=2 v78=3 v84=4 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| FF-LIST | C1 | v12=4 v13=2 v15=3 v23=2 v25=1 v27=1 v30=4 v40=1 v46=1 v52=3 v55=2 v64=2 v72=3 v76=2 v78=1 v84=3 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| GREEDY+REPAIR-LIST (C->F) | C->F | v12=4 v13=2 v15=3 v23=2 v25=1 v27=1 v30=4 v40=1 v46=1 v52=3 v55=2 v64=2 v72=3 v76=2 v78=1 v84=3 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | a complete first-fit pass in order σ, then verification, then local recolouring confined to the top colour cl… |
+| LF | C1 | v12=4 v13=2 v15=3 v23=2 v25=3 v27=2 v30=1 v40=3 v46=1 v52=3 v55=4 v64=2 v72=3 v76=2 v78=3 v84=1 | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | commits vertices by degree, highest first; first-fit colour; cites degree |
+| NOISY-EXACT | nuisance | P(_exact)=0.72; P(_other)=0.28 | p_h(outcome) = (1 - eps)·its distribution + eps/K (uniform slip eps = 0.1 over the K = 5 outcome classes); the cell rate is Σ_h π_h·p_h. Co… | correct procedure with sporadic violations of its own stated rule |
+| RANDOM (H) | H | — | uniform over all answers (uniform over the 16^16 colourings with colours 1..16): its mass on the listed answers and solution sets is at mos… | no procedure determines the answer; trace content and verdict unrelated |
+| RO-FF (C3) | C3 | P(v12,v13,v27,v64,v76|v15,v23,v…)=0.02; P(v12,v30,v40,v55,v64,v76|v13|v…)=0.02 | p_h(outcome) = (1 - eps)·its distribution + eps/K (uniform slip eps = 0.1 over the K = 5 outcome classes); the cell rate is Σ_h π_h·p_h. Co… | commit order uncorrelated with listing, label and answer order; first-fit colour; arbitrary-choice statements |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = DSATUR / DSATUR-LABEL / DPLL-LIST (D)'s prediction*: FF-LABEL +1.66, FF-LIST +1.66, GREEDY+REPAIR-LIST (C->F) +1.66, LF +1.66, RO-FF (C3) +1.34, NOISY-EXACT +0.14
+- *answer = DSATUR / DSATUR-LABEL / DPLL-LIST (D) / EXACT's prediction*: FF-LABEL +1.66, FF-LIST +1.66, GREEDY+REPAIR-LIST (C->F) +1.66, LF +1.66, RANDOM (H) +1.66, RO-FF (C3) +1.35
 - *answer = FF-LABEL's prediction*: DPLL-LIST (D) +1.66, DSATUR +1.66, DSATUR-LABEL +1.66, EXACT +1.66, FF-LIST +1.66, GREEDY+REPAIR-LIST (C->F) +1.66
 - *answer = FF-LIST / GREEDY+REPAIR-LIST (C->F)'s prediction*: DPLL-LIST (D) +1.66, DSATUR +1.66, DSATUR-LABEL +1.66, EXACT +1.66, FF-LABEL +1.66, LF +1.66
 - *answer = LF's prediction*: DPLL-LIST (D) +1.66, DSATUR +1.66, DSATUR-LABEL +1.66, EXACT +1.66, FF-LABEL +1.66, FF-LIST +1.66
@@ -176,8 +176,8 @@ Notes: Single edits of the base. Cell = which members' outputs change (computed 
 - **Domain / framing:** 3-SAT / textbook
 - **Ground truth:** `{"n_solutions": 6, "satisfiable": true}`
 - **Hashes:** content `3272a4ed9c109c23`, base `3272a4ed9c109c23`, source `None`; seed 182669 (dev)
-- **Params:** `{"alpha": 3.5, "balance": {"D(h1|h2)": {"POLARITY": false}, "D(h2|h1)": {"POLARITY": false}, "balanced": true, "competitors": ["POLARITY"]}, "contrast": ["GREEDY", "UC"], "design_cell": "BASE", "edit": "none", "m": 70, "n": 20, "prompt_tokens": 1293, "repeat_prompt": false, "signature": null, "toke…`
-- **Prompt tokens (regex-digit-split-v1):** 1293
+- **Params:** `{"alpha": 3.5, "balance": {"D(h1|h2)": {"POLARITY": false}, "D(h2|h1)": {"POLARITY": false}, "balanced": true, "competitors": ["POLARITY"]}, "contrast": ["GREEDY", "UC"], "design_cell": "BASE", "edit": "none", "m": 70, "n": 20, "prompt_tokens": 1298, "repeat_prompt": false, "signature": null, "toke…`
+- **Prompt tokens (regex-digit-split-v1):** 1298
 
 <details><summary>Prompt</summary>
 
@@ -255,30 +255,30 @@ C69: x45 or not x74 or x38
 C70: x45 or x38 or not x19
 
 Find values for all variables that make every clause true, or say UNSAT if none exist.
-After the line ANSWER:, write UNSAT or the values as `x=T` / `x=F`, comma-separated, in this order: x11, x12, x19, x26, x29, x38, x42, x43, x45, x50, x53, x57, x65, x69, x74, x84, x86, x90, x92, x97.
+After the line ANSWER:, write UNSAT, or one `<variable>=T` or `<variable>=F` per variable, comma-separated, in this order: x11, x12, x19, x26, x29, x38, x42, x43, x45, x50, x53, x57, x65, x69, x74, x84, x86, x90, x92, x97.
 ```
 
 </details>
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| DPLL-MENTION (D, T first) | D | x11=T x12=F x19=F x26=T x29=T x38=T x42=F x43=F x45=T x50=T x53=T x57=T x65=T x69=F x74=T x84=T x86=T x90=F x92=T x97=F | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell BASE. | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| EXACT | null | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell BASE. | a witness checked against every clause, or a closed refutation |
-| GREEDY-INDEX | C1 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell BASE. | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
-| GREEDY-MENTION | C1 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell BASE. | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
-| GUC-DET (C2) | C2 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell BASE. | satisfies a literal of a shortest open clause at every step |
-| POLARITY (C0) | C0 | x11=T x12=F x19=T x26=F x29=T x38=T x42=T x43=F x45=T x50=T x53=F x57=T x65=T x69=F x74=T x84=T x86=T x90=T x92=T x97=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell BASE. | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
-| RANDOM (H) | H | P(SAT)=0.50; P(UNSAT)=0.50 | p_h(outcome) = its distribution, mixed with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell BASE. | no procedure determines the verdict |
-| RO-GREEDY (C3) | C3 | P(UNSAT)=0.99; P(x11=T,x12=F,x19=F,x26=F,x29=T…)=0.01 | p_h(outcome) = its distribution, mixed with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell BASE. | GREEDY in a uniformly random order; the order varies across samples |
-| SC-DET (C2) | C2 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell BASE. | prefers unit, then 2-literal open clauses; otherwise the first free variable set true |
-| UC-DET (C2) | C2 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell BASE. | next commitment comes from a unit clause given the state ('forced'); else the first free variable set true; U… |
+| DPLL-MENTION (D, T first) | D | x11=T x12=F x19=F x26=T x29=T x38=T x42=F x43=F x45=T x50=T x53=T x57=T x65=T x69=F x74=T x84=T x86=T x90=F x92=T x97=F | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
+| EXACT | null | SAT | set-valued: uniform over its 6 solutions (satisfying assignment); a listed solution gets (1 - eps)/6 + eps/K, its unlisted solutions form t… | a witness checked against every clause, or a closed refutation |
+| GREEDY-INDEX | C1 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
+| GREEDY-MENTION | C1 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
+| GUC-DET (C2) | C2 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | satisfies a literal of a shortest open clause at every step |
+| POLARITY (C0) | C0 | x11=T x12=F x19=T x26=F x29=T x38=T x42=T x43=F x45=T x50=T x53=F x57=T x65=T x69=F x74=T x84=T x86=T x90=T x92=T x97=T | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
+| RANDOM (H) | H | P(SAT)=0.50; P(UNSAT)=0.50 | p_h(outcome) = (1 - eps)·its distribution + eps/K (uniform slip eps = 0.1 over the K = 5 outcome classes); the cell rate is Σ_h π_h·p_h. Co… | no procedure determines the verdict |
+| RO-GREEDY (C3) | C3 | P(UNSAT)=0.99; P(x11=T,x12=F,x19=F,x26=T,x29=T…)=0.00 | p_h(outcome) = (1 - eps)·its distribution + eps/K (uniform slip eps = 0.1 over the K = 5 outcome classes); the cell rate is Σ_h π_h·p_h. Co… | GREEDY in a uniformly random order; the order varies across samples |
+| SC-DET (C2) | C2 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | prefers unit, then 2-literal open clauses; otherwise the first free variable set true |
+| UC-DET (C2) | C2 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | next commitment comes from a unit clause given the state ('forced'); else the first free variable set true; U… |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = DPLL-MENTION (D, T first)'s prediction*: GREEDY-INDEX +1.57, GREEDY-MENTION +1.57, GUC-DET (C2) +1.57, POLARITY (C0) +1.57, RANDOM (H) +1.57, RO-GREEDY (C3) +1.57
-- *answer = POLARITY (C0)'s prediction*: DPLL-MENTION (D, T first) +1.57, EXACT +1.57, GREEDY-INDEX +1.57, GREEDY-MENTION +1.57, GUC-DET (C2) +1.57, RANDOM (H) +1.57
-- *answer = UNSAT*: DPLL-MENTION (D, T first) +1.57, EXACT +1.57, POLARITY (C0) +1.57, RANDOM (H) +0.29, GREEDY-INDEX +0.00, GREEDY-MENTION +0.00
-- *answer = other*: DPLL-MENTION (D, T first) +1.49, GREEDY-INDEX +1.49, GREEDY-MENTION +1.49, GUC-DET (C2) +1.49, POLARITY (C0) +1.49, SC-DET (C2) +1.49
+- *answer = DPLL-MENTION (D, T first)'s prediction*: GREEDY-INDEX +1.66, GREEDY-MENTION +1.66, GUC-DET (C2) +1.66, POLARITY (C0) +1.66, RANDOM (H) +1.66, SC-DET (C2) +1.66
+- *answer = POLARITY (C0)'s prediction*: DPLL-MENTION (D, T first) +1.66, EXACT +1.66, GREEDY-INDEX +1.66, GREEDY-MENTION +1.66, GUC-DET (C2) +1.66, RANDOM (H) +1.66
+- *answer = UNSAT*: DPLL-MENTION (D, T first) +1.66, EXACT +1.66, POLARITY (C0) +1.66, RANDOM (H) +0.29, GREEDY-INDEX +0.00, GREEDY-MENTION +0.00
+- *answer = other*: DPLL-MENTION (D, T first) +1.37, EXACT +1.37, GREEDY-INDEX +1.37, GREEDY-MENTION +1.37, GUC-DET (C2) +1.37, POLARITY (C0) +1.37
 
 Notes: Single edits of the base. Cell = which members' outputs change (computed over all single edits).
 
@@ -288,7 +288,7 @@ Notes: Single edits of the base. Cell = which members' outputs change (computed 
 - **Ground truth:** `{"n_solutions": 2, "satisfiable": true}`
 - **Hashes:** content `823260450bace110`, base `3272a4ed9c109c23`, source `3272a4ed9c109c23`; seed 182669 (dev)
 - **Params:** `{"alpha": 3.5, "balance": {"D(h1|h2)": {"POLARITY": false}, "D(h2|h1)": {"POLARITY": false}, "balanced": true, "competitors": ["POLARITY"]}, "contrast": ["GREEDY", "UC"], "design_cell": "D(h1|h2)", "edit": {"args": [7, 2], "kind": "flip_sign", "text": "flip the sign of x53 in C8"}, "m": 70, "n": 20…`
-- **Prompt tokens (regex-digit-split-v1):** 1294
+- **Prompt tokens (regex-digit-split-v1):** 1299
 
 <details><summary>Prompt</summary>
 
@@ -366,30 +366,30 @@ C69: x45 or not x74 or x38
 C70: x45 or x38 or not x19
 
 Find values for all variables that make every clause true, or say UNSAT if none exist.
-After the line ANSWER:, write UNSAT or the values as `x=T` / `x=F`, comma-separated, in this order: x11, x12, x19, x26, x29, x38, x42, x43, x45, x50, x53, x57, x65, x69, x74, x84, x86, x90, x92, x97.
+After the line ANSWER:, write UNSAT, or one `<variable>=T` or `<variable>=F` per variable, comma-separated, in this order: x11, x12, x19, x26, x29, x38, x42, x43, x45, x50, x53, x57, x65, x69, x74, x84, x86, x90, x92, x97.
 ```
 
 </details>
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| DPLL-MENTION (D, T first) | D | x11=T x12=F x19=F x26=T x29=T x38=T x42=T x43=F x45=T x50=F x53=F x57=T x65=T x69=F x74=T x84=T x86=T x90=F x92=F x97=F | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell D(GREEDY|UC). | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| EXACT | null | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell D(GREEDY|UC). | a witness checked against every clause, or a closed refutation |
-| GREEDY-INDEX | C1 | x11=T x12=F x19=F x26=T x29=T x38=T x42=T x43=F x45=T x50=F x53=F x57=T x65=T x69=F x74=T x84=T x86=T x90=F x92=F x97=F | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell D(GREEDY|UC). | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
-| GREEDY-MENTION | C1 | x11=T x12=F x19=F x26=T x29=T x38=T x42=T x43=F x45=T x50=F x53=F x57=T x65=T x69=F x74=T x84=T x86=T x90=F x92=F x97=F | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell D(GREEDY|UC). | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
-| GUC-DET (C2) | C2 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell D(GREEDY|UC). | satisfies a literal of a shortest open clause at every step |
-| POLARITY (C0) | C0 | x11=T x12=F x19=T x26=F x29=T x38=T x42=T x43=F x45=T x50=T x53=F x57=T x65=T x69=F x74=T x84=T x86=T x90=T x92=T x97=T | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell D(GREEDY|UC). | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
-| RANDOM (H) | H | P(SAT)=0.50; P(UNSAT)=0.50 | p_h(outcome) = its distribution, mixed with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell D(GREEDY|UC). | no procedure determines the verdict |
-| RO-GREEDY (C3) | C3 | P(UNSAT)=0.99; P(x11=T,x12=F,x19=F,x26=F,x29=T…)=0.01 | p_h(outcome) = its distribution, mixed with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell D(GREEDY|UC). | GREEDY in a uniformly random order; the order varies across samples |
-| SC-DET (C2) | C2 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell D(GREEDY|UC). | prefers unit, then 2-literal open clauses; otherwise the first free variable set true |
-| UC-DET (C2) | C2 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast GREEDY vs UC, cell D(GREEDY|UC). | next commitment comes from a unit clause given the state ('forced'); else the first free variable set true; U… |
+| DPLL-MENTION (D, T first) | D | x11=T x12=F x19=F x26=T x29=T x38=T x42=T x43=F x45=T x50=F x53=F x57=T x65=T x69=F x74=T x84=T x86=T x90=F x92=F x97=F | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
+| EXACT | null | SAT | set-valued: uniform over its 2 solutions (satisfying assignment); a listed solution gets (1 - eps)/2 + eps/K, its unlisted solutions form t… | a witness checked against every clause, or a closed refutation |
+| GREEDY-INDEX | C1 | x11=T x12=F x19=F x26=T x29=T x38=T x42=T x43=F x45=T x50=F x53=F x57=T x65=T x69=F x74=T x84=T x86=T x90=F x92=F x97=F | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
+| GREEDY-MENTION | C1 | x11=T x12=F x19=F x26=T x29=T x38=T x42=T x43=F x45=T x50=F x53=F x57=T x65=T x69=F x74=T x84=T x86=T x90=F x92=F x97=F | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | commits variables in order σ; value = sign with more open clauses given earlier commitments; no revisions |
+| GUC-DET (C2) | C2 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | satisfies a literal of a shortest open clause at every step |
+| POLARITY (C0) | C0 | x11=T x12=F x19=T x26=F x29=T x38=T x42=T x43=F x45=T x50=T x53=F x57=T x65=T x69=F x74=T x84=T x86=T x90=T x92=T x97=T | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
+| RANDOM (H) | H | P(SAT)=0.50; P(UNSAT)=0.50 | p_h(outcome) = (1 - eps)·its distribution + eps/K (uniform slip eps = 0.1 over the K = 5 outcome classes); the cell rate is Σ_h π_h·p_h. Co… | no procedure determines the verdict |
+| RO-GREEDY (C3) | C3 | P(UNSAT)=1.00; P(x11=T,x12=F,x19=F,x26=T,x29=T…)=0.00 | p_h(outcome) = (1 - eps)·its distribution + eps/K (uniform slip eps = 0.1 over the K = 5 outcome classes); the cell rate is Σ_h π_h·p_h. Co… | GREEDY in a uniformly random order; the order varies across samples |
+| SC-DET (C2) | C2 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | prefers unit, then 2-literal open clauses; otherwise the first free variable set true |
+| UC-DET (C2) | C2 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.920, eps/K = 0.020 on each other class (uniform slip eps = 0.1 over the K = 5 outcome classes); the ce… | next commitment comes from a unit clause given the state ('forced'); else the first free variable set true; U… |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = GREEDY-MENTION / GREEDY-INDEX / DPLL-MENTION (D, T first)'s prediction*: GUC-DET (C2) +1.57, POLARITY (C0) +1.57, RANDOM (H) +1.57, SC-DET (C2) +1.57, UC-DET (C2) +1.57, RO-GREEDY (C3) +1.50
-- *answer = POLARITY (C0)'s prediction*: DPLL-MENTION (D, T first) +1.57, EXACT +1.57, GREEDY-INDEX +1.57, GREEDY-MENTION +1.57, GUC-DET (C2) +1.57, RANDOM (H) +1.57
-- *answer = UNSAT*: DPLL-MENTION (D, T first) +1.57, EXACT +1.57, GREEDY-INDEX +1.57, GREEDY-MENTION +1.57, POLARITY (C0) +1.57, RANDOM (H) +0.29
-- *answer = other*: DPLL-MENTION (D, T first) +1.28, GREEDY-INDEX +1.28, GREEDY-MENTION +1.28, GUC-DET (C2) +1.28, POLARITY (C0) +1.28, SC-DET (C2) +1.28
+- *answer = GREEDY-MENTION / GREEDY-INDEX / DPLL-MENTION (D, T first)'s prediction*: GUC-DET (C2) +1.66, POLARITY (C0) +1.66, RANDOM (H) +1.66, SC-DET (C2) +1.66, UC-DET (C2) +1.66, RO-GREEDY (C3) +1.62
+- *answer = POLARITY (C0)'s prediction*: DPLL-MENTION (D, T first) +1.66, EXACT +1.66, GREEDY-INDEX +1.66, GREEDY-MENTION +1.66, GUC-DET (C2) +1.66, RANDOM (H) +1.66
+- *answer = UNSAT*: DPLL-MENTION (D, T first) +1.66, EXACT +1.66, GREEDY-INDEX +1.66, GREEDY-MENTION +1.66, POLARITY (C0) +1.66, RANDOM (H) +0.29
+- *answer = other*: DPLL-MENTION (D, T first) +1.37, EXACT +1.37, GREEDY-INDEX +1.37, GREEDY-MENTION +1.37, GUC-DET (C2) +1.37, POLARITY (C0) +1.37
 
 Notes: Single edits of the base. Cell = which members' outputs change (computed over all single edits).
 
@@ -424,14 +424,14 @@ After the line ANSWER:, write the letters of the chosen items in alphabetical or
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| DIFF | C1 | ["B", "D", "E", "F", "J"] | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast RATIO vs VALUE, cell BASE. | sorts by value minus weight (a no-division proxy); takes each item that fits |
-| EXACT | null | ["B", "D", "E", "F", "J"] | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast RATIO vs VALUE, cell BASE. | dynamic programming or exhaustive comparison of subsets |
-| INPUT-FIT | C1 | ["A", "B", "C"] | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast RATIO vs VALUE, cell BASE. | takes items in listed order whenever they fit |
-| LARGEST-FIT | C1 | ["A", "B", "G"] | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast RATIO vs VALUE, cell BASE. | takes the heaviest items first while they fit |
-| RATIO+BEST-SINGLE | pBT-2 | ["B", "D", "F", "J"] | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast RATIO vs VALUE, cell BASE. | compares the ratio-greedy prefix with the best single item |
-| RATIO-PREFIX | C1 | ["B", "D", "F", "J"] | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast RATIO vs VALUE, cell BASE. | sorts by value per unit weight; stops at the first item that does not fit |
-| RATIO-SKIP | C1 | ["B", "D", "E", "F", "J"] | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast RATIO vs VALUE, cell BASE. | sorts by value per unit weight; takes each item that fits; cites value per kg |
-| VALUE | C1 | ["B", "D", "G", "J"] | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Contrast RATIO vs VALUE, cell BASE. | takes the most valuable items first while they fit |
+| DIFF | C1 | ["B", "D", "E", "F", "J"] | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | sorts by value minus weight (a no-division proxy); takes each item that fits |
+| EXACT | null | ["B", "D", "E", "F", "J"] | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | dynamic programming or exhaustive comparison of subsets |
+| INPUT-FIT | C1 | ["A", "B", "C"] | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | takes items in listed order whenever they fit |
+| LARGEST-FIT | C1 | ["A", "B", "G"] | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | takes the heaviest items first while they fit |
+| RATIO+BEST-SINGLE | pBT-2 | ["B", "D", "F", "J"] | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | compares the ratio-greedy prefix with the best single item |
+| RATIO-PREFIX | C1 | ["B", "D", "F", "J"] | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | sorts by value per unit weight; stops at the first item that does not fit |
+| RATIO-SKIP | C1 | ["B", "D", "E", "F", "J"] | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | sorts by value per unit weight; takes each item that fits; cites value per kg |
+| VALUE | C1 | ["B", "D", "G", "J"] | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | takes the most valuable items first while they fit |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 

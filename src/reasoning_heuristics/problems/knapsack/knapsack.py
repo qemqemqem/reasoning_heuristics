@@ -1,8 +1,9 @@
 """0/1 knapsack instances, exact solvers and renderers.
 
 Items keep their listing order π_L; names are letters (A, B, ...) or labelled objects.
-Generator path: dynamic programming over capacity (`solve_dp`). Validator path:
-vectorised enumeration of all subsets (`solve_brute`, n <= 22).
+Generator path: dynamic programming over capacity (`solve_dp`), and vectorised enumeration
+of all subsets (`solve_brute`, n <= 22) for the optimal-set readouts. The validators
+recompute both with their own code (`validate/independent.py`).
 
 `covering=True` is A/H E5's inverted problem: choose items with total weight at least
 L, minimising total value.

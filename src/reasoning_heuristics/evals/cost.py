@@ -19,9 +19,12 @@ charges more than the configured price, which stops the run as an error.
 
 from __future__ import annotations
 
+import gzip
+import json
 import statistics
 import threading
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from reasoning_heuristics import tokens
@@ -69,9 +72,28 @@ def kind_of(item: dict[str, Any]) -> str:
     raise KeyError(f"{item['item_id']}: no output-token assumption for domain {item['domain']!r}")
 
 
-def assumed_output_tokens(item: dict[str, Any], cond: Condition) -> int:
-    think, direct = OUTPUT_TOKENS[(item["vertical"], item["eval_id"], kind_of(item))]
+def assumed_output_tokens(item: dict[str, Any], cond: Condition, measured: dict[tuple[str, str, str], float] | None = None) -> int:
+    key = (item["vertical"], item["eval_id"], kind_of(item))
+    if measured and key in measured:
+        return min(round(measured[key]), cond.max_tokens)
+    think, direct = OUTPUT_TOKENS[key]
     return min(direct if cond.name == "direct" else think, cond.max_tokens)
+
+
+def measured_output_tokens(scored_path: str | Path) -> dict[tuple[str, str, str], float]:
+    """Mean API-reported completion tokens per (vertical, eval, kind) in a run's scored records
+    (truncated responses count at the cap), to replace the assumptions once a run exists."""
+    sums: dict[tuple[str, str, str], list[int]] = {}
+    with gzip.open(scored_path, "rt", encoding="utf-8") as fh:
+        for line in fh:
+            r = json.loads(line)
+            if r["category"] == "api_error" or r.get("completion_tokens") is None:
+                continue
+            key = (r["vertical"], r["eval_id"], kind_of({"vertical": r["vertical"], "eval_id": r["eval_id"],
+                                                         "domain": r["item_domain"], "answer_format": r["answer_format"],
+                                                         "item_id": r["item_id"]}))
+            sums.setdefault(key, []).append(r["completion_tokens"])
+    return {k: sum(v) / len(v) for k, v in sums.items()}
 
 
 def prompt_tokens_proxy(item: dict[str, Any], cond: Condition) -> int:
@@ -92,12 +114,13 @@ class EvalEstimate:
         return self.__dict__ | {"cost_usd": round(self.cost_usd, 4), "worst_case_usd": round(self.worst_case_usd, 4)}
 
 
-def estimate(items: list[dict[str, Any]], cond: Condition, price: Pricing, samples: int = 1) -> dict[str, Any]:
+def estimate(items: list[dict[str, Any]], cond: Condition, price: Pricing, samples: int = 1,
+             measured: dict[tuple[str, str, str], float] | None = None, measured_source: str | None = None) -> dict[str, Any]:
     by: dict[tuple[str, str], EvalEstimate] = {}
     for it in items:
         key = (it["vertical"], it["eval_id"])
         row = by.setdefault(key, EvalEstimate(it["vertical"], it["eval_id"], 0, 0, 0, 0.0, 0.0))
-        p, o = prompt_tokens_proxy(it, cond) * samples, assumed_output_tokens(it, cond) * samples
+        p, o = prompt_tokens_proxy(it, cond) * samples, assumed_output_tokens(it, cond, measured) * samples
         row.items += samples
         row.prompt_tokens += p
         row.output_tokens += o
@@ -113,15 +136,18 @@ def estimate(items: list[dict[str, Any]], cond: Condition, price: Pricing, sampl
         "cost_usd": round(sum(r.cost_usd for r in rows), 4),
         "worst_case_usd": round(sum(r.worst_case_usd for r in rows), 4),
         "assumptions": {"prompt_tokens": f"tokens.py proxy ({tokens.PROXY_NAME}) + {TEMPLATE_TOKENS} template tokens",
-                        "output_tokens": SOURCES, "price": price.source},
+                        "output_tokens": (f"measured means per eval and kind from {measured_source} (vertical-doc "
+                                          f"assumptions where it has none)") if measured else SOURCES,
+                        "price": price.source},
     }
 
 
 def format_estimate(est: dict[str, Any], title: str) -> str:
+    out_label = "measured" if str(est["assumptions"]["output_tokens"]).startswith("measured") else "assumed"
     lines = [f"## {title}", "",
              f"Condition {est['condition']['label']}, max_tokens {est['condition']['max_tokens']}; "
              f"price ${est['price']['prompt']}/M prompt, ${est['price']['completion']}/M completion ({est['price']['source']}).", "",
-             "| Vertical | Eval | Items | Prompt tokens (proxy) | Output tokens (assumed) | Estimate (USD) | Worst case, all at max_tokens (USD) |",
+             f"| Vertical | Eval | Items | Prompt tokens (proxy) | Output tokens ({out_label}) | Estimate (USD) | Worst case, all at max_tokens (USD) |",
              "|---|---|---|---|---|---|---|"]
     for r in est["per_eval"]:
         lines.append(f"| {r['vertical']} | {r['eval_id']} | {r['items']} | {r['prompt_tokens']:,} | {r['output_tokens']:,} | "

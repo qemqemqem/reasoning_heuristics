@@ -20,6 +20,7 @@ the network unless the default transport is used.
 
 from __future__ import annotations
 
+import http.client
 import json
 import os
 import random
@@ -157,7 +158,8 @@ class OpenRouterClient:
             charged = 0.0
             try:
                 resp = self.transport("POST", f"{API_BASE}/chat/completions", self._headers(), payload, self.timeout_s)
-            except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as e:
+            except (urllib.error.URLError, http.client.HTTPException, TimeoutError, ConnectionError, OSError) as e:
+                # HTTPException covers a body cut short (IncompleteRead) and a dropped connection
                 errors.append(f"attempt {attempt}: network {type(e).__name__}: {str(e)[:200]}")
             else:
                 status = resp.status

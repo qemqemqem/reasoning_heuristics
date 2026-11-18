@@ -1,9 +1,9 @@
 """What each member predicts on an item, as a distribution over the item's answer space.
 
-Built from the item's `predictions` and `instance` only. The items' `disconfirms` tables and
-outcome classes are not used: they give set-valued members no classes of their own (so EXACT is
-credited with invalid answers in "other"), spread the slip over every class including the
-member's own, and drop some members (see docs/RECOVERY.md).
+Built from the item's `predictions` and `instance` only. The engine computes its own
+likelihoods (`likelihood`, with a fitted slip rate) and never reads the items' `disconfirms`
+tables or outcome classes, which are a uniform-slip preview with ε fixed at 0.1
+(docs/GENERATORS.md).
 
 Every `predictions[label]` record becomes a `Pred` of one of five kinds:
 

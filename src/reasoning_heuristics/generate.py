@@ -41,22 +41,27 @@ def output_path(out_dir: Path, vertical: str, eval_id: str, tier: str, seed: int
 
 def generate_and_validate(vertical: str, eval_id: str, tier: str, seed: int, per_cell: int | None,
                           params: dict, out_dir: Path, validate: bool = True) -> dict:
+    """Generate one set, validate it and write its .jsonl and .report.json.
+
+    The written report holds no timings, so regenerating reproduces it byte for byte (CI checks
+    the committed sets that way). The returned report adds `seconds`: wall-clock and CPU time of
+    generation and validation."""
     mod = load(vertical, eval_id)
-    t0 = time.time()
+    t0, c0 = time.time(), time.process_time()
     items, stats = mod.generate(tier, seed, per_cell, **params)
-    gen_seconds = time.time() - t0
+    seconds = {"generation": round(time.time() - t0, 1), "generation_cpu": round(time.process_time() - c0, 1)}
     path = output_path(out_dir, mod.VERTICAL, mod.EVAL_ID, tier, seed)
     write_jsonl(items, path)
     report = {"vertical": mod.VERTICAL, "eval_id": mod.EVAL_ID, "tier": tier, "seed": seed,
               "per_cell": per_cell or TIERS[tier].default_per_cell, "params": params,
-              "cells": mod.cells(params), "generation": stats, "generation_seconds": round(gen_seconds, 1),
+              "cells": mod.cells(params), "generation": stats,
               "path": str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)}
     if validate:
-        t1 = time.time()
+        t1, c1 = time.time(), time.process_time()
         report["validation"] = run_checks(items, mod.check_set)
-        report["validation_seconds"] = round(time.time() - t1, 1)
+        seconds |= {"validation": round(time.time() - t1, 1), "validation_cpu": round(time.process_time() - c1, 1)}
     path.with_suffix(".report.json").write_text(json.dumps(report, indent=1, ensure_ascii=False))
-    return report
+    return {**report, "seconds": seconds}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -75,6 +80,8 @@ def main(argv: list[str] | None = None) -> int:
     v = report.get("validation")
     print(f"{report['vertical']} {report['eval_id']} {args.tier}: {report['generation']['accepted']} sets, "
           f"{v['items'] if v else '?'} items -> {report['path']}")
+    print("seconds (wall / CPU): " + ", ".join(f"{k} {report['seconds'][k]} / {report['seconds'][k + '_cpu']}"
+                                               for k in ("generation", "validation") if k in report["seconds"]))
     if v:
         print(f"validation: {v['items_passed']}/{v['items']} items pass ({len(v['failures'])} failures)")
         for f in v["failures"][:20]:

@@ -39,14 +39,13 @@
    "pairs_where_ETR_differs_from_GREEDY_CM": 1
   }
  },
- "generation_seconds": 1.6,
  "path": "data/items/smoke/C_E5_smoke_s1.jsonl",
  "validation": {
   "items": 17,
   "sets": 5,
   "items_passed": 17,
   "pass_rate": 1.0,
-  "failures": []
- },
- "validation_seconds": 1.1
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
 }

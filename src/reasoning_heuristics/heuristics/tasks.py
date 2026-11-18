@@ -23,8 +23,15 @@ class ColouringTask:
     fixed: tuple[tuple[str, int], ...] = ()  # pre-coloured vertices (E5-STATE)
     answer_order: tuple[str, ...] | None = None  # None: FREE
     complement: bool = False  # A/H E5 inverted rule: colour the complement graph
+    # C E3 I arm: the question is "first-fit in the listed order: what colour does `target` get?",
+    # so the listing order and the target are part of the question (and of the content key).
+    target: str | None = None
 
     domain = "coloring"
+
+    def __post_init__(self) -> None:
+        if self.target is not None and (self.target not in self.graph.position or self.complement):
+            raise ValueError(f"target {self.target!r}: not a vertex, or on a complement-rule task")
 
     def fixed_dict(self) -> dict[str, int]:
         return dict(self.fixed)
@@ -33,10 +40,14 @@ class ColouringTask:
         return {"kind": "coloring_task", "graph": self.graph.to_json(), "k": self.k,
                 "fixed": [list(x) for x in self.fixed],
                 "answer_order": list(self.answer_order) if self.answer_order is not None else None,
-                "complement": self.complement}
+                "complement": self.complement, **({"target": self.target} if self.target is not None else {})}
 
     def content_key(self) -> dict[str, Any]:
-        return {"graph": self.graph.content_key(), "k": self.k, "fixed": sorted(self.fixed), "complement": self.complement}
+        key = {"graph": self.graph.content_key(), "k": self.k, "fixed": sorted(self.fixed), "complement": self.complement}
+        if self.target is not None:  # an instructed first-fit question: its answer depends on the listing order
+            key["first_fit_listing"] = list(self.graph.vertices)
+            key["target"] = self.target
+        return key
 
 
 @dataclass(frozen=True)
@@ -126,7 +137,7 @@ def load_task(data: dict[str, Any]):
     if kind == "coloring_task":
         return ColouringTask(Graph.from_json(data["graph"]), data["k"], tuple((v, c) for v, c in data["fixed"]),
                              tuple(data["answer_order"]) if data["answer_order"] is not None else None,
-                             data.get("complement", False))
+                             data.get("complement", False), data.get("target"))
     if kind == "sat_task":
         return SatTask(CNF.from_json(data["cnf"]), tuple((v, b) for v, b in data["fixed"]),
                        tuple(data["answer_order"]) if data["answer_order"] is not None else None,

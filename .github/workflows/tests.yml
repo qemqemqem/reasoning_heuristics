@@ -20,3 +20,32 @@ jobs:
         run: python -m pip install -e '.[dev]'
       - name: Tests
         run: python -m pytest -q --durations=10
+
+  # The committed item sets must be exactly what the code generates. Regenerate all of them
+  # (every smoke and dev set, seed 1, with their reports, the review packets and the summary) and
+  # fail on any difference in data/items or review. Test batches are gitignored.
+  reproduce-items:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            data/items/constraints.txt
+      - name: Install the versions the committed sets were built with
+        run: python -m pip install -e '.[dev]' -c data/items/constraints.txt
+      - name: Regenerate (fails on any validation failure, leakage or hash collision)
+        run: python -m reasoning_heuristics.review
+      - name: Fail on any difference from the committed files
+        run: |
+          changed="$(git status --porcelain --untracked-files=all -- data/items review)"
+          if [ -n "$changed" ]; then
+            echo "$changed"
+            git diff -- review 'data/items/*/*.report.json' | head -n 300
+            echo "::error::The committed item sets do not reproduce. Run python -m reasoning_heuristics.review and commit what it writes."
+            exit 1
+          fi

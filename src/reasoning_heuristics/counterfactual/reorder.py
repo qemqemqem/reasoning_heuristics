@@ -54,10 +54,15 @@ def reorder_clauses(cnf: CNF, order: list[int], literal_orders: list[list[int]] 
 
 
 def assert_isomorphic_copy(a: Graph, b: Graph, mapping: dict[str, str] | None = None) -> None:
-    """Fail loudly unless b is a copy of a: same vertex/label multiset, same edges through mapping."""
+    """Fail loudly unless b is a copy of a: same vertex/label multiset, the mapping a bijection from
+    a's vertices onto b's, and the same number of edges, which the mapping carries onto b's edges."""
     if sorted(a.vertices) != sorted(b.vertices):
         raise AssertionError("label multisets differ")
     mapping = mapping or {v: v for v in a.vertices}
+    if sorted(mapping) != sorted(a.vertices) or sorted(mapping.values()) != sorted(b.vertices):
+        raise AssertionError("the mapping is not a bijection from a's vertices onto b's")
+    if len(a.edges) != len(b.edges):
+        raise AssertionError(f"edge counts differ: {len(a.edges)} vs {len(b.edges)}")
     ea = {frozenset((mapping[u], mapping[v])) for u, v in a.edges}
     eb = {frozenset(e) for e in b.edges}
     if ea != eb:

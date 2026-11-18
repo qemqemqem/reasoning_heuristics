@@ -2,7 +2,10 @@
 
 Every hash in the item store is a SHA-256 over canonical JSON (sorted keys, no
 whitespace, tuples as lists). Hashes are shortened to 16 hex characters for
-readability; collisions at that length are checked by the validators.
+readability; collisions at that length are checked by the validators:
+`validate.checks.check_hash_collisions` fails a content hash shared by two different
+content keys, or a presentation hash shared by two different prompts, within every
+generated set (`run_checks`) and across all sets in the review summary.
 """
 
 from __future__ import annotations

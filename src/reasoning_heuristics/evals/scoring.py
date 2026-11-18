@@ -27,10 +27,13 @@ Pipeline for one response
    YES/NO) the scored answer is the decision; a positive claim's witness is checked
    (`valid`) and its problems are flags (`witness_partial`, ...), not a category. On every other
    channel the witness is the answer, so its problems set the category.
-6. **Outcome class** (only for category ok): the item's channel (reconstructed with the same
-   generator functions that built `extra.outcome_classes`) maps the parsed answer to a class key;
-   the record carries the class label as written in `extra.outcome_classes` / `disconfirms`
-   ("answer = other" when no deterministic member predicted it).
+6. **Outcome class** (only for category ok): the item's channel, rebuilt from `extra.channel_spec`
+   (items written before scorer-1.1.0: from the channel name, with the same generator functions
+   that built `extra.outcome_classes`), maps the parsed answer to a class key with
+   `generators.common.classify_answer`: its channel value when that is a class, else, on a
+   witness channel, the class of the unlisted solutions of the solution sets that contain it
+   (checked with the item's serialised membership rules), else other. The record carries the
+   class label as written in `extra.outcome_classes` / `disconfirms`.
 7. **Correctness** (only for category ok), with the repo's problem code: proper colouring and
    colour count (k, fixed colours, the stated rule's effective graph), the assignment satisfies
    the stated CNF and the fixed values, knapsack feasibility and optimality, the entailment
@@ -51,8 +54,7 @@ from functools import cached_property
 from typing import Any
 
 from reasoning_heuristics import tokens
-from reasoning_heuristics.generators.c_e3 import bit_channel, colour_channel
-from reasoning_heuristics.generators.common import Channel, decision_channel, witness_channel
+from reasoning_heuristics.generators.common import OTHER, Channel, classify_answer, item_channel
 from reasoning_heuristics.heuristics.answers import answer_key
 from reasoning_heuristics.heuristics.coloring import effective_graph
 from reasoning_heuristics.heuristics.sat import effective_cnf
@@ -61,7 +63,10 @@ from reasoning_heuristics.problems.coloring import graph as G
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.sat import cnf as S
 
-SCORER_VERSION = "scorer-1.0.0"
+SCORER_VERSION = "scorer-1.5.0"
+# The changelog is in docs/RUNNER.md ("Scorer versions"). 1.5.0 is main's scorer-1.1.0 (outcome classes from
+# extra.channel_spec, sets_matched) plus the parsing changes made on the smoke-runs branch, whose own labels
+# 1.1.0-1.4.1 were never used on main; 1.5.0 is the first label above both lines.
 
 CATEGORIES = ("ok", "parse_fail", "refusal", "declared_impossible", "partial", "truncated", "api_error")
 
@@ -224,8 +229,8 @@ _REFUSAL = re.compile(
 
 # Line-initial ANSWER markers ("ANSWER:", "**ANSWER:**", "### Final answer:", "ANSWER" alone on a line);
 # an inline "ANSWER:" (upper case) only counts when no line-initial marker exists.
-_MARK_LINE = re.compile(r"(?im)^[ \t>*_#`~|-]*(?:final[ \t]+)?answer[ \t*_`]*[:：]")
-_MARK_HEAD = re.compile(r"(?im)^[ \t>*_#`~|-]*(?:final[ \t]+)?answer[ \t*_`]*$")
+_MARK_LINE = re.compile(r"(?im)^[^\w\n]*(?:final[ \t]+)?answer[ \t*_`]*[:：]")  # any symbols before it: "### ✅ Final Answer:"
+_MARK_HEAD = re.compile(r"(?im)^[^\w\n]*(?:final[ \t]+)?answer[ \t*_`]*$")
 _MARK_INLINE = re.compile(r"ANSWER[ \t*_`]*[:：]")
 
 
@@ -380,18 +385,11 @@ class ItemContext:
 
 
 def channel_for(item: dict[str, Any], domain: str) -> Channel:
-    """The item's scoring channel, rebuilt with the generator functions that produced its outcome classes."""
-    name = item["extra"].get("channel")
-    if name == "decision":
-        pos, neg = {"sat": ("SAT", "UNSAT"), "coloring": ("POSSIBLE", "IMPOSSIBLE"), "entailment": ("YES", "NO")}[domain]
-        return decision_channel(pos, neg)
-    if name == "answer":
-        return witness_channel(domain)
-    if name == "target-bit":
-        return bit_channel(item["params"]["target"], item["params"]["reference_vertex"])
-    if name == "target-colour":
-        return colour_channel(item["params"]["target"])
-    raise ValueError(f"{item['item_id']}: unknown channel {name!r}")
+    """The item's scoring channel: rebuilt from `extra.channel_spec` (with its solution sets), or,
+    for items written before it existed, from the channel name with the generator functions that
+    produced its outcome classes (`decision_channel`, `witness_channel`, C E3's `bit_channel` /
+    `colour_channel`)."""
+    return item_channel(item)
 
 
 def _fact_norm(s: str) -> str:
@@ -411,13 +409,33 @@ def _fact_variants(canon: str) -> list[str]:
 # --- the parsers ------------------------------------------------------------------------------------
 
 
+_LATEX_WRAP = re.compile(r"\\(?:boxed|text|textbf|textit|texttt|mathrm|mathbf|mathtt)\s*\{([^{}]*)\}")
+
+
+def unlatex(text: str) -> str:
+    """Unwrap LaTeX answer decoration (seen live: `$$\\text{ANSWER: C}$$`, `$$\\boxed{C}$$`): wrappers such
+    as \\boxed{..} and \\text{..} are replaced by their contents, and math delimiters by line breaks."""
+    prev = None
+    while prev != text:  # nested: \boxed{\text{C}}
+        prev, text = text, _LATEX_WRAP.sub(r"\1", text)
+    text = re.sub(r"\$\$|\\\[|\\\]|\\\(|\\\)", "\n", text)
+    return re.sub(r"(?<!\\)\$", "", text)
+
+
 def parse(ctx: ItemContext, text: str) -> Parse | None:
     """Parse the visible text by the item's format. None means no answer block was found."""
     if ctx.fmt.kind.startswith("json_"):
         return _parse_json(ctx, text)
     marks, inline = answer_markers(text)
     if not marks:
-        return None
+        res = _bare_answer(ctx, text)
+        fences = list(re.finditer(r"(?:```|~~~)[\w+-]*[ \t]*\n(.*?)(?:```|~~~)", text, re.S))
+        if res is None and fences:  # no marker: the last fenced block, if it holds nothing but an answer
+            res = _bare_answer(ctx, fences[-1].group(1))
+            if res is not None:
+                res.flags = [f for f in res.flags if f != "no_answer_marker"] + ["fenced_answer_no_marker"]
+                res.answer_start = fences[-1].start()
+        return res
     results = []
     for i, (start, end) in enumerate(marks):
         stop = marks[i + 1][0] if i + 1 < len(marks) else len(text)
@@ -435,6 +453,40 @@ def parse(ctx: ItemContext, text: str) -> Parse | None:
 
 def _first_line(block: str) -> str:
     return next((ln for ln in block.splitlines() if ln.strip()), "")
+
+
+def _bare_answer(ctx: ItemContext, text: str) -> Parse | None:
+    """No ANSWER marker at all: accept the visible text only if it is nothing but an answer in the
+    format (the direct condition's "respond with only the final answer" often drops the marker).
+    Any other text means no answer block. Flagged `no_answer_marker`."""
+    block = clean_block(text)
+    lines = [ln.strip() for ln in block.splitlines() if ln.strip()]
+    if not lines:
+        return None
+    kind = ctx.fmt.kind
+    one = lines[0].rstrip(".")
+    if kind == "ans_yn":
+        pure = len(lines) == 1 and re.fullmatch(r"(?i)yes|no", one)
+    elif kind == "ans_letter":
+        pure = len(lines) == 1 and re.fullmatch(r"\(?[A-Za-z]\)?", one)
+    elif kind == "ans_single_colour":
+        pure = len(lines) == 1 and re.fullmatch(rf"(?i)(?:{re.escape(ctx.fmt.target)}\s*[:=]\s*)?-?\d+", one)
+    elif kind == "ans_knap":
+        pure = len(lines) == 1 and re.fullmatch(rf"(?i)(?:none|(?:(?:{ctx.name_pattern})(?:\s*[,;]\s*|\s+|$))+)", one)
+    elif kind in ("ans_col", "ans_sat"):
+        word, ph, value = (("IMPOSSIBLE", PLACEHOLDER["vertex"], r"-?\d+") if kind == "ans_col"
+                           else ("UNSAT", PLACEHOLDER["variable"], r"(?:TRUE|FALSE|T|F|1|0)"))
+        pure = (len(lines) == 1 and one.upper() == word) or all(
+            re.fullmatch(rf"(?i)(?:(?:{ctx.name_pattern})\s*[:=]\s*\S+?\s*[,;]?\s*)+", ln) for ln in lines) or all(
+            re.fullmatch(rf"(?i)(?:(?:{ph}\s*[:=]\s*)?{value}(?:\s*[,;]\s*|\s+|$))+", ln.rstrip(".")) for ln in lines)
+    else:
+        pure = False
+    if not pure:
+        return None
+    res = _parse_block(ctx, block)
+    res.flags.append("no_answer_marker")
+    res.answer_start, res.n_blocks = 0, 1
+    return res
 
 
 def _declared_or_fail(ctx: ItemContext, snippet: str, what: str) -> Parse:
@@ -498,6 +550,9 @@ def _parse_pairs(ctx: ItemContext, block: str, value_rx: str, convert, negative_
     if not pairs:
         if _NEGATIVE.search(first) and ctx.fmt.allow_impossible:
             return Parse("ok", negative_word, flags=[f"{negative_word.lower()}_as_phrase"])
+        positional = _positional(ctx, block, value_rx, convert, what)
+        if positional is not None:
+            return positional
         return _declared_or_fail(ctx, first, f"no `{what}: value` pairs")
     flags = ["extra_text_in_block"] if extra_lines else []
     values: dict[str, Any] = {}
@@ -519,6 +574,38 @@ def _parse_pairs(ctx: ItemContext, block: str, value_rx: str, convert, negative_
     if order and [n for n in (ctx.name_map[p[0].lower()] for p in pairs)] != order:
         flags.append("order_differs_from_requested")
     return _complete_or_partial(ctx, values, flags, what)
+
+
+# the generic slot names in the C answer lines: the library wording (`x=T`, `vertex: colour`) and the
+# placeholder wording the generators switched to on 2026-11-18 (`<variable>=T`, `<vertex>: <colour>`)
+PLACEHOLDER = {"variable": r"(?:x|<variable>|variable)", "vertex": r"(?:<vertex>|vertex)"}
+
+
+def _positional(ctx: ItemContext, block: str, value_rx: str, convert, what: str) -> Parse | None:
+    """Values without their names, in the requested order (seen live: "ANSWER: T, T, F, ..." and the
+    format's own placeholder taken literally, "ANSWER: x=T, x=T, x=F, ..."). Read positionally only when
+    the item states an answer order and the block holds exactly one value per name; otherwise None."""
+    order = list(ctx.task.answer_order) if getattr(ctx.task, "answer_order", None) else None
+    if not order:
+        return None
+    ph = PLACEHOLDER[what]
+    item = rf"(?:{ph}\s*[:=]\s*)?({value_rx})"
+    line_rx = re.compile(rf"(?i)^(?:{item}(?:\s*[,;]\s*|\s+|$))+$")
+    lines = [ln.strip().rstrip(".") for ln in block.splitlines() if ln.strip()]
+    head: list[str] = []  # the leading run of value lines; anything after it is commentary
+    for ln in lines:
+        if not line_rx.match(ln):
+            break
+        head.append(ln)
+    if not head:
+        return None
+    vals = [m.group(1) for ln in head for m in re.finditer(rf"(?i)(?<![\w]){item}(?![\w])", ln)]
+    if len(vals) != len(order):
+        return Parse("parse_fail", detail=f"{len(vals)} values without names for {len(order)} {what}s")
+    flags = ["positional_values"] + (["placeholder_names"] if re.search(rf"(?i)(?<![\w]){ph}\s*[:=]", "\n".join(head)) else [])
+    if len(head) < len(lines):
+        flags.append("extra_text_in_block")
+    return _complete_or_partial(ctx, {n: convert(v) for n, v in zip(order, vals)}, flags, what)
 
 
 def _complete_or_partial(ctx: ItemContext, values: dict[str, Any], flags: list[str], what: str) -> Parse:
@@ -769,17 +856,23 @@ def _set_valued(rec: dict[str, Any]) -> bool:
     return bool((rec.get("trace_features") or {}).get("set_valued"))
 
 
-def outcome(ctx: ItemContext, ans: Any) -> tuple[str | None, str, list[str], list[str]]:
-    """(channel value, outcome-class label, members matching on the channel, members with the same answer key)."""
+def outcome(ctx: ItemContext, ans: Any) -> tuple[str | None, str, list[str], list[str], list[str]]:
+    """(channel value, outcome-class label, members matching on the channel, members with the same
+    answer key, set-valued members whose solution set contains the answer)."""
     classes = ctx.item["extra"]["outcome_classes"]
     by_key = {v: k for k, v in classes.items()}
-    other = by_key.get("_other", "answer = other")
+    other = by_key.get(OTHER, "answer = other")
     value = ctx.channel.key(ans) if ans is not None else None
-    label = by_key.get(value, other) if value is not None else other
+    label = by_key.get(classify_answer(ctx.channel, set(by_key), ans), other)
     mine = answer_key(ctx.domain, ans)
-    on_channel, same_key = [], []
+    on_channel, same_key, in_sets = [], [], []
+    sv = ctx.channel.set_valued
+    for lbl, spec in sv.items():  # items with a serialised channel: unique solutions are deterministic
+        if spec.class_counts is None and value is not None:
+            if (spec.solution == value) if spec.size == 1 else spec.contains(ctx.channel.task, value):
+                (on_channel if spec.size == 1 else in_sets).append(lbl)
     for lbl, rec in ctx.item["predictions"].items():
-        if rec.get("answer") is None or _set_valued(rec):
+        if rec.get("answer") is None or (lbl in sv if "channel_spec" in ctx.item["extra"] else _set_valued(rec)):
             continue
         try:
             if value is not None and ctx.channel.key(rec["answer"]) == value:
@@ -788,13 +881,18 @@ def outcome(ctx: ItemContext, ans: Any) -> tuple[str | None, str, list[str], lis
             pass
         if mine is not None and answer_key(ctx.domain, rec["answer"]) == mine:
             same_key.append(lbl)
-    return value, label, on_channel, same_key
+    return value, label, on_channel, same_key, in_sets
 
 
 def score_response(item: dict[str, Any], view: ResponseView, ctx: ItemContext | None = None) -> dict[str, Any]:
     """Score one response to one item. Returns the per-response record (see docs/RUNNER.md)."""
     ctx = ctx or ItemContext(item)
     text, flags = visible_text(view.content)
+    if not ctx.fmt.kind.startswith("json_"):
+        plain = unlatex(text)
+        if plain != text:
+            text = plain
+            flags.append("latex_unwrapped")
     truncated = view.finish_reason == "length" or view.native_finish_reason in ("length", "max_tokens", "MAX_TOKENS") or (
         view.max_tokens is not None and view.completion_tokens is not None and view.completion_tokens >= view.max_tokens)
     rec: dict[str, Any] = {
@@ -819,7 +917,9 @@ def score_response(item: dict[str, Any], view: ResponseView, ctx: ItemContext | 
             tail = text[-600:]
             if not text.strip():
                 result = Parse("parse_fail", detail="empty content")
-                if view.reasoning and parse(ctx, visible_text(view.reasoning)[0]) is not None:
+                # only for a finished reply: a reasoning trace cut at the cap often just quotes the
+                # prompt's answer format, which is not an answer
+                if not truncated and view.reasoning and parse(ctx, visible_text(view.reasoning)[0]) is not None:
                     result.flags.append("answer_only_in_reasoning")
             elif _GIVEUP.search(tail):
                 result = Parse("declared_impossible", detail="no answer block; " + _GIVEUP.search(tail).group(0))
@@ -843,11 +943,12 @@ def score_response(item: dict[str, Any], view: ResponseView, ctx: ItemContext | 
         "n_answer_blocks": result.n_blocks if result else 0,
         "pre_answer_tokens": tokens.count(text[: result.answer_start] if result and result.answer_start is not None else text),
         "channel_value": None, "outcome_class": None, "members_matched": [], "answer_key_matches": [],
-        "correct": None, "valid": None, "optimal": None,
+        "sets_matched": [], "correct": None, "valid": None, "optimal": None,
     })
     if category == "ok":
-        value, label, on_channel, same_key = outcome(ctx, parsed)
+        value, label, on_channel, same_key, in_sets = outcome(ctx, parsed)
         correct, valid, optimal = judge(ctx, parsed)
         rec.update({"channel_value": value, "outcome_class": label, "members_matched": on_channel,
-                    "answer_key_matches": same_key, "correct": correct, "valid": valid, "optimal": optimal})
+                    "answer_key_matches": same_key, "sets_matched": in_sets, "correct": correct, "valid": valid,
+                    "optimal": optimal})
     return rec

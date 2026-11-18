@@ -80,18 +80,24 @@ def views(task: EntailmentTask, rendering: str) -> list[View]:
 
 
 def view_to_formula(v: View, atom_names: dict[str, str]) -> F.Formula | None:
-    """A view's stage as a DNF formula over our atoms (None for verum/falsum)."""
+    """A view's stage as a DNF formula over our atoms (None for verum/falsum).
+
+    PyETR keeps states and atoms in frozensets, whose iteration order depends on the hash seed,
+    so the literals of each state and the states themselves are put in canonical order (by atom
+    label, positive first; states by their sorted literals)."""
     if v.is_verum or v.is_falsum:
         return None
-    disjuncts = []
+    states = []
     for state in v.stage:
         lits = []
         for a in state:
             key = f"{a.predicate.name}({','.join(str(t) for t in a.terms)})"
-            lits.append(F.lit(atom_names[key], bool(a.predicate.verifier)))
-        disjuncts.append(F.conj(*lits) if lits else None)
-    if any(d is None for d in disjuncts):
+            lits.append((atom_names[key], bool(a.predicate.verifier)))
+        states.append(sorted(lits, key=lambda l: (l[0], not l[1])))
+    if any(not s for s in states):
         return None
+    states.sort(key=lambda s: [(a, not p) for a, p in s])
+    disjuncts = [F.conj(*[F.lit(a, p) for a, p in s]) for s in states]
     return disjuncts[0] if len(disjuncts) == 1 else F.disj(*disjuncts)
 
 
