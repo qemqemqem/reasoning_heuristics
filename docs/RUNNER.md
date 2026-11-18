@@ -233,10 +233,11 @@ What the runs showed:
 - **gpt-oss-20b at high effort uses far more tokens than the vertical docs assumed**, often about 2× (table above).
   - A/H E2 SAT (n = 24, m = 101) truncates on every smoke item at 32,768 tokens.
   - Truncated responses are censored (SCOPE §6 rule 2) and carry no answer. The sizes need calibrating per SCOPE §6 rule 1.
-- **Qwen3-32B with thinking is shorter, and truncates less.** It writes its answer in three ways the scorer did not expect, each now handled with a flag:
+- **Qwen3-32B with thinking is shorter, and truncates less.** It writes its answer in four ways the scorer did not expect, each now handled with a flag:
   - LaTeX (`$$\boxed{C}$$`; scorer 1.2.0);
   - the C SAT values without their names, or with the format's placeholder `x=T` (1.3.x);
-  - a stray `---` and commentary after the values (1.3.1).
+  - a stray `---` and commentary after the values (1.3.1);
+  - `### ✅ Final Answer` headings, or a colouring in a code fence with no marker at all (1.4.0).
 - **Qwen3-32B direct.**
   - Thinking off held on all 254 responses.
   - Several replies drop the `ANSWER:` marker (1.1.0).
