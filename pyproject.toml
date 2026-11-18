@@ -19,6 +19,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8"]
 theory = ["matplotlib", "tiktoken"]
+force = ["tiktoken", "tokenizers"]  # budget forcing: the models' own tokenizers (evals/tokenizer.py)
 
 [tool.setuptools.packages.find]
 where = ["src"]
