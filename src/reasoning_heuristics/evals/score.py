@@ -100,7 +100,7 @@ def score_raw(manifest: dict[str, Any], raw: list[dict[str, Any]], items: dict[s
         if r.get("forced_template"):  # a forced final answer (force.py): a stratum of its own, never the source's
             rec.update({"forced": True, "forced_template": r["forced_template"], "source_run_id": r["source_run_id"]})
             rec.update({k: r[k] for k in ("forced_select", "forced_sample", "source_sample", *BUDGET_FIELDS) if k in r})
-            if r.get("natural_response") is not None:  # --select done: the source response's own answer
+            if r.get("natural_response") is not None:  # a finished source response (--select done or all): its own answer
                 rec.update(natural_scoring(it, r, ctx, rec))
         out.append(rec)
     return out

@@ -16,7 +16,8 @@ Neither library is a dependency of the package (`pip install -e '.[force]'`), an
 Re-tokenizing the returned trace text can differ slightly from the model's own token stream: the provider returns
 text, not tokens, and the same text can have more than one tokenization. force.py records each trace's count by this
 tokenizer (`trace_tokens`) beside the source usage's `reasoning_tokens` (`provider_reasoning_tokens`), so the
-difference is visible.
+difference is visible. DeepInfra's reasoning_tokens for Qwen3 are not a count of the trace; its completion_tokens are
+(docs/RUNNER.md, "Budget forcing and early answering").
 """
 
 from __future__ import annotations
