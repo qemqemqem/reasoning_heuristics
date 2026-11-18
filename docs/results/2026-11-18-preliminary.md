@@ -62,13 +62,13 @@ DESIGN §5 rule 12 allows mixture weights only for units and item sizes where th
 <!-- BEGIN prelim:units -->
 | Unit (20 per cell) | Items | Here | Why (docs/RECOVERY.md) | Members predicting UNSAT / IMPOSSIBLE / X (items) |
 |---|---|---|---|---|
-| AH_E5/COL | 80 | descriptive only | not reached by 40 (pre-regeneration): the 0.1 weight's coverage is 0.84 at 40 (100 replicates); at 20, coverage 0.83 and width 0.24 | C1 FIRST-FIT (stated rule) (28) |
-| AH_E5/ENT | 80 | descriptive only | not reached by 40 on the regenerated items: coverage 0.81 at 20 and 0.87 at 40 (B4 FIRST); BCa 0.88 at both | B4 FIRST (24) |
-| AH_E5/KNAP | 80 | descriptive only | no mixture test (pre-regeneration): fewer than three members on every item; null q fails at 20 | none |
+| AH_E5/COL | 80 | descriptive only | passes at 40 per cell (the mixture with either interval, and both nulls) but not at 20 (smallest coverage 0.86, median width 0.245; BCa 0.90, 0.239); no A/H E5 run at 40 per cell exists | C1 FIRST-FIT (stated rule) (28) |
+| AH_E5/ENT | 80 | descriptive only | not reached by 40: bias and width pass from 20, but the 0.1 weight (B4 FIRST) covers 0.81 at 20 and 0.87 at 40 (BCa 0.88 at both); both nulls pass | B4 FIRST (24) |
+| AH_E5/KNAP | 80 | descriptive only | no mixture test: fewer than three members on every item; null q fails coverage from 20 per cell on (the boundary) | none |
 | AH_E5/SAT | 100 | **fitted** | the mixture passes the three gates at 20 per cell on the regenerated items (see the text) | none |
-| C_E1/3-SAT | 120 | descriptive only | fails at 20 on the regenerated items: percentile coverage 0.86 (ALWAYS-UNSAT; BCa 0.92 passes), and null q fails (coverage 0.78) | ALWAYS-UNSAT (A1 give-up) (120); GREEDY-OUT (AR) (11); GUC-DET (C2) (50); UC-DET (C2) (81); stored distributions: RANDOM (H), RO-GREEDY (C3) |
-| C_E1/colouring | 120 | descriptive only | not reached by 40 (pre-regeneration): coverage 0.88 ± 0.03 at 40 (100 replicates); 0.77 at 20 | none |
-| C_E2/3-SAT | 200 | descriptive only | fails at 20 on the regenerated items: median width 0.28 > 0.2, and null q fails (coverage 0.89) | ALWAYS-UNSAT (A1 give-up) (200); DPLL-MENTION (D, T first) (40); EXACT (40); GREEDY-INDEX (160); GREEDY-MENTION (160); GUC-DET (C2) (173); SC-DET (C2) (158); UC-DET (C2) (177); stored distributions: RANDOM (H), RO-GREEDY (C3) |
+| C_E1/3-SAT | 120 | descriptive only | the mixture passes only with BCa intervals (0.92 at 20, 0.90 at 40); with percentile intervals the 0.1 ALWAYS-UNSAT weight covers 0.86 at 20 and 0.79 at 40; null q fails at every size (the boundary) | ALWAYS-UNSAT (A1 give-up) (120); GREEDY-OUT (AR) (11); GUC-DET (C2) (50); UC-DET (C2) (81); stored distributions: RANDOM (H), RO-GREEDY (C3) |
+| C_E1/colouring | 120 | descriptive only | the mixture passes only with BCa intervals, at 20 (0.91); with percentile intervals it covers 0.88 at 20 and 0.87 at 40; null ALWAYS fails at every size, by design (the one-colour answer goes to LOCAL-2-ID) | none |
+| C_E2/3-SAT | 200 | descriptive only | the mixture passes at 40 per cell but not at 20 (coverage 0.88, median width 0.28), and null q fails at every size (0.88 at 40), so the three never pass together | ALWAYS-UNSAT (A1 give-up) (200); DPLL-MENTION (D, T first) (40); EXACT (40); GREEDY-INDEX (160); GREEDY-MENTION (160); GUC-DET (C2) (173); SC-DET (C2) (158); UC-DET (C2) (177); stored distributions: RANDOM (H), RO-GREEDY (C3) |
 | C_E2/colouring | 300 | **fitted** | the mixture passes the three gates at 20 per cell on the regenerated items (see the text) | none |
 | C_E2/knapsack | 300 | **fitted** | the mixture passes the three gates at 20 per cell on the regenerated items (see the text) | none |
 <!-- END prelim:units -->
@@ -93,29 +93,29 @@ DESIGN §5 rule 12 allows mixture weights only for units and item sizes where th
 <!-- BEGIN prelim:dev_units -->
 | Unit (5 per cell) | Items | Gate status at larger sizes (docs/RECOVERY.md) |
 |---|---|---|
-| AH_E1/COL | 20 | fails by design: q is not identified on a two-valued channel (q = ½ always-positive + ½ always-negative), and the noise models are near-mixtures of the procedures |
-| AH_E1/ENT | 20 | fails by design: q is not identified on a two-valued channel (q = ½ always-positive + ½ always-negative), and the noise models are near-mixtures of the procedures |
-| AH_E1/SAT | 30 | fails by design: q is not identified on a two-valued channel (q = ½ always-positive + ½ always-negative), and the noise models are near-mixtures of the procedures |
+| AH_E1/COL | 20 | fails by design at every size run (5–20 per cell): q is not identified on a two-valued channel (q = ½ always-positive + ½ always-negative), so the nulls are not testable, and the noise models are near-mixtures of the procedures |
+| AH_E1/ENT | 20 | fails by design at every size run (5–20 per cell): q is not identified on a two-valued channel (q = ½ always-positive + ½ always-negative), so the nulls are not testable, and the noise models are near-mixtures of the procedures |
+| AH_E1/SAT | 30 | fails by design at every size run (5–20 per cell): q is not identified on a two-valued channel (q = ½ always-positive + ½ always-negative), so the nulls are not testable, and the noise models are near-mixtures of the procedures |
 | AH_E2/COL | 40 | fails by design: as A/H E1 |
 | AH_E2/ENT | 40 | fails by design: as A/H E1 |
 | AH_E2/SAT | 40 | fails by design: as A/H E1 |
-| AH_E5/COL | 20 | not reached by 40 (pre-regeneration): the 0.1 weight's coverage is 0.84 at 40 (100 replicates); at 20, coverage 0.83 and width 0.24 |
-| AH_E5/ENT | 20 | not reached by 40 on the regenerated items: coverage 0.81 at 20 and 0.87 at 40 (B4 FIRST); BCa 0.88 at both |
-| AH_E5/KNAP | 20 | no mixture test (pre-regeneration): fewer than three members on every item; null q fails at 20 |
+| AH_E5/COL | 20 | passes at 40 per cell (the mixture with either interval, and both nulls) but not at 20 (smallest coverage 0.86, median width 0.245; BCa 0.90, 0.239); no A/H E5 run at 40 per cell exists |
+| AH_E5/ENT | 20 | not reached by 40: bias and width pass from 20, but the 0.1 weight (B4 FIRST) covers 0.81 at 20 and 0.87 at 40 (BCa 0.88 at both); both nulls pass |
+| AH_E5/KNAP | 20 | no mixture test: fewer than three members on every item; null q fails coverage from 20 per cell on (the boundary) |
 | AH_E5/SAT | 25 | passes at 20 per cell; fitted on the 20-per-cell runs |
-| B4C4_E1/entailment | 140 | fails by design: NOISY-EXACT is nearly the EXACT group (σ_min/σ_max = 0.0004) |
-| B4C4_E2/entailment | 240 | fails by design: five linear dependencies, one of them among procedures (the H6 gap) |
-| C_E1/3-SAT | 30 | fails at 20 on the regenerated items: percentile coverage 0.86 (ALWAYS-UNSAT; BCa 0.92 passes), and null q fails (coverage 0.78) |
-| C_E1/colouring | 30 | not reached by 40 (pre-regeneration): coverage 0.88 ± 0.03 at 40 (100 replicates); 0.77 at 20 |
-| C_E2/3-SAT | 50 | fails at 20 on the regenerated items: median width 0.28 > 0.2, and null q fails (coverage 0.89) |
+| B4C4_E1/entailment | 140 | fails by design (run at dev size only): NOISY-EXACT is nearly the EXACT group (σ_min/σ_max = 0.0004) |
+| B4C4_E2/entailment | 240 | fails by design (run at dev size only): five linear dependencies, one of them among procedures (the H6 gap) |
+| C_E1/3-SAT | 30 | the mixture passes only with BCa intervals (0.92 at 20, 0.90 at 40); with percentile intervals the 0.1 ALWAYS-UNSAT weight covers 0.86 at 20 and 0.79 at 40; null q fails at every size (the boundary) |
+| C_E1/colouring | 30 | the mixture passes only with BCa intervals, at 20 (0.91); with percentile intervals it covers 0.88 at 20 and 0.87 at 40; null ALWAYS fails at every size, by design (the one-colour answer goes to LOCAL-2-ID) |
+| C_E2/3-SAT | 50 | the mixture passes at 40 per cell but not at 20 (coverage 0.88, median width 0.28), and null q fails at every size (0.88 at 40), so the three never pass together |
 | C_E2/colouring | 75 | passes at 20 per cell; fitted on the 20-per-cell runs |
 | C_E2/knapsack | 75 | passes at 20 per cell; fitted on the 20-per-cell runs |
-| C_E3/colouring (gadget) | 270 | fails by design: FF-LIST (= DPLL-LIST) leaks 0.14–0.31 of its weight to the LOCAL-t proxies at every size |
-| C_E5/3-SAT | 15 | not reached by 40: width 0.23 |
+| C_E3/colouring (gadget) | 270 | fails by design (run at dev size only): DPLL-LIST = FF-LIST and six LOCAL-t proxies span only six directions, so the mixture is not testable, and null q loads 0.41 on members |
+| C_E5/3-SAT | 15 | not reached by 40: at 40 per cell the median width is 0.24 and the 0.1 weight's coverage 0.89 |
 | C_E5/3-SAT (partial assignment given) | 15 | passes at 40 per cell; fitted on the 40-per-cell runs |
-| C_E5/colouring (k=3) | 25 | fails by design at these sizes: a near-tie (FF-3-EDGE-MENTION-ABORT vs PHANTOM-ADJACENT); widths stay at 0.4 |
-| C_E5/colouring (k=3, partial colouring given) | 10 | not reached by 40: bias 0.07, width 0.24 |
-| C_E5/propositional entailment | 20 | fails by design: q and NOISY-EXACT are combinations of other members, and EXACT answers NO on every item |
+| C_E5/colouring (k=3) | 25 | fails at these sizes by a near-tie (FF-3-EDGE-MENTION-ABORT against ALWAYS-IMPOSSIBLE = PHANTOM-ADJACENT): coverage 0.48 at 20; at 40, coverage 0.89 but median width 0.46 |
+| C_E5/colouring (k=3, partial colouring given) | 10 | not reached by 40: bias and coverage pass at 40, but the median width is 0.27, and null q fails at every size |
+| C_E5/propositional entailment | 20 | fails by design: q and NOISY-EXACT are combinations of other members, and the EXACT group answers 'does not follow' on every item (mixture bias 0.08–0.13 at every size) |
 <!-- END prelim:dev_units -->
 
 ## 3. Fits
