@@ -507,12 +507,37 @@ def heat_cell(numr: float, den: float, what: str) -> str:
     return f'<td class="hc h{k}" title="{e(what)}: {numr:.0f} of {den:.0f}">{share(numr, den)}</td>'
 
 
+EXCLUDED_FLAG = 0.10  # flag a share whose denominator leaves out this much of the responses or more
+
+
+def excluded(desc: dict[str, Any]) -> int:
+    """Responses that are not ok (truncated, parse failures, partial answers...): left out of every share."""
+    return desc["n"] - desc["ok"]
+
+
+def heavily_excluded(desc: dict[str, Any]) -> bool:
+    return bool(desc["n"]) and excluded(desc) / desc["n"] >= EXCLUDED_FLAG
+
+
+def correct_cell(desc: dict[str, Any]) -> str:
+    """The correct-of-ok heat cell, with a dagger when a tenth or more of the responses are excluded from it."""
+    cell = heat_cell(desc["correct"], desc["ok"], "correct of ok")
+    if not heavily_excluded(desc) or not desc["ok"]:
+        return cell
+    cats = ", ".join(f"{k} {v}" for k, v in desc["categories"].items() if k != "ok" and v)
+    return (cell.replace('">', f'; {excluded(desc)} of {desc["n"]} responses excluded ({e(cats)})">', 1)
+            .replace("</td>", '<sup class="dag">†</sup></td>'))
+
+
 def section_accuracy(d: Data) -> str:
     out = ['<section id="accuracy"><h2>Accuracy and answer validity</h2>'
            "<p>For every unit (eval × domain) and run: the share of <em>ok</em> answers that are correct, and the share that are "
            "valid (a proper colouring, a feasible packing, a satisfying assignment). Excluded responses (parse failures, truncation) "
            "are not in the denominators. Validity is not defined on decision and entailment units (–). "
-           '<span class="pill">fitted</span> marks the units whose mixture fits pass the recovery gates at that size.</p>',
+           '<span class="pill">fitted</span> marks the units whose mixture fits pass the recovery gates at that size.</p>'
+           f'<p class="plain"><strong>† Selected answers.</strong> A dagger marks a share from which {EXCLUDED_FLAG:.0%} or more of '
+           "the responses were excluded, almost always because they were cut off at the token cap. Those are likely the harder "
+           "items, so the share describes the items the model finished, not the unit: hover a cell for the counts.</p>",
            heat_legend()]
     for s in d.sets:
         runs = d.runs_of(s)
@@ -527,7 +552,7 @@ def section_accuracy(d: Data) -> str:
                 if desc is None:
                     cells += ['<td class="hc na">–</td>'] * 2
                     continue
-                cells.append(heat_cell(desc["correct"], desc["ok"], "correct of ok"))
+                cells.append(correct_cell(desc))
                 cells.append(heat_cell(desc["valid"], desc["valid_defined"], "valid of ok"))
             rows.append(cells)
         out.append(f"<h3>{e(set_label(s))}</h3>" + table([], rows, "heat", head, fit=True))
@@ -918,17 +943,20 @@ def dumbbell(d: Data, a: dict, b: dict, title: str) -> str:
         va, vb = da["correct"] / da["ok"], db["correct"] / db["ok"]
         xa, xb = UNIT_SCALE(va), UNIT_SCALE(vb)
         tip = (f"{unit}: {a['label']} {da['correct']}/{da['ok']} ({share(da['correct'], da['ok'])}) → "
-               f"{b['label']} {db['correct']}/{db['ok']} ({share(db['correct'], db['ok'])})")
+               f"{b['label']} {db['correct']}/{db['ok']} ({share(db['correct'], db['ok'])})"
+               + (f"; excluded {excluded(da)} of {da['n']} → {excluded(db)} of {db['n']}" if excluded(da) or excluded(db) else ""))
         marks = [hline(min(xa, xb), max(xa, xb), "conn"), dot(xa, "ring", r=4), dot(xb, "dot")]
-        lab = e(unit) + (' <span class="pill">fitted</span>' if d.is_gated(s, unit) else "")
+        dag = '<sup class="dag">†</sup>' if heavily_excluded(da) or heavily_excluded(db) else ""
+        lab = e(unit) + dag + (' <span class="pill">fitted</span>' if d.is_gated(s, unit) else "")
         rows.append(row(lab, band(UNIT_SCALE, [tip_group(tip, *marks, hit_x=xb)]),
                         f"{share(da['correct'], da['ok'])} → {share(db['correct'], db['ok'])}"))
         trows.append([e(unit), num(count_share(da["correct"], da["ok"])), num(count_share(db["correct"], db["ok"])),
+                      num(f"{excluded(da)} / {excluded(db)}"),
                       num(count_share(da["valid"], da["valid_defined"])), num(count_share(db["valid"], db["valid_defined"])),
                       num(count_share(da["any_member_match"], da["ok"])), num(count_share(db["any_member_match"], db["ok"]))])
-    rows.append(axis_row(UNIT_SCALE, lambda t: f"{100 * t:.0f}%", "correct, of ok answers"))
+    rows.append(axis_row(UNIT_SCALE, lambda t: f"{100 * t:.0f}%", "correct, of ok answers (†: 10% or more excluded)"))
     la, lb = e(a["label"]), e(b["label"])
-    tab = table(["Unit", f"Correct: {la}", f"Correct: {lb}", f"Valid: {la}", f"Valid: {lb}",
+    tab = table(["Unit", f"Correct: {la}", f"Correct: {lb}", "Excluded (not ok), each run", f"Valid: {la}", f"Valid: {lb}",
                  f"Matches ≥1 member: {la}", f"Matches ≥1 member: {lb}"], trows)
     return (f'<article class="panel wide"><h4>{e(title)} <span class="tag-desc">descriptive</span></h4>'
             + legend([(SW_RING, a["label"]), (SW_DOT, b["label"])])
@@ -1265,6 +1293,7 @@ svg.axis text{font-size:11px;fill:var(--muted);font-variant-numeric:tabular-nums
 .obs{fill:var(--ink);stroke:var(--surface);stroke-width:2}
 .obs.out{fill:var(--critical)}
 .out-word{color:var(--ink);font-weight:600;white-space:nowrap}
+.dag{font-weight:700;margin-left:1px}
 .out-word span{color:var(--critical)}
 .hit{fill:transparent}
 .sep{stroke:var(--surface);stroke-width:2}

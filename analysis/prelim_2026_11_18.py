@@ -125,7 +125,7 @@ NOT_FITTED = {
 
 SCHEMA = {
     "runs": "one entry per discovered run: run_id, label, item_set, model, condition, effort, reasoning, max_tokens, "
-            "providers_served, n_records, from_cache, spent_usd (API-reported), scorer, run and scorer git SHAs, scored_sha256, "
+            "providers_served, n_records, from_cache, spent_usd (API-reported, summed over every invocation of a resumed run), scorer, run and scorer git SHAs, scored_sha256, "
             "item_drift (per item file: the manifest's sha256 and the current file's)",
     "skipped_runs": "directories matching the run patterns that have no scored records yet (in progress)",
     "descriptive": "run_id -> unit -> categories, ok, correct, accuracy_of_ok, valid / valid_defined, members_matched and "
@@ -274,7 +274,7 @@ def run_meta(run: dict[str, Any]) -> dict[str, Any]:
             "system_prompt": m["condition"]["system_prompt"], "sampling": m["condition"]["sampling"],
             "providers_served": m.get("providers_served"), "provider_routing": m.get("provider_routing"),
             "status": m["status"], "n_items": m["items"]["n_items"], "n_records": len(recs),
-            "from_cache": sum(1 for r in recs if r.get("from_cache")), "spent_usd": m["spend"]["spent_usd"],
+            "from_cache": sum(1 for r in recs if r.get("from_cache")), "spent_usd": m.get("charged_usd_all_invocations", m["spend"]["spent_usd"]),
             "max_pre_answer_tokens": max((r.get("pre_answer_tokens") or 0 for r in recs), default=0),
             "pre_answer_over_20": sum(1 for r in recs if (r.get("pre_answer_tokens") or 0) > 20),
             "run_git_sha": m["git"]["sha"], "scorer_version": run["scoring"]["scorer_version"],
