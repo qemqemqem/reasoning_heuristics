@@ -19,14 +19,14 @@ What it computes:
    `correct` and `valid` among ok answers, `members_matched` and `sets_matched`.
 3. **Mixture fits only where the recovery gates pass at this item size** (DESIGN §5 rule 12):
    C E2 colouring, C E2 knapsack and A/H E5 SAT, on the two pilot-size (20 per cell) runs, with
-   `identify.engine.fit_unit` (near-miss slips, percentile cluster-bootstrap intervals; main's engine
-   has no BCa intervals). Each fit also reports how far the answers are from the nearest member,
-   and a check that no member of the unit predicts a special token (the pending slip fix for
-   UNSAT / IMPOSSIBLE / X predictions cannot change these units).
+   `identify.engine.fit_unit` (near-miss slips, percentile cluster-bootstrap intervals), plus BCa
+   intervals from the same bootstrap draws (`mixture.bca_interval`, #24). Each fit also reports how
+   far the answers are from the nearest member, and a check that no member of the unit predicts a
+   special token (the special-token slip fix of #24 changes only units where one does).
 4. **Recovery at the estimate**: fake models that answer the same items from each fitted mixture
    (its weights, slip rate and slip shape) are refitted, to check bias, coverage and width at the
    operating point the real data put the fit in, which the Stage 0 gates did not test (they plant
-   0.6 / 0.3 / 0.1 with eps = 0.1, rho = 0.3).
+   0.6 / 0.3 / 0.1 with eps = 0.1, rho = 0.3), with both interval methods.
 
 Every random draw is seeded; a rerun reproduces the JSON and the tables exactly.
 """
@@ -58,7 +58,7 @@ from reasoning_heuristics.identify import agreement
 from reasoning_heuristics.identify.engine import fit_unit
 from reasoning_heuristics.identify.fake import Scenario, simulate, truth_vector
 from reasoning_heuristics.identify.likelihood import UnitModel
-from reasoning_heuristics.identify.mixture import EPS_MAX, RHO_GRID, UNEXPLAINED, fit
+from reasoning_heuristics.identify.mixture import EPS_MAX, RHO_GRID, UNEXPLAINED, bca_interval, fit
 from reasoning_heuristics.identify.records import from_scored, join
 from reasoning_heuristics.identify.units import Unit, eval_name, is_answer_item, load_items
 
@@ -90,20 +90,20 @@ DEV_TWIN = {"2026-11-18-pc20-qwen3-32b-direct": "2026-11-18-dev-qwen3-32b-direct
 # preliminary table; docs/RECOVERY.md has the pre-regeneration sweep). Nothing else is fitted.
 FIT_UNITS = ["C_E2/colouring", "C_E2/knapsack", "AH_E5/SAT"]
 
-# Why every other unit gets descriptive statistics only. RECOVERY.md "Where the gates pass" (pre-
-# regeneration items, 5/10/20/40 per cell) and its sweep table at 20 per cell; "dev" units are at
-# 5 per cell, where no unit passes ("Bottom line").
+# Why every other unit gets descriptive statistics only. RECOVERY.md "Regenerated items: candidate
+# units" (#24) where a unit was rerun on the regenerated items, else its pre-regeneration "Where the
+# gates pass" and sweep tables; dev units are at 5 per cell, where no unit passes ("Bottom line").
 NOT_FITTED = {
     "AH_E1": "fails by design: q is not identified on a two-valued channel (q = ½ always-positive + ½ always-negative), and the noise models are near-mixtures of the procedures",
     "AH_E2": "fails by design: as A/H E1",
-    "AH_E5/COL": "not reached by 40: the 0.1 weight's coverage is 0.84 at 40 (100 replicates); at 20, coverage 0.83 and width 0.24",
-    "AH_E5/ENT": "not reached at 20: coverage 0.77 (pre-regeneration sweep) and 0.82 (regenerated items, preliminary); passes at 40",
-    "AH_E5/KNAP": "no mixture test: fewer than three members on every item; null q fails at 20",
+    "AH_E5/COL": "not reached by 40 (pre-regeneration): the 0.1 weight's coverage is 0.84 at 40 (100 replicates); at 20, coverage 0.83 and width 0.24",
+    "AH_E5/ENT": "not reached by 40 on the regenerated items: coverage 0.81 at 20 and 0.87 at 40 (B4 FIRST); BCa 0.88 at both",
+    "AH_E5/KNAP": "no mixture test (pre-regeneration): fewer than three members on every item; null q fails at 20",
     "B4C4_E1": "fails by design: NOISY-EXACT is nearly the EXACT group (σ_min/σ_max = 0.0004)",
     "B4C4_E2": "fails by design: five linear dependencies, one of them among procedures (the H6 gap)",
-    "C_E1/3-SAT": "the mixture passes all three gates at 40 (pre-regeneration) and, in the preliminary regenerated-items run, at 20; null ALWAYS fails at both (a constant UNSAT responder is credited to a member)",
-    "C_E1/colouring": "not reached by 40: coverage 0.88 ± 0.03 at 40 (100 replicates); 0.77 at 20",
-    "C_E2/3-SAT": "not reached at 20: median width 0.24 > 0.2 (passes at 40); null ALWAYS fails",
+    "C_E1/3-SAT": "fails at 20 on the regenerated items: percentile coverage 0.86 (ALWAYS-UNSAT; BCa 0.92 passes), and null q fails (coverage 0.78)",
+    "C_E1/colouring": "not reached by 40 (pre-regeneration): coverage 0.88 ± 0.03 at 40 (100 replicates); 0.77 at 20",
+    "C_E2/3-SAT": "fails at 20 on the regenerated items: median width 0.28 > 0.2, and null q fails (coverage 0.89)",
     "C_E3": "fails by design: FF-LIST (= DPLL-LIST) leaks 0.14–0.31 of its weight to the LOCAL-t proxies at every size",
     "C_E5/3-SAT": "not reached by 40: width 0.23",
     "C_E5/3-SAT (partial assignment given)": "passes only at 40 per cell; null ALWAYS fails",
@@ -446,6 +446,16 @@ def fit_job(args: tuple) -> dict[str, Any]:
     rep = fit_unit(um, rs, n_boot=n_boot, seed=seed, n_perm=n_perm)
     obs, _ = um.observations(rs)
     T = um.tensors(obs)
+    # BCa next to the percentile intervals, from the same bootstrap draws: fit_unit's first use of its
+    # rng is this same fit, so seeding alike reproduces its replicates (asserted), and the jackknife
+    # (leave one cluster out) draws nothing
+    res = fit(T, n_boot=n_boot, rng=np.random.default_rng(seed), jackknife=True)
+    w = rep["fit"]["weights"]
+    for j, lab in enumerate(res.labels):
+        if isinstance(w[lab]["pi"], (int, float)) and not (abs(w[lab]["lo"] - res.lo[j]) < 1e-3 and abs(w[lab]["hi"] - res.hi[j]) < 1e-3):
+            raise AssertionError(f"{name} {run_id} {lab}: the refit's bootstrap differs from fit_unit's")
+    blo, bhi = bca_interval(res.boot, res.pi, res.jack)
+    rep["bca"] = {lab: [float(a), float(b)] for lab, a, b in zip(res.labels, blo, bhi)}
     counts = agreement.error_agreement(um, obs, ties="include")
     rep["ea_counts"] = {g: {"n": v.n, "agree": v.agree, "n_h_wrong": v.n_h_wrong,
                             "co_agree": (v.co_error or 0.0) * v.n_h_wrong} for g, v in counts.items()}
@@ -484,9 +494,10 @@ def recovery_job(args: tuple) -> dict[str, Any]:
     for _ in range(reps):
         sim = [ob for ob in simulate(um, sc, rng) if keep.get(ob.item)]
         T = um.tensors(sim)
-        res = fit(T, n_boot=n_boot, rng=rng)
-        out.append({"pi": res.pi.tolist(), "lo": res.lo.tolist(), "hi": res.hi.tolist(), "eps": res.eps, "rho": res.rho,
-                    "reach": reach_stats(um, sim, T)})
+        res = fit(T, n_boot=n_boot, rng=rng, jackknife=True)
+        blo, bhi = bca_interval(res.boot, res.pi, res.jack)
+        out.append({"pi": res.pi.tolist(), "lo": res.lo.tolist(), "hi": res.hi.tolist(), "bca_lo": blo.tolist(),
+                    "bca_hi": bhi.tolist(), "eps": res.eps, "rho": res.rho, "reach": reach_stats(um, sim, T)})
     return {"unit": name, "run_id": run_id, "chunk": chunk, "truth": truth.tolist(), "labels": [g.name for g in um.columns] + [UNEXPLAINED],
             "replicates": out}
 
@@ -495,24 +506,36 @@ def summarise_recovery(chunks: list[dict[str, Any]]) -> dict[str, Any]:
     labels, truth = chunks[0]["labels"], np.array(chunks[0]["truth"])
     reps = [r for c in sorted(chunks, key=lambda c: c["chunk"]) for r in c["replicates"]]
     pi = np.array([r["pi"] for r in reps])
-    lo = np.array([r["lo"] for r in reps])
-    hi = np.array([r["hi"] for r in reps])
-    cover = (lo <= truth[None, :] + 1e-12) & (truth[None, :] - 1e-12 <= hi)
-    width = hi - lo
+    planted = [j for j in range(len(labels)) if truth[j] > 0]
+    by_method = {}
+    for method, (klo, khi) in (("percentile", ("lo", "hi")), ("bca", ("bca_lo", "bca_hi"))):
+        lo = np.array([r[klo] for r in reps])
+        hi = np.array([r[khi] for r in reps])
+        cover = (lo <= truth[None, :] + 1e-12) & (truth[None, :] - 1e-12 <= hi)
+        width = hi - lo
+        by_method[method] = {"coverage": cover.mean(0), "median_width": np.median(width, 0),
+                             "planted_median_width": float(np.median(width[:, planted]))}
     q = {}
     for j, lab in enumerate(labels):
         q[lab] = {"truth": float(truth[j]), "mean": float(pi[:, j].mean()), "bias": float(pi[:, j].mean() - truth[j]),
-                  "coverage": float(cover[:, j].mean()), "median_width": float(np.median(width[:, j]))}
-    planted = [j for j in range(len(labels)) if truth[j] > 0]
-    gates = {"bias": max(abs(v["bias"]) for v in q.values()) <= 0.05,
-             "coverage": min(cover[:, j].mean() for j in planted) >= 0.9,
-             "width": float(np.median(width[:, planted])) <= 0.2}
+                  "coverage": float(by_method["percentile"]["coverage"][j]),
+                  "median_width": float(by_method["percentile"]["median_width"][j]),
+                  "coverage_bca": float(by_method["bca"]["coverage"][j]),
+                  "median_width_bca": float(by_method["bca"]["median_width"][j])}
+    bias_ok = max(abs(v["bias"]) for v in q.values()) <= 0.05
+    verdicts = {}
+    for method, bm in by_method.items():
+        cov = bm["coverage"]
+        gates = {"bias": bias_ok, "coverage": float(min(cov[j] for j in planted)) >= 0.9, "width": bm["planted_median_width"] <= 0.2}
+        verdicts[method] = {"gates": gates, "pass": all(gates.values()), "min_coverage": float(min(cov[j] for j in planted)),
+                            "worst_coverage_quantity": labels[min(planted, key=lambda j: cov[j])],
+                            "median_width": bm["planted_median_width"]}
+    pv = verdicts["percentile"]
     return {"replicates": len(reps), "quantities": q,
             "max_abs_bias": max(abs(v["bias"]) for v in q.values()),
             "worst_bias_quantity": max(q, key=lambda k: abs(q[k]["bias"])),
-            "min_coverage": float(min(cover[:, j].mean() for j in planted)),
-            "worst_coverage_quantity": labels[min(planted, key=lambda j: cover[:, j].mean())],
-            "median_width": float(np.median(width[:, planted])), "gates": gates, "pass": all(gates.values()),
+            "min_coverage": pv["min_coverage"], "worst_coverage_quantity": pv["worst_coverage_quantity"],
+            "median_width": pv["median_width"], "gates": pv["gates"], "pass": pv["pass"], "bca": verdicts["bca"],
             "eps_mean": float(np.mean([r["eps"] for r in reps])), "rho_mean": float(np.mean([r["rho"] for r in reps])),
             "simulated": {k: {"mean": float(np.mean([r["reach"][k] for r in reps])),
                               "p05_p95": [float(np.percentile([r["reach"][k] for r in reps], p)) for p in (5, 95)]}
@@ -614,20 +637,22 @@ def weights_table(name: str, fits: dict[str, dict[str, Any]]) -> str:
         for rid in runs:
             w = fits[rid]["fit"]["weights"][lab]
             if isinstance(w["pi"], str):
-                row.append(f"not identified, range [{w['range'][0]:.3f}, {w['range'][1]:.3f}]")
+                row += [f"not identified, range [{w['range'][0]:.3f}, {w['range'][1]:.3f}]", "–"]
             else:
-                row.append(f"{w['pi']:.3f} [{w['lo']:.3f}, {w['hi']:.3f}]")
+                b = fits[rid]["bca"][lab]
+                row += [f"{w['pi']:.3f} [{w['lo']:.3f}, {w['hi']:.3f}]", f"[{b[0]:.3f}, {b[1]:.3f}]"]
         rows.append(row)
-    for key, fmt in (("eps", "ε (slip rate)"), ("rho", "ρ (slip shape)")):
+    for key, fmt in (("eps", "ε (slip rate; cap 0.5)"), ("rho", "ρ (slip shape; grid 0.02–0.9)")):
         row = [fmt]
         for rid in runs:
             f = fits[rid]["fit"]
             ci = f[f"{key}_ci"]
-            row.append(f"{f[key]:.3f} [{ci[0]:.3f}, {ci[1]:.3f}]")
+            row += [f"{f[key]:.3f} [{ci[0]:.3f}, {ci[1]:.3f}]", "–"]
         rows.append(row)
-    rows.append(["answers fitted (rows) / clusters"] + [f"{fits[r]['fit']['n_rows']} / {fits[r]['fit']['n_clusters']}" for r in runs])
-    rows.append(["log-likelihood"] + [f"{fits[r]['fit']['loglik']:.1f}" for r in runs])
-    return md_table(["Weight, 95% percentile interval"] + [label_of(r) for r in runs], rows)
+    rows.append(["answers fitted (rows) / clusters"] + [x for r in runs for x in (f"{fits[r]['fit']['n_rows']} / {fits[r]['fit']['n_clusters']}", "")])
+    rows.append(["log-likelihood"] + [x for r in runs for x in (f"{fits[r]['fit']['loglik']:.1f}", "")])
+    header = ["Weight"] + [x for r in runs for x in (f"{label_of(r)}: π [95% percentile]", "BCa")]
+    return md_table(header, rows)
 
 
 def ident_table(name: str, fits: dict[str, dict[str, Any]]) -> str:
@@ -696,11 +721,14 @@ def recovery_table(fits_by_unit: dict[str, dict[str, dict[str, Any]]], rec: dict
             g = r["gates"]
             pl = r["planted"]
             verdict = "PASS" if r["pass"] else "fail (" + ", ".join(k for k, v in g.items() if not v) + ")"
-            rows.append([name, lab, f"{pl['eps']:.2f} / {pl['rho']:.2f}", r["replicates"], verdict,
+            bv = r["bca"]
+            bverdict = "PASS" if bv["pass"] else "fail (" + ", ".join(k for k, v in bv["gates"].items() if not v) + ")"
+            rows.append([name, lab, f"{pl['eps']:.2f} / {pl['rho']:.2f}", r["replicates"],
                          f"{r['max_abs_bias']:.3f} ({r['worst_bias_quantity']})",
-                         f"{r['min_coverage']:.2f} ({r['worst_coverage_quantity']})", f"{r['median_width']:.3f}"])
-    return md_table(["Unit", "Run whose fit is planted", "planted ε / ρ", "Replicates", "Gates at the estimate",
-                     "max |bias|", "min coverage", "median width"], rows)
+                         verdict, f"{r['min_coverage']:.2f} ({r['worst_coverage_quantity']})", f"{r['median_width']:.3f}",
+                         bverdict, f"{bv['min_coverage']:.2f} ({bv['worst_coverage_quantity']})", f"{bv['median_width']:.3f}"])
+    return md_table(["Unit", "Run whose fit is planted", "planted ε / ρ", "Replicates", "max |bias|",
+                     "Percentile: gates", "min coverage", "median width", "BCa: gates", "min coverage", "median width"], rows)
 
 
 def ppc_table(fits_by_unit: dict[str, dict[str, dict[str, Any]]], rec: dict[str, dict[str, dict[str, Any]]]) -> str:
@@ -727,9 +755,12 @@ def recovery_detail_table(rec: dict[str, dict[str, dict[str, Any]]]) -> str:
             for q, v in rec[name][rid]["quantities"].items():
                 if v["truth"] <= 0 and abs(v["bias"]) < 0.02:
                     continue
+                planted = v["truth"] > 0
                 rows.append([name, lab, q, f"{v['truth']:.3f}", f"{v['mean']:.3f}", f"{v['bias']:+.3f}",
-                             f"{v['coverage']:.2f}" if v["truth"] > 0 else "–", f"{v['median_width']:.3f}"])
-    return md_table(["Unit", "Run", "Quantity", "Planted", "Mean estimate", "Bias", "Coverage", "Median width"], rows)
+                             f"{v['coverage']:.2f}" if planted else "–", f"{v['coverage_bca']:.2f}" if planted else "–",
+                             f"{v['median_width']:.3f}"])
+    return md_table(["Unit", "Run", "Quantity", "Planted", "Mean estimate", "Bias", "Coverage, percentile", "Coverage, BCa",
+                     "Median width (percentile)"], rows)
 
 
 def agreement_table(name: str, fits: dict[str, dict[str, Any]]) -> str:
@@ -930,7 +961,7 @@ def main(argv: list[str] | None = None) -> int:
         "git": git_state(), "python": platform.python_version(), "numpy": np.__version__,
         "settings": {"n_boot": args.n_boot, "n_perm": args.n_perm, "recovery_reps": args.recovery_reps,
                      "recovery_boot": args.recovery_boot, "plant_min": PLANT_MIN, "eps_max": EPS_MAX,
-                     "rho_grid": [float(RHO_GRID[0]), float(RHO_GRID[-1])], "intervals": "percentile cluster bootstrap (main's engine has no BCa)"},
+                     "rho_grid": [float(RHO_GRID[0]), float(RHO_GRID[-1])], "intervals": "percentile cluster bootstrap (primary) and BCa from the same draws"},
         "item_sets": {k: {"paths": v["paths"], "sha256": v["sha256"], "n_items": len(v["items"])} for k, v in sets.items()},
         "unit_items": {k: {name: len(its) for name, its in sorted(v["groups"].items())} for k, v in sets.items()},
         "runs": meta, "fit_units": FIT_UNITS,
