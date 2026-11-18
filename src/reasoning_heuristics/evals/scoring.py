@@ -27,10 +27,13 @@ Pipeline for one response
    YES/NO) the scored answer is the decision; a positive claim's witness is checked
    (`valid`) and its problems are flags (`witness_partial`, ...), not a category. On every other
    channel the witness is the answer, so its problems set the category.
-6. **Outcome class** (only for category ok): the item's channel (reconstructed with the same
-   generator functions that built `extra.outcome_classes`) maps the parsed answer to a class key;
-   the record carries the class label as written in `extra.outcome_classes` / `disconfirms`
-   ("answer = other" when no deterministic member predicted it).
+6. **Outcome class** (only for category ok): the item's channel, rebuilt from `extra.channel_spec`
+   (items written before scorer-1.1.0: from the channel name, with the same generator functions
+   that built `extra.outcome_classes`), maps the parsed answer to a class key with
+   `generators.common.classify_answer`: its channel value when that is a class, else, on a
+   witness channel, the class of the unlisted solutions of the solution sets that contain it
+   (checked with the item's serialised membership rules), else other. The record carries the
+   class label as written in `extra.outcome_classes` / `disconfirms`.
 7. **Correctness** (only for category ok), with the repo's problem code: proper colouring and
    colour count (k, fixed colours, the stated rule's effective graph), the assignment satisfies
    the stated CNF and the fixed values, knapsack feasibility and optimality, the entailment
@@ -51,8 +54,7 @@ from functools import cached_property
 from typing import Any
 
 from reasoning_heuristics import tokens
-from reasoning_heuristics.generators.c_e3 import bit_channel, colour_channel
-from reasoning_heuristics.generators.common import Channel, decision_channel, witness_channel
+from reasoning_heuristics.generators.common import OTHER, Channel, classify_answer, item_channel
 from reasoning_heuristics.heuristics.answers import answer_key
 from reasoning_heuristics.heuristics.coloring import effective_graph
 from reasoning_heuristics.heuristics.sat import effective_cnf
@@ -61,16 +63,10 @@ from reasoning_heuristics.problems.coloring import graph as G
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.sat import cnf as S
 
-SCORER_VERSION = "scorer-1.4.1"
-# 1.1.0: a reply that is nothing but the answer, without the ANSWER: marker, is parsed (flag no_answer_marker).
-# 1.1.1: answer_only_in_reasoning is not set on truncated replies (their reasoning often quotes the format).
-# 1.2.0: LaTeX answer decoration (\\boxed{..}, \\text{..}, $$ ... $$) is unwrapped before the ANSWER: formats are parsed.
-# 1.3.0: C SAT / colouring values given without their names (or with the format's placeholder, `x=T`) are read in
-#        the requested order when the count is exact (flags positional_values, placeholder_names).
-# 1.3.1: commentary after such a run of values (e.g. "---" and a sentence) is tolerated (flag extra_text_in_block).
-# 1.4.0: a line-initial answer marker may follow any symbols, not only markdown ("### ✅ Final Answer"); with no
-#        marker at all, the last fenced code block is read if it holds nothing but an answer (flag fenced_answer_no_marker).
-# 1.4.1: positional values may also use the generators' new placeholders (`<variable>=T`, `<vertex>: 1`).
+SCORER_VERSION = "scorer-1.5.0"
+# The changelog is in docs/RUNNER.md ("Scorer versions"). 1.5.0 is main's scorer-1.1.0 (outcome classes from
+# extra.channel_spec, sets_matched) plus the parsing changes made on the smoke-runs branch, whose own labels
+# 1.1.0-1.4.1 were never used on main; 1.5.0 is the first label above both lines.
 
 CATEGORIES = ("ok", "parse_fail", "refusal", "declared_impossible", "partial", "truncated", "api_error")
 
@@ -389,18 +385,11 @@ class ItemContext:
 
 
 def channel_for(item: dict[str, Any], domain: str) -> Channel:
-    """The item's scoring channel, rebuilt with the generator functions that produced its outcome classes."""
-    name = item["extra"].get("channel")
-    if name == "decision":
-        pos, neg = {"sat": ("SAT", "UNSAT"), "coloring": ("POSSIBLE", "IMPOSSIBLE"), "entailment": ("YES", "NO")}[domain]
-        return decision_channel(pos, neg)
-    if name == "answer":
-        return witness_channel(domain)
-    if name == "target-bit":
-        return bit_channel(item["params"]["target"], item["params"]["reference_vertex"])
-    if name == "target-colour":
-        return colour_channel(item["params"]["target"])
-    raise ValueError(f"{item['item_id']}: unknown channel {name!r}")
+    """The item's scoring channel: rebuilt from `extra.channel_spec` (with its solution sets), or,
+    for items written before it existed, from the channel name with the generator functions that
+    produced its outcome classes (`decision_channel`, `witness_channel`, C E3's `bit_channel` /
+    `colour_channel`)."""
+    return item_channel(item)
 
 
 def _fact_norm(s: str) -> str:
@@ -867,17 +856,23 @@ def _set_valued(rec: dict[str, Any]) -> bool:
     return bool((rec.get("trace_features") or {}).get("set_valued"))
 
 
-def outcome(ctx: ItemContext, ans: Any) -> tuple[str | None, str, list[str], list[str]]:
-    """(channel value, outcome-class label, members matching on the channel, members with the same answer key)."""
+def outcome(ctx: ItemContext, ans: Any) -> tuple[str | None, str, list[str], list[str], list[str]]:
+    """(channel value, outcome-class label, members matching on the channel, members with the same
+    answer key, set-valued members whose solution set contains the answer)."""
     classes = ctx.item["extra"]["outcome_classes"]
     by_key = {v: k for k, v in classes.items()}
-    other = by_key.get("_other", "answer = other")
+    other = by_key.get(OTHER, "answer = other")
     value = ctx.channel.key(ans) if ans is not None else None
-    label = by_key.get(value, other) if value is not None else other
+    label = by_key.get(classify_answer(ctx.channel, set(by_key), ans), other)
     mine = answer_key(ctx.domain, ans)
-    on_channel, same_key = [], []
+    on_channel, same_key, in_sets = [], [], []
+    sv = ctx.channel.set_valued
+    for lbl, spec in sv.items():  # items with a serialised channel: unique solutions are deterministic
+        if spec.class_counts is None and value is not None:
+            if (spec.solution == value) if spec.size == 1 else spec.contains(ctx.channel.task, value):
+                (on_channel if spec.size == 1 else in_sets).append(lbl)
     for lbl, rec in ctx.item["predictions"].items():
-        if rec.get("answer") is None or _set_valued(rec):
+        if rec.get("answer") is None or (lbl in sv if "channel_spec" in ctx.item["extra"] else _set_valued(rec)):
             continue
         try:
             if value is not None and ctx.channel.key(rec["answer"]) == value:
@@ -886,7 +881,7 @@ def outcome(ctx: ItemContext, ans: Any) -> tuple[str | None, str, list[str], lis
             pass
         if mine is not None and answer_key(ctx.domain, rec["answer"]) == mine:
             same_key.append(lbl)
-    return value, label, on_channel, same_key
+    return value, label, on_channel, same_key, in_sets
 
 
 def score_response(item: dict[str, Any], view: ResponseView, ctx: ItemContext | None = None) -> dict[str, Any]:
@@ -948,11 +943,12 @@ def score_response(item: dict[str, Any], view: ResponseView, ctx: ItemContext | 
         "n_answer_blocks": result.n_blocks if result else 0,
         "pre_answer_tokens": tokens.count(text[: result.answer_start] if result and result.answer_start is not None else text),
         "channel_value": None, "outcome_class": None, "members_matched": [], "answer_key_matches": [],
-        "correct": None, "valid": None, "optimal": None,
+        "sets_matched": [], "correct": None, "valid": None, "optimal": None,
     })
     if category == "ok":
-        value, label, on_channel, same_key = outcome(ctx, parsed)
+        value, label, on_channel, same_key, in_sets = outcome(ctx, parsed)
         correct, valid, optimal = judge(ctx, parsed)
         rec.update({"channel_value": value, "outcome_class": label, "members_matched": on_channel,
-                    "answer_key_matches": same_key, "correct": correct, "valid": valid, "optimal": optimal})
+                    "answer_key_matches": same_key, "sets_matched": in_sets, "correct": correct, "valid": valid,
+                    "optimal": optimal})
     return rec

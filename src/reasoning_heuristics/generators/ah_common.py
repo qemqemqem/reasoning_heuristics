@@ -131,11 +131,8 @@ def word_count(text: str) -> int:
 
 
 def discriminates(item) -> bool:
-    """The validator's rule: at least two listed members give different (non-set-valued) answers."""
-    from reasoning_heuristics.heuristics.answers import answer_key
-    from reasoning_heuristics.heuristics.tasks import load_task
+    """The validator's rule (validate.checks.discriminates): members differ on the scoring channel
+    and the likelihood table is non-degenerate."""
+    from reasoning_heuristics.validate.checks import discriminates as why_not
 
-    domain = load_task(item.instance).domain
-    keys = {answer_key(domain, r["answer"]) for r in item.predictions.values()
-            if r["answer"] is not None and not r.get("trace_features", {}).get("set_valued")}
-    return len(keys) >= 2
+    return why_not(item) is None

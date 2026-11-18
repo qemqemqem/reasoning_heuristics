@@ -4,12 +4,13 @@ Literals are signed 1-based variable indices (DIMACS style); `var_names[i-1]` is
 display name of variable i. Clause order and literal order are presentation; the
 content key sorts both away but keeps names (so it is not invariant to renaming).
 
-Two independent exact procedures are provided so validators can recompute ground
-truth without the generator's code path:
+Two independent exact procedures are provided, and the tests cross-check them:
 
 - `solve` / `count_solutions` use python-sat (MiniSat 2.2) — the generator path;
 - `dpll_solve` is a plain recursive DPLL with unit propagation, and
-  `brute_force_count` enumerates assignments — the validator path.
+  `brute_force_count` enumerates assignments.
+
+The validators recompute ground truth with their own code (`validate/independent.py`).
 """
 
 from __future__ import annotations

@@ -53,8 +53,9 @@ import numpy as np
 
 from reasoning_heuristics import tokens
 from reasoning_heuristics.generators import ah_common as A
-from reasoning_heuristics.generators.common import GenStats, make_item, set_hash, witness_channel
+from reasoning_heuristics.generators.common import GenStats, SetSpec, content_hash, make_item, set_hash, witness_channel
 from reasoning_heuristics.hashing import sha
+from reasoning_heuristics.heuristics.answers import answer_key
 from reasoning_heuristics.heuristics.coloring import effective_graph
 from reasoning_heuristics.heuristics.entailment import effective_premises, entailed_literals
 from reasoning_heuristics.heuristics.sat import effective_cnf
@@ -157,13 +158,28 @@ def sat_marks(rng, cnf: CNF, tries: int = 200) -> tuple[int, ...] | None:
     return None
 
 
-def _assignment_valid(cnf: CNF):
-    def check(key: str) -> bool:
-        if "=" not in key:
-            return False
-        a = {kv.split("=")[0]: kv.split("=")[1] == "T" for kv in key.split(",")}
-        return set(a) == set(cnf.var_names) and S.satisfies(cnf, a)
-    return check
+def _unique_key(domain: str, solutions: list) -> str | None:
+    return answer_key(domain, solutions[0]) if len(solutions) == 1 else None
+
+
+def sat_channel(task: SatTask, n_stated: int, n_text: int) -> Any:
+    """exact: uniform over the stated rule's solutions; TT: over the textbook formula's. T and N
+    state the textbook rule (identical sets); under I and I+R the sets are disjoint (F and F-bar
+    are jointly UNSAT, asserted at selection); under P the overlap is counted."""
+    eff = effective_cnf(task)
+    if not (task.inverted or task.inverted_clauses):
+        overlap = n_text
+    elif task.inverted:
+        overlap = 0
+    else:
+        overlap = S.count_solutions(task.cnf.with_clauses(list(task.cnf.clauses) + list(eff.clauses)))
+    sets = {
+        "exact": SetSpec("assignment", {"cnf": "stated"}, n_stated, "satisfying assignment under the stated rule",
+                         _unique_key("sat", S.all_solutions(eff, limit=2)) if n_stated == 1 else None),
+        "A3 TT[exact]": SetSpec("assignment", {"cnf": "textbook"}, n_text, "satisfying assignment under the textbook rule",
+                                _unique_key("sat", S.all_solutions(task.cnf, limit=2)) if n_text == 1 else None),
+    }
+    return witness_channel("sat", sets, task, values=("UNSAT",), overlaps={("exact", "A3 TT[exact]"): overlap})
 
 
 def _sat_set(rng, made, bseed, tier, sizes):
@@ -185,8 +201,7 @@ def _sat_set(rng, made, bseed, tier, sizes):
         task = tasks[fr]
         eff = effective_cnf(task)
         n_stated = S.count_solutions(eff)
-        channel = witness_channel("sat", {"exact": (_assignment_valid(eff), n_stated),
-                                          "A3 TT[exact]": (_assignment_valid(cnf), n_text)})
+        channel = sat_channel(task, n_stated, n_text)
         specs = [("exact", "EXACT", {}), ("A3 TT[exact]", "TT", {}), ("C0 POLARITY", "POLARITY", {}),
                  ("C1 GREEDY", "GREEDY", {"order": "MENTION", "mode": "INFEAS"}),
                  ("D DPLL (first solution)", "SEARCH", {"order": "MENTION", "value": "TRUE"})]
@@ -227,14 +242,24 @@ def planted_friends(rng, n: int, k: int, p: float = 0.2):
     return Graph(tuple(names), tuple(edges)), groups
 
 
-def _partition_member(g: Graph):
-    def check(key: str) -> bool:
-        if key == "IMPOSSIBLE":
-            return False
-        classes = [c.split(",") for c in key.split("|")]
-        col = {v: i for i, c in enumerate(classes) for v in c}
-        return set(col) == set(g.vertices) and G.is_proper(g, col)
-    return check
+def col_channel(task: ColouringTask, g: Graph, parts_stated: list, parts_text: list) -> Any:
+    """exact: uniform over the valid room assignments (partitions into <= k classes) under the
+    stated rule; TT: under the textbook rule. Identical sets under T and N; disjoint under I and
+    I+R (asserted at selection)."""
+    k = task.k
+    n_stated, n_text = len(parts_stated), len(parts_text)
+
+    def unique(parts):
+        return answer_key("coloring", G.masks_to_colouring(g, parts[0])) if len(parts) == 1 else None
+
+    sets = {
+        "exact": SetSpec("colouring", {"graph": "stated", "colours": k}, n_stated,
+                         f"valid assignment to at most {k} rooms under the stated rule", unique(parts_stated)),
+        "A3 TT[exact]": SetSpec("colouring", {"graph": "textbook", "colours": k}, n_text,
+                                f"valid assignment to at most {k} rooms under the textbook rule", unique(parts_text)),
+    }
+    overlap = 0 if task.complement else n_text
+    return witness_channel("coloring", sets, task, values=("IMPOSSIBLE",), overlaps={("exact", "A3 TT[exact]"): overlap})
 
 
 def _col_set(rng, made, bseed, tier, sizes, k):
@@ -263,8 +288,7 @@ def _col_set(rng, made, bseed, tier, sizes, k):
         prompt = render_rooms(g, k, "friends" if inverted else "enemies",
                               "Only friends may share a room." if inverted else "No two enemies may share a room.",
                               preamble=_preamble_of("COL", fr), reminder=REMINDER["COL"] if fr == "I+R" else None)
-        channel = witness_channel("coloring", {"exact": (_partition_member(eff), n_inv if inverted else n_text),
-                                               "A3 TT[exact]": (_partition_member(g), n_text)})
+        channel = col_channel(task, g, parts_inv if inverted else parts_text, parts_text)
         specs = [("exact", "EXACT", {}), ("A3 TT[exact]", "TT", {"inner": "EXACT"}), ("A3 TT[FIRST-FIT]", "TT", {"inner": "FF"}),
                  ("C1 FIRST-FIT (stated rule)", "FF", {"order": "LIST", "mode": "ABORT"}),
                  ("C2 DSATUR (stated rule)", "DSATUR", {"mode": "ABORT"}),
@@ -311,9 +335,20 @@ def knap_prompt(k: Knapsack, framing: str) -> str:
     return "\n".join(lines)
 
 
-def _subset_member(optima: list[list[str]]):
-    keys = {",".join(sorted(s)) for s in optima}
-    return lambda key: key in keys
+def knap_channel(task: KnapsackTask, stated: list[list[str]], pack: list[list[str]]) -> Any:
+    """exact: uniform over the optimal subsets under the stated objective; TT: over the packing
+    optima. Identical sets under T and N; disjoint under I and I+R (asserted at selection)."""
+    def unique(subsets):
+        return answer_key("knapsack", subsets[0]) if len(subsets) == 1 else None
+
+    sets = {
+        "exact": SetSpec("subset", {"objective": "stated"}, len(stated), "optimal subset under the stated objective",
+                         unique(stated)),
+        "A3 TT[exact]": SetSpec("subset", {"objective": "textbook"}, len(pack), "optimal packing (textbook objective)",
+                                unique(pack)),
+    }
+    overlap = 0 if task.covering else len(pack)
+    return witness_channel("knapsack", sets, task, overlaps={("exact", "A3 TT[exact]"): overlap})
 
 
 def _knap_set(rng, made, bseed, tier):
@@ -333,8 +368,7 @@ def _knap_set(rng, made, bseed, tier):
     for fr in FRAMINGS["KNAP"]:
         covering = fr in ("I", "I+R")
         task = KnapsackTask(k, covering=covering)
-        channel = witness_channel("knapsack", {"exact": (_subset_member(cover if covering else pack), len(cover if covering else pack)),
-                                               "A3 TT[exact]": (_subset_member(pack), len(pack))})
+        channel = knap_channel(task, cover if covering else pack, pack)
         specs = [("exact", "EXACT", {}), ("A3 TT[exact]", "TT", {})]
         if not covering:
             specs += [("C1 INPUT-FIT", "INPUT-FIT", {}), ("C1 RATIO-SKIP", "RATIO-SKIP", {}),
@@ -381,7 +415,7 @@ def _ent_set(rng, made, bseed, tier, tries: int = 3000):
         return None, "no premise set whose OR and NOR readings entail different non-empty literal sets"
     items = []
     set_id = f"{set_hash(bseed, 'ENT')}-ENT"
-    base_hash = sha({"premises": [F.canonical(p) for p in prem]})
+    base_hash = content_hash(EntailmentTask(prem, None, "OPEN"))  # the T item
     for fr in FRAMINGS["ENT"]:
         task = EntailmentTask(prem, None, "OPEN", reading="nor" if fr in ("I", "I+R") else "standard")
         prompt = A.render_machine_facts(task, preamble=_preamble_of("ENT", fr), reminder=REMINDER["ENT"] if fr == "I+R" else None)

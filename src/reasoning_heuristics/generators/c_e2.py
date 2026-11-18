@@ -168,9 +168,9 @@ def item_members(domain: str) -> list:
 
 def channel_of(domain: str, task, gt: dict[str, Any]) -> Channel:
     if domain == "COL":
-        return CC.colouring_channel(task.graph, gt["chromatic_number"], gt["n_optimal_partitions"])
+        return CC.colouring_channel(task, gt["chromatic_number"], gt["n_optimal_partitions"])
     if domain == "SAT":
-        return CC.sat_channel(task.cnf, gt["n_solutions"])
+        return CC.sat_channel(task, gt["n_solutions"])
     return witness_channel("knapsack")
 
 

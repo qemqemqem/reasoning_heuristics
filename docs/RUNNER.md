@@ -91,8 +91,9 @@ One JSON object per response. The identification engine joins it to its item on 
 | `parse_status`, `parse_detail`, `flags`, `n_answer_blocks`, `witness` | What the parser found (kept for truncated responses too), why, and tolerated deviations |
 | `parsed` | The answer in the members' representation: colouring dict, assignment dict, "UNSAT", "IMPOSSIBLE", "SAT" / "POSSIBLE" (a positive decision without a usable witness), "YES" / "NO", "X", option letter, sorted item list, sorted fact list or "NOTHING". `{target: colour}` for the single-vertex format. `null` unless `category` is ok |
 | `answer_key` | `heuristics.answers.answer_key(domain, parsed)`, comparable with `answer_key(domain, predictions[label]["answer"])` |
-| `channel_value`, `outcome_class` | The parsed answer on the item's channel, and the outcome-class label as written in `extra.outcome_classes` and `disconfirms` ("answer = other" when no deterministic member predicted it). Only for ok |
-| `members_matched`, `answer_key_matches` | Member labels whose prediction has the same channel value / the same answer key. Set-valued members (EXACT on witness tasks) never appear; use `correct` |
+| `channel_value`, `outcome_class` | The parsed answer on the item's channel, and the outcome-class label as written in `extra.outcome_classes` and `disconfirms`. Since scorer-1.1.0 an answer no member listed goes to the unlisted-solution class of the solution sets that contain it (checked with the item's serialised membership rules), and to "answer = other" only when it is in none. Only for ok |
+| `members_matched`, `answer_key_matches` | Member labels whose prediction has the same channel value / the same answer key. A set-valued member appears in `members_matched` only when its set has one solution and the answer is it |
+| `sets_matched` | Set-valued members (EXACT, A/H E5's TT) whose solution set contains the answer. Empty for items written before `extra.channel_spec` existed. Only for ok |
 | `correct`, `valid`, `optimal` | Only for ok; otherwise `null`. See below |
 | `prompt_tokens`, `completion_tokens`, `reasoning_tokens`, `cost_usd` | API-reported usage |
 | `finish_reason`, `native_finish_reason`, `truncated` | Truncated = finish_reason `length`, or the completion reached max_tokens |
@@ -108,11 +109,9 @@ Deterministic, no LLM (DESIGN §5 rule 4), and it reads the item's structured `i
 **Parsing.** The last answer block wins.
 
 - **Markers:** the last line-initial `ANSWER:` marker, also `**ANSWER:**`, `Final answer:`, or `ANSWER` alone on a line, after any symbols (`### ✅ Final Answer`). An inline `ANSWER:` counts only when there is no line-initial one. For the JSON formats, the last JSON object carrying the format's key.
-- **Tolerated and removed first:** code fences, markdown emphasis, list bullets, whitespace and case; inline `<think>…</think>` in the content; and, for the `ANSWER:` formats, LaTeX decoration (`$$\text{ANSWER: C}$$`, `\boxed{C}`; flag `latex_unwrapped`, since 1.2.0).
-- **No marker at all:** a reply that is nothing but an answer in the format is parsed (flag `no_answer_marker`, since 1.1.0). This matters in the direct condition. So is a last fenced code block that holds nothing but an answer (flag `fenced_answer_no_marker`, since 1.4.0). Any other text without a marker is a parse failure.
+- **Tolerated and removed first:** code fences, markdown emphasis, list bullets, whitespace and case; inline `<think>…</think>` in the content; and, for the `ANSWER:` formats, LaTeX decoration (`$$\text{ANSWER: C}$$`, `\boxed{C}`; flag `latex_unwrapped`).
+- **No marker at all:** a reply that is nothing but an answer in the format is parsed (flag `no_answer_marker`). This matters in the direct condition. So is a last fenced code block that holds nothing but an answer (flag `fenced_answer_no_marker`). Any other text without a marker is a parse failure.
 - **The reasoning channel is never parsed for the answer.** A finished reply whose answer appears only there is flagged `answer_only_in_reasoning` and stays a parse failure.
-
-**Versions so far.** 1.0.0 was the first. 1.1.0 parses marker-less bare answers. 1.1.1 stops `answer_only_in_reasoning` on truncated replies, whose reasoning often just quotes the format. 1.2.0 unwraps LaTeX. 1.3.0 reads C SAT and colouring values given without their names, or with the format's own placeholder (`x=T, x=F, …`), in the requested order. It does so only when the item states an order and the count is exact (flags `positional_values`, `placeholder_names`). 1.3.1 tolerates commentary after such a run of values. 1.4.0 lets a line-initial marker follow any symbols ("### ✅ Final Answer"). With no marker at all, 1.4.0 also reads the last fenced code block if it holds nothing but an answer (flag `fenced_answer_no_marker`). 1.4.1 also reads the placeholders the generators switched to on 2026-11-18 (`<variable>=T`). Each version came from the smoke runs below.
 
 | Answer format (items) | Parsed into |
 |---|---|
@@ -146,7 +145,21 @@ Deterministic, no LLM (DESIGN §5 rule 4), and it reads the item's structured `i
 | Knapsack | weight ≤ capacity (≥ for the A/H E5 covering rule) | valid and the value equals the optimum (`optimal`) |
 | Entailment | – | equals the ground-truth answer (YES/NO, letter, fact set) |
 
-**Versioning.** `SCORER_VERSION` is on every record, with the git SHA of the scoring checkout. Bump it on any behavioural change and re-score every run (`python -m reasoning_heuristics.evals.score data/runs/*/`). The outcome classes are rebuilt with the generator's own channel functions (`decision_channel`, `witness_channel`, C E3's `bit_channel` / `colour_channel`); a test checks them against every committed item's stored classes.
+**Versioning.** `SCORER_VERSION` is on every record, with the git SHA of the scoring checkout. Bump it on any behavioural change and re-score every run (`python -m reasoning_heuristics.evals.score data/runs/*/`). The channel is rebuilt from the item's `extra.channel_spec` (`generators.common.item_channel`). Items written before it existed are rebuilt from the channel name with the generator's channel functions. A test checks them against every committed item's stored classes.
+
+**Scorer versions.** This is the one changelog. Two lines of work used overlapping labels before they met: main's (PR #13) and the smoke-runs branch's (PR #15). The branch labels are written below as `runs-x.y.z`; on that branch they appeared in records as plain `scorer-x.y.z`, and every one of those records has since been re-scored with 1.5.0.
+
+| Label | Where | What it added |
+|---|---|---|
+| scorer-1.0.0 | PR #8 | The first scorer |
+| scorer-1.1.0 | main, PR #13 (fix-generators) | Reads `extra.channel_spec` and classifies answers with `generators.common.classify_answer`. An answer that no member predicted goes to the unlisted-solution class of the sets that contain it, or to other when it is in none. The record gains `sets_matched`. On items without a `channel_spec` (every set generated before this version) the outcome classes are unchanged |
+| runs-1.1.0 | smoke-runs branch | A reply that is nothing but the answer, with no `ANSWER:` marker, is parsed (`no_answer_marker`) |
+| runs-1.1.1 | smoke-runs branch | `answer_only_in_reasoning` is no longer set on truncated replies, whose reasoning often just quotes the format |
+| runs-1.2.0 | smoke-runs branch | LaTeX answer decoration is unwrapped in the `ANSWER:` formats (`latex_unwrapped`) |
+| runs-1.3.0, runs-1.3.1 | smoke-runs branch | C SAT and colouring values given without their names, or with the format's `x=T` placeholder, are read in the requested order when the item states one and the count is exact (`positional_values`, `placeholder_names`). Commentary after the values is tolerated |
+| runs-1.4.0 | smoke-runs branch | A line-initial marker may follow any symbols (`### ✅ Final Answer`). With no marker at all, the last fenced block is read if it holds nothing but an answer (`fenced_answer_no_marker`) |
+| runs-1.4.1 | smoke-runs branch | Positional values may use the placeholders the generators switched to (`<variable>=T`, PR #12) |
+| **scorer-1.5.0** | PR #15 | scorer-1.1.0 plus every runs-x.y.z change. Every committed run is scored with it |
 
 ## Cost estimates (dry runs)
 
@@ -220,7 +233,7 @@ Endpoint listings and 62 tiny calls ("What is 17 + 25?") over the SCOPE §1 mode
 
 ## First live runs (smoke, 2026-11-18)
 
-Three acceptance runs, each on all 254 smoke items except A/H E8, on the pinned endpoints. They used the items as committed before the generator fixes of 2026-11-18. To re-score them, use `score --items-at-run-sha`. Each run's own `REPORT.md` has the details; all are scored with scorer-1.4.0.
+Three acceptance runs, each on all 254 smoke items except A/H E8, on the pinned endpoints. They used the items as committed before the generator fixes of 2026-11-18. To re-score them, use `score --items-at-run-sha`. Each run's own `REPORT.md` has the details; all are scored with scorer-1.5.0 against the items at their recorded SHA.
 
 | Run | Model, condition | Provider served | Responses | ok | Truncated | Other categories | Correct of ok | API cost | Wall time |
 |---|---|---|---|---|---|---|---|---|---|
@@ -259,20 +272,20 @@ What the runs showed:
   - A/H E2 SAT (n = 24, m = 101) truncates on every smoke item at 32,768 tokens.
   - Truncated responses are censored (SCOPE §6 rule 2) and carry no answer. The sizes need calibrating per SCOPE §6 rule 1.
 - **Qwen3-32B with thinking is shorter, and truncates less.** It writes its answer in four ways the scorer did not expect, each now handled with a flag:
-  - LaTeX (`$$\boxed{C}$$`; scorer 1.2.0);
-  - the C SAT values without their names, or with the format's placeholder `x=T` (1.3.x);
-  - a stray `---` and commentary after the values (1.3.1);
-  - `### ✅ Final Answer` headings, or a colouring in a code fence with no marker at all (1.4.0).
+  - LaTeX (`$$\boxed{C}$$`; runs-1.2.0);
+  - the C SAT values without their names, or with the format's placeholder `x=T` (runs-1.3.x);
+  - a stray `---` and commentary after the values (runs-1.3.1);
+  - `### ✅ Final Answer` headings, or a colouring in a code fence with no marker at all (runs-1.4.0).
 - **Qwen3-32B direct.**
   - Thinking off held on all 254 responses.
-  - Several replies drop the `ANSWER:` marker (1.1.0).
+  - Several replies drop the `ANSWER:` marker (runs-1.1.0).
   - Three A/H E2 SAT replies loop on the assignment string (`0101…`) until the 1,024 cap.
   - A few replies still work in the visible output: see `pre_answer_tokens` in its REPORT.md.
 - **Providers.**
   - DekaLLM answered HTTP 429 to some first attempts at 16 concurrent requests; all were retried successfully. DeepInfra flex sent none.
   - Streams ran at about 55–65 tokens/s (gpt-oss-20b, DekaLLM) and about 40 tokens/s (Qwen3-32B, DeepInfra flex). A 254-item thinking run takes 45–75 minutes at 16–24 concurrent requests.
 - **Prompt tokens.** API-reported prompt tokens are 1.06× the proxy count on gpt-oss-20b and 1.07× on Qwen3-32B, chat template included.
-- **One prompt bug for the generators.** The C SAT format "the values as `x=T` / `x=F`" uses `x` as a placeholder, which collides with the variable names `x15`…. It should read `name=T` (for example `x15=T`).
+- **One prompt bug, since fixed in the generators.** The C SAT answer line "the values as `x=T` / `x=F`" used `x` as a placeholder, which collides with the variable names `x15`…. PR #12 changed it to `<variable>=T`. Items regenerated from main carry the new wording; the scorer reads both.
 
 ## Before any pilot (SCOPE §1)
 

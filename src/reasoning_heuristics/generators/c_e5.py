@@ -35,22 +35,30 @@ Readings of the doc (also in docs/GENERATORS.md):
 - MIN-CONFLICTS (F) is not in the zoo; C4 is ONLINE-FF (edge-list order, never recolours).
 - E5-P (the prefilled single-decision twin) is a runner condition, not a new item set.
 - The SAT control uses "both members succeed" for "non-dead-end".
+- Every part lists the A1 constant give-up (ALWAYS-IMPOSSIBLE, ALWAYS-UNSAT, NONE), so a
+  give-up answer is not credited to the members that abort at a dead end (FF-3-ABORT,
+  GREEDY-ABORT, PHANTOM). On ENT items NONE equals EXACT (no conclusion follows).
+- Selection filters (recorded in `params.filters`): STUCK items need FF-3-LIST to get stuck in
+  the middle third, DEAD items need GREEDY-MENTION and UC-DET to dead-end, FAIL pairs need
+  GREEDY-CM to miss the countermodel. These follow the doc's §2.8 but select on named
+  members' behaviour (SCOPE §6 rule 6 says never on one heuristic's errors): a design
+  question for the project owner, so analyses can condition on the filter.
 """
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 from reasoning_heuristics import tokens
 from reasoning_heuristics.counterfactual.reorder import permutation, reorder_clauses
 from reasoning_heuristics.generators import c_common as CC
-from reasoning_heuristics.generators.common import GenStats, decision_channel, make_item, set_hash, witness_channel
-from reasoning_heuristics.hashing import sha
+from reasoning_heuristics.generators.common import GenStats, content_hash, decision_channel, make_item, set_hash
 from reasoning_heuristics.heuristics.base import run
 from reasoning_heuristics.heuristics.tasks import ColouringTask, EntailmentTask, SatTask, load_task
 from reasoning_heuristics.problems.coloring import graph as G
 from reasoning_heuristics.problems.coloring.graph import Graph
-from reasoning_heuristics.problems.coloring.render import render_neighbours
+from reasoning_heuristics.problems.coloring.render import answer_instruction, render_neighbours
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.sat import cnf as S
 from reasoning_heuristics.problems.sat.render import render_c
@@ -63,6 +71,24 @@ COL_CELLS = ["STUCK/vA/eA", "STUCK/vB/eA", "STUCK/vA/eB", "STUCK/vB/eB", "CONTRO
 SAT_CELLS = ["DEAD", "DEAD-PERM", "CONTROL"]
 STATE_CELLS = {"SAT": ["s1", "s2", "s3"], "COL": ["s1", "s3"]}
 ENT_CELLS = ["FAIL/ORDER-A", "FAIL/ORDER-B", "MATCHED/ORDER-A", "MATCHED/ORDER-B"]
+# The §2.8 selection filters, recorded on every item (params.filters). "selects on <member>" marks a
+# filter on a named member's behaviour (a design question: SCOPE §6 rule 6).
+FILTERS = {
+    "COL": ["3-colourable, not 2-colourable",
+            "FF-3-LIST (ABORT) gets stuck at a vertex in the middle third of the listing (selects on FF's failure)",
+            "vertex order B: FF-3-LIST still stuck, at a different vertex (selects on FF's failure)",
+            "CONTROL: FF-3-LIST succeeds (selects on FF's success); n, m +-1 and order-free backtracking nodes matched"],
+    "SAT": ["satisfiable", "GREEDY-MENTION and UC-DET both dead-end (selects on their failure)",
+            "DEAD-PERM: a clause order that moves GREEDY's dead end",
+            "CONTROL: GREEDY-MENTION and UC-DET both succeed (selects on their success); n, alpha and order-free DPLL nodes matched"],
+    "STATE-SAT": ["s1: GREEDY's completion valid and POLARITY's falsifies a clause; s2: UC-DET's valid and GREEDY's "
+                  "falsifies a clause; s3: no completion (cells defined by member behaviour)"],
+    "STATE-COL": ["s1: the FF-3 continuation dead-ends but a completion exists (cell defined by FF's failure); s3: no completion"],
+    "ENT": ["the conclusion does not follow",
+            "FAIL: GREEDY-CM misses the countermodel in premise order and finds it reversed (selects on GREEDY-CM's "
+            "error); MATCHED: finds it in both orders",
+            "ETR-default differs from GREEDY-CM on at least half of the pairs"],
+}
 DEFAULTS = {"parts": ["COL", "SAT", "STATE", "ENT"], "n_col": 24, "col_mean_degree": 4.2, "drop_q": 3,
             "n_sat": 25, "alpha_sat": 3.5, "n_state_sat": 20, "alpha_state": 3.5, "n_fixed": 6,
             "n_state_col": 16, "n_atoms": 5, "n_premises": 4, "max_attempts": 50_000, "max_partitions": 500_000}
@@ -85,7 +111,9 @@ def cells(params: dict[str, Any]) -> list[str]:
 # --- renderers (library wording) --------------------------------------------------------------------
 
 
-def col_edge_prompt(g: Graph) -> str:
+def col_edge_prompt(g: Graph, style: str | None = None) -> str:
+    """The library's edge-list wording; the answer line is the renderer's (`style`: "placeholder",
+    the default, or "library")."""
     return "\n".join([
         f"Graph with {g.n} vertices and {g.m} edges.",
         "Vertices (in this order): " + ", ".join(g.vertices),
@@ -93,8 +121,7 @@ def col_edge_prompt(g: Graph) -> str:
         "",
         "Colour every vertex with one of the colours 1, 2, ..., 3 so that the two ends of every edge get different "
         "colours. If this is impossible, answer IMPOSSIBLE.",
-        "After the line ANSWER:, write IMPOSSIBLE or one line `vertex: colour` per vertex, in this order: "
-        + ", ".join(g.vertices) + ".",
+        answer_instruction(list(g.vertices), True, style),
     ])
 
 
@@ -140,6 +167,7 @@ def col_members(q: int) -> list:
         ("EXACT", "EXACT", {}),
         ("RANDOM (H)", "RANDOM", {}),
         ("NOISY-EXACT", "NOISY-EXACT", {"p": 0.01}),
+        ("ALWAYS-IMPOSSIBLE (A1 give-up)", "ALWAYS-IMPOSSIBLE", {}),
     ]
 
 
@@ -210,6 +238,8 @@ def generate_col(tier, seed, per_cell, p, stats, attempt0) -> tuple[list, int]:
         }
         sid = set_hash(bseed, "COL")
         set_items = []
+        roots = {"STUCK": content_hash(ColouringTask(g, 3, (), tuple(g.vertices))),  # the STUCK/vA/eA item
+                 "CONTROL": content_hash(ColouringTask(control, 3, (), tuple(control.vertices)))}
         for cell, gg in variants.items():
             task = ColouringTask(gg, 3, (), tuple(gg.vertices))
             masks = G.enumerate_partitions(gg, 3, p["max_partitions"])
@@ -217,17 +247,17 @@ def generate_col(tier, seed, per_cell, p, stats, attempt0) -> tuple[list, int]:
                 break
             gt = {**truth(task), "n_colourings_up_to_renaming": len(masks),
                   "example": G.k_colour(gg, 3)}
-            ch = CC.colouring_channel(gg, 3, len(masks))
+            ch = CC.colouring_channel(task, 3, len(masks), exactly=False)
             stuck_v = ff3(gg).trace_features.get("stuck_vertex")
             prompt = col_edge_prompt(gg)
-            base_hash = sha((control if cell.startswith("CONTROL") else g).content_key())
+            base_hash = roots[cell.split("/")[0]]
             set_items.append(make_item(
                 vertical=VERTICAL, eval_id=EVAL_ID, set_id=sid, cell=f"COL/{cell}", domain="colouring (k=3)",
                 framing="textbook", prompt=prompt, answer_format=CC.COLOUR_K_FORMAT, task=task, ground_truth=gt,
                 specs=col_members(p["drop_q"]), channel=ch, seed=bseed, tier=tier, generator=__name__,
                 base_hash=base_hash, source_hash=None if cell in ("STUCK/vA/eA", "CONTROL/vA/eA") else base_hash,
                 pair_id=f"E5-COL-{sid}",
-                params={"n": gg.n, "m": gg.m, "design_cell": cell, "stuck_vertex": stuck_v,
+                params={"n": gg.n, "m": gg.m, "design_cell": cell, "stuck_vertex": stuck_v, "filters": FILTERS["COL"],
                         "stuck_position": gg.position[stuck_v] if stuck_v else None,
                         "order_free_hardness_nodes": order_free_nodes(gg),
                         "listing_dpll_nodes": run("coloring", "SEARCH", task, {"order": "LIST"}).trace_features["decisions"],
@@ -262,6 +292,7 @@ def sat_members() -> list:
         ("DPLL-MOMS-POLARITY (D)", "SEARCH", {"order": "MOMS", "value": "POLARITY"}),
         ("RO-GREEDY (C3)", "RO-GREEDY", {"samples": 200, "seed": 0}),
         ("EXACT", "EXACT", {}), ("RANDOM (H)", "RANDOM", {}),
+        ("ALWAYS-UNSAT (A1 give-up)", "ALWAYS-UNSAT", {}),
     ]
 
 
@@ -329,19 +360,21 @@ def generate_sat(tier, seed, per_cell, p, stats, attempt0) -> tuple[list, int]:
             continue
         sid = set_hash(bseed, "SAT")
         set_items = []
+        roots = {"DEAD": content_hash(SatTask(cnf)), "CONTROL": content_hash(SatTask(control))}  # answer order is presentation
         for cell, c in (("DEAD", cnf), ("DEAD-PERM", perm), ("CONTROL", control)):
             order = sorted(c.var_names, key=G.label_key)
             task = SatTask(c, (), tuple(order))
             n_sol = CC.count_models(c)
             prompt = render_c(c, order)
-            base_hash = sha((control if cell == "CONTROL" else cnf).content_key())
+            base_hash = roots["CONTROL" if cell == "CONTROL" else "DEAD"]
             set_items.append(make_item(
                 vertical=VERTICAL, eval_id=EVAL_ID, set_id=sid, cell=f"SAT/{cell}", domain="3-SAT", framing="textbook",
                 prompt=prompt, answer_format=CC.SAT_FORMAT, task=task,
                 ground_truth={**truth(task), "n_solutions": n_sol}, specs=sat_members(),
-                channel=CC.sat_channel(c, n_sol), seed=bseed, tier=tier, generator=__name__, base_hash=base_hash,
+                channel=CC.sat_channel(task, n_sol), seed=bseed, tier=tier, generator=__name__, base_hash=base_hash,
                 source_hash=base_hash if cell == "DEAD-PERM" else None, pair_id=f"E5-SAT-{sid}",
-                params={"n": n, "m": c.m, "alpha": alpha, "design_cell": cell, "order_free_dpll_nodes": sat_nodes(c),
+                params={"n": n, "m": c.m, "alpha": alpha, "design_cell": cell, "filters": FILTERS["SAT"],
+                        "order_free_dpll_nodes": sat_nodes(c),
                         "greedy_dead_end": sat_dead_end(c)[1]["greedy"], "uc_dead_end": sat_dead_end(c)[1]["uc"],
                         "prompt_tokens": tokens.count(prompt), "tokenizer_proxy": tokens.PROXY_NAME},
                 notes="Dead-end items (UC-DET and GREEDY both get stuck) against a matched control; the permuted copy "
@@ -369,6 +402,7 @@ def state_sat_members() -> list:
         ("UC-DET from state (C2)", "UC", {}), ("GUC-DET from state (C2)", "GUC", {}), ("SC-DET from state (C2)", "SC", {}),
         ("DPLL from state (D)", "SEARCH", {"order": "MENTION"}),
         ("EXACT", "EXACT", {}), ("RANDOM (H)", "RANDOM", {}),
+        ("ALWAYS-UNSAT (A1 give-up)", "ALWAYS-UNSAT", {}),
     ]
 
 
@@ -380,6 +414,7 @@ def state_col_members() -> list:
         ("GREEDY+REPAIR-LIST (C->F)", "GREEDY+REPAIR", {"order": "LIST", "k": 3}),
         ("DPLL-LIST from state (D)", "SEARCH", {"order": "LIST"}),
         ("EXACT", "EXACT", {}), ("RANDOM (H)", "RANDOM", {}),
+        ("ALWAYS-IMPOSSIBLE (A1 give-up)", "ALWAYS-IMPOSSIBLE", {}),
     ]
 
 
@@ -418,22 +453,35 @@ def count_completions(g: Graph, k: int, fixed: dict[str, int]) -> int:
     return rec(0)
 
 
-def completion_test(g: Graph, fixed: dict[str, int]):
-    def test(key: str) -> bool:
-        classes = CC.parse_partition_key(key)
-        if classes is None or len(classes) > 3:
-            return False
-        if any(g.has_edge(u, v) for c in classes for i, u in enumerate(c) for v in c[i + 1:]):
-            return False
-        # consistent with the fixed colours up to renaming
-        cls_of = {v: i for i, c in enumerate(classes) for v in c}
-        pairs = {}
-        for v, c in fixed.items():
-            if pairs.setdefault(cls_of[v], c) != c:
-                return False
-        return len(set(pairs.values())) == len(pairs)
+def count_completion_partitions(g: Graph, k: int, fixed: dict[str, int]) -> int:
+    """Completions as answer keys (partitions; the free colours' names do not matter). A partition
+    whose free classes number j - f (f = distinct fixed colours) is reached by perm(k - f, j - f)
+    labelled completions, so the labelled counts are divided by that, per class count j."""
+    col = dict(fixed)
+    free = [v for v in g.vertices if v not in col]
+    f = len(set(fixed.values()))
+    by_classes: dict[int, int] = {}
 
-    return test
+    def rec(i: int) -> None:
+        if i == len(free):
+            j = len(set(col.values()))
+            by_classes[j] = by_classes.get(j, 0) + 1
+            return
+        v = free[i]
+        used = {col[u] for u in g.adj[v] if u in col}
+        for c in range(1, k + 1):
+            if c not in used:
+                col[v] = c
+                rec(i + 1)
+                del col[v]
+
+    rec(0)
+    total = 0
+    for j, n in by_classes.items():
+        mult = math.perm(k - f, j - f)
+        assert n % mult == 0
+        total += n // mult
+    return total
 
 
 def generate_state(tier, seed, per_cell, p, stats, attempt0) -> tuple[list, int]:
@@ -491,8 +539,9 @@ def generate_state(tier, seed, per_cell, p, stats, attempt0) -> tuple[list, int]
                     prompt = render_c(cnf, order, fixed)
                     n_sol = CC.count_models(cnf, fixed)
                     gt = {**truth(task), "n_completions": n_sol}
-                    ch = CC.sat_channel(cnf, n_sol, fixed)
-                    specs, base_hash, dom = state_sat_members(), sha(cnf.content_key()), "3-SAT (partial assignment given)"
+                    ch = CC.sat_channel(task, n_sol)
+                    specs, dom = state_sat_members(), "3-SAT (partial assignment given)"
+                    base_hash = content_hash(SatTask(cnf, tuple(found["s1"].items())))  # the s1 item
                     fmt = CC.SAT_FORMAT
                 else:
                     fx = list(fixed.items())
@@ -500,18 +549,17 @@ def generate_state(tier, seed, per_cell, p, stats, attempt0) -> tuple[list, int]
                     prompt = col_state_prompt(g, fx)
                     n_c = count_completions(g, 3, fixed)
                     gt = {**truth(task), "n_completions": n_c}
-                    sv = {"RANDOM": (lambda key: False, 1)}
-                    if n_c:
-                        sv["EXACT"] = (completion_test(g, fixed), n_c)
-                    ch = witness_channel("coloring", sv)
-                    specs, base_hash, dom = state_col_members(), sha(g.content_key()), "colouring (k=3, partial colouring given)"
+                    ch = CC.colouring_channel(task, 3, count_completion_partitions(g, 3, fixed), exactly=False)
+                    specs, dom = state_col_members(), "colouring (k=3, partial colouring given)"
+                    base_hash = content_hash(ColouringTask(g, 3, tuple(found["s1"].items())))  # the s1 item
                     fmt = CC.COLOUR_K_FORMAT
                 set_items.append(make_item(
                     vertical=VERTICAL, eval_id=EVAL_ID, set_id=sid, cell=f"STATE/{domain}/{cell}", domain=dom,
                     framing="textbook", prompt=prompt, answer_format=fmt, task=task, ground_truth=gt, specs=specs,
                     channel=ch, seed=bseed, tier=tier, generator=__name__, base_hash=base_hash,
                     source_hash=None if cell == "s1" else base_hash, pair_id=f"E5-STATE-{sid}",
-                    params={"design_cell": cell, "fixed": fixed, "prompt_tokens": tokens.count(prompt),
+                    params={"design_cell": cell, "fixed": fixed, "filters": FILTERS[f"STATE-{domain}"],
+                            "prompt_tokens": tokens.count(prompt),
                             "tokenizer_proxy": tokens.PROXY_NAME},
                     notes="Same instance in every state; only the fixed values differ. C0 ignores them, C1 counts only "
                           "the clauses they leave open, C2 follows the clauses they make unit.",
@@ -537,6 +585,7 @@ def ent_members() -> list:
         ("TRUTH TABLE (exact)", "EXACT", {}),
         ("UP-fixpoint (B1, sound)", "UP-k", {"k": 10}),
         ("ALWAYS-YES (A1)", "ALWAYS-YES", {}),
+        ("NONE (A1 give-up: does not follow)", "NONE", {}),
         ("ETR-default (R1)", "ETR-default", {"rendering": "R1"}),
         ("ETR-1p (R1)", "ETR-1p", {"rendering": "R1"}),
         ("ONL(1) (C4)", "ONL", {"k": 1}), ("ONL(2) (C4)", "ONL", {"k": 2}),
@@ -595,7 +644,7 @@ def generate_ent(tier, seed, per_cell, p, stats, attempt0) -> tuple[list, int]:
         set_items = []
         for kind in ("FAIL", "MATCHED"):
             ta, tb, _, kseed = pending[kind]
-            base_hash = sha(ta.content_key())
+            base_hash = content_hash(ta)  # the ORDER-A item
             for order, t in (("ORDER-A", ta), ("ORDER-B", tb)):
                 prompt = ent_prompt(t)
                 gt = {**truth(t), "countermodels": len(F.countermodels(list(t.premises), t.probe))}
@@ -606,7 +655,8 @@ def generate_ent(tier, seed, per_cell, p, stats, attempt0) -> tuple[list, int]:
                     channel=decision_channel("YES", "NO"), seed=kseed, tier=tier, generator=__name__,
                     base_hash=base_hash, source_hash=base_hash if order == "ORDER-B" else None,
                     pair_id=f"E5-ENT-{base_hash[:10]}",
-                    params={"design_cell": f"{kind}/{order}", "atoms": len(atoms), "premises": len(t.premises),
+                    params={"design_cell": f"{kind}/{order}", "filters": FILTERS["ENT"], "atoms": len(atoms),
+                            "premises": len(t.premises),
                             "premises_reversed": order == "ORDER-B", "prompt_tokens": tokens.count(prompt),
                             "tokenizer_proxy": tokens.PROXY_NAME},
                     notes="GREEDY-CM errs only by commission (YES when a countermodel exists) and its error depends on "
