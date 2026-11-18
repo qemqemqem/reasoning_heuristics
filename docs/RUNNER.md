@@ -103,7 +103,9 @@ One JSON object per response. The identification engine joins it to its item on 
 | `finish_reason`, `native_finish_reason`, `truncated` | Truncated = finish_reason `length`, or the completion reached max_tokens |
 | `reasoning_returned`, `reasoning_chars`, `content_chars`, `pre_answer_tokens` | Whether reasoning text came back, sizes, and visible working before the answer |
 | `scorer_version`, `scorer_git_sha`, `scorer_git_dirty` | Which scorer made the record (DESIGN §5 rule 3) |
-| `forced`, `forced_template`, `source_run_id` | Only on a forced final answer (`force.py`): `true`, the template, and the run whose truncated response it continues |
+| `forced`, `forced_template`, `source_run_id` | Only on a forced final answer (`force.py`): `true`, the template, and the run whose response's trace it replays |
+| `forced_select`, `forced_sample`, `source_sample` | force-2 only: `cut` or `done`, the forced sample index, and the source response's sample index |
+| `natural_category`, `natural_correct`, `natural_answer_key`, `same_as_natural` | `--select done` only: the source response's own scoring, and whether the forced answer has the same answer key, both `ok` |
 
 For the single-vertex format (C E3, arm I) the members' answers are full colourings, so `answer_key` never matches theirs; compare on `channel_value`.
 
@@ -354,20 +356,31 @@ Checked on the probes and the 2026-11-18 smoke runs:
 - `reasoning_details` passed back on the assistant turn are dropped by the provider (`prompt_tokens` 256).
 - A content prefill is not continued: the model starts new reasoning.
 
-**What works: raw text completions**, `POST https://openrouter.ai/api/v1/completions`. We write the model's chat template ourselves, with the trace as its thinking, and close the thinking. The body is `model`, `provider` (the source request's), `prompt`, `max_tokens`, and the source request's `temperature`, `top_p` and, when it has one, `top_k`. For gpt-oss the provider parses the harmony output: `choices[0].text` holds the final channel, and `choices[0].reasoning` any analysis the model writes again.
+**What works: raw text completions**, `POST https://openrouter.ai/api/v1/completions`, on a provider that passes the prompt through. We write the model's chat template ourselves, with the trace as its thinking, and close the thinking. The body is `model`, `provider`, `prompt`, `max_tokens`, and the source request's `temperature`, `top_p` and, when it has one, `top_k`. The choice's `text` holds the answer, and `reasoning` any analysis the model writes again.
 
-| Model (pinned endpoint) | max_tokens | Answered | Completion tokens |
+**DekaLLM wraps the raw prompt.** Not every provider passes it through. Sent the same text through `/completions` and as a chat user message through `/chat/completions`, a provider that passes the raw prompt through reports fewer prompt tokens for it, because the chat call adds the chat template. Equal counts mean the raw prompt was wrapped as a user message, and the model then reasons afresh ("The user asks…"). The probes (batch 11, `data/runs/probes/2026-11-18-forced-answer/`):
+
+| Model | Provider | Raw / chat prompt_tokens | Passes the raw prompt through |
 |---|---|---|---|
-| Qwen3-32B (DeepInfra) | 1,024 | 5 of 5 | 29–172 |
-| gpt-oss-120b (DekaLLM) | 4,096 | 7 of 8, mostly at once | 17–479; the eighth used all 4,096 |
-| gpt-oss-20b (DekaLLM) | 4,096 | 3 of 8 | 305–2,450; the other 5 went back to reasoning and used all 4,096 |
+| gpt-oss-20b | DekaLLM bf16 (the source runs' pin) | 160 / 160 | no |
+| gpt-oss-120b | DekaLLM bf16 (the source runs' pin) | 206 / 206 | no |
+| gpt-oss-20b and gpt-oss-120b | DeepInfra bf16 | 93 / 147 | yes |
+| gpt-oss-20b and gpt-oss-120b | Parasail fp4 | 93 / 206 | yes |
+| gpt-oss-120b | Cerebras fp16 | 93 / 206 | yes (leaves `<\|return\|>` in the text) |
+| Qwen3-32B and Qwen3-14B | DeepInfra fp8 flex (their pin) | 42 / 51 | yes |
 
-Two additions made gpt-oss no better or worse, so the template has neither:
+So **force-1's gpt-oss passes are invalid**: `data/runs/forced/2026-11-18-dev-gpt-oss-*` measured a re-prompt with the trace as user text, not a forced answer. The gpt-oss probes sent to DekaLLM (batches 03, 04 and 06–09) are invalid for the same reason: their answer rates, and the effects of a wrap-up sentence and of an answer header, say nothing about forcing. Qwen3's force-1 passes are valid: DeepInfra passes the prompt through, and force-2 sends Qwen3 the same body.
 
-- a wrap-up sentence at the end of the analysis ("I have run out of time to think, so I must give my final answer now…"): 0 of 5 and 1 of 5 answered, in two probes at max_tokens 1,024;
-- an answer header prefilled in the final channel (`ANSWER:` or `{"`), which the model wrote again after itself (`ANSWER:ANSWER: …`).
+**On a provider that passes the prompt through, forcing works** (batch 12, gpt-oss-20b on DeepInfra bf16, force-1's prompt):
 
-**The template, `force-1`.** `trace` is the source response's `choices[0].message.reasoning`, with trailing whitespace removed. `user` and `system` are the source request's last user message and its system message, verbatim.
+- **Cut traces:** it answered 16 of 16 (8 traces, each sent plain and with force-2's `logit_bias`), and none went back to reasoning. One answer did not parse (`<v85>: 1`), and one wrote 2,325 tokens of visible working before it.
+- **Finished traces:** replayed whole with the answer forced, 8 of 8 gave the model's own natural answer.
+
+Qwen3-32B on DeepInfra (batch 05) answered 5 of 5 cut traces at max_tokens 1,024.
+
+**Parameters** (`GET /api/v1/models/<slug>/endpoints`, batch 10): DeepInfra supports `logit_bias` but not `logprobs`, for gpt-oss and Qwen3. With `require_parameters: true`, a request with a parameter its endpoint does not support fails with "No endpoints found … Filter by Parameters".
+
+**The prompt (force-1's, which force-2 sends too).** `trace` is the source response's `choices[0].message.reasoning`, with trailing whitespace removed. `user` and `system` are the source request's last user message and its system message, verbatim.
 
 - **gpt-oss** (`openai/gpt-oss-*`). `effort` is the source request's `reasoning.effort`. The developer message is there only when the source request had a system message.
 
@@ -399,48 +412,91 @@ Two additions made gpt-oss no better or worse, so the template has neither:
 
 - **Any other model** is refused.
 
-**What it selects.** The source's raw records whose response stopped for length (finish_reason `length`) with a non-empty `reasoning`, in the source's order. Those that stopped there without a trace (the direct condition's) are counted and skipped.
+**Template `force-2` (the default).** The prompt above, with two changes from force-1:
 
-**Where the outputs live.** `data/runs/forced/<source_run_id>/`, beside the source run:
+- **The forcing route.** Forced calls go to an endpoint that passes the raw prompt through, which need not be the source run's pin (`FORCING_ROUTES` in `evals/force.py`). Each route is `{"order": [slug], "allow_fallbacks": false, "require_parameters": true, "quantizations": [q]}`, priced at the endpoint's listed price. Both DekaLLM's gpt-oss bf16 and DeepInfra's bf16 serve the released weights upcast to bf16, so the forced call runs the weights that wrote the trace.
+
+  | Model | Source runs' pin | Forcing route | USD/M prompt, completion | Context |
+  |---|---|---|---|---|
+  | gpt-oss-20b | `dekallm/bf16` | `deepinfra/bf16` | 0.03, 0.14 | 131,072 |
+  | gpt-oss-120b | `dekallm/bf16` | `deepinfra/bf16` | 0.037, 0.17 | 131,072 |
+  | Qwen3-32B | `deepinfra/fp8/flex` | the same | 0.064, 0.224 | 40,960 |
+  | Qwen3-14B | `deepinfra/fp8/flex` | the same | 0.096, 0.192 | 40,960 |
+
+- **gpt-oss may not leave the final channel.** Its body carries `logit_bias: {"200005": -100, "200006": -100, "200007": -100}`: `<|channel|>`, `<|start|>` and `<|end|>` in tiktoken's `o200k_harmony`. `<|return|>` (200002), which ends the answer, stays allowed. Qwen3 gets no `logit_bias`.
+
+The manifest records both routings: `source.provider_routing` (the source run's) and `provider_routing` (the forced calls'). A source run not routed to its model's configured pin is refused: only traces from the pinned endpoint are forced.
+
+**The raw-prompt check.** Before the first forced call of a live invocation, `force.py` checks that the forcing route passes a raw prompt through. It sends one text twice, to the forcing route, with max_tokens 8 and temperature 0: as `prompt` to `/completions`, and as the user message to `/chat/completions`. The text is the template above, filled with "Is 17 a prime number? Answer with one word, YES or NO." and a one-line thinking; for gpt-oss it is exactly the probes' prompt.
+
+- **It passes only when the raw call's prompt_tokens are strictly below the chat call's.** Otherwise, or when either call fails, the pass stops with an error naming the provider, before any forced call. Nothing is written but the ledger row for the check's cost.
+- **Both responses' prompt_tokens, texts, providers and costs** go into the manifest as `raw_check`.
+- **The check costs about $0.00001.** It is booked in the cost guard and in the invocation's ledger row.
+- **When it does not run:** in a dry run, which makes no calls at all, and when every call is answered from the response cache (`raw_check.skipped` says so).
+
+**Template `force-1`** (`--template force-1`) is kept to reproduce and re-score its passes. It sends exactly what it sent before: the source run's pin, no `logit_bias`, `--select cut` only, no `--per-unit` or `--samples`. Its outputs stay in `data/runs/forced/<source_run_id>/`. Its live calls get the raw-prompt check too, so a gpt-oss force-1 pass with calls to send is refused (DekaLLM wraps). A pass answered wholly from the cache needs no check.
+
+**What it selects** (`--select`), from the source's raw records, in the source's order:
+
+- **`cut`** (the default): responses that stopped for length (finish_reason `length`) with a non-empty `reasoning`. Those that stopped there without a trace (the direct condition's) are counted (`skipped_no_trace`) and skipped.
+- **`done`**: responses that finished (finish_reason `stop`) with a non-empty trace and non-empty content. The whole trace is replayed and the answer forced: the f = 1 acceptance test. Each forced raw record keeps the source response, its reasoning removed (`natural_response`), and each scored record adds the source response's own scoring: `natural_category`, `natural_correct`, `natural_answer_key`, and `same_as_natural` (the same answer key, both `ok`). Skipped: `skipped_no_trace`, `skipped_no_content`.
+- **`--per-unit N`** keeps at most N records per unit (vertical, eval, item domain), in the source's order: a stratified acceptance sample. **`--limit N`** then keeps the first N.
+- **`--samples S`** sends S forced calls per record. Sample indices 0..S−1 (`forced_sample`) give distinct cache keys and records.
+
+**Where the outputs live.** Beside the source run: force-2 in `data/runs/forced-2/<select>/<source_run_id>/` (run id `forced-2/<select>/<source_run_id>`), force-1 in `data/runs/forced/<source_run_id>/`.
 
 | File | Contents |
 |---|---|
-| `manifest.json` | `source` (run id, the SHA-256 of its `raw.jsonl.gz`, condition, git); `forced` (template, endpoint, max_tokens); condition `<source label>-forced`; provider routing; the pinned price; the dry-run estimate; cap, budget and spend; git and versions; `items` (the source's item files and the item flags used); `counts`: `selected`, `skipped_no_trace`, `responses`, `answered` (stopped by itself with a non-empty reply), `still_reasoning` (stopped at max_tokens again) |
-| `raw.jsonl.gz` | one record per forced call, as `run.py` writes them: the full request, prompt included, and response. Plus `source_run_id`, `source_cache_key` and `forced_template`. `prompt_hash` is the first 16 hex digits of the prompt's SHA-256 |
-| `scored.jsonl.gz` | the standard scorer's records (since scorer-1.5.2 it reads a text completion), plus `forced: true`, `forced_template` and `source_run_id`. `run_id` is `forced/<source_run_id>` |
-| `scoring.json`, `REPORT.md` | as for any run; the report adds the pass's counts |
+| `manifest.json` | `source` (run id, routing, the SHA-256 of its `raw.jsonl.gz`, condition, git); `forced` (template, endpoint, max_tokens; for force-2 also select and logit_bias); condition `<source label>-forced`; `provider_routing` and `price` of the forced calls; `raw_check`; the dry-run estimate; cap, budget and spend; git and versions; `items` (the source's item files, the item flags used, per_unit, limit, samples); `counts` (below) |
+| `raw.jsonl.gz` | one record per forced call, as `run.py` writes them: the full request, prompt included, and response. Plus `source_run_id`, `source_cache_key` and `forced_template`; force-2 adds `forced_select`, `forced_sample` and `source_sample`, and for `done` `natural_response` and `natural_max_tokens`. `prompt_hash` is the first 16 hex digits of the prompt's SHA-256 |
+| `scored.jsonl.gz` | the standard scorer's records (since scorer-1.5.2 it reads a text completion), plus `forced: true`, `forced_template` and `source_run_id`; force-2 adds `forced_select`, `forced_sample` and `source_sample`, and `done` the `natural_*` fields and `same_as_natural` |
+| `scoring.json`, `REPORT.md` | as for any run; the report adds the pass's counts, routings and raw-prompt check |
 
-**How they are kept apart.** The source run's files are never written. Its truncated records stay `truncated` (censored), and a forced answer never replaces one: it was written under a second budget the source condition did not have. Forced answers are analysed as their own stratum (`forced: true`, condition `…-forced`). The analysis reads only `data/runs/2026-11-18-{dev,pc20,pc40}-*` (`RUN_PATTERNS`), which `data/runs/forced/` does not match.
+**Counts** (`counts` in the manifest):
+
+- **Selection:** `candidates`, `selected`, `units`, `samples`, `calls`, `skipped_*`, `max_tokens_lowered`.
+- **Outcomes:** `responses`; `answered` (stopped by itself with a non-empty reply); `parsed` (category `ok`); `still_reasoning` (stopped at max_tokens again); and `renewed_reasoning`, the responses whose choice carries non-empty `reasoning`. That should be 0 under force-2; anything else means the provider or the model left the answer.
+- **`done` adds** `natural_ok` (the source response's answer is `ok`) and `same_as_natural`.
+
+**Acceptance tests,** before forced answers are analysed:
+
+- **f = 1 agreement:** on `--select done` (a stratified sample, `--per-unit 3`), `same_as_natural / natural_ok` should be at least 95%.
+- **Cut traces:** `answered` and `parsed` should each be at least 95% of the responses.
+- **Repeatability** is measured with `--samples 2`: the share of records whose two samples give the same answer key (scored records grouped by `item_id` and `source_sample`).
+
+**How they are kept apart.** The source run's files are never written. Its truncated records stay `truncated` (censored), and a forced answer never replaces one: it was written under a second budget the source condition did not have. Forced answers are analysed as their own stratum (`forced: true`, condition `…-forced`). The analysis reads only `data/runs/2026-11-18-{dev,pc20,pc40}-*` (`RUN_PATTERNS`), which `data/runs/forced/` and `data/runs/forced-2/` do not match.
 
 **Running it.**
 
 ```bash
 # count and cost estimate: no network, writes nothing
-python -m reasoning_heuristics.evals.force data/runs/<source_run_id> --dry-run --allow-item-drift
+python -m reasoning_heuristics.evals.force data/runs/<source_run_id> --dry-run --allow-item-drift [--select done --per-unit 3]
 
 # live (the key comes from the environment); re-running resumes, and the cache never pays twice
 python -m reasoning_heuristics.evals.force data/runs/<source_run_id> --cap-usd 1 --allow-item-drift \
-    [--max-tokens 4096] [--limit N] [--concurrency 4] [--budget-tag T --budget-usd B]
+    [--select cut|done] [--per-unit N] [--samples S] [--max-tokens 4096] [--limit N] [--concurrency 4] \
+    [--budget-tag T --budget-usd B]
 
 # re-score after a scorer change, with the item flag the pass used
-python -m reasoning_heuristics.evals.score --allow-item-drift data/runs/forced/<source_run_id>
+python -m reasoning_heuristics.evals.score --allow-item-drift data/runs/forced-2/<select>/<source_run_id>
 ```
 
 - **Items.** The pass is scored against the source run's items. It refuses to start if they no longer hash to the source manifest, unless given the flag the source's own scoring used:
   - `--allow-item-drift` for the dev and pilot runs: their C E1 and C E2 files gained the A1 give-up member after the runs (data/items/pc20/README.md);
   - `--items-at-run-sha` for the smoke runs: the files at the source run's SHA. Re-score such a pass with `score --items-ref <SHA>` (`source.git.sha` in its manifest).
-- **The cap.** Each call reserves 1.25 × (prompt + max_tokens) at the pinned price. The prompt is estimated as the source response's prompt plus completion tokens; the probes' forced prompts came to 1.0007–1.0033 times that. A source run not routed to the model's configured pin is refused, since that is what the price is for.
-- **The context.** Each call's max_tokens is lowered when prompt plus answer would not fit the pinned endpoint's context (`context_length` in evals/models.py): it becomes context − 1.01 × the prompt estimate − 64. A call left with under 256 tokens is skipped and counted (`skipped_no_room`); `max_tokens_lowered` counts the rest. DeepInfra serves Qwen3 with 40,960 tokens. On 2026-11-18 one dev item per Qwen3 run (estimate 36,889 tokens) overflowed it at 4,096 answer tokens, with an HTTP 400 that stopped the pass, before this rule existed.
-- **Ledger.** Each live invocation that sends a call appends one row: run id `forced/<source_run_id>`, condition `<source label>-forced`.
-- **Dry-run estimates** for the 2026-11-18 thinking runs at max_tokens 4,096, from the prompt alone (every call answers at once) to every call at max_tokens. The low-effort and direct runs have nothing to force.
+- **The cap.** Each call reserves 1.25 × (prompt + max_tokens) at the forcing route's price. The prompt is estimated as the source response's prompt plus completion tokens; the probes' forced prompts came to 1.0007–1.0033 times that. For a finished response the estimate includes its answer, which the prompt leaves out.
+- **The context.** Each call's max_tokens is lowered when prompt plus answer would not fit the forcing endpoint's context: it becomes context − 1.01 × the prompt estimate − 64. A call left with under 256 tokens is skipped and counted (`skipped_no_room`); `max_tokens_lowered` counts the rest. DeepInfra serves Qwen3 with 40,960 tokens. On 2026-11-18 one dev item per Qwen3 run (estimate 36,889 tokens) overflowed it at 4,096 answer tokens, with an HTTP 400 that stopped the pass, before this rule existed.
+- **Ledger.** Each live invocation that sends a call appends one row, the raw-prompt check included: run id `forced-2/<select>/<source_run_id>` (force-1: `forced/<source_run_id>`), condition `<source label>-forced`. A pass refused by the check books the check's cost in a row of its own (`status=refused`).
+- **Dry-run estimates** for the 2026-11-18 thinking-high runs under force-2, at max_tokens 4,096: from the prompt alone (every call answers at once) to every call at max_tokens. The low-effort and direct runs have nothing to cut.
 
-| Source run | Calls | Estimate (USD) |
-|---|---|---|
-| dev, gpt-oss-20b thinking-high | 462 | 0.45–0.72 |
-| dev, gpt-oss-120b thinking-high | 284 | 0.29–0.50 |
-| dev, Qwen3-32B / Qwen3-14B thinking-high | 26 / 28 | 0.06–0.08 / 0.09–0.12 |
-| pc20 and pc40, Qwen3-32B / Qwen3-14B thinking-high (each) | 14 / 21 | 0.03–0.04 / 0.07–0.09 |
-| smoke, gpt-oss-20b / Qwen3-32B thinking-high | 89 / 6 | 0.09–0.14 / 0.01–0.02 |
+| Source run | `cut`: calls | `cut`: USD | `done --per-unit 3`: calls (units) | `done --per-unit 3`: USD |
+|---|---|---|---|---|
+| dev, gpt-oss-20b | 462 | 0.47–0.74 | 66 (23) | 0.03–0.07 |
+| dev, gpt-oss-120b | 284 | 0.36–0.56 | 68 (23) | 0.04–0.08 |
+| dev, Qwen3-32B / Qwen3-14B | 26 / 28 | 0.06–0.08 / 0.09–0.12 | 69 / 69 (23) | 0.05–0.11 / 0.07–0.13 |
+| pc20, Qwen3-32B / Qwen3-14B | 14 / 21 | 0.03–0.04 / 0.07–0.09 | 27 / 27 (9) | 0.02–0.05 / 0.03–0.05 |
+| pc40, Qwen3-32B / Qwen3-14B | 14 / 21 | 0.03–0.04 / 0.07–0.09 | 15 / 15 (5) | 0.01–0.03 / 0.02–0.03 |
+| smoke, gpt-oss-20b / Qwen3-32B | 89 / 6 | 0.09–0.14 / 0.01–0.02 | 58 (21) / 67 (23) | 0.02–0.06 / 0.04–0.11 |
 
 ## E8: continuations and prefill
 
@@ -448,7 +504,7 @@ E8 items are specs: each continuation is built from the model's own earlier resp
 
 - **Assistant prefill exists.** The API overview says that to have a model complete a partial response you "include a message with `role: "assistant"` at the end of your messages array". That covers the visible-content channel only.
 - **Prefilling the reasoning channel is not documented.** The reasoning-tokens page documents sending `reasoning` / `reasoning_details` back on earlier assistant turns to preserve reasoning across turns, and warns that `reasoning_details` blocks must be passed back unmodified and in order. It says nothing about a final assistant message whose reasoning the model should continue. For gpt-oss (harmony format: analysis and final channels) and Qwen3 (`<think>` in the template), a content prefill would most likely land in the final answer channel, which is not what E8 means by a truncated trace.
-- **The 2026-11-18 forced-answer probes answered part of this** ([below](#forced-final-answers-at-the-cap)): a content prefill is not continued, `reasoning_details` passed back are dropped, and the raw completions endpoint serves the pinned gpt-oss and Qwen3 providers with our own chat template.
+- **The 2026-11-18 forced-answer probes answered part of this** ([above](#forced-final-answers-at-the-cap)): a content prefill is not continued, `reasoning_details` passed back are dropped, and the raw completions endpoint takes our own chat template on DeepInfra (Qwen3's pin, and gpt-oss bf16). DekaLLM, gpt-oss's pin, wraps a raw prompt as a chat user message.
 - **So E8 on OpenRouter needs a probe before it is built:** send a content prefill (`<think>…</think>` text plus the header) and an assistant message carrying `reasoning`, per pinned provider, and check whether the model continues the prefix or starts a new reply. If neither works, the options are a raw completions endpoint with the chat template applied by us (`/api/v1/completions`, if the pinned provider serves these models there), or self-hosted vLLM, where the prompt can end inside the analysis channel.
 - **Runner changes then:** materialise each spec from the source run's raw output (`ah_e8.materialise`, with the model tokenizer's offsets for the truncation point, not the proxy), send it as a continuation with max_tokens 64 (or the condition's max for mistake insertion), and score with the `sat_json` parser on the continuation text. E8 raw records would carry the source run id and the source response's cache key.
 
