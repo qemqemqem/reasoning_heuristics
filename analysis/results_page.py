@@ -689,8 +689,10 @@ def section_ppc(d: Data) -> str:
               "other two are 0 by construction (no special tokens, no answer out of reach), so the first three checks there amount "
               "to “ε is below its cap”. The distance profile tests the shape of the near misses, which no single parameter fits. "
               "Because the fake data come from parameters fitted to the real data, the real data sit closer to the fake data's "
-              "mean than a fresh data set would: the check is conservative, so a failure is a real misfit, and a pass is weak "
-              "support.</p>" if has_dist else ""),
+              "mean than a fresh data set would: the check is conservative. Still, each fit faces four checks against 100 fake data "
+              "sets, so a single marginal failure is weak evidence; the clear failures are those with ε at its cap or several "
+              "checks failed. This check was added on 2026-11-18, after the first results; it changes two verdicts (see the "
+              "findings).</p>" if has_dist else ""),
            legend([(SW_SIM, "fake data from the fitted model: 5–95% range and mean"), (SW_OBS_IN, "observed, inside the range"),
                    (SW_OBS_OUT, "observed, outside the range")])]
     scale = UNIT_SCALE
@@ -1065,8 +1067,8 @@ def section_limits(d: Data) -> str:
     n_cap = sum(f.at_cap for f in d.fits)
     n_near = sum(f.nearness for f in d.fits)
     shows = ["<li><strong>Which fits pass the predictive checks against their data</strong>, and which do not "
-             f"({len(d.fits) - n_near} of {len(d.fits)} do, with ε below its cap). The checks are conservative: a failure is a "
-             "real misfit, a pass is weak support.</li>",
+             f"({len(d.fits) - n_near} of {len(d.fits)} do, with ε below its cap). A pass is weak support, and a single marginal "
+             "failure is weak evidence.</li>",
              "<li><strong>How often each model's wrong answers equal a member's wrong answer</strong>, on the gated units, against "
              "a within-cell permutation chance level where one exists.</li>",
              "<li><strong>Accuracy, validity and member-match counts</strong> on every unit and run.</li>"]
@@ -1154,7 +1156,9 @@ def section_reproduce(d: Data) -> str:
             "OMP_NUM_THREADS=1 python analysis/prelim_2026_11_18.py --runs-root data/runs --workers 6\n"
             "# 2. Rebuild this page from the JSON and docs/results/findings.html (seconds)\n"
             "python analysis/results_page.py\n"
-            "python analysis/results_page.py --check   # fails if the committed page differs (a test runs this)</code></pre>"
+            "python analysis/results_page.py --check   # fails if the committed page differs (a test runs this)\n"
+            "# 3. The checks behind the hand-written claims: near-optimality null, random-order chance, paired tests (seconds)\n"
+            "python analysis/findings_checks.py</code></pre>"
             f'<p>The JSON was computed at commit <code>{e(g.get("sha", "?"))}</code>'
             + (" with uncommitted changes to the code" if g.get("dirty_src") else " on a clean tree")
             + f', by <code>{e(d.r.get("command", "?"))}</code>, with Python {e(str(d.r.get("python", "?")))} and numpy '

@@ -89,3 +89,10 @@ def test_textbook_section_shows_each_framing():
                   "unit_items": {"pc20": {"AH_E5/ENT": 80}}, "descriptive": {"r": {"AH_E5/ENT": {"by_framing": bf}}}})
     html = mod.section_textbook(d)
     assert "0 · 16 / 20" in html and "16 · 3 / 20" in html and html.count('<td class="n">–</td>') == 3
+
+
+def test_findings_checks_match_the_committed_json():
+    """The numbers the hand-written claims take from analysis/findings_checks.py are what it computes today."""
+    r = subprocess.run([sys.executable, str(REPO / "analysis" / "findings_checks.py"), "--check"],
+                       capture_output=True, text=True, cwd=REPO)
+    assert r.returncode == 0, r.stdout + r.stderr
