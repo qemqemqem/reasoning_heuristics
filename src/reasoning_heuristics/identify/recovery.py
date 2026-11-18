@@ -611,6 +611,9 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
         cl, te, tt = s.get("clustered"), s.get("truncated_excluded"), s.get("truncated_token_model")
         if not cl:
             continue
+        if cl.get("testable") is False:  # the triple has weight on a member identified only in combination
+            ck.append(f"| {u['unit']} | not testable | not testable | not testable |")
+            continue
         h1 = u["triple"][0]
         h1g = next((g for g in te["quantities"] if h1 in g.split(" = ")), None) if te else None
         b_ex = te["quantities"][h1g]["bias"] if h1g else None
@@ -673,7 +676,57 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
                 status = bw if bw is not None else "not reached"
             need.append(f"| {n} | {status} | {', '.join(allg) if allg else '–'} | {', '.join(allb) if allb else '–'} |")
         sections["needed"] = "\n".join(need)
+        sections["where"] = _where_table(names, sizes, labels)
     return "\n\n".join(f"<!-- {k} -->\n{v}" for k, v in sections.items())
+
+
+def _verdict(s: dict[str, Any] | None) -> str | None:
+    if s is None:
+        return None
+    if s.get("testable") is False:
+        return "not testable"
+    return "pass" if s["pass"] else "fail"
+
+
+def _by_size(pairs: list[tuple[str, str]]) -> str:
+    """[(size, verdict)] -> "pass at 5, 10; fail at 20" (one verdict: "pass at every size run (5–40)")."""
+    kinds = list(dict.fromkeys(v for _, v in pairs))
+    if not kinds:
+        return "–"
+    if len(kinds) == 1:
+        return f"{kinds[0]} at every size ({pairs[0][0]}–{pairs[-1][0]})" if len(pairs) > 1 else f"{kinds[0]} at {pairs[0][0]}"
+    return "; ".join(f"{k} at {', '.join(s for s, v in pairs if v == k)}" for k in kinds)
+
+
+def _where_table(names: list[str], sizes: dict[str, dict[str, Any]], labels: list[str]) -> str:
+    """Per unit: the sizes (items per cell) at which the 60/30/10 mixture passes all three gates, with
+    percentile and with BCa intervals; the two null scenarios by size; and the sizes at which the
+    mixture (percentile) and both nulls pass together."""
+    rows = ["| Unit | mixture passes at (percentile) | mixture passes at (BCa) | null q | null ALWAYS | mixture and both nulls pass at |",
+            "|---|---|---|---|---|---|"]
+    for n in names:
+        per = []
+        for l in labels:
+            u = next((x for x in sizes[l]["units"] if x["unit"] == n and "error" not in x), None)
+            if u is not None:
+                per.append((f"{u['items_per_cell']:g}", u["scenarios"]))
+        mixes = [(z, s["mix"]) for z, s in per if s.get("mix")]
+        if not mixes:
+            pct = bca = "no planted triple"
+        elif all(m.get("testable") is False for _, m in mixes):
+            pct = bca = "not testable"
+        else:
+            p = [z for z, m in mixes if m.get("pass")]
+            b = [z for z, m in mixes if (m.get("bca") or {}).get("pass")]
+            run = f"{mixes[0][0]}–{mixes[-1][0]}" if len(mixes) > 1 else mixes[0][0]
+            pct = ", ".join(p) if p else f"none ({run})"
+            bca = ", ".join(b) if b else f"none ({run})"
+        nq = _by_size([(z, v) for z, s in per if (v := _verdict(s.get("null_q")))])
+        na = _by_size([(z, v) for z, s in per if (v := _verdict(s.get("null_always")))])
+        together = [z for z, s in per if _verdict(s.get("mix")) == "pass"
+                    and _verdict(s.get("null_q")) == "pass" and _verdict(s.get("null_always")) == "pass"]
+        rows.append(f"| {n} | {pct} | {bca} | {nq} | {na} | {', '.join(together) if together else '–'} |")
+    return "\n".join(rows)
 
 
 def merge(base_path: str, patch_path: str) -> None:

@@ -81,7 +81,8 @@ def test_run_unit_end_to_end_small(tmp_path):
     path.write_text(json.dumps(doc))
     assert "C_E2/knapsack" in table([str(path)])
     md = report(str(path), [str(path)])
-    for section in ("<!-- dev -->", "<!-- misspec -->", "<!-- offzoo -->", "<!-- checks -->", "<!-- sweep -->"):
+    for section in ("<!-- dev -->", "<!-- misspec -->", "<!-- offzoo -->", "<!-- checks -->", "<!-- sweep -->",
+                    "<!-- needed -->", "<!-- where -->"):
         assert section in md
 
 
