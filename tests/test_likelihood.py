@@ -40,7 +40,7 @@ def col_preds():
 def col_channel():
     return C.witness_channel("coloring", {
         "EXACT": SetSpec("colouring", {"graph": "stated", "colours": 2, "exactly": True}, 4, "optimal colouring"),
-        "RANDOM (H)": C.uniform_fill("uniform over 6^6 colourings", 1e-3),
+        "RANDOM (H)": C.uniform_fill("uniform over 6^6 colourings", 6, 6),
     }, task=TASK)
 
 
@@ -117,7 +117,7 @@ def test_unique_solutions_are_deterministic_classes():
 def test_a_member_without_a_row_fails_loudly():
     preds = col_preds()
     with pytest.raises(ValueError, match="not listed"):  # the "RANDOM" vs "RANDOM (H)" label mismatch
-        C.likelihood_table(preds, C.witness_channel("coloring", {"RANDOM": C.uniform_fill("x", 1e-3)}, task=TASK))
+        C.likelihood_table(preds, C.witness_channel("coloring", {"RANDOM": C.uniform_fill("x", 6, 6)}, task=TASK))
     with pytest.raises(ValueError, match="needs a row"):  # RANDOM (H) with no spec has no prediction at all
         C.likelihood_table(preds, C.witness_channel("coloring", {
             "EXACT": SetSpec("colouring", {"graph": "stated", "colours": 2, "exactly": True}, 4, "optimal")}, task=TASK))

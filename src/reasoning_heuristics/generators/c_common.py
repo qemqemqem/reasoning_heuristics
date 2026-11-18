@@ -11,7 +11,6 @@ vertex / variable, so partitions and assignments can be compared across isomorph
 
 from __future__ import annotations
 
-import math
 from typing import Any
 
 from reasoning_heuristics.generators.common import Channel, SetSpec, uniform_fill, witness_channel
@@ -68,10 +67,8 @@ def parse_partition_key(key: str) -> list[list[str]] | None:
 
 
 def random_fill(n: int, k: int) -> SetSpec:
-    """RANDOM (H) on a colouring witness channel: uniform over the k^n colourings with colours
-    1..k. One partition with j classes has mass k!/(k-j)!/k^n, at most the value used here."""
-    per_answer = max(math.perm(k, j) for j in range(1, min(k, n) + 1)) / k ** n
-    return uniform_fill(f"uniform over the {k}^{n} colourings with colours 1..{k}", per_answer)
+    """RANDOM (H) on a colouring witness channel: uniform over the k^n colourings with colours 1..k."""
+    return uniform_fill(f"uniform over the {k}^{n} colourings with colours 1..{k}", k, n)
 
 
 def colouring_channel(task, colours: int, n_solutions: int, exactly: bool = True) -> Channel:

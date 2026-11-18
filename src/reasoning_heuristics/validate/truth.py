@@ -87,16 +87,17 @@ def _mc_answer_sat(task: EntailmentTask, premises: list) -> str:
 
 def _listed_first_fit_colour(task: ColouringTask) -> int:
     """Validator path for an instructed first-fit question, written from the edge list alone:
-    walk the listing, give each vertex the least colour its earlier neighbours do not use."""
-    position = {v: i for i, v in enumerate(task.graph.vertices)}
-    earlier: dict[str, set[str]] = {v: set() for v in task.graph.vertices}
+    walk the listing, give each vertex the least colour its already-coloured neighbours (the
+    earlier ones, and any fixed ones) do not use."""
+    neighbours: dict[str, set[str]] = {v: set() for v in task.graph.vertices}
     for u, v in task.graph.edges:
-        first, second = (u, v) if position[u] < position[v] else (v, u)
-        earlier[second].add(first)
-    colour: dict[str, int] = {}
+        neighbours[u].add(v)
+        neighbours[v].add(u)
+    colour: dict[str, int] = dict(task.fixed)
     for v in task.graph.vertices:
-        taken = {colour[u] for u in earlier[v]}
-        colour[v] = next(c for c in itertools.count(1) if c not in taken)
+        if v not in colour:
+            taken = {colour[u] for u in neighbours[v] if u in colour}
+            colour[v] = next(c for c in itertools.count(1) if c not in taken)
     return colour[task.target]
 
 

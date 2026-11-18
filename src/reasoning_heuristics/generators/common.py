@@ -196,10 +196,30 @@ class SetSpec:
         return cls(d["rule"], d["params"], d["size"], d["description"], d.get("solution"), d.get("class_counts"))
 
 
-def uniform_fill(description: str, bound: float) -> SetSpec:
-    """A member uniform over the whole answer space (RANDOM on a witness channel): its mass on
-    every listed answer and solution set is below `bound`, so all of it is put on other."""
-    return SetSpec("fill", {"mass_outside_other_below": bound}, 1, description, class_counts={OTHER: 1})
+FILL_MAX = 1e-2  # a uniform fill may ignore at most this much mass on listed answers and solution sets
+
+
+def uniform_fill(description: str, k: int, n: int) -> SetSpec:
+    """RANDOM on a colouring witness channel: uniform over the k^n colourings with colours 1..k.
+    A partition with j classes has mass k!/(k-j)!/k^n, which is negligible here, so all of the
+    mass is put on other; `likelihood_table` computes what that ignores (`fill_bound`) and fails
+    if it exceeds FILL_MAX."""
+    return SetSpec("fill", {"k": k, "n": n}, 1, description, class_counts={OTHER: 1})
+
+
+def fill_bound(spec: SetSpec, listed: list[str], regions: dict[tuple, int], channel: "Channel") -> float:
+    """An upper bound on a uniform colouring fill's mass on the listed partitions and on the
+    unlisted solution classes (a partition with j classes is at most k!/(k-j)! colourings)."""
+    k, n = spec.params["k"], spec.params["n"]
+    total = 0
+    for key in listed:
+        if key and "=" not in key and key not in channel.values:  # a partition key
+            j = key.count("|") + 1
+            total += math.perm(k, j) if j <= k else 0
+    for sig, size in regions.items():
+        j = min(k, max(channel.set_valued[g[0]].params.get("colours", k) for g in sig))
+        total += size * math.perm(k, j)
+    return total / k ** n
 
 
 # --- channels ----------------------------------------------------------------------------------------
@@ -335,6 +355,7 @@ class LikelihoodTable:
     kinds: dict[str, str]  # member label -> deterministic | distribution | set | unique | counts | fill
     regions: dict[str, tuple[str, ...]]  # unlisted-solution class key -> the set labels it lies in
     eps: float
+    fills: dict[str, float] = field(default_factory=dict)  # uniform fill -> the mass it puts on other but should not
 
     @property
     def K(self) -> int:
@@ -485,6 +506,13 @@ def likelihood_table(preds: dict[str, dict[str, Any]], channel: Channel, eps: fl
     exact = [lbl for lbl, rec in preds.items() if rec["member"] == "EXACT"]
     probs: dict[str, dict[str, float]] = {}
     kinds: dict[str, str] = {}
+    fills: dict[str, float] = {}
+    for label, s in sv.items():
+        if s.rule == "fill" and set(s.class_counts) == {OTHER}:
+            fills[label] = fill_bound(s, list(listed), region_of, channel)
+            if fills[label] > FILL_MAX:
+                raise ValueError(f"{label}: a uniform fill would ignore {fills[label]:.2g} of its mass on listed answers "
+                                 "and solution sets; model it exactly")
     for label, rec in preds.items():
         p = {k: 0.0 for k in keys}
         if label in sv:
@@ -523,7 +551,7 @@ def likelihood_table(preds: dict[str, dict[str, Any]], channel: Channel, eps: fl
         K = len(keys)
         probs[label] = {k: (1 - eps) * v + eps / K for k, v in p.items()}
     regions = {region_key(sig): tuple(lbl for g in sig for lbl in g) for sig in region_of}
-    return LikelihoodTable(keys, labels, probs, kinds, regions, eps)
+    return LikelihoodTable(keys, labels, probs, kinds, regions, eps, fills)
 
 
 def disconfirms(preds: dict[str, dict[str, Any]], channel: Channel, eps: float = EPS) -> tuple[dict[str, dict[str, float]], dict[str, str]]:
@@ -589,8 +617,8 @@ def _rate_text(lt: LikelihoodTable, label: str, channel: Channel) -> str:
         return f"set-valued: uniform over its {s.size} solutions ({s.description}), which give {shares} ({slip})"
     if kind == "fill":
         s = channel.set_valued[label]
-        return (f"uniform over all answers ({s.description}): mass on listed answers and solution sets "
-                f"< {s.params['mass_outside_other_below']:.1e}, so p_h(other) = 1 ({slip})")
+        return (f"uniform over all answers ({s.description}): its mass on the listed answers and solution sets is "
+                f"at most {lt.fills[label]:.1e}, so p_h(other) = 1 ({slip})")
     return f"p_h(outcome) = (1 - eps)·its distribution + eps/K ({slip})"
 
 
