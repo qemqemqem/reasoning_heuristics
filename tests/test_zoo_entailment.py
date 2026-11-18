@@ -245,6 +245,34 @@ def test_mm_s1_chain_of_conditionals():
     assert run("entailment", "MM-S1", t3).trace_features["implicit"] is True
 
 
+def test_exact_readings_follow_the_ground_truth_on_inconsistent_premises():
+    # The prompts define "follows" as "must be true whenever all the statements are true", so
+    # inconsistent premises entail everything (validate.truth). Members that reason exactly agree;
+    # a member whose own rewrite of consistent premises is contradictory answers X (B4/C4 §1.1).
+    from reasoning_heuristics.validate.truth import truth
+
+    inconsistent = (L("A"), L("A", False), F.disj(L("B"), L("C")))
+    options = (L("B"), F.disj(L("B"), L("C")), L("C", False))
+    for task in (EntailmentTask(inconsistent, L("B"), "YN"), EntailmentTask(inconsistent, None, "MC", options),
+                 EntailmentTask(inconsistent, None, "OPEN")):
+        want = truth(task)["answer"]
+        assert run("entailment", "EXACT", task).answer == want, task.fmt
+        assert run("entailment", "TT", task).answer == want, task.fmt
+        assert run("entailment", "BICOND-PRAG", task, {"instruction": True}).answer == want, task.fmt
+        if task.fmt != "OPEN":
+            dist = run("entailment", "NOISY-EXACT", task).distribution
+            assert max(dist, key=dist.get) == want, task.fmt
+    # FIRST keeps "A" from "A or not-B" and "not-A" from "not-A or C": its own state is contradictory.
+    t = EntailmentTask((F.disj(L("A"), L("B", False)), F.disj(L("A", False), L("C"))), L("C"), "YN")
+    assert truth(t)["answer"] == "NO" and run("entailment", "FIRST", t).answer == "X"
+    # PERCEPTION-NOISE is exact on the misread instance: misreadings that contradict count as YES.
+    # A; A and B ⊢ C: flipping either A makes the premises inconsistent (weight 0.5 each), flipping
+    # B does not (0.5), no flip has weight 0.5^3; so P(YES) = 1 / 1.625.
+    t = EntailmentTask((L("A"), F.conj(L("A"), L("B"))), L("C"), "YN")
+    dist = run("entailment", "PERCEPTION-NOISE", t, {"p_d": 0.0, "p_f": 0.5}).distribution
+    assert set(dist) <= {"YES", "NO"} and dist["YES"] == pytest.approx(1 / 1.625)
+
+
 def test_mm_s1_implicit_model_meets_an_unrelated_premise():
     # "if A then B; C": C mentions no atom of the conditional, so the implicit model conjoined with
     # [C] yields [C] (not null). The models are [A B C] and [C], and B does not follow.

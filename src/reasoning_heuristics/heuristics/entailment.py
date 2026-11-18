@@ -124,7 +124,13 @@ def entailed_literals(premises: list[F.Formula], atoms: list[str]) -> list[str]:
 
 
 def answer_from_premises(task: EntailmentTask, premises: list[F.Formula]) -> str | list[str]:
-    """EXACT on a (possibly rewritten) premise list, in the task's format."""
+    """Exact entailment from a member's (possibly rewritten) premise list, in the task's format.
+
+    If that list is inconsistent the answer is "X", B4/C4 §1.1's output for "the member's state
+    is contradictory" (e.g. FIRST: "X if P' inconsistent"). That is a heuristic answer, distinct
+    from the ground truth: it arises when a member's rewrite of consistent premises contradicts
+    itself. Members that reason exactly about premises as given use `exact_answer`, which, like
+    the ground truth, lets inconsistent premises entail everything."""
     all_atoms = F.atoms_of(list(premises) + ([task.probe] if task.probe is not None else []) + list(task.options))
     if not F.models(premises, all_atoms):
         return "X"
@@ -136,6 +142,25 @@ def answer_from_premises(task: EntailmentTask, premises: list[F.Formula]) -> str
         lits = entailed_literals(premises, F.atoms_of(task.premises))
         return lits or "NOTHING"
     raise ValueError(task.fmt)
+
+
+def vacuous_answer(task: EntailmentTask) -> str | list[str]:
+    """What inconsistent premises entail under the prompts' definition ("must be true whenever all
+    the statements are true"): everything. YN: YES; MC: every option, so the strongest is chosen as
+    usual; OPEN: every literal over the premises' atoms. Matches validate.truth."""
+    if task.fmt == "YN":
+        return "YES"
+    if task.fmt == "MC":
+        return mc_choose(task, lambda option: True)
+    if task.fmt == "OPEN":
+        return sorted(F.render_lit(a, pol) for a in F.atoms_of(task.premises) for pol in (True, False)) or "NOTHING"
+    raise ValueError(task.fmt)
+
+
+def exact_answer(task: EntailmentTask, premises: list[F.Formula]) -> str | list[str]:
+    """Exact entailment as the prompts and the ground truth define it (no "X")."""
+    atoms = F.atoms_of(list(premises) + ([task.probe] if task.probe is not None else []) + list(task.options))
+    return answer_from_premises(task, premises) if F.models(premises, atoms) else vacuous_answer(task)
 
 
 def answer_from_states(task: EntailmentTask, states: list, implicit: bool = False) -> str:
@@ -166,7 +191,7 @@ def exact(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
     trace = {}
     if task.probe is not None:
         trace["countermodels"] = len(F.countermodels(prem, task.probe))
-    return Prediction(answer_from_premises(task, prem), trace)
+    return Prediction(exact_answer(task, prem), trace)
 
 
 # --- B4 restriction ------------------------------------------------------------------------------
@@ -237,7 +262,7 @@ def bicond_pragmatic(task: EntailmentTask, params: dict[str, Any]) -> Prediction
     """B4/C4 E2's pragmatic variant: BICOND unless the item carries the anti-converse instruction
     (params["instruction"]), in which case the conditional is read as stated."""
     if params["instruction"]:
-        return Prediction(answer_from_premises(task, effective_premises(task)), {"reading": "as stated (instructed)"})
+        return Prediction(exact_answer(task, effective_premises(task)), {"reading": "as stated (instructed)"})
     pred = bicond(task, {})
     return Prediction(pred.answer, {"reading": "biconditional", **pred.trace_features})
 
@@ -635,7 +660,7 @@ def atmosphere(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
 @member("TT", "A3", D, "restates 'either ... or' in its textbook (inclusive) meaning; checks use textbook semantics")
 def textbook_transfer(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
     std = EntailmentTask(task.premises, task.probe, task.fmt, task.options, "standard")
-    return Prediction(answer_from_premises(std, list(task.premises)), {"reading": "standard"})
+    return Prediction(exact_answer(std, list(task.premises)), {"reading": "standard"})
 
 
 # --- H and nuisance ----------------------------------------------------------------------------------------
@@ -664,7 +689,7 @@ def noisy_exact(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
     p = params.get("p", 0.01)
     L = sum(len(F.literals(x)) for x in task.premises)
     eps = 0.5 * (1 - (1 - p) ** L)
-    g = answer_from_premises(task, effective_premises(task))
+    g = exact_answer(task, effective_premises(task))
     if task.fmt == "YN":
         other = "NO" if g == "YES" else "YES"
         return Prediction(None, {"L": L, "eps": round(eps, 4)}, {g: 1 - eps, other: eps})
@@ -677,7 +702,9 @@ def noisy_exact(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
 @member("PERCEPTION-NOISE", "nuisance", D, "a misquoted premise that predicts the error", deterministic=False)
 def perception_noise(task: EntailmentTask, params: dict[str, Any]) -> Prediction:
     """Exact on a misread instance: at most one event, either a dropped premise (p_d each) or a
-    flipped literal occurrence (p_f each); probabilities renormalised over 0-1 events."""
+    flipped literal occurrence (p_f each); probabilities renormalised over 0-1 events. "Exact" is
+    the ground truth's reading, so a misreading that makes the premises inconsistent entails
+    everything (`exact_answer`)."""
     p_d, p_f = params.get("p_d", 0.02), params.get("p_f", 0.01)
     prem = list(effective_premises(task))
     events: list[tuple[float, list]] = []
@@ -691,9 +718,7 @@ def perception_noise(task: EntailmentTask, params: dict[str, Any]) -> Prediction
     total = sum(w for w, _ in events)
     dist: Counter = Counter()
     for w, ps in events:
-        dist[answer_from_premises(task, ps) if ps else ("NO" if task.fmt == "YN" else mc_letter(task, None))] += w / total
-    if "X" in dist:
-        dist["NO" if task.fmt == "YN" else mc_letter(task, None)] += dist.pop("X")
+        dist[exact_answer(task, ps) if ps else ("NO" if task.fmt == "YN" else mc_letter(task, None))] += w / total
     return Prediction(None, {"p_d": p_d, "p_f": p_f}, dict(dist))
 
 

@@ -133,6 +133,7 @@ The full list is in the module docstrings. The ones that change what an item is:
 - **SAT PERCEPTION-NOISE flips each literal occurrence with p_f = 0.01.** A/H §1.5 says "flip one literal's sign w.p. p_f" with no default; the rate per literal read matches the entailment member's default.
 - **UP-k with clashing facts.** B1's pseudocode assumes consistent facts. A unit clause that clashes with an earlier fact (or a fixed value) is not applied, so round 1 finds its clause falsified: UP-0 says SAT, UP-1 UNSAT.
 - **WALK checks the k-th flip.** D/F's `WALK-k` loop checks before each flip; a run whose k-th flip satisfies the formula counts as a success.
+- **"X" is a heuristic answer, not ground truth.** Members that reason exactly about the premises they are given (EXACT, TT, NOISY-EXACT's exact answer, BICOND-PRAG under the instruction, PERCEPTION-NOISE on its misread instance) use the ground truth's reading: inconsistent premises entail everything (`exact_answer`). A member whose own rewrite of consistent premises contradicts itself (FIRST, MATCH-*, BICOND, CW-COMP, CW-MIN, GREEDY-MODEL, strict ONL) answers X, B4/C4 §1.1's output for "the member's state is contradictory"; X maps to NO in two-way formats.
 
 ### Reference implementations
 
