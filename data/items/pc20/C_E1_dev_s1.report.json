@@ -1,0 +1,46 @@
+{
+ "vertical": "C",
+ "eval_id": "E1",
+ "tier": "dev",
+ "seed": 1,
+ "per_cell": 20,
+ "params": {},
+ "cells": [
+  "COL/c1-NAT",
+  "COL/c2-RELABEL",
+  "COL/c3-ANS-LABEL",
+  "COL/c4-ANS-RAND",
+  "COL/c5-ANS-FREE",
+  "COL/c6-RELIST",
+  "SAT/c1-NAT",
+  "SAT/c2-RELABEL",
+  "SAT/c3-ANS-LABEL",
+  "SAT/c4-ANS-RAND",
+  "SAT/c5-ANS-FREE",
+  "SAT/c6-RELIST"
+ ],
+ "generation": {
+  "attempts": 10580,
+  "accepted": 40,
+  "rejections": {
+   "FF optimal in every order (no C1-vs-D split)": 5,
+   "FF partitions for the four orders not pairwise distinct": 1,
+   "GREEDY assignments closer than the Hamming threshold": 100,
+   "Grundy fraction among optimal partitions too high": 2,
+   "LF or DSATUR equals an FF partition": 2,
+   "a GREEDY order does not reach a satisfying assignment": 10270,
+   "chromatic number not in {3, 4}": 2,
+   "too few optimal partitions": 7,
+   "unsatisfiable": 151
+  }
+ },
+ "path": "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc20/dev/C_E1_dev_s1.jsonl",
+ "validation": {
+  "items": 240,
+  "sets": 40,
+  "items_passed": 240,
+  "pass_rate": 1.0,
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
+}
