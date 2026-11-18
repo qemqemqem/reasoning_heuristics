@@ -2,27 +2,35 @@
 
     OMP_NUM_THREADS=1 python analysis/prelim_2026_11_18.py --runs-root data/runs
     OMP_NUM_THREADS=1 python analysis/prelim_2026_11_18.py --runs-root data/runs --check   # regenerate, compare, write nothing
+    python analysis/prelim_2026_11_18.py --render-only --check     # seconds: do the doc's tables match the JSON?
 
-Reads the committed item sets (data/items/pc20, data/items/dev) and the scored records of five
-runs under --runs-root, and writes `analysis/out/prelim_2026_11_18.json` and the doc's generated
-tables (the blocks between `<!-- BEGIN prelim:NAME -->` and `<!-- END prelim:NAME -->`; the prose
-around them is written by hand). DESIGN §5 rule 6: every number in the doc comes from this command.
+The recovery check at the estimate is the slow part (C E2 colouring: about an hour of CPU per
+fit); `--recovery-reps 0` skips it, and `--no-doc` writes only the JSON.
+
+Discovers every run under --runs-root named `2026-11-18-{dev,pc20,pc40}-*` that has scored
+records, reads the committed item set each one's manifest names (data/items/<set>), and writes
+`analysis/out/prelim_2026_11_18.json` and the doc's generated tables (the blocks between
+`<!-- BEGIN prelim:NAME -->` and `<!-- END prelim:NAME -->`; the prose around them is written by
+hand). DESIGN §5 rule 6: every number in the doc comes from this command. The JSON holds every
+discovered run, so a page can be built from it alone (`SCHEMA` below, also written into it); the
+doc's tables show only the runs the doc describes (`DOC_PILOT`, `DOC_DEV`).
 
 What it computes:
 
 1. **Joins.** Every scored record is read with `identify.records.from_scored` and joined to the
    current item files by item_id with the content hash checked (`identify.records.join`, which
-   raises on any mismatch). The runs were scored before #22 added the A1 give-up member to the C E1
-   and C E2 SAT items; the join is what makes that drift safe (ids, prompts and content hashes are
-   unchanged), and the per-run drift of item-file hashes against each manifest is recorded.
+   raises on any mismatch). The first runs were scored before #22 added the A1 give-up member to the
+   C E1 and C E2 SAT items; the join is what makes that drift safe (ids, prompts and content hashes
+   are unchanged), and the per-run drift of item-file hashes against each manifest is recorded.
 2. **Descriptive statistics for every run and unit** from the scorer's own fields: categories,
    `correct` and `valid` among ok answers, `members_matched` and `sets_matched`.
-3. **Mixture fits only where the recovery gates pass at this item size** (DESIGN §5 rule 12):
-   C E2 colouring, C E2 knapsack and A/H E5 SAT, on the two pilot-size (20 per cell) runs, with
-   `identify.engine.fit_unit` (near-miss slips, percentile cluster-bootstrap intervals), plus BCa
-   intervals from the same bootstrap draws (`mixture.bca_interval`, #24). Each fit also reports how
-   far the answers are from the nearest member, and a check that no member of the unit predicts a
-   special token (the special-token slip fix of #24 changes only units where one does).
+3. **Mixture fits only where the recovery gates pass at the item set's size** (DESIGN §5 rule 12;
+   `GATED`): C E2 colouring, C E2 knapsack and A/H E5 SAT at 20 per cell, and C E5 SAT with a given
+   partial assignment at 40, on every run of those sets, with `identify.engine.fit_unit` (near-miss
+   slips, percentile cluster-bootstrap intervals), plus BCa intervals from the same bootstrap draws
+   (`mixture.bca_interval`, #24). Members tied on every item share one weight (`MUST_TIE` checks
+   the one tie a gate depends on). Each fit also reports how far the answers are from the nearest
+   member, and which members predict a special token.
 4. **Recovery at the estimate**: fake models that answer the same items from each fitted mixture
    (its weights, slip rate and slip shape) are refitted, to check bias, coverage and width at the
    operating point the real data put the fit in, which the Stage 0 gates did not test (they plant
@@ -66,29 +74,27 @@ REPO = Path(__file__).resolve().parent.parent
 OUT_JSON = REPO / "analysis" / "out" / "prelim_2026_11_18.json"
 DOC = REPO / "docs" / "results" / "2026-11-18-preliminary.md"
 
-ITEM_SETS = {
-    "pc20": ["data/items/pc20/C_E2_dev_s1.jsonl.gz", "data/items/pc20/AH_E5_dev_s1.jsonl.gz",
-             "data/items/pc20/C_E1_dev_s1.jsonl.gz"],
-    "dev": sorted(str(p.relative_to(REPO)) for p in (REPO / "data" / "items" / "dev").glob("*.jsonl.gz")),
+# Runs are discovered under --runs-root: every directory matching one of these patterns that has
+# scored records. A run still in progress has none; it is listed under `skipped_runs` and left out.
+RUN_PATTERNS = ("2026-11-18-dev-*", "2026-11-18-pc20-*", "2026-11-18-pc40-*")
+
+# Per item set (the directory under data/items/ a run's manifest names), the units whose recovery
+# gates pass at that set's size on the regenerated items (RECOVERY.md, "Regenerated items:
+# candidate units", #24). Nothing else is fitted (DESIGN §5 rule 12).
+GATED = {
+    "pc20": ["C_E2/colouring", "C_E2/knapsack", "AH_E5/SAT"],
+    "pc40": ["C_E5/3-SAT (partial assignment given)"],
 }
+# Members that are tied on every item of a gated unit, so that only their sum is identified: the
+# engine merges them into one group, and the script stops if it ever does not (RECOVERY.md: on C E5
+# SAT with a given state at 40 per cell the pass covers the pair's sum, never either one alone)
+MUST_TIE = {("pc40", "C_E5/3-SAT (partial assignment given)"): ("GUC-DET from state (C2)", "SC-DET from state (C2)")}
 
-# (run id, item set, short label); the pilot-size runs come first and are the only ones fitted
-RUNS = [
-    ("2026-11-18-pc20-qwen3-32b-direct", "pc20", "Qwen3-32B direct"),
-    ("2026-11-18-pc20-gpt-oss-20b-thinking-low", "pc20", "gpt-oss-20b low"),
-    ("2026-11-18-dev-qwen3-32b-direct", "dev", "Qwen3-32B direct"),
-    ("2026-11-18-dev-qwen3-14b-direct", "dev", "Qwen3-14B direct"),
-    ("2026-11-18-dev-gpt-oss-20b-thinking-low", "dev", "gpt-oss-20b low"),
-]
-PILOT = [r for r in RUNS if r[1] == "pc20"]
-# the dev run with the same model and condition: a pilot response served from the response cache
-# is that run's response to the same prompt
-DEV_TWIN = {"2026-11-18-pc20-qwen3-32b-direct": "2026-11-18-dev-qwen3-32b-direct",
-            "2026-11-18-pc20-gpt-oss-20b-thinking-low": "2026-11-18-dev-gpt-oss-20b-thinking-low"}
-
-# The units the recovery gates pass at 20 per cell on the regenerated items (the recovery agent's
-# preliminary table; docs/RECOVERY.md has the pre-regeneration sweep). Nothing else is fitted.
-FIT_UNITS = ["C_E2/colouring", "C_E2/knapsack", "AH_E5/SAT"]
+# The runs the doc describes. Its tables are rendered for these runs only, so the doc stays what its
+# prose says when more runs land; the JSON holds every discovered run, for a page built from it.
+DOC_PILOT = ["2026-11-18-pc20-qwen3-32b-direct", "2026-11-18-pc20-gpt-oss-20b-thinking-low"]
+DOC_DEV = ["2026-11-18-dev-qwen3-32b-direct", "2026-11-18-dev-qwen3-14b-direct", "2026-11-18-dev-gpt-oss-20b-thinking-low"]
+DOC_FIT_UNITS = GATED["pc20"]
 
 # Why every other unit gets descriptive statistics only. RECOVERY.md "Regenerated items: candidate
 # units" (#24) where a unit was rerun on the regenerated items, else its pre-regeneration "Where the
@@ -106,10 +112,27 @@ NOT_FITTED = {
     "C_E2/3-SAT": "fails at 20 on the regenerated items: median width 0.28 > 0.2, and null q fails (coverage 0.89)",
     "C_E3": "fails by design: FF-LIST (= DPLL-LIST) leaks 0.14–0.31 of its weight to the LOCAL-t proxies at every size",
     "C_E5/3-SAT": "not reached by 40: width 0.23",
-    "C_E5/3-SAT (partial assignment given)": "passes only at 40 per cell; null ALWAYS fails",
+    "C_E5/3-SAT (partial assignment given)": "passes only at 40 per cell (regenerated items); null q fails below 40",
     "C_E5/colouring (k=3)": "fails by design at these sizes: a near-tie (FF-3-EDGE-MENTION-ABORT vs PHANTOM-ADJACENT); widths stay at 0.4",
     "C_E5/colouring (k=3, partial colouring given)": "not reached by 40: bias 0.07, width 0.24",
     "C_E5/propositional entailment": "fails by design: q and NOISY-EXACT are combinations of other members, and EXACT answers NO on every item",
+}
+
+SCHEMA = {
+    "runs": "one entry per discovered run: run_id, label, item_set, model, condition, effort, reasoning, max_tokens, "
+            "providers_served, n_records, from_cache, spent_usd (API-reported), scorer, run and scorer git SHAs, scored_sha256, "
+            "item_drift (per item file: the manifest's sha256 and the current file's)",
+    "skipped_runs": "directories matching the run patterns that have no scored records yet (in progress)",
+    "descriptive": "run_id -> unit -> categories, ok, correct, accuracy_of_ok, valid / valid_defined, members_matched and "
+                   "sets_matched ([{members, answers, share_of_ok}], members matching the same answers merged), "
+                   "wrong_member_match, special_answers, token medians, truncated_by_cell",
+    "fits": "unit -> run_id -> fit_unit's report (fit.weights: pi with percentile lo/hi, or 'not identified' with a range; "
+            "eps, rho with intervals; identifiability; diagnostics; excluded; error_agreement and weight_lift with "
+            "permutation baselines) plus bca ({group: [lo, hi]}), ea_counts, q_exact_chance, near, reach, lumps, "
+            "unit_facts, special_check, seed, item_set",
+    "recovery_at_estimate": "unit -> run_id -> fake models planted at the fitted mixture: per-quantity truth, mean, bias, "
+                            "coverage and width (percentile and BCa), gate verdicts, and the simulated reach statistics",
+    "gated_units": "item set -> the units fitted at that size; every other unit is descriptive only (not_fitted gives why)",
 }
 
 CATS = ("ok", "parse_fail", "partial", "truncated", "refusal", "declared_impossible", "api_error")
@@ -150,17 +173,46 @@ def not_fitted_reason(name: str, item_set: str) -> str:
     return NOT_FITTED[name.split("/")[0]]
 
 
-def load_sets() -> dict[str, dict[str, Any]]:
-    out = {}
-    for name, paths in ITEM_SETS.items():
-        items = load_items([REPO / p for p in paths])
-        groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
-        for it in items:
-            if is_answer_item(it):
-                groups[unit_name(it)].append(it)
-        out[name] = {"paths": paths, "sha256": {p: sha256(REPO / p) for p in paths}, "items": items,
-                     "by_id": {it["item_id"]: it for it in items}, "groups": dict(groups)}
-    return out
+def discover_runs(runs_root: Path) -> tuple[list[str], list[str]]:
+    """Run directories matching RUN_PATTERNS: those with scored records, and those without."""
+    found, skipped = [], []
+    for pat in RUN_PATTERNS:
+        for d in sorted(runs_root.glob(pat)):
+            if d.is_dir():
+                (found if (d / "scored.jsonl.gz").exists() else skipped).append(d.name)
+    if not found:
+        raise FileNotFoundError(f"no scored run matching {RUN_PATTERNS} under {runs_root}")
+    return found, skipped
+
+
+def run_label(manifest: dict[str, Any]) -> str:
+    """'Qwen3-32B direct', 'gpt-oss-20b thinking-low', ... from the manifest."""
+    model = manifest["model_requested"].split("/")[-1]
+    if model.startswith("qwen"):
+        model = "Qwen" + model[4:].upper()
+    return f"{model} {manifest['condition']['label']}"
+
+
+def item_set_of(manifest: dict[str, Any]) -> str:
+    """The item set a run answered: the one directory under data/items/ that its manifest's files are in."""
+    dirs = {Path(p).parent for p in manifest["items"]["files"]}
+    if len(dirs) != 1 or next(iter(dirs)).parent != Path("data/items"):
+        raise ValueError(f"run {manifest['run_id']}: item files are not in one directory of data/items: {sorted(map(str, dirs))}")
+    return next(iter(dirs)).name
+
+
+def load_set(name: str) -> dict[str, Any]:
+    """Every item file of data/items/<name>, as committed now."""
+    paths = sorted(str(p.relative_to(REPO)) for p in (REPO / "data" / "items" / name).glob("*.jsonl.gz"))
+    if not paths:
+        raise FileNotFoundError(f"no item files in data/items/{name}")
+    items = load_items([REPO / p for p in paths])
+    groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for it in items:
+        if is_answer_item(it):
+            groups[unit_name(it)].append(it)
+    return {"paths": paths, "sha256": {p: sha256(REPO / p) for p in paths}, "items": items,
+            "by_id": {it["item_id"]: it for it in items}, "groups": dict(groups)}
 
 
 def read_records(path: Path) -> list[dict[str, Any]]:
@@ -168,13 +220,18 @@ def read_records(path: Path) -> list[dict[str, Any]]:
         return [json.loads(line) for line in f if line.strip()]
 
 
-def load_run(runs_root: Path, run_id: str, item_set: dict[str, Any]) -> dict[str, Any]:
+def load_run(runs_root: Path, run_id: str, sets: dict[str, dict[str, Any]]) -> dict[str, Any]:
     d = runs_root / run_id
     scored = d / "scored.jsonl.gz"
-    if not scored.exists():
-        raise FileNotFoundError(f"{scored} is missing")
     manifest = json.loads((d / "manifest.json").read_text())
     scoring = json.loads((d / "scoring.json").read_text())
+    set_name = item_set_of(manifest)
+    if set_name not in sets:
+        sets[set_name] = load_set(set_name)
+    item_set = sets[set_name]
+    missing = set(manifest["items"]["files"]) - set(item_set["paths"])
+    if missing:
+        raise FileNotFoundError(f"run {run_id} answered item files that are not committed: {sorted(missing)}")
     records = read_records(scored)
     responses, dropped = from_scored(scored)
     pairs = join(responses, item_set["items"])  # raises on an unknown item or a content-hash mismatch
@@ -184,14 +241,16 @@ def load_run(runs_root: Path, run_id: str, item_set: dict[str, Any]) -> dict[str
     for p, h in manifest["items"]["files"].items():
         cur = item_set["sha256"].get(p)
         drift[p] = {"manifest": h, "current": cur, "same": h == cur}
-    return {"run_id": run_id, "dir": str(d), "scored_sha256": sha256(scored), "manifest": manifest, "scoring": scoring,
-            "records": records, "responses": responses, "dropped": dropped, "pairs": pairs, "drift": drift}
+    return {"run_id": run_id, "dir": str(d), "item_set": set_name, "scored_sha256": sha256(scored), "manifest": manifest,
+            "scoring": scoring, "records": records, "responses": responses, "dropped": dropped, "pairs": pairs, "drift": drift}
 
 
-def run_meta(run: dict[str, Any], label: str) -> dict[str, Any]:
+def run_meta(run: dict[str, Any]) -> dict[str, Any]:
     m = run["manifest"]
     recs = run["records"]
-    return {"run_id": run["run_id"], "label": label, "model": m["model_requested"], "condition": m["condition"]["label"],
+    return {"run_id": run["run_id"], "label": run_label(m), "item_set": run["item_set"], "model": m["model_requested"],
+            "models_returned": m.get("models_returned"), "condition": m["condition"]["label"],
+            "effort": m["condition"].get("effort"),
             "reasoning": m["condition"]["reasoning"], "max_tokens": m["condition"]["max_tokens"],
             "system_prompt": m["condition"]["system_prompt"], "sampling": m["condition"]["sampling"],
             "providers_served": m.get("providers_served"), "provider_routing": m.get("provider_routing"),
@@ -209,8 +268,9 @@ def run_meta(run: dict[str, Any], label: str) -> dict[str, Any]:
 # =============================================================================================
 
 
-def match_groups(recs: list[dict[str, Any]], field: str) -> list[tuple[str, int]]:
-    """Members by how many ok answers they match; members matching exactly the same answers are merged."""
+def match_groups(recs: list[dict[str, Any]], field: str) -> list[dict[str, Any]]:
+    """Members by how many ok answers they match (and that count's share of the ok answers); members
+    that match exactly the same answers are merged ("A = B")."""
     hits: dict[str, set[int]] = defaultdict(set)
     for k, r in enumerate(recs):
         for m in r.get(field) or []:
@@ -218,8 +278,8 @@ def match_groups(recs: list[dict[str, Any]], field: str) -> list[tuple[str, int]
     merged: dict[frozenset, list[str]] = defaultdict(list)
     for m, s in hits.items():
         merged[frozenset(s)].append(m)
-    out = [(" = ".join(ms), len(s)) for s, ms in merged.items()]
-    return sorted(out, key=lambda x: (-x[1], x[0]))
+    out = [{"members": " = ".join(ms), "answers": len(s), "share_of_ok": len(s) / len(recs)} for s, ms in merged.items()]
+    return sorted(out, key=lambda x: (-x["answers"], x["members"]))
 
 
 def median_or_none(xs: list) -> float | None:
@@ -240,9 +300,10 @@ def describe(run: dict[str, Any], item_set: dict[str, Any]) -> dict[str, Any]:
         ok = [r for r in recs if r["category"] == "ok"]
         valid = [r["valid"] for r in ok if r.get("valid") is not None]
         special = Counter(r["parsed"] for r in ok if isinstance(r.get("parsed"), str) and r["parsed"] in SPECIALS)
+        n_correct = sum(1 for r in ok if r["correct"])
         out[name] = {
             "n": len(recs), "categories": {c: cats.get(c, 0) for c in CATS},
-            "ok": len(ok), "correct": sum(1 for r in ok if r["correct"]),
+            "ok": len(ok), "correct": n_correct, "accuracy_of_ok": n_correct / len(ok) if ok else None,
             "valid": sum(1 for v in valid if v), "valid_defined": len(valid),
             "any_member_match": sum(1 for r in ok if r.get("members_matched")),
             "wrong": sum(1 for r in ok if r["correct"] is False),
@@ -435,12 +496,19 @@ def lump_shares(um: UnitModel, obs: list, T, fitj: dict[str, Any]) -> dict[str, 
     return out
 
 
+def check_ties(set_name: str, name: str, um: UnitModel) -> None:
+    """Members that must share one weight on this unit (MUST_TIE) are one tie group, or we stop."""
+    tied = MUST_TIE.get((set_name, name))
+    if tied and not any(set(tied) <= set(g.members) for g in um.columns):
+        raise AssertionError(f"{set_name} {name}: {tied} are not one tie group on these items; the gate covers only their sum")
+
+
 def fit_job(args: tuple) -> dict[str, Any]:
-    name, run_id, n_boot, n_perm = args
-    t0 = time.time()
+    set_name, name, run_id, n_boot, n_perm = args
     run = _CTX["runs"][run_id]
-    unit = _unit("pc20", name)
+    unit = _unit(set_name, name)
     um = UnitModel(unit)
+    check_ties(set_name, name, um)
     rs = [r for r, it in run["pairs"] if unit_name(it) == name]
     seed = job_seed("fit", name, run_id)
     rep = fit_unit(um, rs, n_boot=n_boot, seed=seed, n_perm=n_perm)
@@ -474,15 +542,15 @@ def fit_job(args: tuple) -> dict[str, Any]:
     rep["unit_facts"] = unit_facts(um)
     rep["special_check"] = special_check(um)
     rep["seed"] = seed
-    rep["seconds"] = round(time.time() - t0, 1)
+    rep["item_set"] = set_name
     return {"unit": name, "run_id": run_id, "report": to_jsonable(rep)}
 
 
 def recovery_job(args: tuple) -> dict[str, Any]:
     """Fake models answering the unit's items from a fitted mixture, refitted; one chunk of replicates."""
-    name, run_id, planted, q, eps, rho, reps, n_boot, chunk = args
+    set_name, name, run_id, planted, q, eps, rho, reps, n_boot, chunk = args
     run = _CTX["runs"][run_id]
-    unit = _unit("pc20", name)
+    unit = _unit(set_name, name)
     um = UnitModel(unit)
     rs = [r for r, it in run["pairs"] if unit_name(it) == name]
     obs_real, _ = um.observations(rs)
@@ -587,8 +655,15 @@ def md_table(header: list[str], rows: list[list[str]]) -> str:
     return "\n".join(out)
 
 
+_LABELS: dict[str, str] = {}  # run id -> label, set by render() from the JSON
+
+
 def label_of(run_id: str) -> str:
-    return next(lab for rid, _, lab in RUNS if rid == run_id)
+    return _LABELS[run_id]
+
+
+def doc_pilot() -> list[tuple[str, str]]:
+    return [(rid, label_of(rid)) for rid in DOC_PILOT]
 
 
 def table_runs(meta: list[dict[str, Any]]) -> str:
@@ -600,7 +675,7 @@ def table_runs(meta: list[dict[str, Any]]) -> str:
         cache = f"{m['from_cache']}" + (f" ({ct['cached_same_generation_as_dev_run']} are the dev run's own responses)" if ct else "")
         rows.append([f"`{m['run_id']}`", m["model"], m["condition"], f"{m['max_tokens']:,}", prov, m["n_records"],
                      cache, f"{m['max_pre_answer_tokens']} ({m['pre_answer_over_20']} over 20)",
-                     f"${m['spent_usd']:.4f}", m["scorer_version"], ", ".join(sorted(drift)) + " (#22)" if drift else "none"])
+                     f"${m['spent_usd']:.4f}", m["scorer_version"], ", ".join(sorted(drift)) if drift else "none"])
     return md_table(["Run", "Model", "Condition", "max_tokens", "Served by", "Responses", "From the response cache",
                      "Visible working: max pre_answer_tokens", "API cost", "Scorer", "Item files changed since the run"], rows)
 
@@ -612,7 +687,7 @@ def table_units(special: dict[str, dict[str, Any]], unit_items: dict[str, int]) 
         tok = "; ".join(f"{k} ({v})" for k, v in sorted(sc["det_special_predictions"].items())) or "none"
         if sc["dist_members_with_special_mass"]:
             tok += "; stored distributions: " + ", ".join(sorted(sc["dist_members_with_special_mass"]))
-        if name in FIT_UNITS:
+        if name in DOC_FIT_UNITS:
             rows.append([name, unit_items[name], "**fitted**", "the mixture passes the three gates at 20 per cell on the regenerated items (see the text)", tok])
         else:
             rows.append([name, unit_items[name], "descriptive only", not_fitted_reason(name, "pc20"), tok])
@@ -629,7 +704,7 @@ def table_dev_units(unit_items: dict[str, int]) -> str:
 
 
 def weights_table(name: str, fits: dict[str, dict[str, Any]]) -> str:
-    runs = [rid for rid, _, _ in PILOT]
+    runs = list(DOC_PILOT)
     labels = list(fits[runs[0]]["fit"]["weights"].keys())
     rows = []
     for lab in labels:
@@ -656,7 +731,7 @@ def weights_table(name: str, fits: dict[str, dict[str, Any]]) -> str:
 
 
 def ident_table(name: str, fits: dict[str, dict[str, Any]]) -> str:
-    rid = PILOT[0][0]
+    rid = DOC_PILOT[0]
     rep = fits[rid]
     idf = rep["identifiability"]
     diag = rep["diagnostics"]
@@ -688,8 +763,8 @@ def ident_table(name: str, fits: dict[str, dict[str, Any]]) -> str:
 def near_table(fits_by_unit: dict[str, dict[str, dict[str, Any]]]) -> str:
     order = ["0", "1", "2", "3", "4-6", ">6", "special token"]
     rows = []
-    for name in FIT_UNITS:
-        for rid, _, lab in PILOT:
+    for name in DOC_FIT_UNITS:
+        for rid, lab in doc_pilot():
             rep = fits_by_unit[name][rid]
             nb = rep["near"]
             n = nb["n"]
@@ -700,8 +775,8 @@ def near_table(fits_by_unit: dict[str, dict[str, dict[str, Any]]]) -> str:
 
 def lumps_table(fits_by_unit: dict[str, dict[str, dict[str, Any]]]) -> str:
     rows = []
-    for name in FIT_UNITS:
-        for rid, _, lab in PILOT:
+    for name in DOC_FIT_UNITS:
+        for rid, lab in doc_pilot():
             rep = fits_by_unit[name][rid]
             for g, v in rep.get("lumps", {}).items():
                 w = rep["fit"]["weights"][g]["pi"]
@@ -715,8 +790,8 @@ def lumps_table(fits_by_unit: dict[str, dict[str, dict[str, Any]]]) -> str:
 
 def recovery_table(fits_by_unit: dict[str, dict[str, dict[str, Any]]], rec: dict[str, dict[str, dict[str, Any]]]) -> str:
     rows = []
-    for name in FIT_UNITS:
-        for rid, _, lab in PILOT:
+    for name in DOC_FIT_UNITS:
+        for rid, lab in doc_pilot():
             r = rec[name][rid]
             g = r["gates"]
             pl = r["planted"]
@@ -734,8 +809,8 @@ def recovery_table(fits_by_unit: dict[str, dict[str, dict[str, Any]]], rec: dict
 def ppc_table(fits_by_unit: dict[str, dict[str, dict[str, Any]]], rec: dict[str, dict[str, dict[str, Any]]]) -> str:
     """Observed statistics against the same statistics of fake data drawn from the fitted mixture."""
     rows = []
-    for name in FIT_UNITS:
-        for rid, _, lab in PILOT:
+    for name in DOC_FIT_UNITS:
+        for rid, lab in doc_pilot():
             obs = fits_by_unit[name][rid]["reach"]
             sim = rec[name][rid]["simulated"]
             cells = []
@@ -750,8 +825,8 @@ def ppc_table(fits_by_unit: dict[str, dict[str, dict[str, Any]]], rec: dict[str,
 
 def recovery_detail_table(rec: dict[str, dict[str, dict[str, Any]]]) -> str:
     rows = []
-    for name in FIT_UNITS:
-        for rid, _, lab in PILOT:
+    for name in DOC_FIT_UNITS:
+        for rid, lab in doc_pilot():
             for q, v in rec[name][rid]["quantities"].items():
                 if v["truth"] <= 0 and abs(v["bias"]) < 0.02:
                     continue
@@ -768,7 +843,7 @@ def agreement_table(name: str, fits: dict[str, dict[str, Any]]) -> str:
     and one-sided p-value. EA's denominator (items where the answer and the member are both wrong)
     and co-error's (items where the member is wrong) are given with the counts."""
     rows = []
-    for rid, _, lab in PILOT:
+    for rid, lab in doc_pilot():
         rep = fits[rid]
         ea = rep["error_agreement"]
         wl = rep.get("weight_lift", {})
@@ -792,8 +867,8 @@ def agreement_table(name: str, fits: dict[str, dict[str, Any]]) -> str:
 def denominators_table(fits_by_unit: dict[str, dict[str, dict[str, Any]]], desc_pc20: dict[str, dict[str, Any]]) -> str:
     """How many answers are wrong, and how many items each member gets wrong (EA's denominators)."""
     rows = []
-    for name in FIT_UNITS:
-        for rid, _, lab in PILOT:
+    for name in DOC_FIT_UNITS:
+        for rid, lab in doc_pilot():
             d = desc_pc20[rid][name]
             rows.append([name, lab, d["ok"], d["ok"] - d["correct"], d["correct"]])
     return md_table(["Unit", "Run", "ok answers", "wrong", "correct"], rows)
@@ -801,8 +876,8 @@ def denominators_table(fits_by_unit: dict[str, dict[str, dict[str, Any]]], desc_
 
 def excluded_table(fits_by_unit: dict[str, dict[str, dict[str, Any]]]) -> str:
     rows = []
-    for name in FIT_UNITS:
-        for rid, _, lab in PILOT:
+    for name in DOC_FIT_UNITS:
+        for rid, lab in doc_pilot():
             ex = fits_by_unit[name][rid]["excluded"]
             total = sum(ex["responses_by_cell"].values())
             if not ex["by_cell"]:
@@ -824,8 +899,8 @@ def descriptive_table(desc: dict[str, dict[str, Any]], run_ids: list[str], fitte
                 continue
             c = d["categories"]
             other = ", ".join(f"{k} {v}" for k, v in c.items() if k != "ok" and v)
-            top = "; ".join(f"{m} {k}" for m, k in d["members_matched"][:3]) or "–"
-            sets = "; ".join(f"{m} {k}" for m, k in d["sets_matched"][:2]) or "–"
+            top = "; ".join(f"{m['members']} {m['answers']}" for m in d["members_matched"][:3]) or "–"
+            sets = "; ".join(f"{m['members']} {m['answers']}" for m in d["sets_matched"][:2]) or "–"
             spec = ", ".join(f"{k} {v}" for k, v in sorted(d["special_answers"].items()))
             mr = d["median_reasoning_tokens"]
             toks = f"{mr:,.0f} / {d['median_completion_tokens']:,.0f}" if mr is not None else "–"
@@ -840,12 +915,19 @@ def descriptive_table(desc: dict[str, dict[str, Any]], run_ids: list[str], fitte
 
 
 def render(results: dict[str, Any]) -> dict[str, str]:
+    """The doc's tables, for the doc's runs (DOC_PILOT, DOC_DEV) and units (DOC_FIT_UNITS) only."""
+    _LABELS.clear()
+    _LABELS.update({m["run_id"]: m["label"] for m in results["runs"]})
+    missing = [r for r in DOC_PILOT + DOC_DEV if r not in _LABELS]
+    if missing:
+        raise KeyError(f"the doc's runs are not in the results: {missing}")
     fits = results["fits"]
     rec = results["recovery_at_estimate"]
-    t = {"runs": table_runs(results["runs"]),
-         "units": table_units(results["special_tokens"], results["unit_items"]["pc20"]),
+    by_id = {m["run_id"]: m for m in results["runs"]}
+    t = {"runs": table_runs([by_id[r] for r in DOC_PILOT + DOC_DEV]),
+         "units": table_units(results["special_tokens"]["pc20"], results["unit_items"]["pc20"]),
          "dev_units": table_dev_units(results["unit_items"]["dev"])}
-    for name in FIT_UNITS:
+    for name in DOC_FIT_UNITS:
         key = name.replace("/", "_").replace(" ", "_")
         t[f"weights_{key}"] = weights_table(name, fits[name])
         t[f"ident_{key}"] = ident_table(name, fits[name])
@@ -857,10 +939,8 @@ def render(results: dict[str, Any]) -> dict[str, str]:
     t["recovery_detail"] = recovery_detail_table(rec)
     t["excluded"] = excluded_table(fits)
     t["wrong"] = denominators_table(fits, results["descriptive"])
-    pilot_ids = [r for r, _, _ in PILOT]
-    dev_ids = [r for r, s, _ in RUNS if s == "dev"]
-    t["desc_pilot"] = descriptive_table(results["descriptive"], pilot_ids, set(FIT_UNITS))
-    t["desc_dev"] = descriptive_table(results["descriptive"], dev_ids, set())
+    t["desc_pilot"] = descriptive_table(results["descriptive"], DOC_PILOT, set(DOC_FIT_UNITS))
+    t["desc_dev"] = descriptive_table(results["descriptive"], DOC_DEV, set())
     return t
 
 
@@ -894,6 +974,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--render-only", action="store_true",
                     help="rewrite the doc's tables from the existing --out JSON without recomputing; with --check, "
                          "only compare (a fast check that the doc's tables match the committed numbers)")
+    ap.add_argument("--no-doc", action="store_true", help="write the JSON only; leave the doc alone")
     args = ap.parse_args(argv)
     t0 = time.time()
 
@@ -911,42 +992,48 @@ def main(argv: list[str] | None = None) -> int:
         print(f"re-rendered the tables in {args.doc} from {args.out}")
         return 0
 
-    sets = load_sets()
-    runs = {rid: load_run(args.runs_root, rid, sets[s]) for rid, s, _ in RUNS}
+    found, skipped = discover_runs(args.runs_root)
+    sets: dict[str, dict[str, Any]] = {}
+    runs = {rid: load_run(args.runs_root, rid, sets) for rid in found}
     _CTX.update(sets=sets, runs=runs)
-    meta = [run_meta(runs[rid], lab) for rid, _, lab in RUNS]
-    for m in meta:
-        twin = DEV_TWIN.get(m["run_id"])
-        if twin is None:
+    meta = [run_meta(runs[rid]) for rid in found]
+    for m in meta:  # a cached response is the earlier run's own response to the same prompt
+        if m["item_set"] == "dev" or "dev" not in sets:
             continue
+        twins = [o for o in meta if o["item_set"] == "dev" and o["model"] == m["model"] and o["condition"] == m["condition"]]
+        if not twins:
+            continue
+        twin = twins[0]["run_id"]
         gens = {r.get("generation_id") for r in runs[twin]["records"]}
         cached = [r for r in runs[m["run_id"]]["records"] if r.get("from_cache")]
-        shared = set(sets["pc20"]["by_id"]) & set(sets["dev"]["by_id"])
+        own = sets[m["item_set"]]["by_id"]
         m["cache_twin"] = {"dev_run": twin, "cached": len(cached),
                            "cached_same_generation_as_dev_run": sum(1 for r in cached if r.get("generation_id") in gens),
-                           "items_shared_with_dev_set": len(shared),
-                           "cached_by_unit": dict(Counter(unit_name(sets["pc20"]["by_id"][r["item_id"]]) for r in cached))}
-    descriptive = {rid: describe(runs[rid], sets[s]) for rid, s, _ in RUNS}
-    special_tokens = {name: special_check(UnitModel(_unit("pc20", name))) for name in sorted(sets["pc20"]["groups"])}
+                           "items_shared_with_dev_set": len(set(own) & set(sets["dev"]["by_id"])),
+                           "cached_by_unit": dict(Counter(unit_name(own[r["item_id"]]) for r in cached))}
+    descriptive = {rid: describe(runs[rid], sets[runs[rid]["item_set"]]) for rid in found}
+    special_tokens = {s: {name: special_check(UnitModel(_unit(s, name))) for name in sorted(v["groups"])}
+                      for s, v in sorted(sets.items()) if s != "dev"}
 
+    fit_targets = [(runs[rid]["item_set"], name, rid) for rid in found for name in GATED.get(runs[rid]["item_set"], [])
+                   if name in descriptive[rid]]
     ctx = mp.get_context("fork")
     with ctx.Pool(args.workers) as pool:
-        jobs = [(name, rid, args.n_boot, args.n_perm) for name in FIT_UNITS for rid, _, _ in PILOT]
+        jobs = [(s, name, rid, args.n_boot, args.n_perm) for s, name, rid in fit_targets]
         fitted = pool.map(fit_job, jobs, chunksize=1)
         fits: dict[str, dict[str, Any]] = defaultdict(dict)
         for f in fitted:
             fits[f["unit"]][f["run_id"]] = f["report"]
         rjobs = []
         planted_by: dict[tuple[str, str], Any] = {}
-        for name in FIT_UNITS:
-            for rid, _, _ in PILOT:
-                rep = fits[name][rid]
-                planted, q = planted_from_fit(rep, rep["diagnostics"]["groups"])
-                eps, rho = rep["fit"]["eps"], rep["fit"]["rho"]
-                planted_by[(name, rid)] = {"weights": planted, "q": q, "eps": eps, "rho": rho}
-                n_chunks = max(1, min(10, args.recovery_reps // 10))
-                per = [args.recovery_reps // n_chunks + (1 if k < args.recovery_reps % n_chunks else 0) for k in range(n_chunks)]
-                rjobs += [(name, rid, planted, q, eps, rho, per[k], args.recovery_boot, k) for k in range(n_chunks) if per[k]]
+        for s, name, rid in fit_targets:
+            rep = fits[name][rid]
+            planted, q = planted_from_fit(rep, rep["diagnostics"]["groups"])
+            eps, rho = rep["fit"]["eps"], rep["fit"]["rho"]
+            planted_by[(name, rid)] = {"weights": planted, "q": q, "eps": eps, "rho": rho}
+            n_chunks = max(1, min(10, args.recovery_reps // 10))
+            per = [args.recovery_reps // n_chunks + (1 if k < args.recovery_reps % n_chunks else 0) for k in range(n_chunks)]
+            rjobs += [(s, name, rid, planted, q, eps, rho, per[k], args.recovery_boot, k) for k in range(n_chunks) if per[k]]
         chunks = pool.map(recovery_job, rjobs, chunksize=1) if args.recovery_reps else []
     by_fit: dict[tuple[str, str], list] = defaultdict(list)
     for c in chunks:
@@ -962,16 +1049,23 @@ def main(argv: list[str] | None = None) -> int:
         "settings": {"n_boot": args.n_boot, "n_perm": args.n_perm, "recovery_reps": args.recovery_reps,
                      "recovery_boot": args.recovery_boot, "plant_min": PLANT_MIN, "eps_max": EPS_MAX,
                      "rho_grid": [float(RHO_GRID[0]), float(RHO_GRID[-1])], "intervals": "percentile cluster bootstrap (primary) and BCa from the same draws"},
-        "item_sets": {k: {"paths": v["paths"], "sha256": v["sha256"], "n_items": len(v["items"])} for k, v in sets.items()},
-        "unit_items": {k: {name: len(its) for name, its in sorted(v["groups"].items())} for k, v in sets.items()},
-        "runs": meta, "fit_units": FIT_UNITS,
-        "not_fitted": {name: not_fitted_reason(name, "pc20") for name in sets["pc20"]["groups"] if name not in FIT_UNITS},
+        "schema": SCHEMA,
+        "item_sets": {k: {"paths": v["paths"], "sha256": v["sha256"], "n_items": len(v["items"])} for k, v in sorted(sets.items())},
+        "unit_items": {k: {name: len(its) for name, its in sorted(v["groups"].items())} for k, v in sorted(sets.items())},
+        "runs": meta, "skipped_runs": skipped, "gated_units": GATED,
+        "must_tie": [{"item_set": s, "unit": u, "members": list(m)} for (s, u), m in MUST_TIE.items()],
+        "not_fitted": {s: {name: not_fitted_reason(name, s) for name in sorted(v["groups"]) if name not in GATED.get(s, [])}
+                       for s, v in sorted(sets.items())},
+        "doc_runs": {"pilot": DOC_PILOT, "dev": DOC_DEV, "fit_units": DOC_FIT_UNITS},
         "descriptive": descriptive, "special_tokens": special_tokens, "fits": fits, "recovery_at_estimate": recovery,
     }
     results = to_jsonable(results)
     if not args.check:  # the numbers first, so a table-format failure never costs the computation
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(results, indent=1, ensure_ascii=False, sort_keys=True) + "\n")
+    if args.no_doc:
+        print(f"wrote {args.out} ({len(found)} runs, {len(fit_targets)} fits; {round(time.time() - t0)} s)")
+        return 0
     tables = render(results)
     doc = args.doc.read_text()
     new_doc = splice(doc, tables)
