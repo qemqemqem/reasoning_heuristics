@@ -35,3 +35,14 @@ One row per live run or probe batch. Costs are API-reported (`usage.cost`, summe
 | 2026-11-18 | 2026-11-18-pc20-qwen3-14b-thinking-high | qwen/qwen3-14b | thinking-high | 1380 | 3.022961 | pilot2-2026-11-18 | status=complete |
 | 2026-11-18 | 2026-11-18-dev-gpt-oss-20b-thinking-high | openai/gpt-oss-20b | thinking-high | 1136 | 2.669481 | dev-2026-11-18 | status=incomplete |
 | 2026-11-18 | 2026-11-18-dev-gpt-oss-20b-thinking-high | openai/gpt-oss-20b | thinking-high | 105 | 0.383138 | dev-2026-11-18 | status=complete |
+| 2026-11-18 | forced/2026-11-18-dev-qwen3-32b-thinking-high | qwen/qwen3-32b | thinking-high-forced | 3 | 0.006672 | forced-2026-11-18 | forced final answers, force-1, max_tokens 4096 status=stopped |
+| 2026-11-18 | forced/2026-11-18-dev-qwen3-14b-thinking-high | qwen/qwen3-14b | thinking-high-forced | 3 | 0.010783 | forced-2026-11-18 | forced final answers, force-1, max_tokens 4096 status=stopped |
+| 2026-11-18 | forced/2026-11-18-pc20-qwen3-32b-thinking-high | qwen/qwen3-32b | thinking-high-forced | 14 | 0.031523 | forced-2026-11-18 | forced final answers, force-1, max_tokens 4096 status=complete |
+| 2026-11-18 | forced/2026-11-18-pc20-qwen3-14b-thinking-high | qwen/qwen3-14b | thinking-high-forced | 21 | 0.069206 | forced-2026-11-18 | forced final answers, force-1, max_tokens 4096 status=complete |
+| 2026-11-18 | forced/2026-11-18-pc40-qwen3-32b-thinking-high | qwen/qwen3-32b | thinking-high-forced | 14 | 0.029639 | forced-2026-11-18 | forced final answers, force-1, max_tokens 4096 status=complete |
+| 2026-11-18 | forced/2026-11-18-pc40-qwen3-14b-thinking-high | qwen/qwen3-14b | thinking-high-forced | 21 | 0.069890 | forced-2026-11-18 | forced final answers, force-1, max_tokens 4096 status=complete |
+| 2026-11-18 | forced/2026-11-18-dev-qwen3-32b-thinking-high | qwen/qwen3-32b | thinking-high-forced | 23 | 0.049849 | forced-2026-11-18 | forced final answers, force-1, max_tokens 4096 (resumed after the context fix) status=complete |
+| 2026-11-18 | forced/2026-11-18-dev-qwen3-14b-thinking-high | qwen/qwen3-14b | thinking-high-forced | 25 | 0.079308 | forced-2026-11-18 | forced final answers, force-1, max_tokens 4096 (resumed after the context fix) status=complete |
+| 2026-11-18 | forced/2026-11-18-dev-gpt-oss-120b-thinking-high | openai/gpt-oss-120b | thinking-high-forced | 284 | 0.352518 | forced-2026-11-18 | forced final answers, force-1, max_tokens 4096 status=complete |
+| 2026-11-18 | forced/2026-11-18-dev-gpt-oss-20b-thinking-high | openai/gpt-oss-20b | thinking-high-forced | 52 | 0.075976 | forced-2026-11-18 | forced final answers, force-1, max_tokens 4096 status=incomplete |
+| 2026-11-18 | probes/2026-11-18-forced-answer | openai/gpt-oss-20b, openai/gpt-oss-120b, qwen/qwen3-32b, qwen/qwen3-14b | probe | 101 | 0.090900 | forced-2026-11-18 | forced-answer probes (PROBES.md): batches 01-09 by the key's usage counter, including 3 calls lost to a script crash; 10-12 API-reported |

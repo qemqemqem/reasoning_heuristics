@@ -1,0 +1,138 @@
+{
+  "run_id": "forced/2026-11-18-pc20-qwen3-32b-thinking-high",
+  "status": "complete",
+  "started_at": "2026-11-18T18:30:12Z",
+  "model_requested": "qwen/qwen3-32b",
+  "source": {
+    "run_id": "2026-11-18-pc20-qwen3-32b-thinking-high",
+    "raw_sha256": "7482f1b8bb8bac53b38ca3662b91df88fe37f91252b5781b12769872c8c4a4a2",
+    "condition": "thinking-high",
+    "git": {
+      "sha": "62d8345a6eec0691e8eb0c36f085239c09d1f46e",
+      "dirty": false,
+      "branch": "dev-runs-2026-11-18"
+    }
+  },
+  "forced": {
+    "template": "force-1",
+    "endpoint": "https://openrouter.ai/api/v1/completions",
+    "max_tokens": 4096
+  },
+  "condition": {
+    "name": "forced",
+    "label": "thinking-high-forced",
+    "effort": "high",
+    "max_tokens": 4096,
+    "system_prompt": null,
+    "reasoning": null,
+    "sampling": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20
+    },
+    "template": "force-1"
+  },
+  "provider_routing": {
+    "order": [
+      "deepinfra/fp8/flex"
+    ],
+    "allow_fallbacks": false,
+    "require_parameters": true,
+    "quantizations": [
+      "fp8"
+    ]
+  },
+  "price": {
+    "prompt": 0.064,
+    "completion": 0.224,
+    "source": "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
+  },
+  "model_notes": "Hybrid thinking checkpoint. Every OpenRouter endpoint is fp8 (DeepInfra tiers, SiliconFlow, Tenstorrent), so fp8 is pinned; Phase 2 should use the official FP8 checkpoint or say how bf16 differs. deepinfra/fp8 (standard) caps completions at 16,384 and Tenstorrent's context is 20,000, so the flex tier is pinned (36,864 completion tokens, 40,960 context, cheapest). reasoning {enabled: false} and {effort: none} are honoured (0 reasoning tokens) on every endpoint; /no_think leaves an empty think block (1 token).",
+  "items": {
+    "files": {
+      "data/items/pc20/C_E2_dev_s1.jsonl.gz": "533f43bb5fabd8d061e250844bc4d8394a5ebf850bdf095b93de2d89325b5ca6",
+      "data/items/pc20/AH_E5_dev_s1.jsonl.gz": "c0cf6a23b09e11841d3060abb3722e13d7c497e054ee170ccfd25972bb8e353f",
+      "data/items/pc20/C_E1_dev_s1.jsonl.gz": "ccb91baa3557c39b80288da7cb3e543db80a9c8b1482b0801055a44b6f9e2bdc"
+    },
+    "n_items": 14,
+    "skipped": {
+      "no_trace": 0
+    },
+    "limit": null,
+    "allow_item_drift": true,
+    "items_ref": null
+  },
+  "estimate": {
+    "calls": 14,
+    "prompt_tokens": 479034,
+    "cost_usd": 0.0307,
+    "worst_case_usd": 0.0435,
+    "assumptions": "prompt tokens: each source response's prompt plus completion tokens; cost_usd is the prompt alone (every call answers at once), worst_case_usd has every call at max_tokens"
+  },
+  "cap_usd": 0.2,
+  "cap_requested_usd": 0.2,
+  "budget_tag": "forced-2026-11-18",
+  "budget_usd": 2.5,
+  "budget_spent_before_usd": 0.017455,
+  "git": {
+    "sha": "3223682c25e56bc749b4ebed1cf3a1732b022c07",
+    "dirty": false,
+    "branch": "forced-runs-2026-11-18"
+  },
+  "versions": {
+    "python": "3.12.12",
+    "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "reasoning_heuristics": "0.1.0",
+    "scorer": "scorer-1.5.2",
+    "tokenizer_proxy": "regex-digit-split-v1",
+    "python-sat": "1.9.dev22",
+    "pyetr": "1.0.0",
+    "numpy": "2.5.5",
+    "networkx": "3.7",
+    "jsonschema": "4.26.0"
+  },
+  "client": {
+    "timeout_s": 1800.0,
+    "max_attempts": 6,
+    "concurrency": 4
+  },
+  "notes": "forced final answers, force-1, max_tokens 4096",
+  "resumed_from": 0,
+  "counts": {
+    "selected": 14,
+    "skipped_no_trace": 0,
+    "responses": 14,
+    "answered": 14,
+    "still_reasoning": 0
+  },
+  "stop_reason": null,
+  "finished_at": "2026-11-18T18:32:03Z",
+  "wall_s": 111.5,
+  "models_returned": [
+    "qwen/qwen3-32b"
+  ],
+  "providers_served": {
+    "DeepInfra": 14
+  },
+  "responses": 14,
+  "failed_calls": 0,
+  "cache_hits": 0,
+  "spend": {
+    "cap_usd": 0.2,
+    "spent_usd": 0.031523,
+    "calls": 14,
+    "refused_reservations": 0,
+    "calls_without_reported_cost": 0,
+    "failed_attempt_cost_usd": 0.0,
+    "failed_attempts_charged": 0,
+    "safety_factor": 1.25,
+    "price": {
+      "prompt": 0.064,
+      "completion": 0.224,
+      "source": "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
+    }
+  },
+  "charged_usd": 0.031523,
+  "charged_usd_all_invocations": 0.031523,
+  "api_reported_cost_usd_all_responses": 0.031523
+}
