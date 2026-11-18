@@ -8,7 +8,7 @@ Descriptive summary, written by `python -m reasoning_heuristics.evals.score`. No
 - **Items:** 1380 (data/items/pc20/C_E2_dev_s1.jsonl.gz, data/items/pc20/AH_E5_dev_s1.jsonl.gz, data/items/pc20/C_E1_dev_s1.jsonl.gz); skipped {'excluded_eval': 0, 'unsupported': 0, 'not_included': 0}.
 - **Status:** complete; 1380 responses, 0 failed calls, 160 from cache.
 - **Spend:** $3.0230 API-reported over 1 invocation(s) (last cap $4.00; dry-run estimate $2.15, worst case $8.77).
-- **Code:** git `9f33eaae34ec5c7affccdaf2744e5d74a4221624`; scorer `scorer-1.5.0` at `9f33eaae34ec5c7affccdaf2744e5d74a4221624`.
+- **Code:** git `9f33eaae34ec5c7affccdaf2744e5d74a4221624`; scorer `scorer-1.5.1` at `34f2a739e3b2b71721f4ec75aa792469f382b395`.
 
 ## Response categories
 
@@ -18,8 +18,8 @@ Correct is among `ok` responses only; the other categories are never counted as 
 |---|---|---|---|---|---|---|
 | A/H | E5 | 340 | 331 | 2 | 7 | 237/331 (72%) |
 | C | E1 | 240 | 236 | 2 | 2 | 178/236 (75%) |
-| C | E2 | 800 | 666 | 122 | 12 | 331/666 (50%) |
-| **All** | | **1380** | **1233** | **126** | **21** | **746/1233 (61%)** |
+| C | E2 | 800 | 764 | 24 | 12 | 427/764 (56%) |
+| **All** | | **1380** | **1331** | **28** | **21** | **842/1331 (63%)** |
 
 ## Tokens per response
 
@@ -47,6 +47,7 @@ API-reported. Completion tokens include reasoning tokens. Truncated responses co
 | Flag | Responses |
 |---|---|
 | `latex_unwrapped` | 186 |
+| `answer_after_lead_in` | 98 |
 | `no_answer_marker` | 32 |
 | `extra_text_in_block` | 19 |
 | `fenced_answer_no_marker` | 4 |
@@ -60,29 +61,29 @@ API-reported. Completion tokens include reasoning tokens. Truncated responses co
 |---|---|---|
 | `C-E2-17774e248d-COL_DSATUR-vs-LF_G-ONLY` | parse_fail | no answer block |
 | `C-E2-14dd49ad87-SAT_GREEDY-vs-POLARITY_BASE` | parse_fail | no answer block |
-| `C-E2-5c71bbbb07-KNAP_RATIO-vs-DIFF_BASE` | parse_fail | no item names: 'The chosen items in alphabetical order are:' |
-| `C-E2-5c71bbbb07-KNAP_RATIO-vs-DIFF_D(RATIO_DIFF)` | parse_fail | no item names: 'The chosen items, listed in alphabetical order, are:' |
-| `C-E2-1c0866a169-KNAP_RATIO-vs-VALUE_D(RATIO_VALUE)` | parse_fail | no item names: 'The letters of the chosen items, in alphabetical order, are:' |
-| `C-E2-1c0866a169-KNAP_RATIO-vs-VALUE_G-ONLY` | parse_fail | no item names: 'The selected items, sorted alphabetically, are:' |
 | `C-E2-1b8cbaa480-KNAP_RATIO-vs-DIFF_PLACEBO` | parse_fail | no answer block |
 | `C-E2-1b8cbaa480-KNAP_RATIO-vs-DIFF_G-ONLY` | parse_fail | no answer block |
-| `C-E2-52078ce10b-KNAP_RATIO-vs-VALUE_D(VALUE_RATIO)` | parse_fail | no item names: 'The letters of the chosen items in alphabetical order are:' |
-| `C-E2-8d55fdfc20-KNAP_RATIO-vs-DIFF_D(RATIO_DIFF)` | parse_fail | no item names: 'The chosen items in alphabetical order are:' |
-| `C-E2-8d55fdfc20-KNAP_RATIO-vs-DIFF_G-ONLY` | parse_fail | no item names: 'The chosen items in alphabetical order are:' |
-| `C-E2-9b5e0c0481-KNAP_RATIO-vs-VALUE_BASE` | parse_fail | no item names: 'The chosen items in alphabetical order are:' |
-| `C-E2-9b5e0c0481-KNAP_RATIO-vs-VALUE_D(RATIO_VALUE)` | parse_fail | no item names: 'The chosen items in alphabetical order are:' |
 | `C-E2-9b5e0c0481-KNAP_RATIO-vs-VALUE_D(VALUE_RATIO)` | parse_fail | no answer block |
-| `C-E2-63789994a0-KNAP_RATIO-vs-DIFF_BASE` | parse_fail | no item names: 'The selected items in alphabetical order are:' |
 | `C-E2-63789994a0-KNAP_RATIO-vs-DIFF_PLACEBO` | parse_fail | no answer block |
-| `C-E2-9e191cc95d-KNAP_RATIO-vs-DIFF_D(DIFF_RATIO)` | parse_fail | no item names: 'The chosen items, in alphabetical order, are:' |
-| `C-E2-9e191cc95d-KNAP_RATIO-vs-DIFF_PLACEBO` | parse_fail | no item names: 'The chosen items in alphabetical order are:' |
-| `C-E2-735ed583fe-KNAP_PREFIX-vs-RATIO_BASE` | parse_fail | no item names: 'The chosen items in alphabetical order are:' |
-| `C-E2-735ed583fe-KNAP_PREFIX-vs-RATIO_D(RATIO_PREFIX)` | parse_fail | no item names: 'The letters of the chosen items in alphabetical order are:' |
-| `C-E2-735ed583fe-KNAP_PREFIX-vs-RATIO_G-ONLY` | parse_fail | no item names: 'The chosen items, sorted alphabetically, are:' |
-| `C-E2-3adedb695a-KNAP_RATIO-vs-VALUE_BASE` | parse_fail | no item names: 'The chosen items in alphabetical order are:' |
-| `C-E2-3adedb695a-KNAP_RATIO-vs-VALUE_D(RATIO_VALUE)` | parse_fail | no item names: 'The chosen items, listed in alphabetical order, are:' |
-| `C-E2-b3b4715339-KNAP_RATIO-vs-VALUE_BASE` | parse_fail | no item names: 'The chosen items, in alphabetical order, are:' |
-| `C-E2-b3b4715339-KNAP_RATIO-vs-VALUE_D(RATIO_VALUE)` | parse_fail | no item names: 'The letters of the chosen items, in alphabetical order, are:' |
+| `C-E2-4ee55ab373-KNAP_RATIO-vs-VALUE_D(VALUE_RATIO)` | parse_fail | no answer block |
+| `C-E2-382814412c-KNAP_RATIO-vs-VALUE_BASE` | parse_fail | no answer block |
+| `C-E2-382814412c-KNAP_RATIO-vs-VALUE_D(VALUE_RATIO)` | parse_fail | no answer block |
+| `C-E2-382814412c-KNAP_RATIO-vs-VALUE_G-ONLY` | parse_fail | no answer block |
+| `C-E2-7b3eb86931-KNAP_RATIO-vs-DIFF_PLACEBO` | parse_fail | no answer block |
+| `C-E2-d71c196792-KNAP_PREFIX-vs-RATIO_G-ONLY` | parse_fail | no answer block |
+| `C-E2-5438ab1d24-KNAP_RATIO-vs-DIFF_D(RATIO_DIFF)` | parse_fail | no answer block |
+| `C-E2-cd5771888e-KNAP_RATIO-vs-VALUE_PLACEBO` | parse_fail | no answer block |
+| `C-E2-2562f01ee9-KNAP_RATIO-vs-DIFF_G-ONLY` | parse_fail | no answer block |
+| `C-E2-3ce4b01af8-KNAP_RATIO-vs-VALUE_PLACEBO` | parse_fail | no answer block |
+| `C-E2-5317cd9eab-KNAP_RATIO-vs-DIFF_PLACEBO` | parse_fail | no answer block |
+| `C-E2-87110f5f03-KNAP_RATIO-vs-DIFF_D(DIFF_RATIO)` | parse_fail | no answer block |
+| `C-E2-fbe877a9ed-KNAP_PREFIX-vs-RATIO_G-ONLY` | parse_fail | no answer block |
+| `C-E2-f27c9880a8-KNAP_PREFIX-vs-RATIO_PLACEBO` | parse_fail | no answer block |
+| `C-E2-916a1826d0-KNAP_PREFIX-vs-RATIO_BASE` | parse_fail | no answer block |
+| `C-E2-4299d82b5f-KNAP_PREFIX-vs-RATIO_D(PREFIX_RATIO)` | parse_fail | no answer block |
+| `C-E2-5a4557445d-KNAP_PREFIX-vs-RATIO_BASE` | parse_fail | no answer block |
+| `C-E2-e36a305251-KNAP_PREFIX-vs-RATIO_BASE` | parse_fail | no answer block |
+| `AH-E5-28b3419632-COL-COL_N` | parse_fail | room None for Kim |
 
 ## Truncation by cell (censored, SCOPE §6 rule 2)
 

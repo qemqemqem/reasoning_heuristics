@@ -8,7 +8,7 @@ Descriptive summary, written by `python -m reasoning_heuristics.evals.score`. No
 - **Items:** 1270 (data/items/dev/AH_E1_dev_s1.jsonl.gz, data/items/dev/AH_E2_dev_s1.jsonl.gz, data/items/dev/AH_E5_dev_s1.jsonl.gz, data/items/dev/AH_E8_dev_s1.jsonl.gz, data/items/dev/B4C4_E1_dev_s1.jsonl.gz, data/items/dev/B4C4_E2_dev_s1.jsonl.gz, data/items/dev/C_E1_dev_s1.jsonl.gz, data/items/dev/C_E2_dev_s1.jsonl.gz, data/items/dev/C_E3_dev_s1.jsonl.gz, data/items/dev/C_E5_dev_s1.jsonl.gz); skipped {'excluded_eval': 60, 'unsupported': 0, 'not_included': 0}.
 - **Status:** complete; 1270 responses, 0 failed calls, 0 from cache.
 - **Spend:** $2.2878 API-reported over 3 invocation(s) (last cap $0.20; dry-run estimate $1.91, worst case $8.08).
-- **Code:** git `62d8345a6eec0691e8eb0c36f085239c09d1f46e`; scorer `scorer-1.5.0` at `62d8345a6eec0691e8eb0c36f085239c09d1f46e`.
+- **Code:** git `62d8345a6eec0691e8eb0c36f085239c09d1f46e`; scorer `scorer-1.5.1` at `34f2a739e3b2b71721f4ec75aa792469f382b395`.
 
 ## Response categories
 
@@ -22,10 +22,10 @@ Correct is among `ok` responses only; the other categories are never counted as 
 | B4/C4 | E1 | 140 | 140 | 0 | 0 | 0 | 140/140 (100%) |
 | B4/C4 | E2 | 240 | 240 | 0 | 0 | 0 | 240/240 (100%) |
 | C | E1 | 60 | 59 | 1 | 0 | 0 | 48/59 (81%) |
-| C | E2 | 200 | 167 | 27 | 0 | 6 | 79/167 (47%) |
+| C | E2 | 200 | 187 | 7 | 0 | 6 | 98/187 (52%) |
 | C | E3 | 270 | 242 | 19 | 2 | 7 | 217/242 (90%) |
 | C | E5 | 85 | 83 | 1 | 0 | 1 | 50/83 (60%) |
-| **All** | | **1270** | **1191** | **49** | **2** | **28** | **972/1191 (82%)** |
+| **All** | | **1270** | **1211** | **29** | **2** | **28** | **991/1211 (82%)** |
 
 ## Tokens per response
 
@@ -67,6 +67,7 @@ API-reported. Completion tokens include reasoning tokens. Truncated responses co
 | Flag | Responses |
 |---|---|
 | `latex_unwrapped` | 180 |
+| `answer_after_lead_in` | 20 |
 | `no_answer_marker` | 19 |
 | `witness_malformed` | 5 |
 | `witness_partial` | 5 |
@@ -83,28 +84,28 @@ API-reported. Completion tokens include reasoning tokens. Truncated responses co
 | `AH-E5-c0cbfc3e6e-ENT-ENT_I` | parse_fail | unrecognised fact(s): ['switch is down'] |
 | `C-E1-cbf51c7982-SAT_c5-ANS-FREE` | parse_fail | unknown variable(s): x1 |
 | `C-E2-fcc6ef350c-SAT_GREEDY-vs-POLARITY_PLACEBO` | parse_fail | no answer block |
-| `C-E2-25a935fa9d-KNAP_RATIO-vs-VALUE_G-ONLY` | parse_fail | no item names: 'The chosen items in alphabetical order are:' |
-| `C-E2-97afa78f7c-KNAP_RATIO-vs-VALUE_BASE` | parse_fail | no item names: 'The selected items, in alphabetical order, are:' |
 | `C-E2-97afa78f7c-KNAP_RATIO-vs-VALUE_D(VALUE_RATIO)` | parse_fail | no answer block |
 | `C-E2-97afa78f7c-KNAP_RATIO-vs-VALUE_PLACEBO` | parse_fail | no answer block |
-| `C-E2-76568d67b9-KNAP_RATIO-vs-DIFF_PLACEBO` | parse_fail | no item names: 'The letters of the chosen items, in alphabetical order, are:' |
-| `C-E2-76568d67b9-KNAP_RATIO-vs-DIFF_G-ONLY` | parse_fail | no item names: 'The chosen items, in alphabetical order, are:' |
-| `C-E2-cdb9a6c233-KNAP_RATIO-vs-DIFF_D(DIFF_RATIO)` | parse_fail | no item names: 'The letters of the chosen items, in alphabetical order, are:' |
-| `C-E2-c3f2ca88fd-KNAP_RATIO-vs-DIFF_D(DIFF_RATIO)` | parse_fail | no item names: 'The chosen items, sorted alphabetically, are:' |
-| `C-E2-68929de3b8-KNAP_RATIO-vs-VALUE_D(RATIO_VALUE)` | parse_fail | no item names: 'The chosen items in alphabetical order are:' |
-| `C-E2-68929de3b8-KNAP_RATIO-vs-VALUE_PLACEBO` | parse_fail | no item names: 'The letters of the chosen items in alphabetical order are:' |
 | `C-E2-68929de3b8-KNAP_RATIO-vs-VALUE_G-ONLY` | parse_fail | no answer block |
 | `C-E2-41f5f64b4a-KNAP_RATIO-vs-DIFF_D(RATIO_DIFF)` | parse_fail | no answer block |
-| `C-E2-1198d97fa1-KNAP_RATIO-vs-VALUE_D(RATIO_VALUE)` | parse_fail | no item names: 'The letters of the chosen items in alphabetical order are:' |
 | `C-E2-1198d97fa1-KNAP_RATIO-vs-VALUE_D(VALUE_RATIO)` | parse_fail | no answer block |
-| `C-E2-1ea790987a-KNAP_RATIO-vs-VALUE_BASE` | parse_fail | no item names: 'The selected items, sorted alphabetically, are:' |
-| `C-E2-1ea790987a-KNAP_RATIO-vs-VALUE_G-ONLY` | parse_fail | no item names: 'The chosen items in alphabetical order are:' |
-| `C-E2-f45cf49a26-KNAP_RATIO-vs-DIFF_D(RATIO_DIFF)` | parse_fail | no item names: 'The chosen items, listed in alphabetical order, are:' |
-| `C-E2-f45cf49a26-KNAP_RATIO-vs-DIFF_PLACEBO` | parse_fail | no item names: 'The chosen items, in alphabetical order, are:' |
-| `C-E2-f45cf49a26-KNAP_RATIO-vs-DIFF_G-ONLY` | parse_fail | no item names: 'The chosen items in alphabetical order are:' |
-| `C-E2-4ea1f0d8a1-KNAP_PREFIX-vs-RATIO_PLACEBO` | parse_fail | no item names: 'The chosen items in alphabetical order are:' |
-| `C-E2-3b998f965a-KNAP_PREFIX-vs-RATIO_G-ONLY` | parse_fail | no item names: 'The chosen items in alphabetical order are:' |
-| `C-E2-ee0d8f0fa7-KNAP_PREFIX-vs-RATIO_BASE` | parse_fail | no item names: 'The chosen items, in alphabetical order, are:' |
+| `C-E2-b4404ec2bc-KNAP_PREFIX-vs-RATIO_D(RATIO_PREFIX)` | parse_fail | no answer block |
+| `C-E3-322e4cdfac-d=1_CRITICAL_I` | parse_fail | no answer block |
+| `C-E3-337e67cdbd-d=2_CRITICAL_I` | parse_fail | no answer block |
+| `C-E3-337e67cdbd-d=2_PLACEBO_I` | parse_fail | no answer block |
+| `C-E3-d8b624d603-d=2_CRITICAL_U-REV` | partial | missing 9 vertex(s): v46, v36, v31, v17, v21, v69, v77, v49, v16 |
+| `C-E3-3b60d2f9bd-d=3_CRITICAL_I` | parse_fail | no answer block |
+| `C-E3-9a0cd44b4d-d=3_CRITICAL_U-REV` | partial | missing 1 vertex(s): v40 |
+| `C-E3-9a0cd44b4d-d=3_CRITICAL_I` | parse_fail | no answer block |
+| `C-E3-9a0cd44b4d-d=3_PLACEBO_I` | parse_fail | no answer block |
+| `C-E3-03f012ed51-d=4_PLACEBO_I` | parse_fail | no answer block |
+| `C-E3-f55f670046-d=4_CRITICAL_I` | parse_fail | no answer block |
+| `C-E3-725dfed728-d=4_BASE_I` | parse_fail | no answer block |
+| `C-E3-725dfed728-d=4_PLACEBO_I` | parse_fail | no answer block |
+| `C-E3-a93af8e839-d=4_BASE_I` | parse_fail | no answer block |
+| `C-E3-a93af8e839-d=4_CRITICAL_U-REV` | parse_fail | no answer block |
+| `C-E3-44103b792f-d=6_BASE_I` | parse_fail | no answer block |
+| `C-E3-44103b792f-d=6_CRITICAL_I` | parse_fail | no answer block |
 
 ## Truncation by cell (censored, SCOPE §6 rule 2)
 

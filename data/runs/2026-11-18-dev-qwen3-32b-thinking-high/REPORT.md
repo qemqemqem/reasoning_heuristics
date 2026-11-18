@@ -8,7 +8,7 @@ Descriptive summary, written by `python -m reasoning_heuristics.evals.score`. No
 - **Items:** 1270 (data/items/dev/AH_E1_dev_s1.jsonl.gz, data/items/dev/AH_E2_dev_s1.jsonl.gz, data/items/dev/AH_E5_dev_s1.jsonl.gz, data/items/dev/AH_E8_dev_s1.jsonl.gz, data/items/dev/B4C4_E1_dev_s1.jsonl.gz, data/items/dev/B4C4_E2_dev_s1.jsonl.gz, data/items/dev/C_E1_dev_s1.jsonl.gz, data/items/dev/C_E2_dev_s1.jsonl.gz, data/items/dev/C_E3_dev_s1.jsonl.gz, data/items/dev/C_E5_dev_s1.jsonl.gz); skipped {'excluded_eval': 60, 'unsupported': 0, 'not_included': 0}.
 - **Status:** complete; 1270 responses, 0 failed calls, 100 from cache.
 - **Spend:** $2.2600 API-reported over 2 invocation(s) (last cap $5.86; dry-run estimate $2.18, worst case $9.38).
-- **Code:** git `12095bc719ce00f4d3ff50c8e7f73dc16c37054a`; scorer `scorer-1.5.0` at `62d8345a6eec0691e8eb0c36f085239c09d1f46e`.
+- **Code:** git `12095bc719ce00f4d3ff50c8e7f73dc16c37054a`; scorer `scorer-1.5.1` at `34f2a739e3b2b71721f4ec75aa792469f382b395`.
 
 ## Response categories
 
@@ -73,6 +73,7 @@ API-reported. Completion tokens include reasoning tokens. Truncated responses co
 | `extra_text_in_block` | 7 |
 | `fenced_answer_no_marker` | 4 |
 | `witness_missing` | 3 |
+| `answer_blocks_disagree` | 2 |
 | `witness_partial` | 1 |
 | `order_differs_from_requested` | 1 |
 
