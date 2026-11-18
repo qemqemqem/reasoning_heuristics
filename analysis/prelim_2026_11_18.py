@@ -699,10 +699,15 @@ def table_units(special: dict[str, dict[str, Any]], unit_items: dict[str, int]) 
 
 
 def table_dev_units(unit_items: dict[str, int]) -> str:
+    sizes = {"pc20": 20, "pc40": 40}
     rows = []
     for name in sorted(unit_items):
-        by_design = NOT_FITTED.get(name) or NOT_FITTED.get(name.split("/")[0], "")
-        rows.append([name, unit_items[name], by_design])
+        gated = [s for s, units in GATED.items() if name in units]
+        if gated:
+            status = f"passes at {sizes[gated[0]]} per cell; fitted on the {sizes[gated[0]]}-per-cell runs"
+        else:
+            status = NOT_FITTED.get(name) or NOT_FITTED.get(name.split("/")[0], "")
+        rows.append([name, unit_items[name], status])
     return md_table(["Unit (5 per cell)", "Items", "Gate status at larger sizes (docs/RECOVERY.md)"], rows)
 
 
