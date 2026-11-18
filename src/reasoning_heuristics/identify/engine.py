@@ -39,12 +39,52 @@ def separations(um: UnitModel) -> dict[str, dict[str, int]]:
     return out
 
 
+def design_rank(um: UnitModel) -> dict[str, Any] | None:
+    """For units whose items are all on finite channels: the (item, value) x (groups + q) matrix of
+    no-slip probabilities, its rank and sigma_min / sigma_max after scaling columns to unit norm
+    (A/H §5.3 pre-registers >= 0.05), and the columns of the weakest direction. A rank below the
+    number of columns means some weights are not identified by any amount of data on these items
+    (e.g. q = 1/2 ALWAYS-SAT + 1/2 ALWAYS-UNSAT on a two-valued channel)."""
+    from reasoning_heuristics.identify.spaces import FiniteSpace
+
+    if not all(isinstance(im.space, FiniteSpace) for im in um.items):
+        return None
+    cols = um.columns
+    rows = []
+    for i, im in enumerate(um.items):
+        V = im.space.values
+        block = np.zeros((len(V), len(cols) + 1))
+        for j, g in enumerate(cols):
+            p = um.pred(i, g.members[0])
+            if p.kind == "det":
+                block[V.index(p.key), j] = 1.0
+            elif p.kind == "dist":
+                for k, v in p.dist.items():
+                    block[V.index(k), j] += v
+            elif p.kind in ("uniform",):
+                block[:, j] = 1.0 / len(V)
+        block[:, -1] = 1.0 / len(V)
+        rows.append(block)
+    M = np.vstack(rows)
+    norms = np.linalg.norm(M, axis=0)
+    M = M / np.where(norms > 0, norms, 1.0)
+    _, s, vt = np.linalg.svd(M, full_matrices=False)
+    tol = s.max() * 1e-9
+    rank = int((s > tol).sum())
+    weak = vt[-1]
+    labels = [g.name for g in cols] + ["q"]
+    involved = [labels[j] for j in np.argsort(-np.abs(weak)) if abs(weak[j]) > 0.1]
+    return {"columns": len(labels), "rank": rank, "sigma_ratio": round(float(s.min() / s.max()), 4),
+            "weakest_direction": involved[:8]}
+
+
 def diagnostics(um: UnitModel) -> dict[str, Any]:
     sep = separations(um)
     weakest = sorted(((min(v.values()) if v else 0, k, min(v, key=v.get) if v else None) for k, v in sep.items()))[:5]
     return {"groups": [g.members for g in um.columns], "folded_into_q": um.q_members,
             "n_items": len(um.items), "n_clusters": um.unit.n_clusters,
-            "least_separated": [{"group": k, "nearest": n, "separating_items": s} for s, k, n in weakest]}
+            "least_separated": [{"group": k, "nearest": n, "separating_items": s} for s, k, n in weakest],
+            "design": design_rank(um)}
 
 
 def fit_unit(um: UnitModel, responses: list[Response], n_boot: int = 200, seed: int = 0,

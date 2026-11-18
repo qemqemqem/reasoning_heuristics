@@ -6,8 +6,10 @@ fitted, and the estimates are compared with the planted weights.
     python -m reasoning_heuristics.identify.recovery table data/recovery/dev.json [more.json ...]
 
 `run` fits every scenario of `fake.py` on every fit unit (eval x domain) of the item sets it is
-given and writes one JSON file; `table` prints the gate tables in Markdown. Rerun it on
-regenerated item sets with the same command: nothing in it is tuned to the current items.
+given and writes one JSON file, with the git SHA and the sha256 of every item file it read;
+`table` prints the gate tables in Markdown. Rerun it on regenerated item sets with the same
+command: nothing in it is tuned to the current items. Workers are processes, so run it with
+`OMP_NUM_THREADS=1` (numpy's BLAS threads only oversubscribe the cores here).
 
 **Gates** (SCOPE §4 item 5), per unit and scenario, over replicates:
 
@@ -42,7 +44,7 @@ from typing import Any
 
 import numpy as np
 
-from reasoning_heuristics.identify.engine import separations
+from reasoning_heuristics.identify.engine import design_rank, separations
 from reasoning_heuristics.identify.fake import Scenario, always_answer, simulate, truth_vector
 from reasoning_heuristics.identify.likelihood import NEAR_MISS, UNIFORM, TruncationTable, UnitModel
 from reasoning_heuristics.identify.mixture import UNEXPLAINED, em, fit, fit_features
@@ -89,6 +91,11 @@ def choose_triple(um: UnitModel, sep: dict[str, dict[str, int]]) -> list[str] | 
     cross = [j for j in others if family_of(um, cols[j].members[0]) not in f12] or others
     h3 = max(cross, key=lambda j: (min(sep[cols[h1].name][cols[j].name], sep[cols[h2].name][cols[j].name]), -j))
     return [cols[h1].members[0], cols[h2].members[0], cols[h3].members[0]]
+
+
+def diagnostics_least_separated(sep: dict[str, dict[str, int]], k: int = 6) -> list[dict[str, Any]]:
+    pairs = sorted({tuple(sorted((a, b))): n for a, row in sep.items() for b, n in row.items()}.items(), key=lambda kv: kv[1])
+    return [{"pair": list(p), "separating_items": n} for p, n in pairs[:k]]
 
 
 def feature_levels(unit: Unit) -> tuple[np.ndarray, str]:
@@ -168,6 +175,8 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
                            "scenarios": {}}
     triple = choose_triple(um, sep)
     out["triple"] = triple
+    out["design"] = design_rank(um)
+    out["least_separated"] = diagnostics_least_separated(sep)
     R, B = cfg["reps"], cfg["boot"]
     scen = cfg["scenarios"]
 
@@ -360,6 +369,7 @@ def run(argv: list[str]) -> int:
             tasks.append((ps, name, cfg))
     # longest first, so the pool is not left waiting on one big unit at the end
     tasks.sort(key=lambda t: -sum(p.stat().st_size for p in t[0]))
+    prov = provenance(paths)  # before the run, so later edits to the tree cannot leak in
     t0 = time.time()
     results = []
     with mp.get_context("fork").Pool(a.workers) as pool:
@@ -369,7 +379,7 @@ def run(argv: list[str]) -> int:
             print(f"[{time.time() - t0:7.0f}s] {r['unit']}: {status} ({r.get('seconds', '?')}s)", flush=True)
     results.sort(key=lambda r: r["unit"])
     doc = {"label": a.label or Path(a.items).name, "items": str(a.items), "config": cfg, "gates": GATES,
-           "generated": time.strftime("%Y-%m-%d %H:%M"), "provenance": provenance(paths),
+           "generated": time.strftime("%Y-%m-%d %H:%M"), "provenance": prov,
            "command": "python -m reasoning_heuristics.identify.recovery run " + " ".join(argv), "units": results}
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
     Path(a.out).write_text(json.dumps(doc, indent=1, ensure_ascii=False))
