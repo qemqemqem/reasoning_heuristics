@@ -692,7 +692,7 @@ def _verdict(s: dict[str, Any] | None) -> str | None:
 
 
 def _by_size(pairs: list[tuple[str, str]]) -> str:
-    """[(size, verdict)] -> "pass at 5, 10; fail at 20" (one verdict: "pass at every size run (5–40)")."""
+    """[(size, verdict)] -> "pass at 5, 10; fail at 20" (a single verdict: "pass at every size (5–40)")."""
     kinds = list(dict.fromkeys(v for _, v in pairs))
     if not kinds:
         return "–"
