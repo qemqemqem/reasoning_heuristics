@@ -39,6 +39,3916 @@
  "command": "python -m reasoning_heuristics.identify.recovery run --items /tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete --label pc10 --units C_E2/colouring,AH_E5/SAT,AH_E5/ENT,C_E2/knapsack,C_E1/3-SAT,C_E2/3-SAT,C_E5/3-SAT (partial assignment given) --scenarios mix,null_q,null_always --reps 100 --boot 100 --workers 4 --out data/recovery/pc10.json",
  "units": [
   {
+   "unit": "AH_E1/COL",
+   "n_items": 40,
+   "n_clusters": 20,
+   "n_cells": 4,
+   "items_per_cell": 10.0,
+   "finite_channel": true,
+   "groups": [
+    [
+     "A1 ALWAYS-IMPOSSIBLE",
+     "B4 ADD-CONSTRAINT(adjacent)"
+    ],
+    [
+     "A1 ALWAYS-POSSIBLE",
+     "A2 DENSITY-D",
+     "A2 DENSITY-U"
+    ],
+    [
+     "A2 LENGTH-M"
+    ],
+    [
+     "B1 DROP-CONSTRAINT(last 3)"
+    ],
+    [
+     "C1 FIRST-FIT"
+    ],
+    [
+     "C2 DSATUR"
+    ],
+    [
+     "D DPLL-b"
+    ],
+    [
+     "H SAMPLE-8"
+    ],
+    [
+     "NOISY-EXACT"
+    ],
+    [
+     "PERCEPTION-NOISE"
+    ],
+    [
+     "exact"
+    ]
+   ],
+   "folded_into_q": [
+    "H RANDOM-U"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.09,
+     "worst_bias_quantity": "H SAMPLE-8",
+     "min_coverage": 0.3,
+     "worst_coverage_quantity": "H SAMPLE-8",
+     "median_width": 0.431,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × q": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 1.0,
+       "median_width": 0.063,
+       "mean_upper": 0.072
+      },
+      "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U + 0.5 × q": {
+       "truth": 0.0,
+       "mean": 0.029,
+       "bias": 0.029,
+       "coverage": 0.99,
+       "median_width": 0.281,
+       "mean_upper": 0.273
+      },
+      "A2 LENGTH-M": {
+       "truth": 0.6,
+       "mean": 0.587,
+       "bias": -0.013,
+       "coverage": 0.91,
+       "median_width": 0.571,
+       "mean_upper": 0.818
+      },
+      "B1 DROP-CONSTRAINT(last 3)": {
+       "truth": 0.3,
+       "mean": 0.236,
+       "bias": -0.064,
+       "coverage": 0.86,
+       "median_width": 0.501,
+       "mean_upper": 0.505
+      },
+      "C1 FIRST-FIT": {
+       "truth": 0.0,
+       "mean": 0.055,
+       "bias": 0.055,
+       "coverage": 0.97,
+       "median_width": 0.166,
+       "mean_upper": 0.148
+      },
+      "C2 DSATUR": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 1.0,
+       "median_width": 0.018,
+       "mean_upper": 0.068
+      },
+      "D DPLL-b": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.049
+      },
+      "H SAMPLE-8": {
+       "truth": 0.1,
+       "mean": 0.01,
+       "bias": -0.09,
+       "coverage": 0.3,
+       "median_width": 0.064,
+       "mean_upper": 0.063
+      },
+      "PERCEPTION-NOISE": {
+       "truth": 0.0,
+       "mean": 0.024,
+       "bias": 0.024,
+       "coverage": 1.0,
+       "median_width": 0.087,
+       "mean_upper": 0.16
+      },
+      "exact": {
+       "truth": 0.0,
+       "mean": 0.021,
+       "bias": 0.021,
+       "coverage": 1.0,
+       "median_width": 0.035,
+       "mean_upper": 0.132
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.47,
+      "worst_coverage_quantity": "H SAMPLE-8",
+      "median_width": 0.431,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × q": 0.91,
+       "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U + 0.5 × q": 0.98,
+       "A2 LENGTH-M": 0.93,
+       "B1 DROP-CONSTRAINT(last 3)": 0.91,
+       "C1 FIRST-FIT": 0.86,
+       "C2 DSATUR": 0.94,
+       "D DPLL-b": 0.9,
+       "H SAMPLE-8": 0.47,
+       "NOISY-EXACT": 0.82,
+       "PERCEPTION-NOISE": 0.88,
+       "exact": 0.96
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × q": 0.1,
+       "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U + 0.5 × q": 0.342,
+       "A2 LENGTH-M": 0.553,
+       "B1 DROP-CONSTRAINT(last 3)": 0.512,
+       "C1 FIRST-FIT": 0.194,
+       "C2 DSATUR": 0.1,
+       "D DPLL-b": 0.0,
+       "H SAMPLE-8": 0.086,
+       "NOISY-EXACT": 0.0,
+       "PERCEPTION-NOISE": 0.226,
+       "exact": 0.113
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.291,
+     "worst_bias_quantity": "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × q",
+     "min_coverage": 0.0,
+     "worst_coverage_quantity": "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × q",
+     "median_width": 0.356,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": null,
+     "quantities": {
+      "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × q": {
+       "truth": 0.5,
+       "mean": 0.209,
+       "bias": -0.291,
+       "coverage": 0.0,
+       "median_width": 0.328,
+       "mean_upper": 0.333
+      },
+      "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U + 0.5 × q": {
+       "truth": 0.5,
+       "mean": 0.351,
+       "bias": -0.149,
+       "coverage": 0.54,
+       "median_width": 0.411,
+       "mean_upper": 0.521
+      },
+      "A2 LENGTH-M": {
+       "truth": 0.0,
+       "mean": 0.087,
+       "bias": 0.087,
+       "coverage": 0.88,
+       "median_width": 0.344,
+       "mean_upper": 0.328
+      },
+      "B1 DROP-CONSTRAINT(last 3)": {
+       "truth": 0.0,
+       "mean": 0.051,
+       "bias": 0.051,
+       "coverage": 0.97,
+       "median_width": 0.224,
+       "mean_upper": 0.239
+      },
+      "C1 FIRST-FIT": {
+       "truth": 0.0,
+       "mean": 0.102,
+       "bias": 0.102,
+       "coverage": 0.94,
+       "median_width": 0.448,
+       "mean_upper": 0.421
+      },
+      "C2 DSATUR": {
+       "truth": 0.0,
+       "mean": 0.024,
+       "bias": 0.024,
+       "coverage": 1.0,
+       "median_width": 0.128,
+       "mean_upper": 0.153
+      },
+      "D DPLL-b": {
+       "truth": 0.0,
+       "mean": 0.031,
+       "bias": 0.031,
+       "coverage": 1.0,
+       "median_width": 0.145,
+       "mean_upper": 0.172
+      },
+      "H SAMPLE-8": {
+       "truth": 0.0,
+       "mean": 0.131,
+       "bias": 0.131,
+       "coverage": 0.76,
+       "median_width": 0.247,
+       "mean_upper": 0.256
+      },
+      "NOISY-EXACT": {
+       "truth": 0.0,
+       "mean": 0.008,
+       "bias": 0.008,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.059
+      },
+      "PERCEPTION-NOISE": {
+       "truth": 0.0,
+       "mean": 0.003,
+       "bias": 0.003,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.061
+      },
+      "exact": {
+       "truth": 0.0,
+       "mean": 0.003,
+       "bias": 0.003,
+       "coverage": 1.0,
+       "median_width": 0.003,
+       "mean_upper": 0.061
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.02,
+      "worst_coverage_quantity": "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × q",
+      "median_width": 0.325,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": null,
+      "coverage": {
+       "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × q": 0.02,
+       "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U + 0.5 × q": 0.62,
+       "A2 LENGTH-M": 0.86,
+       "B1 DROP-CONSTRAINT(last 3)": 0.93,
+       "C1 FIRST-FIT": 0.91,
+       "C2 DSATUR": 0.91,
+       "D DPLL-b": 0.81,
+       "H SAMPLE-8": 0.48,
+       "NOISY-EXACT": 0.79,
+       "PERCEPTION-NOISE": 0.85,
+       "exact": 0.82
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × q": 0.269,
+       "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U + 0.5 × q": 0.399,
+       "A2 LENGTH-M": 0.324,
+       "B1 DROP-CONSTRAINT(last 3)": 0.296,
+       "C1 FIRST-FIT": 0.471,
+       "C2 DSATUR": 0.2,
+       "D DPLL-b": 0.191,
+       "H SAMPLE-8": 0.248,
+       "NOISY-EXACT": 0.0,
+       "PERCEPTION-NOISE": 0.058,
+       "exact": 0.042
+      }
+     },
+     "testable": false,
+     "not_testable": "planted weight on q, identified only in combination: q = 0.5 × A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U"
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U + 0.5 × q",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U + 0.5 × q",
+     "median_width": 0.04,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": null,
+     "quantities": {
+      "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U + 0.5 × q": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.04,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U + 0.5 × q",
+      "median_width": 0.134,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": null,
+      "coverage": {
+       "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U + 0.5 × q": 1.0,
+       "A2 LENGTH-M": 1.0
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U + 0.5 × q": 0.134,
+       "A2 LENGTH-M": 0.052
+      }
+     },
+     "testable": false,
+     "not_testable": "planted weight on A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U, identified only in combination: q = 0.5 × A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U",
+     "truth_group": "A1 ALWAYS-POSSIBLE"
+    }
+   },
+   "triple": [
+    "A2 LENGTH-M",
+    "B1 DROP-CONSTRAINT(last 3)",
+    "H SAMPLE-8"
+   ],
+   "design": {
+    "columns": 12,
+    "rank": 11,
+    "sigma_ratio": 0.0,
+    "weakest_direction": [
+     "q",
+     "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U",
+     "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent)"
+    ]
+   },
+   "least_separated": [
+    {
+     "pair": [
+      "C2 DSATUR",
+      "exact"
+     ],
+     "separating_items": 1
+    },
+    {
+     "pair": [
+      "D DPLL-b",
+      "exact"
+     ],
+     "separating_items": 2
+    },
+    {
+     "pair": [
+      "C2 DSATUR",
+      "D DPLL-b"
+     ],
+     "separating_items": 3
+    },
+    {
+     "pair": [
+      "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent)",
+      "C1 FIRST-FIT"
+     ],
+     "separating_items": 4
+    },
+    {
+     "pair": [
+      "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U",
+      "A2 LENGTH-M"
+     ],
+     "separating_items": 6
+    },
+    {
+     "pair": [
+      "B1 DROP-CONSTRAINT(last 3)",
+      "exact"
+     ],
+     "separating_items": 8
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent)",
+      "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U",
+      "A2 LENGTH-M",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "C1 FIRST-FIT",
+      "C2 DSATUR",
+      "D DPLL-b",
+      "H SAMPLE-8",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE",
+      "exact",
+      "q"
+     ],
+     "rank": 11,
+     "deficiency": 1,
+     "sigma_ratio": 9.468662820314982e-17,
+     "null_directions": [
+      "q = 0.5 × A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U"
+     ],
+     "dependencies": [
+      {
+       "members": [
+        "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent)",
+        "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U",
+        "q"
+       ],
+       "substantive": false,
+       "relation": "q = 0.5 × A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U",
+       "statement": "q = 0.5 × A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U"
+      }
+     ],
+     "not_identified": [
+      "q"
+     ],
+     "involved": [
+      "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent)",
+      "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U",
+      "q"
+     ],
+     "identified": [
+      "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × q",
+      "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U + 0.5 × q",
+      "A2 LENGTH-M",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "C1 FIRST-FIT",
+      "C2 DSATUR",
+      "D DPLL-b",
+      "H SAMPLE-8",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE",
+      "exact"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent)",
+      "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U",
+      "A2 LENGTH-M",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "C1 FIRST-FIT",
+      "C2 DSATUR",
+      "D DPLL-b",
+      "H SAMPLE-8",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE",
+      "exact",
+      "q"
+     ],
+     "rank": 11,
+     "deficiency": 1,
+     "sigma_ratio": 9.468662820314982e-17,
+     "null_directions": [
+      "q = 0.5 × A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U"
+     ],
+     "dependencies": [
+      {
+       "members": [
+        "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent)",
+        "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U",
+        "q"
+       ],
+       "substantive": false,
+       "relation": "q = 0.5 × A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U",
+       "statement": "q = 0.5 × A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U"
+      }
+     ],
+     "not_identified": [
+      "q"
+     ],
+     "involved": [
+      "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent)",
+      "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U",
+      "q"
+     ],
+     "identified": [
+      "A1 ALWAYS-IMPOSSIBLE = B4 ADD-CONSTRAINT(adjacent) + 0.5 × q",
+      "A1 ALWAYS-POSSIBLE = A2 DENSITY-D = A2 DENSITY-U + 0.5 × q",
+      "A2 LENGTH-M",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "C1 FIRST-FIT",
+      "C2 DSATUR",
+      "D DPLL-b",
+      "H SAMPLE-8",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE",
+      "exact"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [
+    "null_q",
+    "null_always"
+   ],
+   "seconds": 225.9
+  },
+  {
+   "unit": "AH_E1/ENT",
+   "n_items": 40,
+   "n_clusters": 20,
+   "n_cells": 4,
+   "items_per_cell": 10.0,
+   "finite_channel": true,
+   "groups": [
+    [
+     "A1 ALWAYS-YES"
+    ],
+    [
+     "A1 NONE",
+     "A2 ATMOSPHERE"
+    ],
+    [
+     "A2 DENSITY"
+    ],
+    [
+     "A2 FREQ"
+    ],
+    [
+     "A2 PRIMACY"
+    ],
+    [
+     "A2 RECENCY"
+    ],
+    [
+     "B1 UP-1"
+    ],
+    [
+     "B1 UP-2"
+    ],
+    [
+     "B1 UP-3"
+    ],
+    [
+     "B4 ETR"
+    ],
+    [
+     "B4 FIRST"
+    ],
+    [
+     "B4 MATCH"
+    ],
+    [
+     "D case-split (b = 4)"
+    ],
+    [
+     "H SAMPLE-8"
+    ],
+    [
+     "NOISY-EXACT"
+    ],
+    [
+     "PERCEPTION-NOISE"
+    ],
+    [
+     "exact"
+    ]
+   ],
+   "folded_into_q": [
+    "H RANDOM-U"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.118,
+     "worst_bias_quantity": "A1 NONE = A2 ATMOSPHERE + 0.5 × q",
+     "min_coverage": 0.05,
+     "worst_coverage_quantity": "H SAMPLE-8",
+     "median_width": 0.185,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "A1 NONE = A2 ATMOSPHERE + 0.5 × q": {
+       "truth": 0.0,
+       "mean": 0.118,
+       "bias": 0.118,
+       "coverage": 0.85,
+       "median_width": 0.203,
+       "mean_upper": 0.312
+      },
+      "A2 DENSITY": {
+       "truth": 0.6,
+       "mean": 0.531,
+       "bias": -0.069,
+       "coverage": 0.61,
+       "median_width": 0.5,
+       "mean_upper": 0.776
+      },
+      "A2 FREQ": {
+       "truth": 0.0,
+       "mean": 0.009,
+       "bias": 0.009,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.076
+      },
+      "A2 PRIMACY": {
+       "truth": 0.0,
+       "mean": 0.021,
+       "bias": 0.021,
+       "coverage": 0.99,
+       "median_width": 0.0,
+       "mean_upper": 0.107
+      },
+      "A2 RECENCY": {
+       "truth": 0.0,
+       "mean": 0.023,
+       "bias": 0.023,
+       "coverage": 1.0,
+       "median_width": 0.13,
+       "mean_upper": 0.176
+      },
+      "B1 UP-1": {
+       "truth": 0.0,
+       "mean": 0.028,
+       "bias": 0.028,
+       "coverage": 1.0,
+       "median_width": 0.019,
+       "mean_upper": 0.133
+      },
+      "B1 UP-2": {
+       "truth": 0.0,
+       "mean": 0.015,
+       "bias": 0.015,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.049
+      },
+      "B4 ETR": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 1.0,
+       "median_width": 0.001,
+       "mean_upper": 0.114
+      },
+      "B4 FIRST": {
+       "truth": 0.3,
+       "mean": 0.193,
+       "bias": -0.107,
+       "coverage": 0.51,
+       "median_width": 0.272,
+       "mean_upper": 0.371
+      },
+      "B4 MATCH": {
+       "truth": 0.0,
+       "mean": 0.036,
+       "bias": 0.036,
+       "coverage": 1.0,
+       "median_width": 0.125,
+       "mean_upper": 0.161
+      },
+      "H SAMPLE-8": {
+       "truth": 0.1,
+       "mean": 0.0,
+       "bias": -0.1,
+       "coverage": 0.05,
+       "median_width": 0.0,
+       "mean_upper": 0.011
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.09,
+      "worst_coverage_quantity": "H SAMPLE-8",
+      "median_width": 0.204,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "A1 NONE = A2 ATMOSPHERE + 0.5 × q": 0.83,
+       "A2 DENSITY": 0.6,
+       "A2 FREQ": 0.94,
+       "A2 PRIMACY": 0.85,
+       "A2 RECENCY": 0.93,
+       "B1 UP-1": 0.93,
+       "B1 UP-2": 0.9,
+       "B1 UP-3": 0.94,
+       "B4 ETR": 0.94,
+       "B4 FIRST": 0.45,
+       "B4 MATCH": 0.95,
+       "H SAMPLE-8": 0.09,
+       "exact": 0.9
+      },
+      "median_width_by_quantity": {
+       "A1 NONE = A2 ATMOSPHERE + 0.5 × q": 0.188,
+       "A2 DENSITY": 0.5,
+       "A2 FREQ": 0.113,
+       "A2 PRIMACY": 0.078,
+       "A2 RECENCY": 0.242,
+       "B1 UP-1": 0.166,
+       "B1 UP-2": 0.0,
+       "B1 UP-3": 0.0,
+       "B4 ETR": 0.2,
+       "B4 FIRST": 0.251,
+       "B4 MATCH": 0.227,
+       "H SAMPLE-8": 0.0,
+       "exact": 0.0
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.338,
+     "worst_bias_quantity": "A1 NONE = A2 ATMOSPHERE + 0.5 × q",
+     "min_coverage": 0.07,
+     "worst_coverage_quantity": "A1 NONE = A2 ATMOSPHERE + 0.5 × q",
+     "median_width": 0.378,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": null,
+     "quantities": {
+      "A1 ALWAYS-YES + 0.5 × q": {
+       "truth": 0.5,
+       "mean": 0.38,
+       "bias": -0.12,
+       "coverage": 0.58,
+       "median_width": 0.389,
+       "mean_upper": 0.529
+      },
+      "A1 NONE = A2 ATMOSPHERE + 0.5 × q": {
+       "truth": 0.5,
+       "mean": 0.162,
+       "bias": -0.338,
+       "coverage": 0.07,
+       "median_width": 0.342,
+       "mean_upper": 0.288
+      },
+      "A2 DENSITY": {
+       "truth": 0.0,
+       "mean": 0.076,
+       "bias": 0.076,
+       "coverage": 0.98,
+       "median_width": 0.215,
+       "mean_upper": 0.239
+      },
+      "A2 FREQ": {
+       "truth": 0.0,
+       "mean": 0.042,
+       "bias": 0.042,
+       "coverage": 0.99,
+       "median_width": 0.213,
+       "mean_upper": 0.227
+      },
+      "A2 PRIMACY": {
+       "truth": 0.0,
+       "mean": 0.046,
+       "bias": 0.046,
+       "coverage": 0.97,
+       "median_width": 0.212,
+       "mean_upper": 0.232
+      },
+      "A2 RECENCY": {
+       "truth": 0.0,
+       "mean": 0.029,
+       "bias": 0.029,
+       "coverage": 1.0,
+       "median_width": 0.165,
+       "mean_upper": 0.191
+      },
+      "B1 UP-1": {
+       "truth": 0.0,
+       "mean": 0.018,
+       "bias": 0.018,
+       "coverage": 1.0,
+       "median_width": 0.082,
+       "mean_upper": 0.138
+      },
+      "B1 UP-2": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 1.0,
+       "median_width": 0.061,
+       "mean_upper": 0.114
+      },
+      "B1 UP-3": {
+       "truth": 0.0,
+       "mean": 0.01,
+       "bias": 0.01,
+       "coverage": 1.0,
+       "median_width": 0.068,
+       "mean_upper": 0.116
+      },
+      "B4 ETR": {
+       "truth": 0.0,
+       "mean": 0.047,
+       "bias": 0.047,
+       "coverage": 0.98,
+       "median_width": 0.274,
+       "mean_upper": 0.274
+      },
+      "B4 FIRST": {
+       "truth": 0.0,
+       "mean": 0.107,
+       "bias": 0.107,
+       "coverage": 0.91,
+       "median_width": 0.144,
+       "mean_upper": 0.234
+      },
+      "B4 MATCH": {
+       "truth": 0.0,
+       "mean": 0.035,
+       "bias": 0.035,
+       "coverage": 1.0,
+       "median_width": 0.195,
+       "mean_upper": 0.203
+      },
+      "D case-split (b = 4)": {
+       "truth": 0.0,
+       "mean": 0.022,
+       "bias": 0.022,
+       "coverage": 1.0,
+       "median_width": 0.036,
+       "mean_upper": 0.113
+      },
+      "H SAMPLE-8": {
+       "truth": 0.0,
+       "mean": 0.01,
+       "bias": 0.01,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.08
+      },
+      "exact": {
+       "truth": 0.0,
+       "mean": 0.004,
+       "bias": 0.004,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.066
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.16,
+      "worst_coverage_quantity": "A1 NONE = A2 ATMOSPHERE + 0.5 × q",
+      "median_width": 0.327,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": null,
+      "coverage": {
+       "A1 ALWAYS-YES + 0.5 × q": 0.71,
+       "A1 NONE = A2 ATMOSPHERE + 0.5 × q": 0.16,
+       "A2 DENSITY": 0.89,
+       "A2 FREQ": 0.97,
+       "A2 PRIMACY": 0.95,
+       "A2 RECENCY": 0.97,
+       "B1 UP-1": 0.91,
+       "B1 UP-2": 0.89,
+       "B1 UP-3": 0.92,
+       "B4 ETR": 0.95,
+       "B4 FIRST": 0.79,
+       "B4 MATCH": 0.92,
+       "D case-split (b = 4)": 0.83,
+       "H SAMPLE-8": 0.81,
+       "exact": 0.87
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-YES + 0.5 × q": 0.357,
+       "A1 NONE = A2 ATMOSPHERE + 0.5 × q": 0.25,
+       "A2 DENSITY": 0.221,
+       "A2 FREQ": 0.262,
+       "A2 PRIMACY": 0.261,
+       "A2 RECENCY": 0.228,
+       "B1 UP-1": 0.211,
+       "B1 UP-2": 0.133,
+       "B1 UP-3": 0.165,
+       "B4 ETR": 0.32,
+       "B4 FIRST": 0.18,
+       "B4 MATCH": 0.266,
+       "D case-split (b = 4)": 0.119,
+       "H SAMPLE-8": 0.093,
+       "exact": 0.06
+      }
+     },
+     "testable": false,
+     "not_testable": "planted weight on q, identified only in combination: q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 ATMOSPHERE"
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "A1 ALWAYS-YES + 0.5 × q",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "A1 ALWAYS-YES + 0.5 × q",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": null,
+     "quantities": {
+      "A1 ALWAYS-YES + 0.5 × q": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "A1 ALWAYS-YES + 0.5 × q",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": null,
+      "coverage": {
+       "A1 ALWAYS-YES + 0.5 × q": 1.0
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-YES + 0.5 × q": 0.0
+      }
+     },
+     "testable": false,
+     "not_testable": "planted weight on A1 ALWAYS-YES, identified only in combination: q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 ATMOSPHERE",
+     "truth_group": "A1 ALWAYS-YES"
+    }
+   },
+   "triple": [
+    "A2 DENSITY",
+    "B4 FIRST",
+    "H SAMPLE-8"
+   ],
+   "design": {
+    "columns": 18,
+    "rank": 17,
+    "sigma_ratio": 0.0,
+    "weakest_direction": [
+     "q",
+     "A1 ALWAYS-YES",
+     "A1 NONE = A2 ATMOSPHERE"
+    ]
+   },
+   "least_separated": [
+    {
+     "pair": [
+      "B1 UP-2",
+      "B1 UP-3"
+     ],
+     "separating_items": 1
+    },
+    {
+     "pair": [
+      "D case-split (b = 4)",
+      "exact"
+     ],
+     "separating_items": 1
+    },
+    {
+     "pair": [
+      "A1 NONE = A2 ATMOSPHERE",
+      "B4 FIRST"
+     ],
+     "separating_items": 2
+    },
+    {
+     "pair": [
+      "B1 UP-1",
+      "B1 UP-2"
+     ],
+     "separating_items": 3
+    },
+    {
+     "pair": [
+      "A1 NONE = A2 ATMOSPHERE",
+      "A2 DENSITY"
+     ],
+     "separating_items": 4
+    },
+    {
+     "pair": [
+      "B1 UP-1",
+      "B1 UP-3"
+     ],
+     "separating_items": 4
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "A1 ALWAYS-YES",
+      "A1 NONE = A2 ATMOSPHERE",
+      "A2 DENSITY",
+      "A2 FREQ",
+      "A2 PRIMACY",
+      "A2 RECENCY",
+      "B1 UP-1",
+      "B1 UP-2",
+      "B1 UP-3",
+      "B4 ETR",
+      "B4 FIRST",
+      "B4 MATCH",
+      "D case-split (b = 4)",
+      "H SAMPLE-8",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE",
+      "exact",
+      "q"
+     ],
+     "rank": 17,
+     "deficiency": 1,
+     "sigma_ratio": 5.652190176863395e-17,
+     "null_directions": [
+      "q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 ATMOSPHERE"
+     ],
+     "dependencies": [
+      {
+       "members": [
+        "A1 ALWAYS-YES",
+        "A1 NONE = A2 ATMOSPHERE",
+        "q"
+       ],
+       "substantive": false,
+       "relation": "q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 ATMOSPHERE",
+       "statement": "q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 ATMOSPHERE"
+      }
+     ],
+     "not_identified": [
+      "q"
+     ],
+     "involved": [
+      "A1 ALWAYS-YES",
+      "A1 NONE = A2 ATMOSPHERE",
+      "q"
+     ],
+     "identified": [
+      "A1 ALWAYS-YES + 0.5 × q",
+      "A1 NONE = A2 ATMOSPHERE + 0.5 × q",
+      "A2 DENSITY",
+      "A2 FREQ",
+      "A2 PRIMACY",
+      "A2 RECENCY",
+      "B1 UP-1",
+      "B1 UP-2",
+      "B1 UP-3",
+      "B4 ETR",
+      "B4 FIRST",
+      "B4 MATCH",
+      "D case-split (b = 4)",
+      "H SAMPLE-8",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE",
+      "exact"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "A1 ALWAYS-YES",
+      "A1 NONE = A2 ATMOSPHERE",
+      "A2 DENSITY",
+      "A2 FREQ",
+      "A2 PRIMACY",
+      "A2 RECENCY",
+      "B1 UP-1",
+      "B1 UP-2",
+      "B1 UP-3",
+      "B4 ETR",
+      "B4 FIRST",
+      "B4 MATCH",
+      "D case-split (b = 4)",
+      "H SAMPLE-8",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE",
+      "exact",
+      "q"
+     ],
+     "rank": 17,
+     "deficiency": 1,
+     "sigma_ratio": 5.652190176863395e-17,
+     "null_directions": [
+      "q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 ATMOSPHERE"
+     ],
+     "dependencies": [
+      {
+       "members": [
+        "A1 ALWAYS-YES",
+        "A1 NONE = A2 ATMOSPHERE",
+        "q"
+       ],
+       "substantive": false,
+       "relation": "q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 ATMOSPHERE",
+       "statement": "q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 ATMOSPHERE"
+      }
+     ],
+     "not_identified": [
+      "q"
+     ],
+     "involved": [
+      "A1 ALWAYS-YES",
+      "A1 NONE = A2 ATMOSPHERE",
+      "q"
+     ],
+     "identified": [
+      "A1 ALWAYS-YES + 0.5 × q",
+      "A1 NONE = A2 ATMOSPHERE + 0.5 × q",
+      "A2 DENSITY",
+      "A2 FREQ",
+      "A2 PRIMACY",
+      "A2 RECENCY",
+      "B1 UP-1",
+      "B1 UP-2",
+      "B1 UP-3",
+      "B4 ETR",
+      "B4 FIRST",
+      "B4 MATCH",
+      "D case-split (b = 4)",
+      "H SAMPLE-8",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE",
+      "exact"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [
+    "null_q",
+    "null_always"
+   ],
+   "seconds": 279.4
+  },
+  {
+   "unit": "AH_E1/SAT",
+   "n_items": 60,
+   "n_clusters": 30,
+   "n_cells": 6,
+   "items_per_cell": 10.0,
+   "finite_channel": true,
+   "groups": [
+    [
+     "A1 ALWAYS-SAT",
+     "C0 POLARITY"
+    ],
+    [
+     "A1 ALWAYS-UNSAT"
+    ],
+    [
+     "A2 DENSITY-D",
+     "A2 DENSITY-U"
+    ],
+    [
+     "A2 LENGTH-M"
+    ],
+    [
+     "B1 UP-3"
+    ],
+    [
+     "C1 GREEDY"
+    ],
+    [
+     "C2 UC"
+    ],
+    [
+     "D DPLL-b"
+    ],
+    [
+     "D∘DENSITY"
+    ],
+    [
+     "F WALK-200"
+    ],
+    [
+     "H SAMPLE-8"
+    ],
+    [
+     "NOISY-EXACT-READ"
+    ],
+    [
+     "NOISY-EXACT-STEP"
+    ],
+    [
+     "PERCEPTION-NOISE"
+    ],
+    [
+     "exact"
+    ]
+   ],
+   "folded_into_q": [
+    "H RANDOM-U"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.091,
+     "worst_bias_quantity": "F WALK-200",
+     "min_coverage": 0.18,
+     "worst_coverage_quantity": "F WALK-200",
+     "median_width": 0.487,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "A1 ALWAYS-SAT = C0 POLARITY + 0.5 × q": {
+       "truth": 0.0,
+       "mean": 0.006,
+       "bias": 0.006,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.076
+      },
+      "A2 DENSITY-D = A2 DENSITY-U": {
+       "truth": 0.6,
+       "mean": 0.572,
+       "bias": -0.028,
+       "coverage": 0.9,
+       "median_width": 0.562,
+       "mean_upper": 0.814
+      },
+      "A2 LENGTH-M": {
+       "truth": 0.0,
+       "mean": 0.026,
+       "bias": 0.026,
+       "coverage": 0.99,
+       "median_width": 0.136,
+       "mean_upper": 0.126
+      },
+      "B1 UP-3": {
+       "truth": 0.0,
+       "mean": 0.008,
+       "bias": 0.008,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.06
+      },
+      "D DPLL-b": {
+       "truth": 0.0,
+       "mean": 0.019,
+       "bias": 0.019,
+       "coverage": 1.0,
+       "median_width": 0.05,
+       "mean_upper": 0.09
+      },
+      "D∘DENSITY": {
+       "truth": 0.3,
+       "mean": 0.308,
+       "bias": 0.008,
+       "coverage": 0.92,
+       "median_width": 0.537,
+       "mean_upper": 0.601
+      },
+      "F WALK-200": {
+       "truth": 0.1,
+       "mean": 0.009,
+       "bias": -0.091,
+       "coverage": 0.18,
+       "median_width": 0.0,
+       "mean_upper": 0.037
+      },
+      "exact": {
+       "truth": 0.0,
+       "mean": 0.05,
+       "bias": 0.05,
+       "coverage": 0.99,
+       "median_width": 0.174,
+       "mean_upper": 0.158
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.28,
+      "worst_coverage_quantity": "F WALK-200",
+      "median_width": 0.475,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "A1 ALWAYS-SAT = C0 POLARITY + 0.5 × q": 0.87,
+       "A2 DENSITY-D = A2 DENSITY-U": 0.91,
+       "A2 LENGTH-M": 0.98,
+       "B1 UP-3": 0.92,
+       "D DPLL-b": 0.89,
+       "D∘DENSITY": 0.91,
+       "F WALK-200": 0.28,
+       "exact": 0.9
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-SAT = C0 POLARITY + 0.5 × q": 0.087,
+       "A2 DENSITY-D = A2 DENSITY-U": 0.547,
+       "A2 LENGTH-M": 0.148,
+       "B1 UP-3": 0.0,
+       "D DPLL-b": 0.156,
+       "D∘DENSITY": 0.546,
+       "F WALK-200": 0.0,
+       "exact": 0.214
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.303,
+     "worst_bias_quantity": "A1 ALWAYS-UNSAT + 0.5 × q",
+     "min_coverage": 0.15,
+     "worst_coverage_quantity": "A1 ALWAYS-UNSAT + 0.5 × q",
+     "median_width": 0.408,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": null,
+     "quantities": {
+      "A1 ALWAYS-SAT = C0 POLARITY + 0.5 × q": {
+       "truth": 0.5,
+       "mean": 0.336,
+       "bias": -0.164,
+       "coverage": 0.49,
+       "median_width": 0.449,
+       "mean_upper": 0.502
+      },
+      "A1 ALWAYS-UNSAT + 0.5 × q": {
+       "truth": 0.5,
+       "mean": 0.197,
+       "bias": -0.303,
+       "coverage": 0.15,
+       "median_width": 0.341,
+       "mean_upper": 0.33
+      },
+      "A2 DENSITY-D = A2 DENSITY-U": {
+       "truth": 0.0,
+       "mean": 0.054,
+       "bias": 0.054,
+       "coverage": 0.98,
+       "median_width": 0.277,
+       "mean_upper": 0.271
+      },
+      "A2 LENGTH-M": {
+       "truth": 0.0,
+       "mean": 0.04,
+       "bias": 0.04,
+       "coverage": 0.97,
+       "median_width": 0.233,
+       "mean_upper": 0.228
+      },
+      "B1 UP-3": {
+       "truth": 0.0,
+       "mean": 0.043,
+       "bias": 0.043,
+       "coverage": 0.98,
+       "median_width": 0.257,
+       "mean_upper": 0.252
+      },
+      "C1 GREEDY": {
+       "truth": 0.0,
+       "mean": 0.091,
+       "bias": 0.091,
+       "coverage": 0.97,
+       "median_width": 0.429,
+       "mean_upper": 0.36
+      },
+      "C2 UC": {
+       "truth": 0.0,
+       "mean": 0.051,
+       "bias": 0.051,
+       "coverage": 0.98,
+       "median_width": 0.331,
+       "mean_upper": 0.325
+      },
+      "D DPLL-b": {
+       "truth": 0.0,
+       "mean": 0.016,
+       "bias": 0.016,
+       "coverage": 1.0,
+       "median_width": 0.112,
+       "mean_upper": 0.142
+      },
+      "D∘DENSITY": {
+       "truth": 0.0,
+       "mean": 0.015,
+       "bias": 0.015,
+       "coverage": 1.0,
+       "median_width": 0.066,
+       "mean_upper": 0.112
+      },
+      "F WALK-200": {
+       "truth": 0.0,
+       "mean": 0.017,
+       "bias": 0.017,
+       "coverage": 1.0,
+       "median_width": 0.043,
+       "mean_upper": 0.108
+      },
+      "H SAMPLE-8": {
+       "truth": 0.0,
+       "mean": 0.097,
+       "bias": 0.097,
+       "coverage": 0.9,
+       "median_width": 0.169,
+       "mean_upper": 0.173
+      },
+      "NOISY-EXACT-READ": {
+       "truth": 0.0,
+       "mean": 0.008,
+       "bias": 0.008,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.066
+      },
+      "PERCEPTION-NOISE": {
+       "truth": 0.0,
+       "mean": 0.018,
+       "bias": 0.018,
+       "coverage": 1.0,
+       "median_width": 0.125,
+       "mean_upper": 0.16
+      },
+      "exact": {
+       "truth": 0.0,
+       "mean": 0.014,
+       "bias": 0.014,
+       "coverage": 1.0,
+       "median_width": 0.121,
+       "mean_upper": 0.128
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.24,
+      "worst_coverage_quantity": "A1 ALWAYS-UNSAT + 0.5 × q",
+      "median_width": 0.351,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": null,
+      "coverage": {
+       "A1 ALWAYS-SAT = C0 POLARITY + 0.5 × q": 0.64,
+       "A1 ALWAYS-UNSAT + 0.5 × q": 0.24,
+       "A2 DENSITY-D = A2 DENSITY-U": 0.94,
+       "A2 LENGTH-M": 0.96,
+       "B1 UP-3": 0.95,
+       "C1 GREEDY": 0.89,
+       "C2 UC": 0.95,
+       "D DPLL-b": 0.93,
+       "D∘DENSITY": 0.97,
+       "F WALK-200": 0.87,
+       "H SAMPLE-8": 0.46,
+       "NOISY-EXACT-READ": 0.78,
+       "NOISY-EXACT-STEP": 0.84,
+       "PERCEPTION-NOISE": 0.94,
+       "exact": 0.97
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-SAT = C0 POLARITY + 0.5 × q": 0.388,
+       "A1 ALWAYS-UNSAT + 0.5 × q": 0.334,
+       "A2 DENSITY-D = A2 DENSITY-U": 0.288,
+       "A2 LENGTH-M": 0.254,
+       "B1 UP-3": 0.286,
+       "C1 GREEDY": 0.275,
+       "C2 UC": 0.365,
+       "D DPLL-b": 0.139,
+       "D∘DENSITY": 0.118,
+       "F WALK-200": 0.154,
+       "H SAMPLE-8": 0.173,
+       "NOISY-EXACT-READ": 0.0,
+       "NOISY-EXACT-STEP": 0.0,
+       "PERCEPTION-NOISE": 0.223,
+       "exact": 0.148
+      }
+     },
+     "testable": false,
+     "not_testable": "planted weight on q, identified only in combination: q = 0.5 × A1 ALWAYS-SAT = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT"
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "A1 ALWAYS-SAT = C0 POLARITY + 0.5 × q",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "A1 ALWAYS-SAT = C0 POLARITY + 0.5 × q",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": null,
+     "quantities": {
+      "A1 ALWAYS-SAT = C0 POLARITY + 0.5 × q": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "A1 ALWAYS-SAT = C0 POLARITY + 0.5 × q",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": null,
+      "coverage": {
+       "A1 ALWAYS-SAT = C0 POLARITY + 0.5 × q": 1.0
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-SAT = C0 POLARITY + 0.5 × q": 0.0
+      }
+     },
+     "testable": false,
+     "not_testable": "planted weight on A1 ALWAYS-SAT = C0 POLARITY, identified only in combination: q = 0.5 × A1 ALWAYS-SAT = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT",
+     "truth_group": "A1 ALWAYS-SAT"
+    }
+   },
+   "triple": [
+    "A2 DENSITY-D",
+    "D∘DENSITY",
+    "F WALK-200"
+   ],
+   "design": {
+    "columns": 16,
+    "rank": 15,
+    "sigma_ratio": 0.0,
+    "weakest_direction": [
+     "q",
+     "A1 ALWAYS-SAT = C0 POLARITY",
+     "A1 ALWAYS-UNSAT"
+    ]
+   },
+   "least_separated": [
+    {
+     "pair": [
+      "A1 ALWAYS-UNSAT",
+      "C1 GREEDY"
+     ],
+     "separating_items": 2
+    },
+    {
+     "pair": [
+      "C1 GREEDY",
+      "C2 UC"
+     ],
+     "separating_items": 3
+    },
+    {
+     "pair": [
+      "A1 ALWAYS-UNSAT",
+      "C2 UC"
+     ],
+     "separating_items": 5
+    },
+    {
+     "pair": [
+      "C2 UC",
+      "D DPLL-b"
+     ],
+     "separating_items": 9
+    },
+    {
+     "pair": [
+      "A1 ALWAYS-SAT = C0 POLARITY",
+      "B1 UP-3"
+     ],
+     "separating_items": 10
+    },
+    {
+     "pair": [
+      "A2 DENSITY-D = A2 DENSITY-U",
+      "D∘DENSITY"
+     ],
+     "separating_items": 11
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "A1 ALWAYS-SAT = C0 POLARITY",
+      "A1 ALWAYS-UNSAT",
+      "A2 DENSITY-D = A2 DENSITY-U",
+      "A2 LENGTH-M",
+      "B1 UP-3",
+      "C1 GREEDY",
+      "C2 UC",
+      "D DPLL-b",
+      "D∘DENSITY",
+      "F WALK-200",
+      "H SAMPLE-8",
+      "NOISY-EXACT-READ",
+      "NOISY-EXACT-STEP",
+      "PERCEPTION-NOISE",
+      "exact",
+      "q"
+     ],
+     "rank": 15,
+     "deficiency": 1,
+     "sigma_ratio": 1.1586980161563496e-17,
+     "null_directions": [
+      "q = 0.5 × A1 ALWAYS-SAT = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT"
+     ],
+     "dependencies": [
+      {
+       "members": [
+        "A1 ALWAYS-SAT = C0 POLARITY",
+        "A1 ALWAYS-UNSAT",
+        "q"
+       ],
+       "substantive": false,
+       "relation": "q = 0.5 × A1 ALWAYS-SAT = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT",
+       "statement": "q = 0.5 × A1 ALWAYS-SAT = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT"
+      }
+     ],
+     "not_identified": [
+      "q"
+     ],
+     "involved": [
+      "A1 ALWAYS-SAT = C0 POLARITY",
+      "A1 ALWAYS-UNSAT",
+      "q"
+     ],
+     "identified": [
+      "A1 ALWAYS-SAT = C0 POLARITY + 0.5 × q",
+      "A1 ALWAYS-UNSAT + 0.5 × q",
+      "A2 DENSITY-D = A2 DENSITY-U",
+      "A2 LENGTH-M",
+      "B1 UP-3",
+      "C1 GREEDY",
+      "C2 UC",
+      "D DPLL-b",
+      "D∘DENSITY",
+      "F WALK-200",
+      "H SAMPLE-8",
+      "NOISY-EXACT-READ",
+      "NOISY-EXACT-STEP",
+      "PERCEPTION-NOISE",
+      "exact"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "A1 ALWAYS-SAT = C0 POLARITY",
+      "A1 ALWAYS-UNSAT",
+      "A2 DENSITY-D = A2 DENSITY-U",
+      "A2 LENGTH-M",
+      "B1 UP-3",
+      "C1 GREEDY",
+      "C2 UC",
+      "D DPLL-b",
+      "D∘DENSITY",
+      "F WALK-200",
+      "H SAMPLE-8",
+      "NOISY-EXACT-READ",
+      "NOISY-EXACT-STEP",
+      "PERCEPTION-NOISE",
+      "exact",
+      "q"
+     ],
+     "rank": 15,
+     "deficiency": 1,
+     "sigma_ratio": 1.1586980161563496e-17,
+     "null_directions": [
+      "q = 0.5 × A1 ALWAYS-SAT = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT"
+     ],
+     "dependencies": [
+      {
+       "members": [
+        "A1 ALWAYS-SAT = C0 POLARITY",
+        "A1 ALWAYS-UNSAT",
+        "q"
+       ],
+       "substantive": false,
+       "relation": "q = 0.5 × A1 ALWAYS-SAT = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT",
+       "statement": "q = 0.5 × A1 ALWAYS-SAT = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT"
+      }
+     ],
+     "not_identified": [
+      "q"
+     ],
+     "involved": [
+      "A1 ALWAYS-SAT = C0 POLARITY",
+      "A1 ALWAYS-UNSAT",
+      "q"
+     ],
+     "identified": [
+      "A1 ALWAYS-SAT = C0 POLARITY + 0.5 × q",
+      "A1 ALWAYS-UNSAT + 0.5 × q",
+      "A2 DENSITY-D = A2 DENSITY-U",
+      "A2 LENGTH-M",
+      "B1 UP-3",
+      "C1 GREEDY",
+      "C2 UC",
+      "D DPLL-b",
+      "D∘DENSITY",
+      "F WALK-200",
+      "H SAMPLE-8",
+      "NOISY-EXACT-READ",
+      "NOISY-EXACT-STEP",
+      "PERCEPTION-NOISE",
+      "exact"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [
+    "null_q",
+    "null_always"
+   ],
+   "seconds": 607.1
+  },
+  {
+   "unit": "AH_E2/COL",
+   "n_items": 80,
+   "n_clusters": 20,
+   "n_cells": 8,
+   "items_per_cell": 10.0,
+   "finite_channel": true,
+   "groups": [
+    [
+     "A1 ALWAYS-IMPOSSIBLE"
+    ],
+    [
+     "A1 ALWAYS-POSSIBLE"
+    ],
+    [
+     "A2 DENSITY-D",
+     "A2 DENSITY-U"
+    ],
+    [
+     "A2 LENGTH-M"
+    ],
+    [
+     "B1 DROP-CONSTRAINT(last 3)"
+    ],
+    [
+     "B4 ADD-CONSTRAINT(adjacent)"
+    ],
+    [
+     "C1 FIRST-FIT"
+    ],
+    [
+     "C2 DSATUR"
+    ],
+    [
+     "D DPLL-b"
+    ],
+    [
+     "H SAMPLE-8"
+    ],
+    [
+     "NOISY-EXACT"
+    ],
+    [
+     "PERCEPTION-NOISE"
+    ],
+    [
+     "exact"
+    ]
+   ],
+   "folded_into_q": [
+    "H RANDOM-U"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.1,
+     "worst_bias_quantity": "NOISY-EXACT",
+     "min_coverage": 0.01,
+     "worst_coverage_quantity": "NOISY-EXACT",
+     "median_width": 0.389,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "A1 ALWAYS-POSSIBLE + 0.5 × q": {
+       "truth": 0.0,
+       "mean": 0.014,
+       "bias": 0.014,
+       "coverage": 1.0,
+       "median_width": 0.069,
+       "mean_upper": 0.084
+      },
+      "A2 DENSITY-D = A2 DENSITY-U": {
+       "truth": 0.6,
+       "mean": 0.611,
+       "bias": 0.011,
+       "coverage": 0.95,
+       "median_width": 0.424,
+       "mean_upper": 0.811
+      },
+      "A2 LENGTH-M": {
+       "truth": 0.3,
+       "mean": 0.286,
+       "bias": -0.014,
+       "coverage": 0.96,
+       "median_width": 0.423,
+       "mean_upper": 0.503
+      },
+      "B1 DROP-CONSTRAINT(last 3)": {
+       "truth": 0.0,
+       "mean": 0.023,
+       "bias": 0.023,
+       "coverage": 0.99,
+       "median_width": 0.065,
+       "mean_upper": 0.088
+      },
+      "C2 DSATUR": {
+       "truth": 0.0,
+       "mean": 0.011,
+       "bias": 0.011,
+       "coverage": 1.0,
+       "median_width": 0.017,
+       "mean_upper": 0.054
+      },
+      "D DPLL-b": {
+       "truth": 0.0,
+       "mean": 0.019,
+       "bias": 0.019,
+       "coverage": 1.0,
+       "median_width": 0.091,
+       "mean_upper": 0.094
+      },
+      "NOISY-EXACT": {
+       "truth": 0.1,
+       "mean": 0.0,
+       "bias": -0.1,
+       "coverage": 0.01,
+       "median_width": 0.0,
+       "mean_upper": 0.001
+      },
+      "PERCEPTION-NOISE": {
+       "truth": 0.0,
+       "mean": 0.011,
+       "bias": 0.011,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.057
+      },
+      "exact": {
+       "truth": 0.0,
+       "mean": 0.016,
+       "bias": 0.016,
+       "coverage": 1.0,
+       "median_width": 0.061,
+       "mean_upper": 0.089
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.02,
+      "worst_coverage_quantity": "NOISY-EXACT",
+      "median_width": 0.391,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "A1 ALWAYS-POSSIBLE + 0.5 × q": 0.91,
+       "A2 DENSITY-D = A2 DENSITY-U": 0.96,
+       "A2 LENGTH-M": 0.97,
+       "B1 DROP-CONSTRAINT(last 3)": 0.94,
+       "C2 DSATUR": 0.97,
+       "D DPLL-b": 0.93,
+       "NOISY-EXACT": 0.02,
+       "PERCEPTION-NOISE": 0.94,
+       "exact": 0.98
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-POSSIBLE + 0.5 × q": 0.101,
+       "A2 DENSITY-D = A2 DENSITY-U": 0.42,
+       "A2 LENGTH-M": 0.416,
+       "B1 DROP-CONSTRAINT(last 3)": 0.119,
+       "C2 DSATUR": 0.075,
+       "D DPLL-b": 0.126,
+       "NOISY-EXACT": 0.0,
+       "PERCEPTION-NOISE": 0.074,
+       "exact": 0.112
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.335,
+     "worst_bias_quantity": "A1 ALWAYS-IMPOSSIBLE + 0.5 × q + 1 × H SAMPLE-8",
+     "min_coverage": 0.14,
+     "worst_coverage_quantity": "A1 ALWAYS-IMPOSSIBLE + 0.5 × q + 1 × H SAMPLE-8",
+     "median_width": 0.287,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": null,
+     "quantities": {
+      "A1 ALWAYS-IMPOSSIBLE + 0.5 × q + 1 × H SAMPLE-8": {
+       "truth": 0.5,
+       "mean": 0.165,
+       "bias": -0.335,
+       "coverage": 0.14,
+       "median_width": 0.181,
+       "mean_upper": 0.287
+      },
+      "A1 ALWAYS-POSSIBLE + 0.5 × q": {
+       "truth": 0.5,
+       "mean": 0.389,
+       "bias": -0.111,
+       "coverage": 0.64,
+       "median_width": 0.366,
+       "mean_upper": 0.509
+      },
+      "A2 DENSITY-D = A2 DENSITY-U": {
+       "truth": 0.0,
+       "mean": 0.039,
+       "bias": 0.039,
+       "coverage": 0.96,
+       "median_width": 0.214,
+       "mean_upper": 0.213
+      },
+      "A2 LENGTH-M": {
+       "truth": 0.0,
+       "mean": 0.037,
+       "bias": 0.037,
+       "coverage": 1.0,
+       "median_width": 0.185,
+       "mean_upper": 0.185
+      },
+      "B1 DROP-CONSTRAINT(last 3)": {
+       "truth": 0.0,
+       "mean": 0.037,
+       "bias": 0.037,
+       "coverage": 0.98,
+       "median_width": 0.197,
+       "mean_upper": 0.191
+      },
+      "B4 ADD-CONSTRAINT(adjacent)": {
+       "truth": 0.0,
+       "mean": 0.174,
+       "bias": 0.174,
+       "coverage": 0.61,
+       "median_width": 0.196,
+       "mean_upper": 0.289
+      },
+      "C1 FIRST-FIT": {
+       "truth": 0.0,
+       "mean": 0.085,
+       "bias": 0.085,
+       "coverage": 0.84,
+       "median_width": 0.099,
+       "mean_upper": 0.174
+      },
+      "C2 DSATUR": {
+       "truth": 0.0,
+       "mean": 0.032,
+       "bias": 0.032,
+       "coverage": 1.0,
+       "median_width": 0.115,
+       "mean_upper": 0.138
+      },
+      "D DPLL-b": {
+       "truth": 0.0,
+       "mean": 0.019,
+       "bias": 0.019,
+       "coverage": 0.98,
+       "median_width": 0.156,
+       "mean_upper": 0.156
+      },
+      "NOISY-EXACT": {
+       "truth": 0.0,
+       "mean": 0.009,
+       "bias": 0.009,
+       "coverage": 1.0,
+       "median_width": 0.023,
+       "mean_upper": 0.112
+      },
+      "PERCEPTION-NOISE": {
+       "truth": 0.0,
+       "mean": 0.009,
+       "bias": 0.009,
+       "coverage": 1.0,
+       "median_width": 0.04,
+       "mean_upper": 0.095
+      },
+      "exact": {
+       "truth": 0.0,
+       "mean": 0.004,
+       "bias": 0.004,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.055
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.19,
+      "worst_coverage_quantity": "A1 ALWAYS-IMPOSSIBLE + 0.5 × q + 1 × H SAMPLE-8",
+      "median_width": 0.219,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": null,
+      "coverage": {
+       "A1 ALWAYS-IMPOSSIBLE + 0.5 × q + 1 × H SAMPLE-8": 0.19,
+       "A1 ALWAYS-POSSIBLE + 0.5 × q": 0.72,
+       "A2 DENSITY-D = A2 DENSITY-U": 0.93,
+       "A2 LENGTH-M": 0.97,
+       "B1 DROP-CONSTRAINT(last 3)": 0.92,
+       "B4 ADD-CONSTRAINT(adjacent)": 0.61,
+       "C1 FIRST-FIT": 0.75,
+       "C2 DSATUR": 0.93,
+       "D DPLL-b": 0.92,
+       "NOISY-EXACT": 0.9,
+       "PERCEPTION-NOISE": 0.89,
+       "exact": 0.85
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-IMPOSSIBLE + 0.5 × q + 1 × H SAMPLE-8": 0.171,
+       "A1 ALWAYS-POSSIBLE + 0.5 × q": 0.314,
+       "A2 DENSITY-D = A2 DENSITY-U": 0.226,
+       "A2 LENGTH-M": 0.214,
+       "B1 DROP-CONSTRAINT(last 3)": 0.248,
+       "B4 ADD-CONSTRAINT(adjacent)": 0.146,
+       "C1 FIRST-FIT": 0.1,
+       "C2 DSATUR": 0.157,
+       "D DPLL-b": 0.184,
+       "NOISY-EXACT": 0.195,
+       "PERCEPTION-NOISE": 0.135,
+       "exact": 0.041
+      }
+     },
+     "testable": false,
+     "not_testable": "planted weight on q, identified only in combination: q = 0.5 × A1 ALWAYS-IMPOSSIBLE + 0.5 × A1 ALWAYS-POSSIBLE"
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "A1 ALWAYS-POSSIBLE + 0.5 × q",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "A1 ALWAYS-POSSIBLE + 0.5 × q",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": null,
+     "quantities": {
+      "A1 ALWAYS-POSSIBLE + 0.5 × q": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "A1 ALWAYS-POSSIBLE + 0.5 × q",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": null,
+      "coverage": {
+       "A1 ALWAYS-POSSIBLE + 0.5 × q": 1.0
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-POSSIBLE + 0.5 × q": 0.0
+      }
+     },
+     "testable": false,
+     "not_testable": "planted weight on A1 ALWAYS-POSSIBLE, identified only in combination: q = 0.5 × A1 ALWAYS-IMPOSSIBLE + 0.5 × A1 ALWAYS-POSSIBLE",
+     "truth_group": "A1 ALWAYS-POSSIBLE"
+    }
+   },
+   "triple": [
+    "A2 DENSITY-D",
+    "A2 LENGTH-M",
+    "NOISY-EXACT"
+   ],
+   "design": {
+    "columns": 14,
+    "rank": 13,
+    "sigma_ratio": 0.0,
+    "weakest_direction": [
+     "q",
+     "A1 ALWAYS-IMPOSSIBLE",
+     "A1 ALWAYS-POSSIBLE"
+    ]
+   },
+   "least_separated": [
+    {
+     "pair": [
+      "A1 ALWAYS-IMPOSSIBLE",
+      "B4 ADD-CONSTRAINT(adjacent)"
+     ],
+     "separating_items": 1
+    },
+    {
+     "pair": [
+      "A1 ALWAYS-IMPOSSIBLE",
+      "C1 FIRST-FIT"
+     ],
+     "separating_items": 4
+    },
+    {
+     "pair": [
+      "B4 ADD-CONSTRAINT(adjacent)",
+      "C1 FIRST-FIT"
+     ],
+     "separating_items": 5
+    },
+    {
+     "pair": [
+      "C2 DSATUR",
+      "exact"
+     ],
+     "separating_items": 8
+    },
+    {
+     "pair": [
+      "D DPLL-b",
+      "exact"
+     ],
+     "separating_items": 15
+    },
+    {
+     "pair": [
+      "C2 DSATUR",
+      "D DPLL-b"
+     ],
+     "separating_items": 17
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "A1 ALWAYS-IMPOSSIBLE",
+      "A1 ALWAYS-POSSIBLE",
+      "A2 DENSITY-D = A2 DENSITY-U",
+      "A2 LENGTH-M",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "B4 ADD-CONSTRAINT(adjacent)",
+      "C1 FIRST-FIT",
+      "C2 DSATUR",
+      "D DPLL-b",
+      "H SAMPLE-8",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE",
+      "exact",
+      "q"
+     ],
+     "rank": 12,
+     "deficiency": 2,
+     "sigma_ratio": 6.953012034600536e-17,
+     "null_directions": [
+      "q = 0.5 × A1 ALWAYS-IMPOSSIBLE + 0.5 × A1 ALWAYS-POSSIBLE",
+      "H SAMPLE-8 = 1 × A1 ALWAYS-IMPOSSIBLE"
+     ],
+     "dependencies": [
+      {
+       "members": [
+        "A1 ALWAYS-IMPOSSIBLE",
+        "A1 ALWAYS-POSSIBLE",
+        "q"
+       ],
+       "substantive": false,
+       "relation": "q = 0.5 × A1 ALWAYS-IMPOSSIBLE + 0.5 × A1 ALWAYS-POSSIBLE",
+       "statement": "q = 0.5 × A1 ALWAYS-IMPOSSIBLE + 0.5 × A1 ALWAYS-POSSIBLE"
+      },
+      {
+       "members": [
+        "A1 ALWAYS-IMPOSSIBLE",
+        "H SAMPLE-8"
+       ],
+       "substantive": false,
+       "relation": "H SAMPLE-8 = 1 × A1 ALWAYS-IMPOSSIBLE",
+       "statement": "H SAMPLE-8 = 1 × A1 ALWAYS-IMPOSSIBLE"
+      }
+     ],
+     "not_identified": [
+      "q",
+      "H SAMPLE-8"
+     ],
+     "involved": [
+      "A1 ALWAYS-IMPOSSIBLE",
+      "A1 ALWAYS-POSSIBLE",
+      "H SAMPLE-8",
+      "q"
+     ],
+     "identified": [
+      "A1 ALWAYS-IMPOSSIBLE + 0.5 × q + 1 × H SAMPLE-8",
+      "A1 ALWAYS-POSSIBLE + 0.5 × q",
+      "A2 DENSITY-D = A2 DENSITY-U",
+      "A2 LENGTH-M",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "B4 ADD-CONSTRAINT(adjacent)",
+      "C1 FIRST-FIT",
+      "C2 DSATUR",
+      "D DPLL-b",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE",
+      "exact"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "A1 ALWAYS-IMPOSSIBLE",
+      "A1 ALWAYS-POSSIBLE",
+      "A2 DENSITY-D = A2 DENSITY-U",
+      "A2 LENGTH-M",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "B4 ADD-CONSTRAINT(adjacent)",
+      "C1 FIRST-FIT",
+      "C2 DSATUR",
+      "D DPLL-b",
+      "H SAMPLE-8",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE",
+      "exact",
+      "q"
+     ],
+     "rank": 12,
+     "deficiency": 2,
+     "sigma_ratio": 6.953012034600536e-17,
+     "null_directions": [
+      "q = 0.5 × A1 ALWAYS-IMPOSSIBLE + 0.5 × A1 ALWAYS-POSSIBLE",
+      "H SAMPLE-8 = 1 × A1 ALWAYS-IMPOSSIBLE"
+     ],
+     "dependencies": [
+      {
+       "members": [
+        "A1 ALWAYS-IMPOSSIBLE",
+        "A1 ALWAYS-POSSIBLE",
+        "q"
+       ],
+       "substantive": false,
+       "relation": "q = 0.5 × A1 ALWAYS-IMPOSSIBLE + 0.5 × A1 ALWAYS-POSSIBLE",
+       "statement": "q = 0.5 × A1 ALWAYS-IMPOSSIBLE + 0.5 × A1 ALWAYS-POSSIBLE"
+      },
+      {
+       "members": [
+        "A1 ALWAYS-IMPOSSIBLE",
+        "H SAMPLE-8"
+       ],
+       "substantive": false,
+       "relation": "H SAMPLE-8 = 1 × A1 ALWAYS-IMPOSSIBLE",
+       "statement": "H SAMPLE-8 = 1 × A1 ALWAYS-IMPOSSIBLE"
+      }
+     ],
+     "not_identified": [
+      "q",
+      "H SAMPLE-8"
+     ],
+     "involved": [
+      "A1 ALWAYS-IMPOSSIBLE",
+      "A1 ALWAYS-POSSIBLE",
+      "H SAMPLE-8",
+      "q"
+     ],
+     "identified": [
+      "A1 ALWAYS-IMPOSSIBLE + 0.5 × q + 1 × H SAMPLE-8",
+      "A1 ALWAYS-POSSIBLE + 0.5 × q",
+      "A2 DENSITY-D = A2 DENSITY-U",
+      "A2 LENGTH-M",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "B4 ADD-CONSTRAINT(adjacent)",
+      "C1 FIRST-FIT",
+      "C2 DSATUR",
+      "D DPLL-b",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE",
+      "exact"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [
+    "null_q",
+    "null_always"
+   ],
+   "seconds": 481.9
+  },
+  {
+   "unit": "AH_E2/ENT",
+   "n_items": 80,
+   "n_clusters": 10,
+   "n_cells": 8,
+   "items_per_cell": 10.0,
+   "finite_channel": true,
+   "groups": [
+    [
+     "A1 ALWAYS-YES"
+    ],
+    [
+     "A1 NONE",
+     "A2 DENSITY"
+    ],
+    [
+     "A2 ATMOSPHERE"
+    ],
+    [
+     "A2 FREQ"
+    ],
+    [
+     "A2 PRIMACY"
+    ],
+    [
+     "A2 RECENCY"
+    ],
+    [
+     "B1 UP-1"
+    ],
+    [
+     "B1 UP-2",
+     "B1 UP-3"
+    ],
+    [
+     "B4 ETR"
+    ],
+    [
+     "B4 FIRST"
+    ],
+    [
+     "B4 MATCH"
+    ],
+    [
+     "D case-split (b = 4)",
+     "exact"
+    ],
+    [
+     "H SAMPLE-8"
+    ],
+    [
+     "NOISY-EXACT"
+    ],
+    [
+     "PERCEPTION-NOISE"
+    ]
+   ],
+   "folded_into_q": [
+    "H RANDOM-U"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.084,
+     "worst_bias_quantity": "H SAMPLE-8",
+     "min_coverage": 0.23,
+     "worst_coverage_quantity": "H SAMPLE-8",
+     "median_width": 0.266,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "A1 NONE = A2 DENSITY + 0.5 × q": {
+       "truth": 0.0,
+       "mean": 0.008,
+       "bias": 0.008,
+       "coverage": 1.0,
+       "median_width": 0.055,
+       "mean_upper": 0.087
+      },
+      "A2 ATMOSPHERE": {
+       "truth": 0.6,
+       "mean": 0.597,
+       "bias": -0.003,
+       "coverage": 0.9,
+       "median_width": 0.295,
+       "mean_upper": 0.736
+      },
+      "A2 FREQ": {
+       "truth": 0.0,
+       "mean": 0.01,
+       "bias": 0.01,
+       "coverage": 1.0,
+       "median_width": 0.028,
+       "mean_upper": 0.068
+      },
+      "A2 PRIMACY": {
+       "truth": 0.0,
+       "mean": 0.013,
+       "bias": 0.013,
+       "coverage": 1.0,
+       "median_width": 0.14,
+       "mean_upper": 0.143
+      },
+      "A2 RECENCY": {
+       "truth": 0.3,
+       "mean": 0.219,
+       "bias": -0.081,
+       "coverage": 0.76,
+       "median_width": 0.346,
+       "mean_upper": 0.371
+      },
+      "B1 UP-1": {
+       "truth": 0.0,
+       "mean": 0.019,
+       "bias": 0.019,
+       "coverage": 1.0,
+       "median_width": 0.055,
+       "mean_upper": 0.086
+      },
+      "B1 UP-2 = B1 UP-3": {
+       "truth": 0.0,
+       "mean": 0.031,
+       "bias": 0.031,
+       "coverage": 0.96,
+       "median_width": 0.059,
+       "mean_upper": 0.096
+      },
+      "B4 ETR": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 1.0,
+       "median_width": 0.003,
+       "mean_upper": 0.057
+      },
+      "B4 FIRST": {
+       "truth": 0.0,
+       "mean": 0.026,
+       "bias": 0.026,
+       "coverage": 1.0,
+       "median_width": 0.093,
+       "mean_upper": 0.114
+      },
+      "B4 MATCH": {
+       "truth": 0.0,
+       "mean": 0.028,
+       "bias": 0.028,
+       "coverage": 0.99,
+       "median_width": 0.14,
+       "mean_upper": 0.149
+      },
+      "D case-split (b = 4) = exact": {
+       "truth": 0.0,
+       "mean": 0.018,
+       "bias": 0.018,
+       "coverage": 0.99,
+       "median_width": 0.068,
+       "mean_upper": 0.073
+      },
+      "H SAMPLE-8": {
+       "truth": 0.1,
+       "mean": 0.016,
+       "bias": -0.084,
+       "coverage": 0.23,
+       "median_width": 0.027,
+       "mean_upper": 0.053
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.4,
+      "worst_coverage_quantity": "H SAMPLE-8",
+      "median_width": 0.253,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "A1 NONE = A2 DENSITY + 0.5 × q": 0.96,
+       "A2 ATMOSPHERE": 0.9,
+       "A2 FREQ": 0.95,
+       "A2 PRIMACY": 0.98,
+       "A2 RECENCY": 0.8,
+       "B1 UP-1": 0.97,
+       "B1 UP-2 = B1 UP-3": 0.83,
+       "B4 ETR": 0.9,
+       "B4 FIRST": 0.93,
+       "B4 MATCH": 0.96,
+       "D case-split (b = 4) = exact": 0.88,
+       "H SAMPLE-8": 0.4
+      },
+      "median_width_by_quantity": {
+       "A1 NONE = A2 DENSITY + 0.5 × q": 0.073,
+       "A2 ATMOSPHERE": 0.291,
+       "A2 FREQ": 0.076,
+       "A2 PRIMACY": 0.163,
+       "A2 RECENCY": 0.333,
+       "B1 UP-1": 0.071,
+       "B1 UP-2 = B1 UP-3": 0.076,
+       "B4 ETR": 0.029,
+       "B4 FIRST": 0.111,
+       "B4 MATCH": 0.154,
+       "D case-split (b = 4) = exact": 0.105,
+       "H SAMPLE-8": 0.059
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.343,
+     "worst_bias_quantity": "A1 NONE = A2 DENSITY + 0.5 × q",
+     "min_coverage": 0.1,
+     "worst_coverage_quantity": "A1 NONE = A2 DENSITY + 0.5 × q",
+     "median_width": 0.276,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": null,
+     "quantities": {
+      "A1 ALWAYS-YES + 0.5 × q": {
+       "truth": 0.5,
+       "mean": 0.407,
+       "bias": -0.093,
+       "coverage": 0.54,
+       "median_width": 0.284,
+       "mean_upper": 0.512
+      },
+      "A1 NONE = A2 DENSITY + 0.5 × q": {
+       "truth": 0.5,
+       "mean": 0.157,
+       "bias": -0.343,
+       "coverage": 0.1,
+       "median_width": 0.253,
+       "mean_upper": 0.278
+      },
+      "A2 ATMOSPHERE": {
+       "truth": 0.0,
+       "mean": 0.042,
+       "bias": 0.042,
+       "coverage": 0.93,
+       "median_width": 0.175,
+       "mean_upper": 0.183
+      },
+      "A2 FREQ": {
+       "truth": 0.0,
+       "mean": 0.034,
+       "bias": 0.034,
+       "coverage": 0.97,
+       "median_width": 0.171,
+       "mean_upper": 0.187
+      },
+      "A2 PRIMACY": {
+       "truth": 0.0,
+       "mean": 0.058,
+       "bias": 0.058,
+       "coverage": 0.98,
+       "median_width": 0.271,
+       "mean_upper": 0.263
+      },
+      "A2 RECENCY": {
+       "truth": 0.0,
+       "mean": 0.072,
+       "bias": 0.072,
+       "coverage": 0.96,
+       "median_width": 0.15,
+       "mean_upper": 0.206
+      },
+      "B1 UP-1": {
+       "truth": 0.0,
+       "mean": 0.036,
+       "bias": 0.036,
+       "coverage": 0.99,
+       "median_width": 0.1,
+       "mean_upper": 0.142
+      },
+      "B1 UP-2 = B1 UP-3": {
+       "truth": 0.0,
+       "mean": 0.022,
+       "bias": 0.022,
+       "coverage": 0.99,
+       "median_width": 0.095,
+       "mean_upper": 0.115
+      },
+      "B4 ETR": {
+       "truth": 0.0,
+       "mean": 0.075,
+       "bias": 0.075,
+       "coverage": 0.97,
+       "median_width": 0.174,
+       "mean_upper": 0.229
+      },
+      "B4 FIRST": {
+       "truth": 0.0,
+       "mean": 0.049,
+       "bias": 0.049,
+       "coverage": 0.95,
+       "median_width": 0.097,
+       "mean_upper": 0.144
+      },
+      "B4 MATCH": {
+       "truth": 0.0,
+       "mean": 0.028,
+       "bias": 0.028,
+       "coverage": 0.97,
+       "median_width": 0.145,
+       "mean_upper": 0.157
+      },
+      "D case-split (b = 4) = exact": {
+       "truth": 0.0,
+       "mean": 0.007,
+       "bias": 0.007,
+       "coverage": 1.0,
+       "median_width": 0.011,
+       "mean_upper": 0.057
+      },
+      "NOISY-EXACT": {
+       "truth": 0.0,
+       "mean": 0.005,
+       "bias": 0.005,
+       "coverage": 1.0,
+       "median_width": 0.003,
+       "mean_upper": 0.075
+      },
+      "PERCEPTION-NOISE": {
+       "truth": 0.0,
+       "mean": 0.004,
+       "bias": 0.004,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.051
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.15,
+      "worst_coverage_quantity": "A1 NONE = A2 DENSITY + 0.5 × q",
+      "median_width": 0.23,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": null,
+      "coverage": {
+       "A1 ALWAYS-YES + 0.5 × q": 0.63,
+       "A1 NONE = A2 DENSITY + 0.5 × q": 0.15,
+       "A2 ATMOSPHERE": 0.93,
+       "A2 FREQ": 0.94,
+       "A2 PRIMACY": 0.91,
+       "A2 RECENCY": 0.85,
+       "B1 UP-1": 0.8,
+       "B1 UP-2 = B1 UP-3": 0.92,
+       "B4 ETR": 0.87,
+       "B4 FIRST": 0.84,
+       "B4 MATCH": 0.91,
+       "D case-split (b = 4) = exact": 0.83,
+       "H SAMPLE-8": 0.86,
+       "NOISY-EXACT": 0.84,
+       "PERCEPTION-NOISE": 0.87
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-YES + 0.5 × q": 0.247,
+       "A1 NONE = A2 DENSITY + 0.5 × q": 0.216,
+       "A2 ATMOSPHERE": 0.179,
+       "A2 FREQ": 0.166,
+       "A2 PRIMACY": 0.281,
+       "A2 RECENCY": 0.16,
+       "B1 UP-1": 0.143,
+       "B1 UP-2 = B1 UP-3": 0.115,
+       "B4 ETR": 0.141,
+       "B4 FIRST": 0.103,
+       "B4 MATCH": 0.164,
+       "D case-split (b = 4) = exact": 0.056,
+       "H SAMPLE-8": 0.077,
+       "NOISY-EXACT": 0.076,
+       "PERCEPTION-NOISE": 0.017
+      }
+     },
+     "testable": false,
+     "not_testable": "planted weight on q, identified only in combination: q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 DENSITY"
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "A1 ALWAYS-YES + 0.5 × q",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "A1 ALWAYS-YES + 0.5 × q",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": null,
+     "quantities": {
+      "A1 ALWAYS-YES + 0.5 × q": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "A1 ALWAYS-YES + 0.5 × q",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": null,
+      "coverage": {
+       "A1 ALWAYS-YES + 0.5 × q": 1.0
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-YES + 0.5 × q": 0.0
+      }
+     },
+     "testable": false,
+     "not_testable": "planted weight on A1 ALWAYS-YES, identified only in combination: q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 DENSITY",
+     "truth_group": "A1 ALWAYS-YES"
+    }
+   },
+   "triple": [
+    "A2 ATMOSPHERE",
+    "A2 RECENCY",
+    "H SAMPLE-8"
+   ],
+   "design": {
+    "columns": 16,
+    "rank": 15,
+    "sigma_ratio": 0.0,
+    "weakest_direction": [
+     "q",
+     "A1 ALWAYS-YES",
+     "A1 NONE = A2 DENSITY"
+    ]
+   },
+   "least_separated": [
+    {
+     "pair": [
+      "A1 NONE = A2 DENSITY",
+      "B4 FIRST"
+     ],
+     "separating_items": 4
+    },
+    {
+     "pair": [
+      "B1 UP-1",
+      "B1 UP-2 = B1 UP-3"
+     ],
+     "separating_items": 4
+    },
+    {
+     "pair": [
+      "A1 NONE = A2 DENSITY",
+      "A2 RECENCY"
+     ],
+     "separating_items": 5
+    },
+    {
+     "pair": [
+      "A1 NONE = A2 DENSITY",
+      "B4 ETR"
+     ],
+     "separating_items": 5
+    },
+    {
+     "pair": [
+      "B4 ETR",
+      "B4 FIRST"
+     ],
+     "separating_items": 5
+    },
+    {
+     "pair": [
+      "A1 NONE = A2 DENSITY",
+      "A2 PRIMACY"
+     ],
+     "separating_items": 8
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "A1 ALWAYS-YES",
+      "A1 NONE = A2 DENSITY",
+      "A2 ATMOSPHERE",
+      "A2 FREQ",
+      "A2 PRIMACY",
+      "A2 RECENCY",
+      "B1 UP-1",
+      "B1 UP-2 = B1 UP-3",
+      "B4 ETR",
+      "B4 FIRST",
+      "B4 MATCH",
+      "D case-split (b = 4) = exact",
+      "H SAMPLE-8",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE",
+      "q"
+     ],
+     "rank": 15,
+     "deficiency": 1,
+     "sigma_ratio": 6.847870228757603e-17,
+     "null_directions": [
+      "q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 DENSITY"
+     ],
+     "dependencies": [
+      {
+       "members": [
+        "A1 ALWAYS-YES",
+        "A1 NONE = A2 DENSITY",
+        "q"
+       ],
+       "substantive": false,
+       "relation": "q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 DENSITY",
+       "statement": "q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 DENSITY"
+      }
+     ],
+     "not_identified": [
+      "q"
+     ],
+     "involved": [
+      "A1 ALWAYS-YES",
+      "A1 NONE = A2 DENSITY",
+      "q"
+     ],
+     "identified": [
+      "A1 ALWAYS-YES + 0.5 × q",
+      "A1 NONE = A2 DENSITY + 0.5 × q",
+      "A2 ATMOSPHERE",
+      "A2 FREQ",
+      "A2 PRIMACY",
+      "A2 RECENCY",
+      "B1 UP-1",
+      "B1 UP-2 = B1 UP-3",
+      "B4 ETR",
+      "B4 FIRST",
+      "B4 MATCH",
+      "D case-split (b = 4) = exact",
+      "H SAMPLE-8",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "A1 ALWAYS-YES",
+      "A1 NONE = A2 DENSITY",
+      "A2 ATMOSPHERE",
+      "A2 FREQ",
+      "A2 PRIMACY",
+      "A2 RECENCY",
+      "B1 UP-1",
+      "B1 UP-2 = B1 UP-3",
+      "B4 ETR",
+      "B4 FIRST",
+      "B4 MATCH",
+      "D case-split (b = 4) = exact",
+      "H SAMPLE-8",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE",
+      "q"
+     ],
+     "rank": 15,
+     "deficiency": 1,
+     "sigma_ratio": 6.847870228757603e-17,
+     "null_directions": [
+      "q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 DENSITY"
+     ],
+     "dependencies": [
+      {
+       "members": [
+        "A1 ALWAYS-YES",
+        "A1 NONE = A2 DENSITY",
+        "q"
+       ],
+       "substantive": false,
+       "relation": "q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 DENSITY",
+       "statement": "q = 0.5 × A1 ALWAYS-YES + 0.5 × A1 NONE = A2 DENSITY"
+      }
+     ],
+     "not_identified": [
+      "q"
+     ],
+     "involved": [
+      "A1 ALWAYS-YES",
+      "A1 NONE = A2 DENSITY",
+      "q"
+     ],
+     "identified": [
+      "A1 ALWAYS-YES + 0.5 × q",
+      "A1 NONE = A2 DENSITY + 0.5 × q",
+      "A2 ATMOSPHERE",
+      "A2 FREQ",
+      "A2 PRIMACY",
+      "A2 RECENCY",
+      "B1 UP-1",
+      "B1 UP-2 = B1 UP-3",
+      "B4 ETR",
+      "B4 FIRST",
+      "B4 MATCH",
+      "D case-split (b = 4) = exact",
+      "H SAMPLE-8",
+      "NOISY-EXACT",
+      "PERCEPTION-NOISE"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [
+    "null_q",
+    "null_always"
+   ],
+   "seconds": 821.2
+  },
+  {
+   "unit": "AH_E2/SAT",
+   "n_items": 80,
+   "n_clusters": 20,
+   "n_cells": 8,
+   "items_per_cell": 10.0,
+   "finite_channel": true,
+   "groups": [
+    [
+     "A1 ALWAYS-SAT",
+     "B1 UP-3",
+     "C0 POLARITY"
+    ],
+    [
+     "A1 ALWAYS-UNSAT",
+     "C2 UC"
+    ],
+    [
+     "A2 DENSITY-D",
+     "A2 DENSITY-U",
+     "D∘DENSITY"
+    ],
+    [
+     "A2 LENGTH-M",
+     "A2 LENGTH-T"
+    ],
+    [
+     "C1 GREEDY"
+    ],
+    [
+     "D DPLL-b",
+     "D DPLL-b+PL"
+    ],
+    [
+     "F WALK-200"
+    ],
+    [
+     "H SAMPLE-8"
+    ],
+    [
+     "NOISY-EXACT-READ"
+    ],
+    [
+     "NOISY-EXACT-STEP"
+    ],
+    [
+     "PERCEPTION-NOISE"
+    ],
+    [
+     "exact"
+    ]
+   ],
+   "folded_into_q": [
+    "H RANDOM-U"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.063,
+     "worst_bias_quantity": "F WALK-200",
+     "min_coverage": 0.55,
+     "worst_coverage_quantity": "F WALK-200",
+     "median_width": 0.374,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × q": {
+       "truth": 0.0,
+       "mean": 0.003,
+       "bias": 0.003,
+       "coverage": 1.0,
+       "median_width": 0.025,
+       "mean_upper": 0.063
+      },
+      "A2 DENSITY-D = A2 DENSITY-U = D∘DENSITY": {
+       "truth": 0.6,
+       "mean": 0.597,
+       "bias": -0.003,
+       "coverage": 0.99,
+       "median_width": 0.404,
+       "mean_upper": 0.791
+      },
+      "A2 LENGTH-M = A2 LENGTH-T": {
+       "truth": 0.3,
+       "mean": 0.298,
+       "bias": -0.002,
+       "coverage": 0.94,
+       "median_width": 0.409,
+       "mean_upper": 0.509
+      },
+      "D DPLL-b = D DPLL-b+PL": {
+       "truth": 0.0,
+       "mean": 0.007,
+       "bias": 0.007,
+       "coverage": 1.0,
+       "median_width": 0.044,
+       "mean_upper": 0.054
+      },
+      "F WALK-200": {
+       "truth": 0.1,
+       "mean": 0.037,
+       "bias": -0.063,
+       "coverage": 0.55,
+       "median_width": 0.107,
+       "mean_upper": 0.113
+      },
+      "exact": {
+       "truth": 0.0,
+       "mean": 0.053,
+       "bias": 0.053,
+       "coverage": 0.96,
+       "median_width": 0.164,
+       "mean_upper": 0.159
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.64,
+      "worst_coverage_quantity": "F WALK-200",
+      "median_width": 0.377,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × q": 0.96,
+       "A2 DENSITY-D = A2 DENSITY-U = D∘DENSITY": 0.97,
+       "A2 LENGTH-M = A2 LENGTH-T": 0.96,
+       "D DPLL-b = D DPLL-b+PL": 0.93,
+       "F WALK-200": 0.64,
+       "exact": 0.89
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × q": 0.071,
+       "A2 DENSITY-D = A2 DENSITY-U = D∘DENSITY": 0.406,
+       "A2 LENGTH-M = A2 LENGTH-T": 0.414,
+       "D DPLL-b = D DPLL-b+PL": 0.08,
+       "F WALK-200": 0.142,
+       "exact": 0.193
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.396,
+     "worst_bias_quantity": "A1 ALWAYS-UNSAT = C2 UC + 0.5 × q",
+     "min_coverage": 0.0,
+     "worst_coverage_quantity": "A1 ALWAYS-UNSAT = C2 UC + 0.5 × q",
+     "median_width": 0.323,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": null,
+     "quantities": {
+      "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × q": {
+       "truth": 0.5,
+       "mean": 0.37,
+       "bias": -0.13,
+       "coverage": 0.62,
+       "median_width": 0.441,
+       "mean_upper": 0.531
+      },
+      "A1 ALWAYS-UNSAT = C2 UC + 0.5 × q": {
+       "truth": 0.5,
+       "mean": 0.104,
+       "bias": -0.396,
+       "coverage": 0.0,
+       "median_width": 0.142,
+       "mean_upper": 0.206
+      },
+      "A2 DENSITY-D = A2 DENSITY-U = D∘DENSITY": {
+       "truth": 0.0,
+       "mean": 0.051,
+       "bias": 0.051,
+       "coverage": 0.96,
+       "median_width": 0.244,
+       "mean_upper": 0.228
+      },
+      "A2 LENGTH-M = A2 LENGTH-T": {
+       "truth": 0.0,
+       "mean": 0.034,
+       "bias": 0.034,
+       "coverage": 0.97,
+       "median_width": 0.17,
+       "mean_upper": 0.178
+      },
+      "C1 GREEDY": {
+       "truth": 0.0,
+       "mean": 0.152,
+       "bias": 0.152,
+       "coverage": 0.68,
+       "median_width": 0.12,
+       "mean_upper": 0.27
+      },
+      "D DPLL-b = D DPLL-b+PL": {
+       "truth": 0.0,
+       "mean": 0.088,
+       "bias": 0.088,
+       "coverage": 0.9,
+       "median_width": 0.089,
+       "mean_upper": 0.18
+      },
+      "F WALK-200": {
+       "truth": 0.0,
+       "mean": 0.017,
+       "bias": 0.017,
+       "coverage": 1.0,
+       "median_width": 0.095,
+       "mean_upper": 0.127
+      },
+      "H SAMPLE-8": {
+       "truth": 0.0,
+       "mean": 0.064,
+       "bias": 0.064,
+       "coverage": 0.65,
+       "median_width": 0.112,
+       "mean_upper": 0.147
+      },
+      "NOISY-EXACT-READ": {
+       "truth": 0.0,
+       "mean": 0.013,
+       "bias": 0.013,
+       "coverage": 1.0,
+       "median_width": 0.001,
+       "mean_upper": 0.168
+      },
+      "NOISY-EXACT-STEP": {
+       "truth": 0.0,
+       "mean": 0.07,
+       "bias": 0.07,
+       "coverage": 1.0,
+       "median_width": 0.406,
+       "mean_upper": 0.397
+      },
+      "PERCEPTION-NOISE": {
+       "truth": 0.0,
+       "mean": 0.025,
+       "bias": 0.025,
+       "coverage": 1.0,
+       "median_width": 0.141,
+       "mean_upper": 0.178
+      },
+      "exact": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 1.0,
+       "median_width": 0.078,
+       "mean_upper": 0.1
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.0,
+      "worst_coverage_quantity": "A1 ALWAYS-UNSAT = C2 UC + 0.5 × q",
+      "median_width": 0.235,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": null,
+      "coverage": {
+       "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × q": 0.64,
+       "A1 ALWAYS-UNSAT = C2 UC + 0.5 × q": 0.0,
+       "A2 DENSITY-D = A2 DENSITY-U = D∘DENSITY": 0.92,
+       "A2 LENGTH-M = A2 LENGTH-T": 0.92,
+       "C1 GREEDY": 0.66,
+       "D DPLL-b = D DPLL-b+PL": 0.8,
+       "F WALK-200": 0.83,
+       "H SAMPLE-8": 0.62,
+       "NOISY-EXACT-READ": 0.9,
+       "NOISY-EXACT-STEP": 0.9,
+       "PERCEPTION-NOISE": 0.89,
+       "exact": 0.84
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × q": 0.373,
+       "A1 ALWAYS-UNSAT = C2 UC + 0.5 × q": 0.148,
+       "A2 DENSITY-D = A2 DENSITY-U = D∘DENSITY": 0.245,
+       "A2 LENGTH-M = A2 LENGTH-T": 0.175,
+       "C1 GREEDY": 0.111,
+       "D DPLL-b = D DPLL-b+PL": 0.083,
+       "F WALK-200": 0.147,
+       "H SAMPLE-8": 0.143,
+       "NOISY-EXACT-READ": 0.215,
+       "NOISY-EXACT-STEP": 0.631,
+       "PERCEPTION-NOISE": 0.256,
+       "exact": 0.126
+      }
+     },
+     "testable": false,
+     "not_testable": "planted weight on q, identified only in combination: q = 0.5 × A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT = C2 UC"
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × q",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × q",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": null,
+     "quantities": {
+      "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × q": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × q",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": null,
+      "coverage": {
+       "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × q": 1.0
+      },
+      "median_width_by_quantity": {
+       "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × q": 0.0
+      }
+     },
+     "testable": false,
+     "not_testable": "planted weight on A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY, identified only in combination: q = 0.5 × A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT = C2 UC",
+     "truth_group": "A1 ALWAYS-SAT"
+    }
+   },
+   "triple": [
+    "A2 DENSITY-D",
+    "A2 LENGTH-M",
+    "F WALK-200"
+   ],
+   "design": {
+    "columns": 13,
+    "rank": 12,
+    "sigma_ratio": 0.0,
+    "weakest_direction": [
+     "q",
+     "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY",
+     "A1 ALWAYS-UNSAT = C2 UC"
+    ]
+   },
+   "least_separated": [
+    {
+     "pair": [
+      "A1 ALWAYS-UNSAT = C2 UC",
+      "C1 GREEDY"
+     ],
+     "separating_items": 1
+    },
+    {
+     "pair": [
+      "A1 ALWAYS-UNSAT = C2 UC",
+      "D DPLL-b = D DPLL-b+PL"
+     ],
+     "separating_items": 2
+    },
+    {
+     "pair": [
+      "C1 GREEDY",
+      "D DPLL-b = D DPLL-b+PL"
+     ],
+     "separating_items": 3
+    },
+    {
+     "pair": [
+      "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY",
+      "A2 DENSITY-D = A2 DENSITY-U = D∘DENSITY"
+     ],
+     "separating_items": 20
+    },
+    {
+     "pair": [
+      "A2 DENSITY-D = A2 DENSITY-U = D∘DENSITY",
+      "A2 LENGTH-M = A2 LENGTH-T"
+     ],
+     "separating_items": 20
+    },
+    {
+     "pair": [
+      "A2 LENGTH-M = A2 LENGTH-T",
+      "D DPLL-b = D DPLL-b+PL"
+     ],
+     "separating_items": 38
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY",
+      "A1 ALWAYS-UNSAT = C2 UC",
+      "A2 DENSITY-D = A2 DENSITY-U = D∘DENSITY",
+      "A2 LENGTH-M = A2 LENGTH-T",
+      "C1 GREEDY",
+      "D DPLL-b = D DPLL-b+PL",
+      "F WALK-200",
+      "H SAMPLE-8",
+      "NOISY-EXACT-READ",
+      "NOISY-EXACT-STEP",
+      "PERCEPTION-NOISE",
+      "exact",
+      "q"
+     ],
+     "rank": 12,
+     "deficiency": 1,
+     "sigma_ratio": 7.503049946851301e-17,
+     "null_directions": [
+      "q = 0.5 × A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT = C2 UC"
+     ],
+     "dependencies": [
+      {
+       "members": [
+        "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY",
+        "A1 ALWAYS-UNSAT = C2 UC",
+        "q"
+       ],
+       "substantive": false,
+       "relation": "q = 0.5 × A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT = C2 UC",
+       "statement": "q = 0.5 × A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT = C2 UC"
+      }
+     ],
+     "not_identified": [
+      "q"
+     ],
+     "involved": [
+      "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY",
+      "A1 ALWAYS-UNSAT = C2 UC",
+      "q"
+     ],
+     "identified": [
+      "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × q",
+      "A1 ALWAYS-UNSAT = C2 UC + 0.5 × q",
+      "A2 DENSITY-D = A2 DENSITY-U = D∘DENSITY",
+      "A2 LENGTH-M = A2 LENGTH-T",
+      "C1 GREEDY",
+      "D DPLL-b = D DPLL-b+PL",
+      "F WALK-200",
+      "H SAMPLE-8",
+      "NOISY-EXACT-READ",
+      "NOISY-EXACT-STEP",
+      "PERCEPTION-NOISE",
+      "exact"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY",
+      "A1 ALWAYS-UNSAT = C2 UC",
+      "A2 DENSITY-D = A2 DENSITY-U = D∘DENSITY",
+      "A2 LENGTH-M = A2 LENGTH-T",
+      "C1 GREEDY",
+      "D DPLL-b = D DPLL-b+PL",
+      "F WALK-200",
+      "H SAMPLE-8",
+      "NOISY-EXACT-READ",
+      "NOISY-EXACT-STEP",
+      "PERCEPTION-NOISE",
+      "exact",
+      "q"
+     ],
+     "rank": 12,
+     "deficiency": 1,
+     "sigma_ratio": 7.503049946851301e-17,
+     "null_directions": [
+      "q = 0.5 × A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT = C2 UC"
+     ],
+     "dependencies": [
+      {
+       "members": [
+        "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY",
+        "A1 ALWAYS-UNSAT = C2 UC",
+        "q"
+       ],
+       "substantive": false,
+       "relation": "q = 0.5 × A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT = C2 UC",
+       "statement": "q = 0.5 × A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × A1 ALWAYS-UNSAT = C2 UC"
+      }
+     ],
+     "not_identified": [
+      "q"
+     ],
+     "involved": [
+      "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY",
+      "A1 ALWAYS-UNSAT = C2 UC",
+      "q"
+     ],
+     "identified": [
+      "A1 ALWAYS-SAT = B1 UP-3 = C0 POLARITY + 0.5 × q",
+      "A1 ALWAYS-UNSAT = C2 UC + 0.5 × q",
+      "A2 DENSITY-D = A2 DENSITY-U = D∘DENSITY",
+      "A2 LENGTH-M = A2 LENGTH-T",
+      "C1 GREEDY",
+      "D DPLL-b = D DPLL-b+PL",
+      "F WALK-200",
+      "H SAMPLE-8",
+      "NOISY-EXACT-READ",
+      "NOISY-EXACT-STEP",
+      "PERCEPTION-NOISE",
+      "exact"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [
+    "null_q",
+    "null_always"
+   ],
+   "seconds": 530.8
+  },
+  {
+   "unit": "AH_E5/COL",
+   "n_items": 40,
+   "n_clusters": 10,
+   "n_cells": 4,
+   "items_per_cell": 10.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "A3 TT[FIRST-FIT]"
+    ],
+    [
+     "A3 TT[exact]"
+    ],
+    [
+     "B1 DROP-CONSTRAINT(last 3)"
+    ],
+    [
+     "C1 FIRST-FIT (stated rule)"
+    ],
+    [
+     "C2 DSATUR (stated rule)"
+    ],
+    [
+     "D DPLL (first solution)"
+    ],
+    [
+     "exact"
+    ]
+   ],
+   "folded_into_q": [],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.051,
+     "worst_bias_quantity": "D DPLL (first solution)",
+     "min_coverage": 0.81,
+     "worst_coverage_quantity": "exact",
+     "median_width": 0.3,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "A3 TT[FIRST-FIT]": {
+       "truth": 0.6,
+       "mean": 0.603,
+       "bias": 0.003,
+       "coverage": 0.88,
+       "median_width": 0.35,
+       "mean_upper": 0.777
+      },
+      "C1 FIRST-FIT (stated rule)": {
+       "truth": 0.3,
+       "mean": 0.264,
+       "bias": -0.036,
+       "coverage": 0.85,
+       "median_width": 0.371,
+       "mean_upper": 0.448
+      },
+      "D DPLL (first solution)": {
+       "truth": 0.0,
+       "mean": 0.051,
+       "bias": 0.051,
+       "coverage": 0.96,
+       "median_width": 0.194,
+       "mean_upper": 0.185
+      },
+      "exact": {
+       "truth": 0.1,
+       "mean": 0.08,
+       "bias": -0.02,
+       "coverage": 0.81,
+       "median_width": 0.163,
+       "mean_upper": 0.162
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.84,
+      "worst_coverage_quantity": "exact",
+      "median_width": 0.3,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "A3 TT[FIRST-FIT]": 0.87,
+       "C1 FIRST-FIT (stated rule)": 0.87,
+       "D DPLL (first solution)": 0.94,
+       "exact": 0.84
+      },
+      "median_width_by_quantity": {
+       "A3 TT[FIRST-FIT]": 0.356,
+       "C1 FIRST-FIT (stated rule)": 0.375,
+       "D DPLL (first solution)": 0.188,
+       "exact": 0.184
+      }
+     }
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.051,
+     "worst_bias_quantity": "A3 TT[FIRST-FIT]",
+     "min_coverage": 0.8,
+     "worst_coverage_quantity": "exact",
+     "median_width": 0.313,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "A3 TT[FIRST-FIT]": {
+       "truth": 0.6,
+       "mean": 0.549,
+       "bias": -0.051,
+       "coverage": 0.91,
+       "median_width": 0.371,
+       "mean_upper": 0.724
+      },
+      "B1 DROP-CONSTRAINT(last 3)": {
+       "truth": 0.0,
+       "mean": 0.026,
+       "bias": 0.026,
+       "coverage": 0.96,
+       "median_width": 0.08,
+       "mean_upper": 0.073
+      },
+      "C1 FIRST-FIT (stated rule)": {
+       "truth": 0.3,
+       "mean": 0.277,
+       "bias": -0.023,
+       "coverage": 0.81,
+       "median_width": 0.349,
+       "mean_upper": 0.456
+      },
+      "C2 DSATUR (stated rule)": {
+       "truth": 0.0,
+       "mean": 0.02,
+       "bias": 0.02,
+       "coverage": 0.98,
+       "median_width": 0.047,
+       "mean_upper": 0.068
+      },
+      "D DPLL (first solution)": {
+       "truth": 0.0,
+       "mean": 0.02,
+       "bias": 0.02,
+       "coverage": 0.99,
+       "median_width": 0.142,
+       "mean_upper": 0.152
+      },
+      "exact": {
+       "truth": 0.1,
+       "mean": 0.076,
+       "bias": -0.024,
+       "coverage": 0.8,
+       "median_width": 0.154,
+       "mean_upper": 0.156
+      },
+      "q": {
+       "truth": 0.0,
+       "mean": 0.031,
+       "bias": 0.031,
+       "coverage": 0.96,
+       "median_width": 0.095,
+       "mean_upper": 0.091
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.82,
+      "worst_coverage_quantity": "C1 FIRST-FIT (stated rule)",
+      "median_width": 0.304,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "A3 TT[FIRST-FIT]": 0.86,
+       "B1 DROP-CONSTRAINT(last 3)": 0.91,
+       "C1 FIRST-FIT (stated rule)": 0.82,
+       "C2 DSATUR (stated rule)": 0.94,
+       "D DPLL (first solution)": 0.94,
+       "exact": 0.88,
+       "q": 0.93
+      },
+      "median_width_by_quantity": {
+       "A3 TT[FIRST-FIT]": 0.362,
+       "B1 DROP-CONSTRAINT(last 3)": 0.081,
+       "C1 FIRST-FIT (stated rule)": 0.344,
+       "C2 DSATUR (stated rule)": 0.058,
+       "D DPLL (first solution)": 0.18,
+       "exact": 0.166,
+       "q": 0.1
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.001,
+     "worst_bias_quantity": "q",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "q": {
+       "truth": 1.0,
+       "mean": 0.999,
+       "bias": -0.001,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.97,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "q": 0.97
+      },
+      "median_width_by_quantity": {
+       "q": 0.0
+      }
+     }
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "q",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "q": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.001,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "q": 1.0
+      },
+      "median_width_by_quantity": {
+       "q": 0.001
+      }
+     },
+     "truth_group": "unexplained (q)"
+    }
+   },
+   "triple": [
+    "A3 TT[FIRST-FIT]",
+    "C1 FIRST-FIT (stated rule)",
+    "exact"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "C1 FIRST-FIT (stated rule)",
+      "D DPLL (first solution)"
+     ],
+     "separating_items": 12
+    },
+    {
+     "pair": [
+      "A3 TT[FIRST-FIT]",
+      "C1 FIRST-FIT (stated rule)"
+     ],
+     "separating_items": 20
+    },
+    {
+     "pair": [
+      "A3 TT[FIRST-FIT]",
+      "D DPLL (first solution)"
+     ],
+     "separating_items": 20
+    },
+    {
+     "pair": [
+      "A3 TT[exact]",
+      "exact"
+     ],
+     "separating_items": 20
+    },
+    {
+     "pair": [
+      "B1 DROP-CONSTRAINT(last 3)",
+      "C2 DSATUR (stated rule)"
+     ],
+     "separating_items": 20
+    },
+    {
+     "pair": [
+      "B1 DROP-CONSTRAINT(last 3)",
+      "D DPLL (first solution)"
+     ],
+     "separating_items": 24
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "A3 TT[FIRST-FIT]",
+      "A3 TT[exact]",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "C1 FIRST-FIT (stated rule)",
+      "C2 DSATUR (stated rule)",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ],
+     "rank": 8,
+     "deficiency": 0,
+     "sigma_ratio": 0.18843352489711052,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "A3 TT[FIRST-FIT]",
+      "A3 TT[exact]",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "C1 FIRST-FIT (stated rule)",
+      "C2 DSATUR (stated rule)",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "A3 TT[FIRST-FIT]",
+      "A3 TT[exact]",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "C1 FIRST-FIT (stated rule)",
+      "C2 DSATUR (stated rule)",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ],
+     "rank": 8,
+     "deficiency": 0,
+     "sigma_ratio": 0.2506256433987333,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "A3 TT[FIRST-FIT]",
+      "A3 TT[exact]",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "C1 FIRST-FIT (stated rule)",
+      "C2 DSATUR (stated rule)",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 123.6
+  },
+  {
    "unit": "AH_E5/ENT",
    "n_items": 40,
    "n_clusters": 10,
@@ -400,6 +4310,227 @@
    "seconds": 61.5
   },
   {
+   "unit": "AH_E5/KNAP",
+   "n_items": 40,
+   "n_clusters": 10,
+   "n_cells": 4,
+   "items_per_cell": 10.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "A3 TT[exact]"
+    ],
+    [
+     "C1 INPUT-FIT"
+    ],
+    [
+     "C1 LARGEST-FIT"
+    ],
+    [
+     "C1 RATIO-SKIP"
+    ],
+    [
+     "C1 VALUE"
+    ],
+    [
+     "exact"
+    ]
+   ],
+   "folded_into_q": [],
+   "scenarios": {
+    "null_q": {
+     "max_abs_bias": 0.03,
+     "worst_bias_quantity": "q",
+     "min_coverage": 0.91,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.133,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "q": {
+       "truth": 1.0,
+       "mean": 0.97,
+       "bias": -0.03,
+       "coverage": 0.91,
+       "median_width": 0.133,
+       "mean_upper": 0.999
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.85,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.137,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": true
+      },
+      "pass": false,
+      "coverage": {
+       "C1 INPUT-FIT": 1.0,
+       "q": 0.85
+      },
+      "median_width_by_quantity": {
+       "C1 INPUT-FIT": 0.0,
+       "q": 0.137
+      }
+     }
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "q",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "q": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "q": 1.0
+      },
+      "median_width_by_quantity": {
+       "q": 0.0
+      }
+     },
+     "truth_group": "unexplained (q)"
+    }
+   },
+   "triple": null,
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "C1 RATIO-SKIP",
+      "C1 VALUE"
+     ],
+     "separating_items": 12
+    },
+    {
+     "pair": [
+      "A3 TT[exact]",
+      "exact"
+     ],
+     "separating_items": 20
+    },
+    {
+     "pair": [
+      "C1 INPUT-FIT",
+      "C1 LARGEST-FIT"
+     ],
+     "separating_items": 20
+    },
+    {
+     "pair": [
+      "C1 INPUT-FIT",
+      "C1 RATIO-SKIP"
+     ],
+     "separating_items": 20
+    },
+    {
+     "pair": [
+      "C1 INPUT-FIT",
+      "C1 VALUE"
+     ],
+     "separating_items": 20
+    },
+    {
+     "pair": [
+      "C1 LARGEST-FIT",
+      "C1 RATIO-SKIP"
+     ],
+     "separating_items": 20
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "A3 TT[exact]",
+      "C1 INPUT-FIT",
+      "C1 LARGEST-FIT",
+      "C1 RATIO-SKIP",
+      "C1 VALUE",
+      "exact",
+      "q"
+     ],
+     "rank": 7,
+     "deficiency": 0,
+     "sigma_ratio": 0.32369868665118573,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "A3 TT[exact]",
+      "C1 INPUT-FIT",
+      "C1 LARGEST-FIT",
+      "C1 RATIO-SKIP",
+      "C1 VALUE",
+      "exact",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "A3 TT[exact]",
+      "C1 INPUT-FIT",
+      "C1 LARGEST-FIT",
+      "C1 RATIO-SKIP",
+      "C1 VALUE",
+      "exact",
+      "q"
+     ],
+     "rank": 7,
+     "deficiency": 0,
+     "sigma_ratio": 0.3863988365308362,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "A3 TT[exact]",
+      "C1 INPUT-FIT",
+      "C1 LARGEST-FIT",
+      "C1 RATIO-SKIP",
+      "C1 VALUE",
+      "exact",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": true,
+   "not_testable": [],
+   "seconds": 30.3
+  },
+  {
    "unit": "AH_E5/SAT",
    "n_items": 50,
    "n_clusters": 10,
@@ -756,6 +4887,1325 @@
    "all_gates_pass": false,
    "not_testable": [],
    "seconds": 164.6
+  },
+  {
+   "unit": "C_E1/3-SAT",
+   "n_items": 60,
+   "n_clusters": 10,
+   "n_cells": 6,
+   "items_per_cell": 10.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "ALWAYS-UNSAT (A1 give-up)"
+    ],
+    [
+     "DPLL-INDEX (D, T first)"
+    ],
+    [
+     "DPLL-MENTION (D, T first)"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "GREEDY-INDEX"
+    ],
+    [
+     "GREEDY-MENTION"
+    ],
+    [
+     "GREEDY-OUT (AR)"
+    ],
+    [
+     "GUC-DET (C2)"
+    ],
+    [
+     "POLARITY (C0)"
+    ],
+    [
+     "RO-GREEDY (C3)"
+    ],
+    [
+     "UC-DET (C2)"
+    ]
+   ],
+   "folded_into_q": [
+    "RANDOM (H)"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.024,
+     "worst_bias_quantity": "UC-DET (C2)",
+     "min_coverage": 0.84,
+     "worst_coverage_quantity": "ALWAYS-UNSAT (A1 give-up)",
+     "median_width": 0.203,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "truth": 0.1,
+       "mean": 0.08,
+       "bias": -0.02,
+       "coverage": 0.84,
+       "median_width": 0.134,
+       "mean_upper": 0.141
+      },
+      "DPLL-INDEX (D, T first)": {
+       "truth": 0.6,
+       "mean": 0.599,
+       "bias": -0.001,
+       "coverage": 0.89,
+       "median_width": 0.24,
+       "mean_upper": 0.719
+      },
+      "DPLL-MENTION (D, T first)": {
+       "truth": 0.3,
+       "mean": 0.296,
+       "bias": -0.004,
+       "coverage": 0.87,
+       "median_width": 0.232,
+       "mean_upper": 0.41
+      },
+      "UC-DET (C2)": {
+       "truth": 0.0,
+       "mean": 0.024,
+       "bias": 0.024,
+       "coverage": 0.96,
+       "median_width": 0.121,
+       "mean_upper": 0.122
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.86,
+      "worst_coverage_quantity": "ALWAYS-UNSAT (A1 give-up)",
+      "median_width": 0.208,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.86,
+       "DPLL-INDEX (D, T first)": 0.89,
+       "DPLL-MENTION (D, T first)": 0.88,
+       "UC-DET (C2)": 0.94
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.14,
+       "DPLL-INDEX (D, T first)": 0.244,
+       "DPLL-MENTION (D, T first)": 0.229,
+       "UC-DET (C2)": 0.118
+      }
+     }
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.055,
+     "worst_bias_quantity": "DPLL-INDEX (D, T first)",
+     "min_coverage": 0.84,
+     "worst_coverage_quantity": "ALWAYS-UNSAT (A1 give-up)",
+     "median_width": 0.207,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "truth": 0.1,
+       "mean": 0.076,
+       "bias": -0.024,
+       "coverage": 0.84,
+       "median_width": 0.15,
+       "mean_upper": 0.148
+      },
+      "DPLL-INDEX (D, T first)": {
+       "truth": 0.6,
+       "mean": 0.545,
+       "bias": -0.055,
+       "coverage": 0.85,
+       "median_width": 0.246,
+       "mean_upper": 0.664
+      },
+      "DPLL-MENTION (D, T first)": {
+       "truth": 0.3,
+       "mean": 0.268,
+       "bias": -0.032,
+       "coverage": 0.86,
+       "median_width": 0.228,
+       "mean_upper": 0.382
+      },
+      "GREEDY-OUT (AR)": {
+       "truth": 0.0,
+       "mean": 0.011,
+       "bias": 0.011,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.035
+      },
+      "GUC-DET (C2)": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.034
+      },
+      "POLARITY (C0)": {
+       "truth": 0.0,
+       "mean": 0.013,
+       "bias": 0.013,
+       "coverage": 0.98,
+       "median_width": 0.038,
+       "mean_upper": 0.034
+      },
+      "UC-DET (C2)": {
+       "truth": 0.0,
+       "mean": 0.036,
+       "bias": 0.036,
+       "coverage": 0.9,
+       "median_width": 0.132,
+       "mean_upper": 0.141
+      },
+      "q": {
+       "truth": 0.0,
+       "mean": 0.022,
+       "bias": 0.022,
+       "coverage": 0.99,
+       "median_width": 0.067,
+       "mean_upper": 0.06
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.81,
+      "worst_coverage_quantity": "DPLL-INDEX (D, T first)",
+      "median_width": 0.209,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.85,
+       "DPLL-INDEX (D, T first)": 0.81,
+       "DPLL-MENTION (D, T first)": 0.88,
+       "GREEDY-OUT (AR)": 0.98,
+       "GUC-DET (C2)": 0.95,
+       "POLARITY (C0)": 0.93,
+       "UC-DET (C2)": 0.88,
+       "q": 0.89
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.149,
+       "DPLL-INDEX (D, T first)": 0.247,
+       "DPLL-MENTION (D, T first)": 0.231,
+       "GREEDY-OUT (AR)": 0.01,
+       "GUC-DET (C2)": 0.016,
+       "POLARITY (C0)": 0.033,
+       "UC-DET (C2)": 0.145,
+       "q": 0.065
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.052,
+     "worst_bias_quantity": "q",
+     "min_coverage": 0.81,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.233,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "truth": 0.0,
+       "mean": 0.042,
+       "bias": 0.042,
+       "coverage": 0.94,
+       "median_width": 0.208,
+       "mean_upper": 0.212
+      },
+      "q": {
+       "truth": 1.0,
+       "mean": 0.948,
+       "bias": -0.052,
+       "coverage": 0.81,
+       "median_width": 0.233,
+       "mean_upper": 0.996
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.82,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.2,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.9,
+       "q": 0.82
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.233,
+       "q": 0.2
+      }
+     }
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "ALWAYS-UNSAT (A1 give-up)",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "ALWAYS-UNSAT (A1 give-up)",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "ALWAYS-UNSAT (A1 give-up)",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 1.0
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.0
+      }
+     },
+     "truth_group": "ALWAYS-UNSAT (A1 give-up)"
+    }
+   },
+   "triple": [
+    "DPLL-INDEX (D, T first)",
+    "DPLL-MENTION (D, T first)",
+    "ALWAYS-UNSAT (A1 give-up)"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "UC-DET (C2)"
+     ],
+     "separating_items": 22
+    },
+    {
+     "pair": [
+      "GREEDY-MENTION",
+      "GREEDY-OUT (AR)"
+     ],
+     "separating_items": 28
+    },
+    {
+     "pair": [
+      "DPLL-MENTION (D, T first)",
+      "UC-DET (C2)"
+     ],
+     "separating_items": 38
+    },
+    {
+     "pair": [
+      "GREEDY-INDEX",
+      "GREEDY-OUT (AR)"
+     ],
+     "separating_items": 40
+    },
+    {
+     "pair": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "GUC-DET (C2)"
+     ],
+     "separating_items": 41
+    },
+    {
+     "pair": [
+      "GUC-DET (C2)",
+      "UC-DET (C2)"
+     ],
+     "separating_items": 47
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL-INDEX (D, T first)",
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX",
+      "GREEDY-MENTION",
+      "GREEDY-OUT (AR)",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "UC-DET (C2)",
+      "q"
+     ],
+     "rank": 12,
+     "deficiency": 0,
+     "sigma_ratio": 0.3426978569200525,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL-INDEX (D, T first)",
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX",
+      "GREEDY-MENTION",
+      "GREEDY-OUT (AR)",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "UC-DET (C2)",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL-INDEX (D, T first)",
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX",
+      "GREEDY-MENTION",
+      "GREEDY-OUT (AR)",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "UC-DET (C2)",
+      "q"
+     ],
+     "rank": 12,
+     "deficiency": 0,
+     "sigma_ratio": 0.3313438197778907,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL-INDEX (D, T first)",
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX",
+      "GREEDY-MENTION",
+      "GREEDY-OUT (AR)",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "UC-DET (C2)",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 384.5
+  },
+  {
+   "unit": "C_E1/colouring",
+   "n_items": 60,
+   "n_clusters": 10,
+   "n_cells": 6,
+   "items_per_cell": 10.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "DPLL-LABEL (D)"
+    ],
+    [
+     "DPLL-LIST (D)"
+    ],
+    [
+     "DSATUR"
+    ],
+    [
+     "DSATUR-LABEL"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "FF-LABEL"
+    ],
+    [
+     "FF-LIST",
+     "GREEDY+REPAIR-LIST (C->F)"
+    ],
+    [
+     "FF-OUT (AR)"
+    ],
+    [
+     "LF"
+    ],
+    [
+     "LOCAL-2-ID (E)"
+    ],
+    [
+     "NOISY-EXACT"
+    ],
+    [
+     "RO-FF (C3)"
+    ]
+   ],
+   "folded_into_q": [
+    "RANDOM (H)"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.013,
+     "worst_bias_quantity": "DSATUR-LABEL",
+     "min_coverage": 0.8,
+     "worst_coverage_quantity": "DSATUR",
+     "median_width": 0.203,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "DPLL-LABEL (D)": {
+       "truth": 0.3,
+       "mean": 0.294,
+       "bias": -0.006,
+       "coverage": 0.84,
+       "median_width": 0.225,
+       "mean_upper": 0.416
+      },
+      "DSATUR": {
+       "truth": 0.1,
+       "mean": 0.096,
+       "bias": -0.004,
+       "coverage": 0.8,
+       "median_width": 0.139,
+       "mean_upper": 0.164
+      },
+      "DSATUR-LABEL": {
+       "truth": 0.0,
+       "mean": 0.013,
+       "bias": 0.013,
+       "coverage": 0.79,
+       "median_width": 0.063,
+       "mean_upper": 0.073
+      },
+      "FF-LABEL": {
+       "truth": 0.6,
+       "mean": 0.595,
+       "bias": -0.005,
+       "coverage": 0.84,
+       "median_width": 0.248,
+       "mean_upper": 0.721
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.84,
+      "worst_coverage_quantity": "FF-LABEL",
+      "median_width": 0.207,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "DPLL-LABEL (D)": 0.88,
+       "DSATUR": 0.86,
+       "DSATUR-LABEL": 0.78,
+       "FF-LABEL": 0.84
+      },
+      "median_width_by_quantity": {
+       "DPLL-LABEL (D)": 0.227,
+       "DSATUR": 0.148,
+       "DSATUR-LABEL": 0.063,
+       "FF-LABEL": 0.246
+      }
+     }
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.067,
+     "worst_bias_quantity": "FF-LABEL",
+     "min_coverage": 0.76,
+     "worst_coverage_quantity": "DSATUR",
+     "median_width": 0.2,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "DPLL-LABEL (D)": {
+       "truth": 0.3,
+       "mean": 0.281,
+       "bias": -0.019,
+       "coverage": 0.81,
+       "median_width": 0.217,
+       "mean_upper": 0.399
+      },
+      "DPLL-LIST (D)": {
+       "truth": 0.0,
+       "mean": 0.013,
+       "bias": 0.013,
+       "coverage": 0.99,
+       "median_width": 0.0,
+       "mean_upper": 0.037
+      },
+      "DSATUR": {
+       "truth": 0.1,
+       "mean": 0.087,
+       "bias": -0.013,
+       "coverage": 0.76,
+       "median_width": 0.13,
+       "mean_upper": 0.156
+      },
+      "DSATUR-LABEL": {
+       "truth": 0.0,
+       "mean": 0.015,
+       "bias": 0.015,
+       "coverage": 0.82,
+       "median_width": 0.055,
+       "mean_upper": 0.06
+      },
+      "FF-LABEL": {
+       "truth": 0.6,
+       "mean": 0.533,
+       "bias": -0.067,
+       "coverage": 0.78,
+       "median_width": 0.255,
+       "mean_upper": 0.66
+      },
+      "FF-OUT (AR)": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.042
+      },
+      "LF": {
+       "truth": 0.0,
+       "mean": 0.018,
+       "bias": 0.018,
+       "coverage": 0.95,
+       "median_width": 0.061,
+       "mean_upper": 0.05
+      },
+      "LOCAL-2-ID (E)": {
+       "truth": 0.0,
+       "mean": 0.016,
+       "bias": 0.016,
+       "coverage": 0.96,
+       "median_width": 0.05,
+       "mean_upper": 0.044
+      },
+      "q": {
+       "truth": 0.0,
+       "mean": 0.015,
+       "bias": 0.015,
+       "coverage": 0.97,
+       "median_width": 0.05,
+       "mean_upper": 0.041
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.8,
+      "worst_coverage_quantity": "DSATUR",
+      "median_width": 0.204,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "DPLL-LABEL (D)": 0.81,
+       "DPLL-LIST (D)": 0.99,
+       "DSATUR": 0.8,
+       "DSATUR-LABEL": 0.77,
+       "FF-LABEL": 0.81,
+       "FF-OUT (AR)": 0.99,
+       "LF": 0.94,
+       "LOCAL-2-ID (E)": 0.97,
+       "q": 0.97
+      },
+      "median_width_by_quantity": {
+       "DPLL-LABEL (D)": 0.214,
+       "DPLL-LIST (D)": 0.037,
+       "DSATUR": 0.133,
+       "DSATUR-LABEL": 0.061,
+       "FF-LABEL": 0.252,
+       "FF-OUT (AR)": 0.0,
+       "LF": 0.075,
+       "LOCAL-2-ID (E)": 0.05,
+       "q": 0.05
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "q",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "q": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "q": 1.0
+      },
+      "median_width_by_quantity": {
+       "q": 0.0
+      }
+     }
+    },
+    "null_always": {
+     "max_abs_bias": 1.0,
+     "worst_bias_quantity": "LOCAL-2-ID (E)",
+     "min_coverage": 0.0,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.0,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "LOCAL-2-ID (E)": {
+       "truth": 0.0,
+       "mean": 1.0,
+       "bias": 1.0,
+       "coverage": 0.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      },
+      "q": {
+       "truth": 1.0,
+       "mean": 0.0,
+       "bias": -1.0,
+       "coverage": 0.0,
+       "median_width": 0.0,
+       "mean_upper": 0.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 0.0,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.0,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": true
+      },
+      "pass": false,
+      "coverage": {
+       "LOCAL-2-ID (E)": 0.0,
+       "q": 0.0
+      },
+      "median_width_by_quantity": {
+       "LOCAL-2-ID (E)": 0.0,
+       "q": 0.0
+      }
+     },
+     "truth_group": "unexplained (q)"
+    }
+   },
+   "triple": [
+    "FF-LABEL",
+    "DPLL-LABEL (D)",
+    "DSATUR"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "DSATUR",
+      "DSATUR-LABEL"
+     ],
+     "separating_items": 12
+    },
+    {
+     "pair": [
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "FF-OUT (AR)"
+     ],
+     "separating_items": 30
+    },
+    {
+     "pair": [
+      "DSATUR",
+      "LF"
+     ],
+     "separating_items": 39
+    },
+    {
+     "pair": [
+      "FF-LABEL",
+      "FF-OUT (AR)"
+     ],
+     "separating_items": 40
+    },
+    {
+     "pair": [
+      "DPLL-LIST (D)",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+     ],
+     "separating_items": 41
+    },
+    {
+     "pair": [
+      "DPLL-LABEL (D)",
+      "FF-LABEL"
+     ],
+     "separating_items": 42
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "DPLL-LABEL (D)",
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "FF-OUT (AR)",
+      "LF",
+      "LOCAL-2-ID (E)",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ],
+     "rank": 13,
+     "deficiency": 0,
+     "sigma_ratio": 0.10647037447940283,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DPLL-LABEL (D)",
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "FF-OUT (AR)",
+      "LF",
+      "LOCAL-2-ID (E)",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "DPLL-LABEL (D)",
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "FF-OUT (AR)",
+      "LF",
+      "LOCAL-2-ID (E)",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ],
+     "rank": 13,
+     "deficiency": 0,
+     "sigma_ratio": 0.010961956074321613,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DPLL-LABEL (D)",
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "FF-OUT (AR)",
+      "LF",
+      "LOCAL-2-ID (E)",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 433.6
+  },
+  {
+   "unit": "C_E2/3-SAT",
+   "n_items": 100,
+   "n_clusters": 20,
+   "n_cells": 10,
+   "items_per_cell": 10.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "ALWAYS-UNSAT (A1 give-up)"
+    ],
+    [
+     "DPLL-MENTION (D, T first)"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "GREEDY-INDEX",
+     "GREEDY-MENTION"
+    ],
+    [
+     "GUC-DET (C2)"
+    ],
+    [
+     "POLARITY (C0)"
+    ],
+    [
+     "RO-GREEDY (C3)"
+    ],
+    [
+     "SC-DET (C2)"
+    ],
+    [
+     "UC-DET (C2)"
+    ]
+   ],
+   "folded_into_q": [
+    "RANDOM (H)"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.108,
+     "worst_bias_quantity": "GUC-DET (C2)",
+     "min_coverage": 0.0,
+     "worst_coverage_quantity": "GUC-DET (C2)",
+     "median_width": 0.177,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "GUC-DET (C2)": {
+       "truth": 0.6,
+       "mean": 0.492,
+       "bias": -0.108,
+       "coverage": 0.0,
+       "median_width": 0.206,
+       "mean_upper": 0.597
+      },
+      "POLARITY (C0)": {
+       "truth": 0.1,
+       "mean": 0.101,
+       "bias": 0.001,
+       "coverage": 0.91,
+       "median_width": 0.105,
+       "mean_upper": 0.158
+      },
+      "SC-DET (C2)": {
+       "truth": 0.3,
+       "mean": 0.406,
+       "bias": 0.106,
+       "coverage": 0.01,
+       "median_width": 0.197,
+       "mean_upper": 0.523
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.0,
+      "worst_coverage_quantity": "GUC-DET (C2)",
+      "median_width": 0.175,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": true
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.79,
+       "GUC-DET (C2)": 0.0,
+       "POLARITY (C0)": 0.93,
+       "SC-DET (C2)": 0.03
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.099,
+       "GUC-DET (C2)": 0.202,
+       "POLARITY (C0)": 0.11,
+       "SC-DET (C2)": 0.197
+      }
+     }
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.074,
+     "worst_bias_quantity": "GUC-DET (C2)",
+     "min_coverage": 0.03,
+     "worst_coverage_quantity": "SC-DET (C2)",
+     "median_width": 0.178,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "truth": 0.0,
+       "mean": 0.014,
+       "bias": 0.014,
+       "coverage": 1.0,
+       "median_width": 0.022,
+       "mean_upper": 0.073
+      },
+      "GUC-DET (C2)": {
+       "truth": 0.6,
+       "mean": 0.526,
+       "bias": -0.074,
+       "coverage": 0.05,
+       "median_width": 0.214,
+       "mean_upper": 0.63
+      },
+      "POLARITY (C0)": {
+       "truth": 0.1,
+       "mean": 0.094,
+       "bias": -0.006,
+       "coverage": 0.91,
+       "median_width": 0.105,
+       "mean_upper": 0.148
+      },
+      "SC-DET (C2)": {
+       "truth": 0.3,
+       "mean": 0.351,
+       "bias": 0.051,
+       "coverage": 0.03,
+       "median_width": 0.206,
+       "mean_upper": 0.492
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.02,
+      "worst_coverage_quantity": "GUC-DET (C2)",
+      "median_width": 0.17,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": true
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.89,
+       "GUC-DET (C2)": 0.02,
+       "POLARITY (C0)": 0.91,
+       "SC-DET (C2)": 0.03
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.113,
+       "GUC-DET (C2)": 0.195,
+       "POLARITY (C0)": 0.105,
+       "SC-DET (C2)": 0.198
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.045,
+     "worst_bias_quantity": "q",
+     "min_coverage": 0.89,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.194,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "truth": 0.0,
+       "mean": 0.035,
+       "bias": 0.035,
+       "coverage": 0.95,
+       "median_width": 0.17,
+       "mean_upper": 0.171
+      },
+      "q": {
+       "truth": 1.0,
+       "mean": 0.955,
+       "bias": -0.045,
+       "coverage": 0.89,
+       "median_width": 0.194,
+       "mean_upper": 0.998
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.91,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.177,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.95,
+       "GUC-DET (C2)": 0.9,
+       "q": 0.91
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.179,
+       "GUC-DET (C2)": 0.053,
+       "q": 0.177
+      }
+     }
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "ALWAYS-UNSAT (A1 give-up)",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "ALWAYS-UNSAT (A1 give-up)",
+     "median_width": 0.041,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.041,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "ALWAYS-UNSAT (A1 give-up)",
+      "median_width": 0.204,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 1.0,
+       "GUC-DET (C2)": 1.0,
+       "SC-DET (C2)": 1.0
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.204,
+       "GUC-DET (C2)": 0.1,
+       "SC-DET (C2)": 0.047
+      }
+     },
+     "truth_group": "ALWAYS-UNSAT (A1 give-up)"
+    }
+   },
+   "triple": [
+    "GUC-DET (C2)",
+    "SC-DET (C2)",
+    "POLARITY (C0)"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "GUC-DET (C2)",
+      "SC-DET (C2)"
+     ],
+     "separating_items": 1
+    },
+    {
+     "pair": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "GUC-DET (C2)"
+     ],
+     "separating_items": 9
+    },
+    {
+     "pair": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "SC-DET (C2)"
+     ],
+     "separating_items": 10
+    },
+    {
+     "pair": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "UC-DET (C2)"
+     ],
+     "separating_items": 13
+    },
+    {
+     "pair": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "GREEDY-INDEX = GREEDY-MENTION"
+     ],
+     "separating_items": 20
+    },
+    {
+     "pair": [
+      "GUC-DET (C2)",
+      "UC-DET (C2)"
+     ],
+     "separating_items": 21
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX = GREEDY-MENTION",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "SC-DET (C2)",
+      "UC-DET (C2)",
+      "q"
+     ],
+     "rank": 10,
+     "deficiency": 0,
+     "sigma_ratio": 0.06284467613751982,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX = GREEDY-MENTION",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "SC-DET (C2)",
+      "UC-DET (C2)",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX = GREEDY-MENTION",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "SC-DET (C2)",
+      "UC-DET (C2)",
+      "q"
+     ],
+     "rank": 10,
+     "deficiency": 0,
+     "sigma_ratio": 0.04156218973386921,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX = GREEDY-MENTION",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "SC-DET (C2)",
+      "UC-DET (C2)",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 1070.9
   },
   {
    "unit": "C_E2/colouring",
@@ -1580,6 +7030,450 @@
    "seconds": 267.9
   },
   {
+   "unit": "C_E5/3-SAT",
+   "n_items": 30,
+   "n_clusters": 10,
+   "n_cells": 3,
+   "items_per_cell": 10.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "ALWAYS-UNSAT (A1 give-up)"
+    ],
+    [
+     "DPLL-MENTION (D)"
+    ],
+    [
+     "DPLL-MOMS-POLARITY (D)"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "GREEDY-MENTION-ABORT (C1)"
+    ],
+    [
+     "GREEDY-MENTION-INFEAS (C1)"
+    ],
+    [
+     "GUC-DET (C2)"
+    ],
+    [
+     "POLARITY (C0)"
+    ],
+    [
+     "RO-GREEDY (C3)"
+    ],
+    [
+     "SC-DET (C2)"
+    ],
+    [
+     "UC-DET (C2)"
+    ]
+   ],
+   "folded_into_q": [
+    "RANDOM (H)"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.014,
+     "worst_bias_quantity": "UC-DET (C2)",
+     "min_coverage": 0.66,
+     "worst_coverage_quantity": "SC-DET (C2)",
+     "median_width": 0.385,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "DPLL-MENTION (D)": {
+       "truth": 0.1,
+       "mean": 0.096,
+       "bias": -0.004,
+       "coverage": 0.82,
+       "median_width": 0.171,
+       "mean_upper": 0.184
+      },
+      "GUC-DET (C2)": {
+       "truth": 0.6,
+       "mean": 0.594,
+       "bias": -0.006,
+       "coverage": 0.73,
+       "median_width": 0.562,
+       "mean_upper": 0.852
+      },
+      "SC-DET (C2)": {
+       "truth": 0.3,
+       "mean": 0.296,
+       "bias": -0.004,
+       "coverage": 0.66,
+       "median_width": 0.566,
+       "mean_upper": 0.583
+      },
+      "UC-DET (C2)": {
+       "truth": 0.0,
+       "mean": 0.014,
+       "bias": 0.014,
+       "coverage": 0.99,
+       "median_width": 0.089,
+       "mean_upper": 0.101
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.74,
+      "worst_coverage_quantity": "SC-DET (C2)",
+      "median_width": 0.402,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "DPLL-MENTION (D)": 0.79,
+       "GUC-DET (C2)": 0.77,
+       "SC-DET (C2)": 0.74,
+       "UC-DET (C2)": 0.96
+      },
+      "median_width_by_quantity": {
+       "DPLL-MENTION (D)": 0.188,
+       "GUC-DET (C2)": 0.597,
+       "SC-DET (C2)": 0.579,
+       "UC-DET (C2)": 0.133
+      }
+     }
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.032,
+     "worst_bias_quantity": "GUC-DET (C2)",
+     "min_coverage": 0.88,
+     "worst_coverage_quantity": "DPLL-MENTION (D)",
+     "median_width": 0.455,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "DPLL-MENTION (D)": {
+       "truth": 0.1,
+       "mean": 0.089,
+       "bias": -0.011,
+       "coverage": 0.88,
+       "median_width": 0.167,
+       "mean_upper": 0.185
+      },
+      "DPLL-MOMS-POLARITY (D)": {
+       "truth": 0.0,
+       "mean": 0.01,
+       "bias": 0.01,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.032
+      },
+      "GUC-DET (C2)": {
+       "truth": 0.6,
+       "mean": 0.568,
+       "bias": -0.032,
+       "coverage": 0.89,
+       "median_width": 0.641,
+       "mean_upper": 0.852
+      },
+      "POLARITY (C0)": {
+       "truth": 0.0,
+       "mean": 0.01,
+       "bias": 0.01,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.033
+      },
+      "SC-DET (C2)": {
+       "truth": 0.3,
+       "mean": 0.272,
+       "bias": -0.028,
+       "coverage": 0.88,
+       "median_width": 0.599,
+       "mean_upper": 0.608
+      },
+      "UC-DET (C2)": {
+       "truth": 0.0,
+       "mean": 0.017,
+       "bias": 0.017,
+       "coverage": 1.0,
+       "median_width": 0.063,
+       "mean_upper": 0.107
+      },
+      "q": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.042
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.86,
+      "worst_coverage_quantity": "GUC-DET (C2)",
+      "median_width": 0.447,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.93,
+       "DPLL-MENTION (D)": 0.88,
+       "DPLL-MOMS-POLARITY (D)": 1.0,
+       "GUC-DET (C2)": 0.86,
+       "POLARITY (C0)": 0.99,
+       "SC-DET (C2)": 0.88,
+       "UC-DET (C2)": 0.97,
+       "q": 0.99
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.0,
+       "DPLL-MENTION (D)": 0.167,
+       "DPLL-MOMS-POLARITY (D)": 0.0,
+       "GUC-DET (C2)": 0.65,
+       "POLARITY (C0)": 0.0,
+       "SC-DET (C2)": 0.649,
+       "UC-DET (C2)": 0.128,
+       "q": 0.0
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.081,
+     "worst_bias_quantity": "q",
+     "min_coverage": 0.8,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.332,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "truth": 0.0,
+       "mean": 0.073,
+       "bias": 0.073,
+       "coverage": 0.9,
+       "median_width": 0.306,
+       "mean_upper": 0.311
+      },
+      "q": {
+       "truth": 1.0,
+       "mean": 0.919,
+       "bias": -0.081,
+       "coverage": 0.8,
+       "median_width": 0.332,
+       "mean_upper": 0.99
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.79,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.333,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.87,
+       "q": 0.79
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.333,
+       "q": 0.333
+      }
+     }
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "ALWAYS-UNSAT (A1 give-up)",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "ALWAYS-UNSAT (A1 give-up)",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "ALWAYS-UNSAT (A1 give-up)",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 1.0
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.0
+      }
+     },
+     "truth_group": "ALWAYS-UNSAT (A1 give-up)"
+    }
+   },
+   "triple": [
+    "GUC-DET (C2)",
+    "SC-DET (C2)",
+    "DPLL-MENTION (D)"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "GUC-DET (C2)",
+      "SC-DET (C2)"
+     ],
+     "separating_items": 7
+    },
+    {
+     "pair": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "GREEDY-MENTION-ABORT (C1)"
+     ],
+     "separating_items": 10
+    },
+    {
+     "pair": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "UC-DET (C2)"
+     ],
+     "separating_items": 10
+    },
+    {
+     "pair": [
+      "GREEDY-MENTION-ABORT (C1)",
+      "UC-DET (C2)"
+     ],
+     "separating_items": 10
+    },
+    {
+     "pair": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "SC-DET (C2)"
+     ],
+     "separating_items": 14
+    },
+    {
+     "pair": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "GUC-DET (C2)"
+     ],
+     "separating_items": 17
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL-MENTION (D)",
+      "DPLL-MOMS-POLARITY (D)",
+      "EXACT",
+      "GREEDY-MENTION-ABORT (C1)",
+      "GREEDY-MENTION-INFEAS (C1)",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "SC-DET (C2)",
+      "UC-DET (C2)",
+      "q"
+     ],
+     "rank": 12,
+     "deficiency": 0,
+     "sigma_ratio": 0.2179125256747566,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL-MENTION (D)",
+      "DPLL-MOMS-POLARITY (D)",
+      "EXACT",
+      "GREEDY-MENTION-ABORT (C1)",
+      "GREEDY-MENTION-INFEAS (C1)",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "SC-DET (C2)",
+      "UC-DET (C2)",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL-MENTION (D)",
+      "DPLL-MOMS-POLARITY (D)",
+      "EXACT",
+      "GREEDY-MENTION-ABORT (C1)",
+      "GREEDY-MENTION-INFEAS (C1)",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "SC-DET (C2)",
+      "UC-DET (C2)",
+      "q"
+     ],
+     "rank": 12,
+     "deficiency": 0,
+     "sigma_ratio": 0.19840065793264414,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL-MENTION (D)",
+      "DPLL-MOMS-POLARITY (D)",
+      "EXACT",
+      "GREEDY-MENTION-ABORT (C1)",
+      "GREEDY-MENTION-INFEAS (C1)",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "SC-DET (C2)",
+      "UC-DET (C2)",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 231.0
+  },
+  {
    "unit": "C_E5/3-SAT (partial assignment given)",
    "n_items": 30,
    "n_clusters": 10,
@@ -1982,6 +7876,1401 @@
    "all_gates_pass": false,
    "not_testable": [],
    "seconds": 101.8
+  },
+  {
+   "unit": "C_E5/colouring (k=3)",
+   "n_items": 50,
+   "n_clusters": 10,
+   "n_cells": 5,
+   "items_per_cell": 10.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "ALWAYS-IMPOSSIBLE (A1 give-up)",
+     "PHANTOM-ADJACENT (B4)"
+    ],
+    [
+     "DPLL-LIST (D)"
+    ],
+    [
+     "DROP-LAST-3-EDGES + exact (B1)"
+    ],
+    [
+     "DSATUR-3 (C2)"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "FF-3-EDGE-MENTION-ABORT (C1 variant)"
+    ],
+    [
+     "FF-3-LIST-ABORT (C1)"
+    ],
+    [
+     "FF-3-LIST-INFEAS (C1)"
+    ],
+    [
+     "GREEDY+REPAIR-LIST (C->F)"
+    ],
+    [
+     "NOISY-EXACT"
+    ],
+    [
+     "ONLINE-FF (C4)"
+    ],
+    [
+     "RANDOM (H)"
+    ]
+   ],
+   "folded_into_q": [],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.008,
+     "worst_bias_quantity": "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)",
+     "min_coverage": 0.02,
+     "worst_coverage_quantity": "FF-3-EDGE-MENTION-ABORT (C1 variant)",
+     "median_width": 0.151,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)": {
+       "truth": 0.3,
+       "mean": 0.292,
+       "bias": -0.008,
+       "coverage": 0.12,
+       "median_width": 0.145,
+       "mean_upper": 0.391
+      },
+      "DROP-LAST-3-EDGES + exact (B1)": {
+       "truth": 0.1,
+       "mean": 0.097,
+       "bias": -0.003,
+       "coverage": 0.87,
+       "median_width": 0.14,
+       "mean_upper": 0.171
+      },
+      "FF-3-EDGE-MENTION-ABORT (C1 variant)": {
+       "truth": 0.6,
+       "mean": 0.606,
+       "bias": 0.006,
+       "coverage": 0.02,
+       "median_width": 0.169,
+       "mean_upper": 0.676
+      },
+      "FF-3-LIST-ABORT (C1)": {
+       "truth": 0.0,
+       "mean": 0.005,
+       "bias": 0.005,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.068
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.01,
+      "worst_coverage_quantity": "FF-3-EDGE-MENTION-ABORT (C1 variant)",
+      "median_width": 0.14,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": true
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)": 0.12,
+       "DROP-LAST-3-EDGES + exact (B1)": 0.91,
+       "FF-3-EDGE-MENTION-ABORT (C1 variant)": 0.01,
+       "FF-3-LIST-ABORT (C1)": 0.98
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)": 0.112,
+       "DROP-LAST-3-EDGES + exact (B1)": 0.14,
+       "FF-3-EDGE-MENTION-ABORT (C1 variant)": 0.163,
+       "FF-3-LIST-ABORT (C1)": 0.0
+      }
+     }
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.058,
+     "worst_bias_quantity": "FF-3-EDGE-MENTION-ABORT (C1 variant)",
+     "min_coverage": 0.06,
+     "worst_coverage_quantity": "FF-3-EDGE-MENTION-ABORT (C1 variant)",
+     "median_width": 0.154,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)": {
+       "truth": 0.3,
+       "mean": 0.348,
+       "bias": 0.048,
+       "coverage": 0.1,
+       "median_width": 0.153,
+       "mean_upper": 0.463
+      },
+      "DROP-LAST-3-EDGES + exact (B1)": {
+       "truth": 0.1,
+       "mean": 0.085,
+       "bias": -0.015,
+       "coverage": 0.86,
+       "median_width": 0.135,
+       "mean_upper": 0.157
+      },
+      "FF-3-EDGE-MENTION-ABORT (C1 variant)": {
+       "truth": 0.6,
+       "mean": 0.542,
+       "bias": -0.058,
+       "coverage": 0.06,
+       "median_width": 0.166,
+       "mean_upper": 0.626
+      },
+      "FF-3-LIST-ABORT (C1)": {
+       "truth": 0.0,
+       "mean": 0.011,
+       "bias": 0.011,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.076
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.04,
+      "worst_coverage_quantity": "FF-3-EDGE-MENTION-ABORT (C1 variant)",
+      "median_width": 0.144,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": true
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)": 0.1,
+       "DROP-LAST-3-EDGES + exact (B1)": 0.9,
+       "FF-3-EDGE-MENTION-ABORT (C1 variant)": 0.04,
+       "FF-3-LIST-ABORT (C1)": 0.95
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)": 0.137,
+       "DROP-LAST-3-EDGES + exact (B1)": 0.135,
+       "FF-3-EDGE-MENTION-ABORT (C1 variant)": 0.165,
+       "FF-3-LIST-ABORT (C1)": 0.0
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.053,
+     "worst_bias_quantity": "q",
+     "min_coverage": 0.93,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.24,
+     "gates": {
+      "bias": false,
+      "coverage": true,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)": {
+       "truth": 0.0,
+       "mean": 0.049,
+       "bias": 0.049,
+       "coverage": 0.93,
+       "median_width": 0.199,
+       "mean_upper": 0.204
+      },
+      "FF-3-EDGE-MENTION-ABORT (C1 variant)": {
+       "truth": 0.0,
+       "mean": 0.004,
+       "bias": 0.004,
+       "coverage": 0.99,
+       "median_width": 0.073,
+       "mean_upper": 0.082
+      },
+      "q": {
+       "truth": 1.0,
+       "mean": 0.947,
+       "bias": -0.053,
+       "coverage": 0.93,
+       "median_width": 0.24,
+       "mean_upper": 0.996
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.9,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.24,
+      "gates": {
+       "bias": false,
+       "coverage": true,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)": 0.91,
+       "FF-3-EDGE-MENTION-ABORT (C1 variant)": 1.0,
+       "q": 0.9
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)": 0.2,
+       "FF-3-EDGE-MENTION-ABORT (C1 variant)": 0.116,
+       "q": 0.24
+      }
+     }
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)",
+     "median_width": 0.155,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.155,
+       "mean_upper": 1.0
+      },
+      "FF-3-EDGE-MENTION-ABORT (C1 variant)": {
+       "truth": 0.0,
+       "mean": 0.0,
+       "bias": 0.0,
+       "coverage": 1.0,
+       "median_width": 0.155,
+       "mean_upper": 0.151
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)",
+      "median_width": 0.141,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)": 1.0
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)": 0.141
+      }
+     },
+     "truth_group": "ALWAYS-IMPOSSIBLE (A1 give-up)"
+    }
+   },
+   "triple": [
+    "FF-3-EDGE-MENTION-ABORT (C1 variant)",
+    "ALWAYS-IMPOSSIBLE (A1 give-up)",
+    "DROP-LAST-3-EDGES + exact (B1)"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)",
+      "FF-3-EDGE-MENTION-ABORT (C1 variant)"
+     ],
+     "separating_items": 2
+    },
+    {
+     "pair": [
+      "FF-3-LIST-INFEAS (C1)",
+      "GREEDY+REPAIR-LIST (C->F)"
+     ],
+     "separating_items": 6
+    },
+    {
+     "pair": [
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)",
+      "FF-3-LIST-ABORT (C1)"
+     ],
+     "separating_items": 10
+    },
+    {
+     "pair": [
+      "FF-3-EDGE-MENTION-ABORT (C1 variant)",
+      "FF-3-LIST-ABORT (C1)"
+     ],
+     "separating_items": 12
+    },
+    {
+     "pair": [
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)",
+      "DSATUR-3 (C2)"
+     ],
+     "separating_items": 38
+    },
+    {
+     "pair": [
+      "DSATUR-3 (C2)",
+      "FF-3-LIST-ABORT (C1)"
+     ],
+     "separating_items": 39
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)",
+      "DPLL-LIST (D)",
+      "DROP-LAST-3-EDGES + exact (B1)",
+      "DSATUR-3 (C2)",
+      "EXACT",
+      "FF-3-EDGE-MENTION-ABORT (C1 variant)",
+      "FF-3-LIST-ABORT (C1)",
+      "FF-3-LIST-INFEAS (C1)",
+      "GREEDY+REPAIR-LIST (C->F)",
+      "NOISY-EXACT",
+      "ONLINE-FF (C4)",
+      "RANDOM (H)",
+      "q"
+     ],
+     "rank": 13,
+     "deficiency": 0,
+     "sigma_ratio": 0.12297302143113194,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)",
+      "DPLL-LIST (D)",
+      "DROP-LAST-3-EDGES + exact (B1)",
+      "DSATUR-3 (C2)",
+      "EXACT",
+      "FF-3-EDGE-MENTION-ABORT (C1 variant)",
+      "FF-3-LIST-ABORT (C1)",
+      "FF-3-LIST-INFEAS (C1)",
+      "GREEDY+REPAIR-LIST (C->F)",
+      "NOISY-EXACT",
+      "ONLINE-FF (C4)",
+      "RANDOM (H)",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)",
+      "DPLL-LIST (D)",
+      "DROP-LAST-3-EDGES + exact (B1)",
+      "DSATUR-3 (C2)",
+      "EXACT",
+      "FF-3-EDGE-MENTION-ABORT (C1 variant)",
+      "FF-3-LIST-ABORT (C1)",
+      "FF-3-LIST-INFEAS (C1)",
+      "GREEDY+REPAIR-LIST (C->F)",
+      "NOISY-EXACT",
+      "ONLINE-FF (C4)",
+      "RANDOM (H)",
+      "q"
+     ],
+     "rank": 13,
+     "deficiency": 0,
+     "sigma_ratio": 0.0063040098046603515,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = PHANTOM-ADJACENT (B4)",
+      "DPLL-LIST (D)",
+      "DROP-LAST-3-EDGES + exact (B1)",
+      "DSATUR-3 (C2)",
+      "EXACT",
+      "FF-3-EDGE-MENTION-ABORT (C1 variant)",
+      "FF-3-LIST-ABORT (C1)",
+      "FF-3-LIST-INFEAS (C1)",
+      "GREEDY+REPAIR-LIST (C->F)",
+      "NOISY-EXACT",
+      "ONLINE-FF (C4)",
+      "RANDOM (H)",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 233.5
+  },
+  {
+   "unit": "C_E5/colouring (k=3, partial colouring given)",
+   "n_items": 20,
+   "n_clusters": 10,
+   "n_cells": 2,
+   "items_per_cell": 10.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "ALWAYS-IMPOSSIBLE (A1 give-up)",
+     "FF-3-LIST from state (C1, ABORT)"
+    ],
+    [
+     "DPLL-LIST from state (D)"
+    ],
+    [
+     "DSATUR-3 from state (C2)"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "FF-3-LIST from state (C1, INFEAS)"
+    ],
+    [
+     "GREEDY+REPAIR-LIST (C->F)"
+    ],
+    [
+     "RANDOM (H)"
+    ]
+   ],
+   "folded_into_q": [],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.031,
+     "worst_bias_quantity": "DSATUR-3 from state (C2)",
+     "min_coverage": 0.69,
+     "worst_coverage_quantity": "FF-3-LIST from state (C1, INFEAS)",
+     "median_width": 0.457,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)": {
+       "truth": 0.6,
+       "mean": 0.616,
+       "bias": 0.016,
+       "coverage": 0.88,
+       "median_width": 0.591,
+       "mean_upper": 0.881
+      },
+      "DPLL-LIST from state (D)": {
+       "truth": 0.0,
+       "mean": 0.001,
+       "bias": 0.001,
+       "coverage": 1.0,
+       "median_width": 0.073,
+       "mean_upper": 0.08
+      },
+      "DSATUR-3 from state (C2)": {
+       "truth": 0.3,
+       "mean": 0.269,
+       "bias": -0.031,
+       "coverage": 0.85,
+       "median_width": 0.555,
+       "mean_upper": 0.546
+      },
+      "FF-3-LIST from state (C1, INFEAS)": {
+       "truth": 0.1,
+       "mean": 0.087,
+       "bias": -0.013,
+       "coverage": 0.69,
+       "median_width": 0.2,
+       "mean_upper": 0.194
+      },
+      "GREEDY+REPAIR-LIST (C->F)": {
+       "truth": 0.0,
+       "mean": 0.026,
+       "bias": 0.026,
+       "coverage": 0.96,
+       "median_width": 0.088,
+       "mean_upper": 0.116
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.73,
+      "worst_coverage_quantity": "FF-3-LIST from state (C1, INFEAS)",
+      "median_width": 0.498,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)": 0.92,
+       "DPLL-LIST from state (D)": 0.98,
+       "DSATUR-3 from state (C2)": 0.91,
+       "FF-3-LIST from state (C1, INFEAS)": 0.73,
+       "GREEDY+REPAIR-LIST (C->F)": 0.9
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)": 0.618,
+       "DPLL-LIST from state (D)": 0.144,
+       "DSATUR-3 from state (C2)": 0.584,
+       "FF-3-LIST from state (C1, INFEAS)": 0.202,
+       "GREEDY+REPAIR-LIST (C->F)": 0.127
+      }
+     }
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.033,
+     "worst_bias_quantity": "DSATUR-3 from state (C2)",
+     "min_coverage": 0.55,
+     "worst_coverage_quantity": "FF-3-LIST from state (C1, INFEAS)",
+     "median_width": 0.449,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)": {
+       "truth": 0.6,
+       "mean": 0.629,
+       "bias": 0.029,
+       "coverage": 0.87,
+       "median_width": 0.587,
+       "mean_upper": 0.893
+      },
+      "DPLL-LIST from state (D)": {
+       "truth": 0.0,
+       "mean": 0.001,
+       "bias": 0.001,
+       "coverage": 1.0,
+       "median_width": 0.071,
+       "mean_upper": 0.074
+      },
+      "DSATUR-3 from state (C2)": {
+       "truth": 0.3,
+       "mean": 0.267,
+       "bias": -0.033,
+       "coverage": 0.81,
+       "median_width": 0.552,
+       "mean_upper": 0.546
+      },
+      "FF-3-LIST from state (C1, INFEAS)": {
+       "truth": 0.1,
+       "mean": 0.075,
+       "bias": -0.025,
+       "coverage": 0.55,
+       "median_width": 0.15,
+       "mean_upper": 0.168
+      },
+      "GREEDY+REPAIR-LIST (C->F)": {
+       "truth": 0.0,
+       "mean": 0.021,
+       "bias": 0.021,
+       "coverage": 0.99,
+       "median_width": 0.088,
+       "mean_upper": 0.109
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.68,
+      "worst_coverage_quantity": "FF-3-LIST from state (C1, INFEAS)",
+      "median_width": 0.501,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)": 0.88,
+       "DPLL-LIST from state (D)": 0.99,
+       "DSATUR-3 from state (C2)": 0.84,
+       "FF-3-LIST from state (C1, INFEAS)": 0.68,
+       "GREEDY+REPAIR-LIST (C->F)": 0.96
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)": 0.591,
+       "DPLL-LIST from state (D)": 0.147,
+       "DSATUR-3 from state (C2)": 0.599,
+       "FF-3-LIST from state (C1, INFEAS)": 0.181,
+       "GREEDY+REPAIR-LIST (C->F)": 0.122
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.073,
+     "worst_bias_quantity": "q",
+     "min_coverage": 0.92,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.4,
+     "gates": {
+      "bias": false,
+      "coverage": true,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)": {
+       "truth": 0.0,
+       "mean": 0.073,
+       "bias": 0.073,
+       "coverage": 0.92,
+       "median_width": 0.4,
+       "mean_upper": 0.372
+      },
+      "q": {
+       "truth": 1.0,
+       "mean": 0.927,
+       "bias": -0.073,
+       "coverage": 0.92,
+       "median_width": 0.4,
+       "mean_upper": 0.997
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.91,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.442,
+      "gates": {
+       "bias": false,
+       "coverage": true,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)": 0.91,
+       "q": 0.91
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)": 0.442,
+       "q": 0.442
+      }
+     }
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)": 1.0
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)": 0.0
+      }
+     },
+     "truth_group": "ALWAYS-IMPOSSIBLE (A1 give-up)"
+    }
+   },
+   "triple": [
+    "ALWAYS-IMPOSSIBLE (A1 give-up)",
+    "DSATUR-3 from state (C2)",
+    "FF-3-LIST from state (C1, INFEAS)"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "DPLL-LIST from state (D)",
+      "DSATUR-3 from state (C2)"
+     ],
+     "separating_items": 2
+    },
+    {
+     "pair": [
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)",
+      "DSATUR-3 from state (C2)"
+     ],
+     "separating_items": 8
+    },
+    {
+     "pair": [
+      "FF-3-LIST from state (C1, INFEAS)",
+      "GREEDY+REPAIR-LIST (C->F)"
+     ],
+     "separating_items": 8
+    },
+    {
+     "pair": [
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)",
+      "DPLL-LIST from state (D)"
+     ],
+     "separating_items": 10
+    },
+    {
+     "pair": [
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)",
+      "EXACT"
+     ],
+     "separating_items": 10
+    },
+    {
+     "pair": [
+      "DPLL-LIST from state (D)",
+      "EXACT"
+     ],
+     "separating_items": 10
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)",
+      "DPLL-LIST from state (D)",
+      "DSATUR-3 from state (C2)",
+      "EXACT",
+      "FF-3-LIST from state (C1, INFEAS)",
+      "GREEDY+REPAIR-LIST (C->F)",
+      "RANDOM (H)",
+      "q"
+     ],
+     "rank": 8,
+     "deficiency": 0,
+     "sigma_ratio": 0.14387571178503739,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)",
+      "DPLL-LIST from state (D)",
+      "DSATUR-3 from state (C2)",
+      "EXACT",
+      "FF-3-LIST from state (C1, INFEAS)",
+      "GREEDY+REPAIR-LIST (C->F)",
+      "RANDOM (H)",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)",
+      "DPLL-LIST from state (D)",
+      "DSATUR-3 from state (C2)",
+      "EXACT",
+      "FF-3-LIST from state (C1, INFEAS)",
+      "GREEDY+REPAIR-LIST (C->F)",
+      "RANDOM (H)",
+      "q"
+     ],
+     "rank": 8,
+     "deficiency": 0,
+     "sigma_ratio": 0.1703536523544841,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "ALWAYS-IMPOSSIBLE (A1 give-up) = FF-3-LIST from state (C1, ABORT)",
+      "DPLL-LIST from state (D)",
+      "DSATUR-3 from state (C2)",
+      "EXACT",
+      "FF-3-LIST from state (C1, INFEAS)",
+      "GREEDY+REPAIR-LIST (C->F)",
+      "RANDOM (H)",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 74.1
+  },
+  {
+   "unit": "C_E5/propositional entailment",
+   "n_items": 40,
+   "n_clusters": 10,
+   "n_cells": 4,
+   "items_per_cell": 10.0,
+   "finite_channel": true,
+   "groups": [
+    [
+     "ALWAYS-YES (A1)"
+    ],
+    [
+     "ETR-1p (R1)"
+    ],
+    [
+     "ETR-default (R1)"
+    ],
+    [
+     "FIRST (B4)"
+    ],
+    [
+     "GREEDY-CM (not-C first) (C1)"
+    ],
+    [
+     "GREEDY-CM-MENTION (C1)"
+    ],
+    [
+     "MM-S1 (B4)"
+    ],
+    [
+     "NOISY-EXACT"
+    ],
+    [
+     "NONE (A1 give-up: does not follow)",
+     "TRUTH TABLE (exact)",
+     "UP-fixpoint (B1, sound)"
+    ],
+    [
+     "ONL(1) (C4)"
+    ],
+    [
+     "ONL(2) (C4)"
+    ],
+    [
+     "SAMPLE-3 (H)"
+    ]
+   ],
+   "folded_into_q": [
+    "RANDOM (H)"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.093,
+     "worst_bias_quantity": "SAMPLE-3 (H)",
+     "min_coverage": 0.11,
+     "worst_coverage_quantity": "ETR-default (R1)",
+     "median_width": 0.144,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "ETR-1p (R1)": {
+       "truth": 0.6,
+       "mean": 0.673,
+       "bias": 0.073,
+       "coverage": 0.15,
+       "median_width": 0.231,
+       "mean_upper": 0.73
+      },
+      "ETR-default (R1)": {
+       "truth": 0.3,
+       "mean": 0.224,
+       "bias": -0.076,
+       "coverage": 0.11,
+       "median_width": 0.146,
+       "mean_upper": 0.325
+      },
+      "FIRST (B4)": {
+       "truth": 0.0,
+       "mean": 0.01,
+       "bias": 0.01,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.058
+      },
+      "GREEDY-CM (not-C first) (C1)": {
+       "truth": 0.0,
+       "mean": 0.006,
+       "bias": 0.006,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.062
+      },
+      "MM-S1 (B4)": {
+       "truth": 0.0,
+       "mean": 0.014,
+       "bias": 0.014,
+       "coverage": 1.0,
+       "median_width": 0.081,
+       "mean_upper": 0.142
+      },
+      "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound) + 0.5 × q + 0.961 × NOISY-EXACT": {
+       "truth": 0.0,
+       "mean": 0.046,
+       "bias": 0.046,
+       "coverage": 0.92,
+       "median_width": 0.144,
+       "mean_upper": 0.179
+      },
+      "ONL(2) (C4)": {
+       "truth": 0.0,
+       "mean": 0.015,
+       "bias": 0.015,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.052
+      },
+      "SAMPLE-3 (H)": {
+       "truth": 0.1,
+       "mean": 0.007,
+       "bias": -0.093,
+       "coverage": 0.12,
+       "median_width": 0.0,
+       "mean_upper": 0.088
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.1,
+      "worst_coverage_quantity": "ETR-default (R1)",
+      "median_width": 0.158,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": true
+      },
+      "pass": false,
+      "coverage": {
+       "ETR-1p (R1)": 0.15,
+       "ETR-default (R1)": 0.1,
+       "FIRST (B4)": 0.95,
+       "GREEDY-CM (not-C first) (C1)": 1.0,
+       "MM-S1 (B4)": 1.0,
+       "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound) + 0.5 × q + 0.961 × NOISY-EXACT": 0.91,
+       "ONL(2) (C4)": 0.93,
+       "SAMPLE-3 (H)": 0.14
+      },
+      "median_width_by_quantity": {
+       "ETR-1p (R1)": 0.253,
+       "ETR-default (R1)": 0.165,
+       "FIRST (B4)": 0.008,
+       "GREEDY-CM (not-C first) (C1)": 0.0,
+       "MM-S1 (B4)": 0.148,
+       "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound) + 0.5 × q + 0.961 × NOISY-EXACT": 0.162,
+       "ONL(2) (C4)": 0.0,
+       "SAMPLE-3 (H)": 0.0
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.368,
+     "worst_bias_quantity": "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound) + 0.5 × q + 0.961 × NOISY-EXACT",
+     "min_coverage": 0.15,
+     "worst_coverage_quantity": "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound) + 0.5 × q + 0.961 × NOISY-EXACT",
+     "median_width": 0.305,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": null,
+     "quantities": {
+      "ALWAYS-YES (A1) + 0.5 × q + 0.0386 × NOISY-EXACT": {
+       "truth": 0.5,
+       "mean": 0.428,
+       "bias": -0.072,
+       "coverage": 0.77,
+       "median_width": 0.319,
+       "mean_upper": 0.568
+      },
+      "ETR-1p (R1)": {
+       "truth": 0.0,
+       "mean": 0.034,
+       "bias": 0.034,
+       "coverage": 1.0,
+       "median_width": 0.059,
+       "mean_upper": 0.118
+      },
+      "ETR-default (R1)": {
+       "truth": 0.0,
+       "mean": 0.048,
+       "bias": 0.048,
+       "coverage": 1.0,
+       "median_width": 0.066,
+       "mean_upper": 0.123
+      },
+      "FIRST (B4)": {
+       "truth": 0.0,
+       "mean": 0.07,
+       "bias": 0.07,
+       "coverage": 0.98,
+       "median_width": 0.333,
+       "mean_upper": 0.301
+      },
+      "GREEDY-CM (not-C first) (C1)": {
+       "truth": 0.0,
+       "mean": 0.033,
+       "bias": 0.033,
+       "coverage": 1.0,
+       "median_width": 0.23,
+       "mean_upper": 0.228
+      },
+      "GREEDY-CM-MENTION (C1)": {
+       "truth": 0.0,
+       "mean": 0.055,
+       "bias": 0.055,
+       "coverage": 0.97,
+       "median_width": 0.252,
+       "mean_upper": 0.256
+      },
+      "MM-S1 (B4)": {
+       "truth": 0.0,
+       "mean": 0.082,
+       "bias": 0.082,
+       "coverage": 0.98,
+       "median_width": 0.245,
+       "mean_upper": 0.267
+      },
+      "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound) + 0.5 × q + 0.961 × NOISY-EXACT": {
+       "truth": 0.5,
+       "mean": 0.132,
+       "bias": -0.368,
+       "coverage": 0.15,
+       "median_width": 0.247,
+       "mean_upper": 0.283
+      },
+      "ONL(1) (C4)": {
+       "truth": 0.0,
+       "mean": 0.04,
+       "bias": 0.04,
+       "coverage": 1.0,
+       "median_width": 0.198,
+       "mean_upper": 0.218
+      },
+      "ONL(2) (C4)": {
+       "truth": 0.0,
+       "mean": 0.036,
+       "bias": 0.036,
+       "coverage": 0.99,
+       "median_width": 0.191,
+       "mean_upper": 0.221
+      },
+      "SAMPLE-3 (H)": {
+       "truth": 0.0,
+       "mean": 0.041,
+       "bias": 0.041,
+       "coverage": 1.0,
+       "median_width": 0.149,
+       "mean_upper": 0.223
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.21,
+      "worst_coverage_quantity": "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound) + 0.5 × q + 0.961 × NOISY-EXACT",
+      "median_width": 0.292,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": null,
+      "coverage": {
+       "ALWAYS-YES (A1) + 0.5 × q + 0.0386 × NOISY-EXACT": 0.77,
+       "ETR-1p (R1)": 0.94,
+       "ETR-default (R1)": 0.88,
+       "FIRST (B4)": 0.9,
+       "GREEDY-CM (not-C first) (C1)": 0.96,
+       "GREEDY-CM-MENTION (C1)": 0.94,
+       "MM-S1 (B4)": 0.85,
+       "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound) + 0.5 × q + 0.961 × NOISY-EXACT": 0.21,
+       "ONL(1) (C4)": 0.86,
+       "ONL(2) (C4)": 0.93,
+       "SAMPLE-3 (H)": 0.86
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-YES (A1) + 0.5 × q + 0.0386 × NOISY-EXACT": 0.295,
+       "ETR-1p (R1)": 0.095,
+       "ETR-default (R1)": 0.091,
+       "FIRST (B4)": 0.38,
+       "GREEDY-CM (not-C first) (C1)": 0.268,
+       "GREEDY-CM-MENTION (C1)": 0.31,
+       "MM-S1 (B4)": 0.304,
+       "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound) + 0.5 × q + 0.961 × NOISY-EXACT": 0.283,
+       "ONL(1) (C4)": 0.243,
+       "ONL(2) (C4)": 0.312,
+       "SAMPLE-3 (H)": 0.362
+      }
+     },
+     "testable": false,
+     "not_testable": "planted weight on q, identified only in combination: q = 0.5 × ALWAYS-YES (A1) + 0.5 × NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)"
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "ALWAYS-YES (A1) + 0.5 × q + 0.0386 × NOISY-EXACT",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "ALWAYS-YES (A1) + 0.5 × q + 0.0386 × NOISY-EXACT",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": null,
+     "quantities": {
+      "ALWAYS-YES (A1) + 0.5 × q + 0.0386 × NOISY-EXACT": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "ALWAYS-YES (A1) + 0.5 × q + 0.0386 × NOISY-EXACT",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": null,
+      "coverage": {
+       "ALWAYS-YES (A1) + 0.5 × q + 0.0386 × NOISY-EXACT": 1.0
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-YES (A1) + 0.5 × q + 0.0386 × NOISY-EXACT": 0.0
+      }
+     },
+     "testable": false,
+     "not_testable": "planted weight on ALWAYS-YES (A1), identified only in combination: q = 0.5 × ALWAYS-YES (A1) + 0.5 × NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound); NOISY-EXACT = 0.0386 × ALWAYS-YES (A1) + 0.961 × NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)",
+     "truth_group": "ALWAYS-YES (A1)"
+    }
+   },
+   "triple": [
+    "ETR-1p (R1)",
+    "ETR-default (R1)",
+    "SAMPLE-3 (H)"
+   ],
+   "design": {
+    "columns": 13,
+    "rank": 11,
+    "sigma_ratio": 0.0,
+    "weakest_direction": [
+     "q",
+     "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)",
+     "ALWAYS-YES (A1)"
+    ]
+   },
+   "least_separated": [
+    {
+     "pair": [
+      "ETR-1p (R1)",
+      "ETR-default (R1)"
+     ],
+     "separating_items": 2
+    },
+    {
+     "pair": [
+      "ETR-1p (R1)",
+      "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)"
+     ],
+     "separating_items": 2
+    },
+    {
+     "pair": [
+      "ETR-1p (R1)",
+      "MM-S1 (B4)"
+     ],
+     "separating_items": 3
+    },
+    {
+     "pair": [
+      "ETR-default (R1)",
+      "MM-S1 (B4)"
+     ],
+     "separating_items": 3
+    },
+    {
+     "pair": [
+      "MM-S1 (B4)",
+      "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)"
+     ],
+     "separating_items": 3
+    },
+    {
+     "pair": [
+      "ETR-default (R1)",
+      "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)"
+     ],
+     "separating_items": 4
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "ALWAYS-YES (A1)",
+      "ETR-1p (R1)",
+      "ETR-default (R1)",
+      "FIRST (B4)",
+      "GREEDY-CM (not-C first) (C1)",
+      "GREEDY-CM-MENTION (C1)",
+      "MM-S1 (B4)",
+      "NOISY-EXACT",
+      "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)",
+      "ONL(1) (C4)",
+      "ONL(2) (C4)",
+      "SAMPLE-3 (H)",
+      "q"
+     ],
+     "rank": 11,
+     "deficiency": 2,
+     "sigma_ratio": 1.8395084054741826e-17,
+     "null_directions": [
+      "q = 0.5 × ALWAYS-YES (A1) + 0.5 × NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)",
+      "NOISY-EXACT = 0.0386 × ALWAYS-YES (A1) + 0.961 × NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)"
+     ],
+     "dependencies": [
+      {
+       "members": [
+        "ALWAYS-YES (A1)",
+        "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)",
+        "q"
+       ],
+       "substantive": false,
+       "relation": "q = 0.5 × ALWAYS-YES (A1) + 0.5 × NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)",
+       "statement": "q = 0.5 × ALWAYS-YES (A1) + 0.5 × NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)"
+      },
+      {
+       "members": [
+        "ALWAYS-YES (A1)",
+        "NOISY-EXACT",
+        "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)"
+       ],
+       "substantive": false,
+       "relation": "NOISY-EXACT = 0.0386 × ALWAYS-YES (A1) + 0.961 × NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)",
+       "statement": "NOISY-EXACT = 0.0386 × ALWAYS-YES (A1) + 0.961 × NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)"
+      }
+     ],
+     "not_identified": [
+      "q",
+      "NOISY-EXACT"
+     ],
+     "involved": [
+      "ALWAYS-YES (A1)",
+      "NOISY-EXACT",
+      "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)",
+      "q"
+     ],
+     "identified": [
+      "ALWAYS-YES (A1) + 0.5 × q + 0.0386 × NOISY-EXACT",
+      "ETR-1p (R1)",
+      "ETR-default (R1)",
+      "FIRST (B4)",
+      "GREEDY-CM (not-C first) (C1)",
+      "GREEDY-CM-MENTION (C1)",
+      "MM-S1 (B4)",
+      "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound) + 0.5 × q + 0.961 × NOISY-EXACT",
+      "ONL(1) (C4)",
+      "ONL(2) (C4)",
+      "SAMPLE-3 (H)"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "ALWAYS-YES (A1)",
+      "ETR-1p (R1)",
+      "ETR-default (R1)",
+      "FIRST (B4)",
+      "GREEDY-CM (not-C first) (C1)",
+      "GREEDY-CM-MENTION (C1)",
+      "MM-S1 (B4)",
+      "NOISY-EXACT",
+      "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)",
+      "ONL(1) (C4)",
+      "ONL(2) (C4)",
+      "SAMPLE-3 (H)",
+      "q"
+     ],
+     "rank": 11,
+     "deficiency": 2,
+     "sigma_ratio": 1.8395084054741826e-17,
+     "null_directions": [
+      "q = 0.5 × ALWAYS-YES (A1) + 0.5 × NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)",
+      "NOISY-EXACT = 0.0386 × ALWAYS-YES (A1) + 0.961 × NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)"
+     ],
+     "dependencies": [
+      {
+       "members": [
+        "ALWAYS-YES (A1)",
+        "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)",
+        "q"
+       ],
+       "substantive": false,
+       "relation": "q = 0.5 × ALWAYS-YES (A1) + 0.5 × NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)",
+       "statement": "q = 0.5 × ALWAYS-YES (A1) + 0.5 × NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)"
+      },
+      {
+       "members": [
+        "ALWAYS-YES (A1)",
+        "NOISY-EXACT",
+        "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)"
+       ],
+       "substantive": false,
+       "relation": "NOISY-EXACT = 0.0386 × ALWAYS-YES (A1) + 0.961 × NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)",
+       "statement": "NOISY-EXACT = 0.0386 × ALWAYS-YES (A1) + 0.961 × NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)"
+      }
+     ],
+     "not_identified": [
+      "q",
+      "NOISY-EXACT"
+     ],
+     "involved": [
+      "ALWAYS-YES (A1)",
+      "NOISY-EXACT",
+      "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound)",
+      "q"
+     ],
+     "identified": [
+      "ALWAYS-YES (A1) + 0.5 × q + 0.0386 × NOISY-EXACT",
+      "ETR-1p (R1)",
+      "ETR-default (R1)",
+      "FIRST (B4)",
+      "GREEDY-CM (not-C first) (C1)",
+      "GREEDY-CM-MENTION (C1)",
+      "MM-S1 (B4)",
+      "NONE (A1 give-up: does not follow) = TRUTH TABLE (exact) = UP-fixpoint (B1, sound) + 0.5 × q + 0.961 × NOISY-EXACT",
+      "ONL(1) (C4)",
+      "ONL(2) (C4)",
+      "SAMPLE-3 (H)"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [
+    "null_q",
+    "null_always"
+   ],
+   "seconds": 207.9
   }
  ],
  "merged": [
@@ -2007,6 +9296,56 @@
    },
    "command": "python -m reasoning_heuristics.identify.recovery run --items /tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete --label pc10 --units C_E5/3-SAT (partial assignment given);AH_E5/ENT --scenarios mix,null_q,null_always --reps 100 --boot 100 --workers 4 --out /tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/b2_pc10.json",
    "generated": "2026-11-17 23:11"
+  },
+  {
+   "units": [
+    "AH_E1/COL",
+    "AH_E1/ENT",
+    "AH_E1/SAT",
+    "AH_E2/COL",
+    "AH_E2/ENT",
+    "AH_E2/SAT",
+    "AH_E5/COL",
+    "AH_E5/KNAP",
+    "C_E1/colouring",
+    "C_E5/3-SAT",
+    "C_E5/colouring (k=3)",
+    "C_E5/colouring (k=3, partial colouring given)",
+    "C_E5/propositional entailment"
+   ],
+   "provenance": {
+    "git_sha": "06e34f4ba0ee9f224bc00b36bb2bfd75dc699c67",
+    "git_dirty": false,
+    "item_files": {
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/AH_E1_dev_s1.jsonl": "41bc65fe48b7d06e1b490dbe5b8bbdb51731d8e2d56ccb954d3da40cc37620c1",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/AH_E2_dev_s1.jsonl": "23f975f1aed0b0821c6c8ca117a3820d098fbb18456d554656c0489037c0de9e",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/AH_E5_dev_s1.jsonl": "6dc305eddb974c841a73c59e55d5f7b37ddd4a9fd59c868d9cde0d879d57b7f6",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/B4C4_E1_dev_s1.jsonl": "31308d5d5edfe30798a3c6cf521c3047a4613dcf5f1676d4b0aa968907bd4a81",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/B4C4_E2_dev_s1.jsonl": "5b33b6fb5e78d45cc8eb8f142fa06e8b76ef2875aa6ceb157d086b18b8afbe6a",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/C_E1_dev_s1.jsonl": "a1e863b3e9d73645ed6414232738fa042e347776c3adbe76df4ecf22c0706301",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/C_E2_dev_s1.jsonl": "9275a0db3866ba90fee008e3ecad36d55722fb29107be22c68739159ee264d7f",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/C_E3_dev_s1.jsonl": "fac7a53b11c047937da0cb042a02e6e49f800cdf389d20bc9de3853a1a2790e3",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/C_E5_dev_s1.jsonl": "099a63a6d0d4def248f9c4688b88e4dcead677c9b97be9f6b735448a0eafc0bd"
+    }
+   },
+   "command": "python -m reasoning_heuristics.identify.recovery run --items /tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete --label pc10 --units AH_E1/SAT;AH_E1/COL;AH_E1/ENT;AH_E2/SAT;AH_E2/COL;AH_E2/ENT;C_E5/3-SAT;C_E5/colouring (k=3);C_E5/colouring (k=3, partial colouring given);C_E5/propositional entailment;AH_E5/COL;AH_E5/KNAP;C_E1/colouring --scenarios mix,null_q,null_always --reps 100 --boot 100 --workers 7 --out /tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/a2_pc10.json",
+   "generated": "2026-11-17 23:41"
+  },
+  {
+   "units": [
+    "C_E1/3-SAT",
+    "C_E2/3-SAT"
+   ],
+   "provenance": {
+    "git_sha": "9cb1bd17b6bc7b117c4bc5062ed50925485ea84b",
+    "git_dirty": false,
+    "item_files": {
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v3/pc10/dev/C_E1_dev_s1.jsonl": "92fe83de0e79831d776bb9ef9ebb8ed8997e2bf52e75c093076a610fd87bb2b2",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v3/pc10/dev/C_E2_dev_s1.jsonl": "6553db1f25f668e7af7d4583e83b2bbe2c238cea5e04c98ac396d0f412059995"
+    }
+   },
+   "command": "python -m reasoning_heuristics.identify.recovery run --items /tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v3/pc10/dev --label pc10 --units C_E1/3-SAT;C_E2/3-SAT --scenarios mix,null_q,null_always --reps 100 --boot 100 --workers 4 --out /tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/b3_sat_pc10.json",
+   "generated": "2026-11-17 23:56"
   }
  ],
  "dropped_before_merge": [
