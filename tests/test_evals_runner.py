@@ -26,15 +26,21 @@ B4E1 = str(ITEMS / "smoke" / "B4C4_E1_smoke_s1.jsonl.gz")
 class FakeTransport:
     """Answers chat completions like a model; can fail first, and records every call."""
 
-    def __init__(self, fail_first: list[int] | None = None, cost: float = 0.0001, exc_first: int = 0):
+    def __init__(self, fail_first: list[int] | None = None, cost: float = 0.0001, exc_first: int = 0,
+                 charged_errors: list[float] | None = None):
         self.calls: list[dict] = []
         self.fail_first = list(fail_first or [])
         self.exc_first = exc_first
         self.cost = cost
+        self.charged_errors = list(charged_errors or [])  # 200s with an error body that still report usage.cost
+        self.key_usage = 1.0
 
     def __call__(self, method, url, headers, body, timeout):
         assert headers["Authorization"] == f"Bearer {SECRET}"
         if method == "GET":
+            if url.endswith("/key"):
+                self.key_usage += 0.25
+                return HttpResponse(200, json.dumps({"data": {"usage": self.key_usage, "label": "secret label"}}).encode())
             return HttpResponse(200, json.dumps({"data": {"endpoints": []}}).encode())
         req = json.loads(body)
         self.calls.append(req)
@@ -43,6 +49,11 @@ class FakeTransport:
             raise urllib.error.URLError("connection reset")
         if self.fail_first:
             return HttpResponse(self.fail_first.pop(0), b'{"error": {"message": "busy"}}', {})
+        if self.charged_errors:
+            cost = self.charged_errors.pop(0)
+            body = {"choices": [{"finish_reason": "error", "error": {"code": 502, "message": "upstream died"},
+                                 "message": {"content": None}}], "usage": {"completion_tokens": 900, "cost": cost}}
+            return HttpResponse(200, json.dumps(body).encode())
         prompt = req["messages"][-1]["content"]
         content = "ANSWER: C" if '"ANSWER: <letter>"' in prompt else "ANSWER: YES"
         resp = api_response(content, cost=self.cost, model=req["model"], provider="FakeProvider",
@@ -128,7 +139,7 @@ def test_key_is_read_from_the_environment_at_call_time(monkeypatch):
 def test_thinking_and_direct_requests():
     q = get_model("qwen/qwen3-32b")
     th = request_body(q, condition(q, "thinking"), "PROMPT", {"order": ["p"], "allow_fallbacks": False})
-    assert th["max_tokens"] == 32768 and th["reasoning"] == {"enabled": True} and th["messages"] == [{"role": "user", "content": "PROMPT"}]
+    assert th["max_tokens"] == 32768 and th["reasoning"] == {"effort": "high"} and th["messages"] == [{"role": "user", "content": "PROMPT"}]
     assert th["provider"] == {"order": ["p"], "allow_fallbacks": False} and th["temperature"] == 0.6
     di = request_body(q, condition(q, "direct"), "PROMPT", None)
     assert di["max_tokens"] == 1024 and di["reasoning"] == {"enabled": False}
@@ -339,3 +350,57 @@ def test_probe_records_listing_reasoning_and_thinking_off(tmp_path, key):
     on = next(p for p in results["models"]["qwen/qwen3-32b"]["probed"] if p["variant"] == "on")
     assert on["summary"]["reasoning_returned"] and not on["summary"]["thinking_off_honoured"]
     assert ledger.spent(led, "mine") == pytest.approx(0.00004)
+
+
+# --- follow-ups: charged failures, key usage, scoring against the items at the run's SHA ---------------------
+
+
+def test_charged_failed_attempts_are_booked(tmp_path, key):
+    t = FakeTransport(charged_errors=[0.002], cost=0.0001)
+    assert run(tmp_path, t, "--concurrency", "1", limit=2) == 0
+    raw = read_gz(tmp_path / "run1" / "raw.jsonl.gz")
+    assert raw[0]["failed_attempt_costs"] == [0.002] and raw[0]["charged_usd"] == pytest.approx(0.0021)
+    assert raw[1]["failed_attempt_costs"] == [] and raw[1]["charged_usd"] == pytest.approx(0.0001)
+    m = json.loads((tmp_path / "run1" / "manifest.json").read_text())
+    assert m["spend"]["spent_usd"] == pytest.approx(0.0022) and m["spend"]["failed_attempt_cost_usd"] == pytest.approx(0.002)
+    assert m["charged_usd"] == pytest.approx(0.0022)
+    assert float(ledger.rows(tmp_path / "LEDGER.md")[0]["cost_usd"]) == pytest.approx(0.0022)
+
+
+def test_no_retry_when_a_charged_failure_leaves_no_room_under_the_cap(tmp_path, key):
+    # one reservation is about $0.0053; the failed attempt is charged $0.005, so a retry could pass $0.008
+    t = FakeTransport(charged_errors=[0.005, 0.005])
+    args = ["--items", B4E1, "--model", "openai/gpt-oss-20b", "--out", str(tmp_path / "c"), "--cap-usd", "0.008",
+            "--provider", "fp", "--cache-dir", str(tmp_path / "cache"), "--ledger", str(tmp_path / "L.md"),
+            "--concurrency", "1", "--limit", "3"]
+    assert run_main(args, client=client(t)) == 2
+    m = json.loads((tmp_path / "c" / "manifest.json").read_text())
+    assert len(t.calls) == 1 and m["status"] == "stopped" and m["stop_reason"].startswith("cap:")
+    assert m["spend"]["spent_usd"] == pytest.approx(0.005) and m["spend"]["spent_usd"] <= 0.008
+
+
+def test_manifest_records_the_key_usage_counter_but_nothing_else_about_the_key(tmp_path, key):
+    run(tmp_path, FakeTransport(), limit=2)
+    m = json.loads((tmp_path / "run1" / "manifest.json").read_text())
+    assert m["key_usage"]["before"] == {"usage": 1.25} and m["key_usage"]["after"] == {"usage": 1.5}
+    assert m["key_usage"]["delta_usd"] == pytest.approx(0.25)
+    assert "secret label" not in (tmp_path / "run1" / "manifest.json").read_text()
+
+
+def test_rescore_against_the_items_at_the_runs_git_sha(tmp_path, key, monkeypatch):
+    run(tmp_path, FakeTransport(), limit=3)
+    out = tmp_path / "run1"
+    before = read_gz(out / "scored.jsonl.gz")
+    from reasoning_heuristics.evals import score as S
+
+    monkeypatch.setattr(S, "sha256_file", lambda p: "f" * 64)  # the working-tree items were regenerated
+    with pytest.raises(SystemExit, match="changed since the run"):
+        score_main([str(out)])
+    assert score_main([str(out), "--items-at-run-sha"]) == 0  # git show <sha>:<path>, hash-checked
+    assert [r["parsed"] for r in read_gz(out / "scored.jsonl.gz")] == [r["parsed"] for r in before]
+    assert json.loads((out / "scoring.json").read_text())["items_source"].startswith("git ")
+    m = json.loads((out / "manifest.json").read_text())
+    m["items"]["files"]["data/items/smoke/B4C4_E1_smoke_s1.jsonl.gz"] = "0" * 64
+    (out / "manifest.json").write_text(json.dumps(m))
+    with pytest.raises(SystemExit, match="not the run's"):
+        score_main([str(out), "--items-at-run-sha"])

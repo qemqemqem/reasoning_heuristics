@@ -56,7 +56,21 @@ def urllib_transport(method: str, url: str, headers: dict[str, str], body: bytes
 
 
 class FatalAPIError(RuntimeError):
-    """A response that retrying cannot fix (bad request, auth, no credits). Stops the run."""
+    """A response that retrying cannot fix (bad request, auth, no credits). Stops the run.
+    `charged` is any cost the API reported on that response."""
+
+    def __init__(self, message: str, charged: float = 0.0):
+        super().__init__(message)
+        self.charged = charged
+
+
+def _reported_cost(data: Any) -> float:
+    """`usage.cost` from a response body, or 0 when it carries none."""
+    if isinstance(data, dict) and isinstance(data.get("usage"), dict):
+        cost = data["usage"].get("cost")
+        if isinstance(cost, (int, float)) and cost > 0:
+            return float(cost)
+    return 0.0
 
 
 class MissingKeyError(RuntimeError):
@@ -73,6 +87,7 @@ class CallResult:
     latency_s: float
     error: str | None = None
     errors: list[str] = field(default_factory=list)  # one line per failed attempt
+    failed_attempt_costs: list[float] = field(default_factory=list)  # API-reported cost of each failed attempt (0 if none)
 
     @property
     def ok(self) -> bool:
@@ -124,14 +139,22 @@ class OpenRouterClient:
         base = min(self.backoff_base_s * 2 ** (attempt - 1), self.backoff_max_s)
         return base * (0.5 + 0.5 * self.rng.random())
 
-    def chat(self, body: dict[str, Any]) -> CallResult:
-        """POST /chat/completions with retries. Raises FatalAPIError for unretryable failures."""
+    def chat(self, body: dict[str, Any], on_failed_attempt: Callable[[float], bool] | None = None) -> CallResult:
+        """POST /chat/completions with retries. Raises FatalAPIError for unretryable failures.
+
+        A failed attempt can still be charged (e.g. a 200 whose body carries an error after the
+        provider generated). Its API-reported `usage.cost` (0 if none) is kept in
+        `failed_attempt_costs` and passed to `on_failed_attempt`, which books it and returns whether
+        another attempt is allowed (the cost guard says no when a retry could pass the cap).
+        """
         payload = json.dumps(body).encode("utf-8")
         errors: list[str] = []
+        failed_costs: list[float] = []
         t0 = time.monotonic()
         status = None
         for attempt in range(1, self.max_attempts + 1):
             retry_after = None
+            charged = 0.0
             try:
                 resp = self.transport("POST", f"{API_BASE}/chat/completions", self._headers(), payload, self.timeout_s)
             except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as e:
@@ -140,27 +163,37 @@ class OpenRouterClient:
                 status = resp.status
                 retry_after = resp.headers.get("Retry-After") or resp.headers.get("retry-after")
                 text = resp.body.decode("utf-8", errors="replace")
+                data = None
+                try:
+                    data = json.loads(text) if text.strip() else {}
+                except json.JSONDecodeError:
+                    pass
+                charged = _reported_cost(data)
                 if resp.status in FATAL_STATUS:
-                    raise FatalAPIError(f"HTTP {resp.status}: {text[:500]}")
+                    raise FatalAPIError(f"HTTP {resp.status}: {text[:500]}", charged)
                 if resp.status == 200:
-                    try:
-                        data = json.loads(text) if text.strip() else {}
-                    except json.JSONDecodeError:
+                    if data is None:
                         errors.append(f"attempt {attempt}: unparseable 200 body ({len(text)} chars)")
                     else:
                         problem = _retryable_body(data)
                         if problem is None:
-                            return CallResult(data, 200, attempt, time.monotonic() - t0, None, errors)
+                            return CallResult(data, 200, attempt, time.monotonic() - t0, None, errors, failed_costs)
                         if isinstance(data.get("error"), dict) and data["error"].get("code") in FATAL_STATUS:
-                            raise FatalAPIError(problem)
+                            raise FatalAPIError(problem, charged)
                         errors.append(f"attempt {attempt}: {problem}")
                 elif resp.status in RETRY_STATUS or resp.status >= 500:
                     errors.append(f"attempt {attempt}: HTTP {resp.status}: {text[:200]}")
                 else:
-                    raise FatalAPIError(f"HTTP {resp.status}: {text[:500]}")
+                    raise FatalAPIError(f"HTTP {resp.status}: {text[:500]}", charged)
+            failed_costs.append(charged)
+            allowed = on_failed_attempt(charged) if on_failed_attempt is not None else True
+            if not allowed:
+                errors.append(f"attempt {attempt}: no retry (the cost guard refused one)")
+                break
             if attempt < self.max_attempts:
                 self.sleep(self._backoff(attempt, retry_after))
-        return CallResult(None, status, self.max_attempts, time.monotonic() - t0, errors[-1] if errors else "failed", errors)
+        return CallResult(None, status, len(failed_costs), time.monotonic() - t0, errors[-1] if errors else "failed",
+                          errors, failed_costs)
 
     def get_json(self, path: str) -> dict[str, Any]:
         """GET an API path (model endpoint listings, generation stats). Free; needs the key."""
@@ -176,3 +209,12 @@ class OpenRouterClient:
     def generation(self, generation_id: str) -> dict[str, Any]:
         """GET /generation?id=...: provider_name, native token counts, total_cost."""
         return self.get_json(f"/generation?id={generation_id}")
+
+    def key_usage(self) -> dict[str, Any]:
+        """The key's own usage counter (GET /key), as numbers only: never the key, its label or its hash.
+        Other users of the same key move it too, so a before/after delta is an upper bound on a run."""
+        try:
+            data = self.get_json("/key").get("data") or {}
+        except (FatalAPIError, OSError, ValueError) as e:
+            return {"error": str(e)[:200]}
+        return {k: data.get(k) for k in ("usage", "usage_daily", "limit", "limit_remaining") if k in data}

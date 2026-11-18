@@ -51,9 +51,23 @@ def endpoint_price(ep: dict[str, Any]) -> Pricing:
 
 
 def probe_variants(slug: str) -> list[tuple[str, dict[str, Any] | None, str]]:
+    """on / off / none for every model (off and none record whether reasoning can be disabled at all);
+    the /no_think soft switch only for Qwen3 checkpoints."""
     cfg = get_model(slug)
-    on = dict(cfg.thinking_reasoning)
-    return [("on", on, ""), ("off", {"enabled": False}, ""), ("none", {"effort": "none"}, ""), ("no_think", None, " /no_think")]
+    out = [("on", dict(cfg.thinking_reasoning), ""), ("off", {"enabled": False}, ""), ("none", {"effort": "none"}, "")]
+    if slug.startswith("qwen/"):
+        out.append(("no_think", None, " /no_think"))
+    return out
+
+
+def rank(eps: list[dict[str, Any]], min_completion: int) -> list[dict[str, Any]]:
+    """Endpoints to probe first: available (status 0), able to return min_completion tokens, full
+    precision, then cheapest."""
+    def key(e: dict[str, Any]):
+        maxc = e.get("max_completion_tokens") or e.get("context_length") or 0
+        return (e.get("status", 0) != 0, maxc < min_completion, PRECISION_RANK.get(e.get("quantization"), 5),
+                float((e.get("pricing") or {}).get("completion") or 1))
+    return sorted(eps, key=key)
 
 
 def summarise(resp: dict[str, Any] | None) -> dict[str, Any]:
@@ -81,8 +95,7 @@ def run_probes(client: OpenRouterClient, models: list[str], guard: CostGuard, ma
     for slug in models:
         listing = client.endpoints(slug)
         eps = (listing.get("data") or {}).get("endpoints") or []
-        ranked = sorted(eps, key=lambda e: (PRECISION_RANK.get(e.get("quantization"), 5),
-                                            float((e.get("pricing") or {}).get("completion") or 1)))
+        ranked = rank(eps, 32768)
         rec: dict[str, Any] = {"listing": listing, "probed": []}
         for ep in ranked[:max_endpoints]:
             price = endpoint_price(ep)
@@ -102,10 +115,12 @@ def run_probes(client: OpenRouterClient, models: list[str], guard: CostGuard, ma
                     rec["probed"].append(entry)
                     continue
                 try:
-                    res = client.chat(body)
+                    res = client.chat(body, on_failed_attempt=guard.book_failed_attempt)
                 except FatalAPIError as e:
+                    if e.charged:
+                        guard.book_failed_attempt(e.charged)
                     guard.release(worst)
-                    entry.update({"error": str(e)[:500]})
+                    entry.update({"error": str(e)[:500], "charged": e.charged})
                     rec["probed"].append(entry)
                     continue
                 if res.ok:
@@ -182,7 +197,7 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
     results["git"] = git_info()
     write_json(out / "probes.json", results)
     (out / "PROBES.md").write_text(report(results), encoding="utf-8")
-    if guard.calls:
+    if guard.calls or guard.failed_attempt_cost:
         ledger.append(Path(a.ledger), date=utc_now()[:10], run_id=f"probes/{out.name}", model=", ".join(a.model),
                       condition="probe", items=guard.calls, cost_usd=guard.spent, budget_tag=a.budget_tag or "-",
                       notes="provider probes (calls in the Items column)")
