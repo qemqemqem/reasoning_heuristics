@@ -203,6 +203,20 @@ def test_bare_answer_without_marker_only_when_it_is_nothing_but_the_answer():
     assert score_text(col, "Here is my colouring:\n" + lines)["category"] == "parse_fail"
 
 
+def test_latex_answer_decoration_is_unwrapped():
+    """Seen live in Qwen3-32B thinking replies to B4/C4 MC items."""
+    mc = first_with("ans_letter")
+    for tail in ("### Final Answer\n\n$$\n\\text{ANSWER: C}\n$$",
+                 "**Final Answer:**  \n$$\n\\boxed{C}\n$$",
+                 "**Final Answer:**\n\n$$\n\\boxed{\\text{C}}\n$$"):
+        rec = score_text(mc, "(D) can be true, so it is not entailed.\n\n---\n\n" + tail)
+        assert rec["category"] == "ok" and rec["parsed"] == "C" and "latex_unwrapped" in rec["flags"], tail
+    yn = first_with("ans_yn", vertical="B4/C4")
+    assert score_text(yn, "ANSWER: $\\boxed{\\text{NO}}$")["parsed"] == "NO"
+    js = first_with("json_ent_yn")  # JSON formats are left alone
+    assert "latex_unwrapped" not in score_text(js, '$x$ so {"follows": true}')["flags"]
+
+
 def test_trailing_periods_after_values():
     it = first_with("ans_single_colour")
     want = it["ground_truth"]["answer"]

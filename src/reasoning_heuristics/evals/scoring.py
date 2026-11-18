@@ -61,9 +61,10 @@ from reasoning_heuristics.problems.coloring import graph as G
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.sat import cnf as S
 
-SCORER_VERSION = "scorer-1.1.1"
+SCORER_VERSION = "scorer-1.2.0"
 # 1.1.0: a reply that is nothing but the answer, without the ANSWER: marker, is parsed (flag no_answer_marker).
 # 1.1.1: answer_only_in_reasoning is not set on truncated replies (their reasoning often quotes the format).
+# 1.2.0: LaTeX answer decoration (\\boxed{..}, \\text{..}, $$ ... $$) is unwrapped before the ANSWER: formats are parsed.
 
 CATEGORIES = ("ok", "parse_fail", "refusal", "declared_impossible", "partial", "truncated", "api_error")
 
@@ -411,6 +412,19 @@ def _fact_variants(canon: str) -> list[str]:
 
 
 # --- the parsers ------------------------------------------------------------------------------------
+
+
+_LATEX_WRAP = re.compile(r"\\(?:boxed|text|textbf|textit|texttt|mathrm|mathbf|mathtt)\s*\{([^{}]*)\}")
+
+
+def unlatex(text: str) -> str:
+    """Unwrap LaTeX answer decoration (seen live: `$$\\text{ANSWER: C}$$`, `$$\\boxed{C}$$`): wrappers such
+    as \\boxed{..} and \\text{..} are replaced by their contents, and math delimiters by line breaks."""
+    prev = None
+    while prev != text:  # nested: \boxed{\text{C}}
+        prev, text = text, _LATEX_WRAP.sub(r"\1", text)
+    text = re.sub(r"\$\$|\\\[|\\\]|\\\(|\\\)", "\n", text)
+    return re.sub(r"(?<!\\)\$", "", text)
 
 
 def parse(ctx: ItemContext, text: str) -> Parse | None:
@@ -829,6 +843,11 @@ def score_response(item: dict[str, Any], view: ResponseView, ctx: ItemContext | 
     """Score one response to one item. Returns the per-response record (see docs/RUNNER.md)."""
     ctx = ctx or ItemContext(item)
     text, flags = visible_text(view.content)
+    if not ctx.fmt.kind.startswith("json_"):
+        plain = unlatex(text)
+        if plain != text:
+            text = plain
+            flags.append("latex_unwrapped")
     truncated = view.finish_reason == "length" or view.native_finish_reason in ("length", "max_tokens", "MAX_TOKENS") or (
         view.max_tokens is not None and view.completion_tokens is not None and view.completion_tokens >= view.max_tokens)
     rec: dict[str, Any] = {
