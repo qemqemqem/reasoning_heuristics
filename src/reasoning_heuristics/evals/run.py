@@ -259,6 +259,9 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
     if a.limit:
         items = items[: a.limit]
     provider = routing(cfg, a.provider, a.quantization, a.no_pin or a.dry_run)
+    if not a.provider and cfg.max_completion_tokens and cond.max_tokens > cfg.max_completion_tokens:
+        raise SystemExit(f"{cfg.slug}: max_tokens {cond.max_tokens} is above the pinned endpoint's completion limit "
+                         f"{cfg.max_completion_tokens}; the condition cannot run there ({cfg.notes})")
     price: Pricing = cfg.pinned_price if (cfg.pinned_price and not a.provider) else cfg.list_price
     if a.price:
         price = Pricing(a.price[0], a.price[1], "--price")
