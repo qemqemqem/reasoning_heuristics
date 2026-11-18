@@ -2,7 +2,17 @@
 
 *Theory-crafting note, written 2026-11-13, before any project data. One of three. T1 covers expressivity, circuit complexity and the budget line; T3 covers LLM precedent and training pressure. Overlaps are marked [→T1] and [→T3] and are not argued here. This note builds on [literature/D_rasp_algorithms.md](../literature/D_rasp_algorithms.md) and does not repeat it. It is the first draft of [PAPER_SKELETON.md](../PAPER_SKELETON.md) Table 15.*
 
-**Code.** Everything marked **Code** runs from [`scripts/theory/rasp/`](../../scripts/theory/rasp/) (numpy + matplotlib, fixed seeds; the full run takes about 30 s):
+**Code.** Everything marked **Code** runs from [`scripts/theory/rasp/`](../../scripts/theory/rasp/) (numpy + matplotlib, fixed seeds; `pip install -e '.[theory]'`). Run from that folder. Wall-clock times were measured on 2026-11-17 on a 14-core laptop under heavy load (load average 25–30), so expect less when idle:
+
+| Command | Produces | Time |
+|---|---|---|
+| `python frontier.py` (default `--n 600`, seed 0) | `results.json`, `T2_frontier.png`, `T2_perstep.png` | 113 s |
+| `python ood.py` | `ood.json` | 47 s |
+| `python programs_sat.py`, `programs_ent.py`, `programs_col.py` | equivalence tests (0 failures) and length reports | seconds |
+
+The committed files are exactly what these commands write (`--n 600`; a run with another `--n` differs). The per-step lengths for `UC`, `DPLL-b`, `WALK`, `DSATUR`, `MIN-CONFLICTS`, `NN` are estimates hard-coded in `frontier.py` (`PER_STEP_EST`), not outputs.
+
+The files:
 
 - `rasp.py`: an instrumented RASP-L interpreter. It counts primitives, tracks attention depth and flags rule-bending.
 - `programs_sat.py`, `programs_ent.py`, `programs_col.py`: the programs, with reference implementations and equivalence tests.
@@ -38,18 +48,18 @@
 
 1. **The direct-answer frontier is short cues plus shallow causal propagation** (Code).
    - On random 3-SAT, `DENSITY` (8 primitives, 2 layers) is the only short program above base rate (0.787 vs 0.728). Unit propagation is inert on pure 3-SAT, because it has no unit clauses.
-   - On puzzle-like CNF and on entailment, `UP-k` is on the frontier (puzzle CNF 0.865 at k = 2; entailment 0.958–0.967), with `ALWAYS-*` and `ECHO` below it.
+   - On puzzle-like CNF and on entailment, `UP-k` is on the frontier (puzzle CNF 0.865 / 0.893 / 0.908 at k = 1 / 2 / 3; entailment 0.958–0.967), with `ALWAYS-*` and `ECHO` below it.
    - `POLARITY` (9 primitives) is the frontier for single-variable value choice. Causal `BP-2` (81) adds nothing on a training-like distribution.
-2. **Restriction (B4) members cost no extra length.** `FIRST∘UP-k` and `BICOND∘UP-k` are the B1 skeleton with a different lookup table: same length, same depth (Code).
+2. **Restriction (B4) members cost no *less* length than validity.** `FIRST∘UP-k` is the B1 skeleton with a different role table: the same length and depth, but only under the table-swap convention (any lookup table, however large, is one map). `BICOND∘UP-k` needs extra lookups and is 12–16% longer (+6 / +12 / +19 primitives at k = 1 / 2 / 3; Code).
    - Under validity labels they are strictly dominated.
    - They overtake `UP-k` only if ≈ 50% (`FIRST`) or ≈ 70–80% (`BICOND`) of training labels on the discriminating items endorse the restricted reading.
-   - So RASP-L simplicity cannot explain B4. If models use it, the data put it there [→T3].
-3. **Greedy with state is not RASP-L in terse form.** A terse `FIRST-FIT` step must join prompt structure (edges) with generated state (colours). We found no int8 program for that join. It takes 25 primitives with set-valued state, which is non-RASP-L and needs width ≥ n (Code + Arg).
-   - With a *verbose* trace that restates each neighbour's colour, every token is a strict RASP-L step (53 primitives, 3 layers; it reproduces FIRST-FIT exactly; Code).
+   - So RASP-L simplicity cannot explain B4: neither member is shorter than `UP-k`, and `BICOND` is longer. If models use it, the data put it there [→T3]. (Correction 2026-11-17: an earlier draft reported `BICOND` as +0 only because the plain `UP-k` program carried the unused BICOND lookups. Removing them makes the conclusion stronger for BICOND and leaves it unchanged for FIRST.)
+3. **Greedy with state is not RASP-L in terse form.** A terse `FIRST-FIT` step must join prompt structure (edges) with generated state (colours). We found no int8 program for that join, and §3.3 gives a counting argument (not a proof) that none exists. It takes 25 primitives with set-valued state, which is non-RASP-L and needs width ≥ n (Code + Arg).
+   - With a *verbose* trace that restates each neighbour's colour, every token is a RASP-L step apart from the `nary_map` convention (53 primitives, 3 layers; it reproduces FIRST-FIT exactly; Code). The step contains an 8-input arbitrary map counted as 7 binary maps, which needs int8 intermediate codes that may not exist. So "strict" holds only under that convention.
    - The account therefore predicts the **style** of thinking traces (copy, then evaluate), not only the heuristic.
 4. **In TH the ranking flips toward exact search.**
    - Per-step programs for C, D and F share about 40–50 primitives of trace machinery (copy, lookup, dispatch). They differ by roughly 10–40 primitives.
-   - Iterated accuracy on training-size instances differs a great deal: `DPLL-b` 1.00, `WALK` 0.88, `UC` 0.43 on random 3-SAT, n = 20 (Code for accuracy, Est for lengths).
+   - Iterated accuracy on training-size instances differs a great deal: `DPLL-b` 0.975 (default SAT) or 1.0 (default UNSAT), `WALK` 0.875, `UC` 0.425 on random 3-SAT, n = 20 (Code for accuracy, Est for lengths; 40 items per cell, so ±0.08).
    - So two-part MDL favours D (truncated exact search) below the budget line. Above it, it favours D's default answer.
 5. **Surprise.** With a small, fixed atom vocabulary, the MDL-optimal *direct* entailment program for N ≳ 10⁴ examples is a parallel truth table (`PROBE-16`).
    - It has 147 primitives but only **3 layers**, and it is exact in-distribution.
@@ -81,9 +91,9 @@ The training-distribution assumptions are in §4.1. "Frontier" means non-dominat
 | A2 cue | `DENSITY` | **+2** random k-SAT; 0 puzzle CNF | −1 | high / med | Code | 8 primitives, 2 layers, sensitivity 0. The only short program above base rate on 3-SAT. Barely above base on mixed-width CNF. |
 | A2 cue | `PRIMACY` | −1 | −1 | med | Code | 20 primitives at `ALWAYS-NO`'s accuracy (0.703 vs 0.698): dominated |
 | A2/B4 cue | `MATCH` | −2 | −1 | med | Code | Dominated by `ALWAYS-NO` (0.61 vs 0.70). The most sensitive member (0.20). |
-| B1 relax | `UP-k` (k ≤ 3, causal) | **+2** | +1 | high / med | Code | On the frontier on entailment and puzzle CNF; sound. About 1 layer per round (2-literal clauses) or 2 (3-literal). In TH it is absorbed into D's propagation. |
+| B1 relax | `UP-k` (k ≤ 3, causal) | **+2** | +1 | high / med | Code | On the frontier on entailment and puzzle CNF; sound. About 1 layer per round (2-literal clauses) or 2 (3-literal; SAT `UP-k` measures 2k + 3 layers). In TH it is absorbed into D's propagation. |
 | B3 convex | `LP-ROUND` | −2 | −1 | low | Arg | Needs iterated real arithmetic. No int8 RASP-L program, and exact LP is P-complete [F]. |
-| B4 restrict | `FIRST`, `BICOND` | −1 | −1 | med / low | Code | Same length as `UP-k` (Δ = 0) but less accurate under validity labels. Selected only when labels endorse the reading (q\* ≈ 0.5 / 0.7–0.8). |
+| B4 restrict | `FIRST`, `BICOND` | −1 | −1 | med / low | Code | `FIRST`: same length as `UP-k` (Δ = 0, by the table-swap convention); `BICOND`: 12–16% longer. Both less accurate under validity labels. Selected only when labels endorse the reading (q\* ≈ 0.5 / 0.7–0.8). |
 | B4/C4 | `MM`, `ETR` (simplified) | −1 | −1 | low | Code (acc.) + Arg | 0.76 accuracy. Model sets are set-valued, so there is no int8 constant-depth program for unbounded disjunctions, and the per-step form needs verbose model lists. |
 | B5 | `EXPECTED-COST` | 0 | 0 | low | — | Not analysed |
 | C0 one-shot | `POLARITY` | **+2** | 0 | high / med | Code | 9 primitives, 2 layers, 0.960 on single-variable value choice. `BP-1c`/`BP-2c` add nothing. In TH it serves as D's value ordering. |
@@ -93,9 +103,9 @@ The training-distribution assumptions are in §4.1. "Frontier" means non-dominat
 | C2 adaptive | `UC` (decision use) | −2 | −1 | med | Code (acc.) + Est | Below base rate as a decision procedure (0.43 at n = 20, α = 4.26) |
 | C3 random order | `RO-FIRST-FIT` | −1 | 0 | med | Arg | RASP-L is deterministic, so randomness exists only through sampling |
 | C4 online | `ONLINE-STATE(k)` | −1 | 0 | low | Arg | A sequential state update: k slots, about 7 primitives per premise [V: B4] |
-| D truncated search | `DPLL-b` | −2 | **+2** | high / med | Code (acc.) + Est | No constant-depth program. Per step ≈ 75 ± 20, within 1.5× of greedy, and exact on training sizes. |
+| D truncated search | `DPLL-b` | −2 | **+2** | high / med | Code (acc.) + Est | No constant-depth program. Per step ≈ 75 ± 20 (an estimate), within 1.5× of greedy, and 0.975–1.0 at n = 20 (exact at n = 10). |
 | E message passing | `BP-2`, `LOCAL-t` | −1 | −1 | med / low | Code | `BP-2c`: 81 primitives, 0.958 vs `POLARITY` 0.960. `LOCAL-3`: 0.73 vs FIRST-FIT 0.82. As text it is Θ(m) tokens per round [→T1]. |
-| F local search | `WALK` | −2 | 0 | med / low | Code (acc.) + Est | 0.875 at n = 20 vs `DPLL-b` 1.0 at a similar estimated length: dominated |
+| F local search | `WALK` | −2 | 0 | med / low | Code (acc.) + Est | 0.875 at n = 20 vs `DPLL-b` 0.975–1.0 at a similar estimated length: dominated at n = 20. At n = 30 / 40 the same simulation has `WALK` at 0.70 / 0.65 against `DPLL-b` 0.60–0.95 / 0.625 (40 items per cell), so domination is shown only at n = 20 |
 | F local search | `MIN-CONFLICTS` | −2 | +1 | med / low | Code (acc.) + Est | 0.968 (20 repairs after FIRST-FIT) at ≈ 80 ± 20 |
 | G decompose | `IGNORE-CROSSLINKS` | 0 | 0 | low | Arg | The base solver + 2 primitives (a part id conjoined into each selector). Nearly free, so the data decide, as for B4. |
 | H sample | `SAMPLE-m` / `PROBE-m` | −1 SAT; +1 ENT (fixed vocab) | 0 | med | Code | `PROBE-2`/`-4` dominated on SAT. `PROBE-16` is exact in-distribution on ≤ 4 atoms and has the fewest layers, but is SAMPLE-like out of distribution. |
@@ -187,14 +197,16 @@ frac     = aggregate(select_all, new_var, mean)                   # 127·(#disti
 answer   = tok_map(frac, ≥ θ)                                     # θ tuned on train
 ```
 
-**`UP-k` causal, SAT** (`up_causal`; k = 1, 2, 3: 31/7/3, 51/12/5, 71/17/7). Equivalence-tested against `ref_up_causal` on 200 instances × 3 values of k, 0 failures.
+**`UP-k` causal, SAT** (`up_causal`; unit seeding, then k propagation rounds; k = 1, 2, 3: 37/9/5, 57/14/7, 77/19/9). Equivalence-tested against `ref_up_causal` on 200 instances × 3 values of k, 0 failures.
+
+*Correction 2026-11-17.* The first version did k − 1 propagation rounds: its first round only recorded unit clauses, so `UP-1c` could never find a conflict and was identical to `ALWAYS-SAT`. The program now seeds the unit clauses first (≈ 6 primitives, no lookup), so round 1 already propagates, as T1 and the README define `UP-k`. The old `UP-k` equals the new `UP-(k−1)` in accuracy.
 
 - Derived literals sit at clause-close positions.
 - Each round:
   - a literal looks up its variable among *earlier* derived literals (one head, max and min of the sign);
   - each clause aggregates `sat`, `max` and `min` of its non-false literal tokens;
   - `max == min` means unit, and `max = −128` means conflict.
-- About 20 primitives and 2 layers per round, plus 11 primitives of setup and readout.
+- About 20 primitives and 2 layers per round, plus 11 primitives of setup and readout and about 6 for the unit seeding.
 - The causal mask means a unit can only fire clauses that come **after** it.
 
 **`POLARITY`** (9 / 2 / 2; equivalence-tested). The sign of the mean polarity of the target variable's occurrences in the prompt (+4 primitives to mask the query token).
@@ -212,11 +224,11 @@ answer   = tok_map(frac, ≥ θ)                                     # θ tuned 
 - **`MATCH`** (17/3/2): the conclusion literal occurs anywhere.
 - **`PRIMACY`** (20/4/2): it occurs in the first premise.
 - **`UP-0` = `ECHO`** (17/3/2): it is a stated fact.
-- **`UP-k`** (54/14/4, 93/25/5, 141/38/6 for k = 1, 2, 3): each round adds about one layer.
+- **`UP-k`** (48/12/4, 81/21/5, 122/32/6 for k = 1, 2, 3): each round adds about one layer. (The first version carried the BICOND lookups in every `UP-k`: 54/14/4, 93/25/5, 141/38/6.)
   - (i) Forward: a 2-literal clause, stored at its second literal, derives the other literal from an earlier fact on the same variable. This is a *sign-carrying* lookup, so the decision table can be swapped.
   - (ii) Backward: a fact derives from an earlier clause on its variable, into a fresh slot per round.
-- **`FIRST∘UP-k`**: the role table maps "either A or B" to fact A and drops B. **+0 primitives.**
-- **`BICOND∘UP-k`**: the decision table also licenses b⇒a and ¬a⇒¬b. **+0 primitives.**
+- **`FIRST∘UP-k`**: the role table maps "either A or B" to fact A and drops B. **+0 primitives**, because a table swap costs nothing under our convention (one map, whatever the table). That is a convention, not a finding that the restriction is free.
+- **`BICOND∘UP-k`**: the decision table also licenses b⇒a and ¬a⇒¬b, which needs an `iff` flag, two more lookups per round and wider maps: 54/14/4, 93/25/5, 141/38/6, i.e. **+6 / +12 / +19 primitives (12.5% / 14.8% / 15.6%) over `UP-k`**.
 - Tested on 9 hand-checked schemas: MP and MT in both orders, DS, illusory "A or B ⊢ A", AC, DA, and forward and backward chains. 0 failures.
 
 **`PROBE-m`, entailment** (`probe`; m = 4, 16: 51/8/3, 147/20/3).
@@ -317,14 +329,14 @@ Code: `frontier.py`. The figure is [T2_frontier.png](T2_frontier.png). ★ = on 
 |---|---|---|---|
 | SAT-DEC/puzzle | `ALWAYS-SAT` ★ | 1 / 0 / 0 | 0.718 |
 | | `DENSITY` ★ | 8 / 2 / 2 | 0.727 |
-| | `UP-1c` | 31 / 7 / 3 | 0.718 |
-| | `UP-2c` ★ | 51 / 12 / 5 | 0.865 |
-| | `UP-3c` ★ | 71 / 17 / 7 | 0.893 |
+| | `UP-1c` ★ | 37 / 9 / 5 | 0.865 |
+| | `UP-2c` ★ | 57 / 14 / 7 | 0.893 |
+| | `UP-3c` ★ | 77 / 19 / 9 | 0.908 |
 | | `PROBE-2` / `-4` | 19 / 29 | 0.473 / 0.593 |
 | | *UP to fixpoint, non-causal (seq)* | — | 0.997 |
 | SAT-DEC/bench | `ALWAYS-SAT` ★ | 1 | 0.728 |
 | | `DENSITY` ★ | 8 / 2 / 2 | **0.787** |
-| | `UP-kc`, `UP-fix` | 31–71 | 0.728 (inert: no unit clauses) |
+| | `UP-kc`, `UP-fix` | 37–77 | 0.728 (inert: no unit clauses) |
 | | `PROBE-2` / `-4` | 19 / 29 | 0.28 / 0.29 |
 | SAT-VAL | `CONST-TRUE` ★ | 1 | 0.917 |
 | | `POLARITY` ★ | 9 / 2 / 2 | **0.960** |
@@ -335,10 +347,10 @@ Code: `frontier.py`. The figure is [T2_frontier.png](T2_frontier.png). ★ = on 
 | | `PRIMACY` | 20 / 4 / 2 | 0.703 |
 | | `ECHO` (UP-0) ★ | 17 / 3 / 2 | 0.897 |
 | | `FIRST-0` | 17 / 3 / 2 | 0.848 |
-| | `UP-1` ★ | 54 / 14 / 4 | 0.958 |
-| | `FIRST∘UP-1` / `BICOND∘UP-1` | 54 / 14 / 4 | 0.870 / 0.935 |
-| | `UP-2` ★ (by length only) | 93 / 25 / 5 | 0.967 |
-| | `FIRST∘UP-2` / `BICOND∘UP-2` | 93 / 25 / 5 | 0.875 / 0.928 |
+| | `UP-1` ★ | 48 / 12 / 4 | 0.958 |
+| | `FIRST∘UP-1` / `BICOND∘UP-1` | 48 / 12 / 4 and 54 / 14 / 4 | 0.870 / 0.935 |
+| | `UP-2` ★ (by length only) | 81 / 21 / 5 | 0.967 |
+| | `FIRST∘UP-2` / `BICOND∘UP-2` | 81 / 21 / 5 and 93 / 25 / 5 | 0.875 / 0.928 |
 | | `PROBE-4` | 51 / 8 / 3 | 0.637 |
 | | `PROBE-16` ★ | 147 / 20 / **3** | **1.000** |
 | | *Python: `MM` (initial models)* | — | 0.758 |
@@ -353,7 +365,7 @@ Code: `frontier.py`. The figure is [T2_frontier.png](T2_frontier.png). ★ = on 
 
 **Frontier members.** These are the direct-answer candidates the account predicts:
 
-- SAT-DEC/puzzle: {`ALWAYS-SAT`, `DENSITY`, `UP-2c`, `UP-3c`}.
+- SAT-DEC/puzzle: {`ALWAYS-SAT`, `DENSITY`, `UP-1c`, `UP-2c`, `UP-3c`}.
 - SAT-DEC/bench: {`ALWAYS-SAT`, `DENSITY`}.
 - SAT-VAL: {`CONST-TRUE`, `POLARITY`}.
 - ENT: {`ALWAYS-NO`, `ECHO`, `UP-1`, `UP-2`, `PROBE-16`}.
@@ -372,15 +384,15 @@ The MDL winner as training-set size N grows, with the transitions:
 
 | Task | N ≤ 10³ | N ≈ 3·10³ | N ≥ 10⁴ |
 |---|---|---|---|
-| SAT-DEC/puzzle | `ALWAYS-SAT` | `UP-2c` | `UP-3c` |
+| SAT-DEC/puzzle | `ALWAYS-SAT` | `UP-1c` | `UP-3c` |
 | SAT-DEC/bench | `ALWAYS-SAT` | `DENSITY` | `DENSITY` |
 | SAT-VAL | `CONST-TRUE` | `POLARITY` (from N ≈ 10³) | `POLARITY` |
 | ENT | `ALWAYS-NO` → `ECHO` (N ≈ 10³) | `UP-1` | **`PROBE-16`** |
 
 **Capacity reading.** A rival reading takes sample complexity to be exponential in program size, after Zetzsche et al. 2026 ✓. Note that this is only a proven *upper* bound, and only for the C-RASP⁺/C-RASP₁ fragments. Under it, a member is learnable iff β^heads ≤ N, and we pick the most accurate learnable member.
 
-- With β = 2, entailment stays at `ECHO` up to N = 10⁴, moves to `UP-1` at 10⁵–10⁶, and reaches `PROBE-16` only at 10⁸.
-- SAT/puzzle moves `DENSITY` → `UP-2c` (10⁴) → `UP-3c` (10⁶).
+- With β = 2, entailment stays at `ECHO` up to N = 10³, moves to `UP-1` at 10⁴–10⁶, and reaches `PROBE-16` only at 10⁸.
+- SAT/puzzle moves `DENSITY` → `UP-1c` (10³–10⁴) → `UP-2c` (10⁵) → `UP-3c` (10⁶).
 
 **The general point.** In linear MDL every crossover lies at N ≈ 10³–10⁴. That is far below the puzzle-like data an LLM sees. **At LLM scale linear MDL makes length nearly irrelevant: the selection is "the most accurate *expressible* program".** The bite comes from four places:
 
@@ -393,7 +405,7 @@ The MDL winner as training-set size N grows, with the transitions:
 
 Code: `label_mixture`. Suppose a share q of training labels follows a restricted reading R instead of validity, as human-written text might [→T3].
 
-- Since `FIRST∘UP-2`, `BICOND∘UP-2` and `UP-2` have *identical* length, the winner is decided by majority on the items where they disagree.
+- Since `FIRST∘UP-2` and `UP-2` have the same length (by the table-swap convention) and `BICOND∘UP-2` is only 15% longer (a negligible 192 bits at 16 bits per primitive), the winner is decided by majority on the items where they disagree. The crossovers did not move when `BICOND` got its extra length.
 - `FIRST∘UP-2` overtakes `UP-2` at **q ≈ 0.5**.
 - `BICOND∘UP-2` overtakes it at **q ≈ 0.7–0.8**.
 - `MM` labels never make a B4 member win; at q = 1, `ECHO` wins.
@@ -406,9 +418,10 @@ Code. Sensitivity is the mean fraction of single local edits that flip the answe
 
 | Member | Sensitivity |
 |---|---|
-| `ALWAYS-SAT`, `DENSITY`, `UP-1c` | 0 |
-| `UP-2c` | 0.016 |
-| `UP-3c` | 0.023 |
+| `ALWAYS-SAT`, `DENSITY` | 0 |
+| `UP-1c` | 0.016 |
+| `UP-2c` | 0.023 |
+| `UP-3c` | 0.030 |
 | `UP-fix` | 0.047 |
 | `EXACT` | 0.053 |
 | `PROBE-2` / `-4` | 0.079 / 0.090 |
@@ -467,7 +480,7 @@ FIRST-FIT verbose (measured) is 53 primitives. About 30 of them are trace machin
 - edge lookups;
 - the colour fetch.
 
-The heuristic-specific delta between members of C, D and F is about 10–40 primitives (§3.4, Est). Meanwhile, iterated accuracy on training-size items spans 0.43 (`UC`) → 0.875 (`WALK`) → 1.0 (`DPLL-b`) on SAT at n = 20, and 0.82 (`FIRST-FIT`) → 0.97 (`MIN-CONFLICTS`) → 0.998 (`DSATUR`) on colouring ([T2_perstep.png](T2_perstep.png)).
+The heuristic-specific delta between members of C, D and F is about 10–40 primitives (§3.4, Est). Meanwhile, iterated accuracy on training-size items spans 0.43 (`UC`) → 0.875 (`WALK`) → 0.975–1.0 (`DPLL-b`) on SAT at n = 20, and 0.82 (`FIRST-FIT`) → 0.97 (`MIN-CONFLICTS`) → 0.998 (`DSATUR`) on colouring ([T2_perstep.png](T2_perstep.png)).
 
 So the per-step frontier is accuracy-dominated, and MDL selects **truncated exact search (D)** on SAT and **DSATUR/repair** on colouring as soon as N ≳ 10³.
 
@@ -478,7 +491,7 @@ So the per-step frontier is accuracy-dominated, and MDL selects **truncated exac
 | 1P | A2, C0, B1 truncations, H-parallel | D and F (inexpressible) |
 | TH | D (and the nuisance "noisy exact") | A and C1 |
 
-Under our token-cost assumptions (6 tokens per clause check, 32k budget), DPLL-b is exact at n ≤ 20 and drops toward its default answer at n ≈ 30–40. That matches T1's budget-line estimate (n\* ≈ 30 with listing-order branching) [→T1].
+Under our token-cost assumptions (6 tokens per clause check per decision, no propagation cost, 32k budget), DPLL-b is exact at n = 10, scores 0.975 (default SAT) or 1.0 (default UNSAT) at n = 20, and drops toward its default answer at n = 30–40 (40 items per cell). T1's n\* ≈ 30 for listing-order branching comes from a different cost model (9 / 37 / 57 tokens per decision / propagation / conflict, 13 per restated clause), so the two agreeing is not an independent check [→T1].
 
 **Above the line, the account predicts D's default** (A1-like answers, or a greedy completion of the partial trail). It does not predict a switch to a different heuristic family.
 
@@ -513,7 +526,7 @@ Each prediction names the eval it maps to. **Embarrassing results for the accoun
 
 - Sound, with omission errors and an accuracy step in derivation depth d.
 - d\* is at most 1 round per layer for 2-literal clauses and 1 round per 2 layers for 3-literal clauses (our constructions). Expect about half that, since later layers mostly refine (Csordás et al. 2025 [C]).
-- An order effect: in our simulation, UP-3c on puzzle CNF is 0.94 with units first, 0.895 as drawn, and 0.848 with units last (`ood.py`). UP to fixpoint is order-invariant (0.995).
+- An order effect: in our simulation, UP-2c on puzzle CNF is 0.94 with units first, 0.895 as drawn, and 0.848 with units last (`ood.py`; the first draft called this member `UP-3c`, see the correction under §3.1). UP to fixpoint is order-invariant (0.995).
 - Maps to: B1 E1 (depth ladder), B1 E3 (premise position × proof order).
 - **Wrong if:** 1P accuracy is invariant to the order of supporting facts at depth ≥ 2, or errors include frequent commissions on catch items.
 
@@ -595,13 +608,13 @@ Each prediction names the eval it maps to. **Embarrassing results for the accoun
 | Family (member) | RASP-L length (primitives / heads) | Depth (layers) | Depth class | Accuracy, training-like | On the frontier? | Predicted rank (1P, in task) |
 |---|---|---|---|---|---|---|
 | A (`DENSITY`) | 8 / 2 | 2 | const | 0.787 random 3-SAT (base 0.728); 0.727 puzzle CNF (base 0.718) | ✓ (both) | 1 on random 3-SAT; 3 on puzzle CNF |
-| B1 (`UP-2`) | 51 / 12 (SAT, causal); 93 / 25 (ENT) | 5 / 5 | const (fixed k) | 0.865 puzzle CNF; 0.728 random 3-SAT (inert); 0.967 ENT | ✓ puzzle CNF, ENT (length); ✗ ENT by heads/layers (vs `PROBE-16`) | 1 on ENT (open names) and on puzzle CNF |
-| B4 (`FIRST`) | 17 / 3 (alone) = `ECHO`; 93 / 25 with UP-2 (= UP-2) | 2 / 5 | const | 0.848 / 0.875 | ✗ (dominated at equal length) | Below `UP-k` and `ECHO` unless ≥ 50% of labels endorse it |
+| B1 (`UP-2`) | 57 / 14 (SAT, causal); 81 / 21 (ENT) | 7 / 5 | const (fixed k) | 0.893 puzzle CNF; 0.728 random 3-SAT (inert); 0.967 ENT | ✓ puzzle CNF, ENT (length); ✗ ENT by heads/layers (vs `PROBE-16`) | 1 on ENT (open names) and on puzzle CNF |
+| B4 (`FIRST`) | 17 / 3 (alone) = `ECHO`; 81 / 21 with UP-2 (= UP-2 by the table-swap convention; `BICOND` 93 / 25) | 2 / 5 | const | 0.848 / 0.875 | ✗ (dominated at equal length) | Below `UP-k` and `ECHO` unless ≥ 50% of labels endorse it |
 | C (`FIRST-FIT`) | per step 53 / 14 verbose; 25 / 6 terse with set-valued state (not RASP-L) | 3 per step | seq (const per step) | 0.818 (n 6–12, ≤ 3 colours) | ✓ at its length (per step); dominated by DSATUR/repair if N ≳ 10³ (Est) | 1 for DS colouring with thinking off; 2–3 in TH |
 | E (`BP-2`) | 81 / 25 (causal, int8) | 6 | const | 0.958 (POLARITY 0.960) | ✗ | Below `POLARITY` |
 | C0 (`POLARITY`) | 9 / 2 | 2 | const | 0.960 | ✓ | 1 on single-variable value choice |
 | H (`PROBE-16`) | 147 / 20 | 3 | const (non-uniform in #atoms) | 1.000 in-distribution; 0.61 OOD | ✓ | 1 for fixed-vocab ENT at N ≳ 10⁴ (toy) |
-| D (`DPLL-b`) | per step ≈ 75 ± 20 (Est) | ≈ 5 per step | seq | 1.0 (n ≤ 20 at 32k) | ✓ (TH) | 1 in TH below n\* |
+| D (`DPLL-b`) | per step ≈ 75 ± 20 (Est) | ≈ 5 per step | seq | 1.0 at n = 10; 0.975–1.0 at n = 20 (32k, 40 items) | ✓ (TH) | 1 in TH below n\* |
 
 The "Observed rank" column stays empty until the evals run.
 
