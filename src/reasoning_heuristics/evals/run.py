@@ -236,6 +236,8 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
     ap.add_argument("--items", nargs="+", required=True, help="item-set files or directories (data/items/smoke)")
     ap.add_argument("--model", required=True, help="OpenRouter model slug, e.g. openai/gpt-oss-20b")
     ap.add_argument("--condition", choices=["thinking", "direct"], default="thinking")
+    ap.add_argument("--budget-notice", action="store_true",
+                    help="end the prompt with the token budget and what happens at the cap (thinking only; label thinking-<effort>+budget)")
     ap.add_argument("--effort", default="high", help="reasoning effort for the thinking condition (default high)")
     ap.add_argument("--max-tokens", type=int, help="override the condition's max_tokens (32768 thinking, 1024 direct)")
     ap.add_argument("--cap-usd", type=float, help="hard cap on API-reported spend for this run (required for live runs)")
@@ -268,7 +270,7 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
     out = Path(a.out)
     run_id = out.name
     cfg = get_model(a.model)
-    cond = condition(cfg, a.condition, a.effort if a.condition == "thinking" else None, a.max_tokens)
+    cond = condition(cfg, a.condition, a.effort if a.condition == "thinking" else None, a.max_tokens, a.budget_notice)
     files = item_files(a.items)
     items, skipped = load_items(files, a.exclude_eval, a.include_eval)
     if a.limit:
