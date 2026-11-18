@@ -18,6 +18,7 @@ import numpy as np
 
 from reasoning_heuristics.heuristics.answers import assignment_key
 from reasoning_heuristics.heuristics.base import Prediction, member
+from reasoning_heuristics.heuristics.montecarlo import SAMPLES, SMOOTHING_EPS, random_orders, smoothed
 from reasoning_heuristics.heuristics.tasks import SatTask
 from reasoning_heuristics.problems.coloring.graph import label_key
 from reasoning_heuristics.problems.sat import cnf as S
@@ -159,39 +160,81 @@ def greedy(task: SatTask, params: dict[str, Any]) -> Prediction:
     return _finish(cnf, values, trace)
 
 
+def ro_greedy_counts(cnf: CNF, free: list[int], orders: np.ndarray, start: dict[int, bool], mode: str) -> dict[str, int]:
+    """Outcome counts of GREEDY over many orders at once (row r visits free[orders[r, 0]], ...);
+    the same outcome as `greedy_run` on each row."""
+    S_, n, m = len(orders), cnf.n, cnf.m
+    pos = np.zeros((n + 1, m), dtype=bool)
+    neg = np.zeros((n + 1, m), dtype=bool)
+    for i, c in enumerate(cnf.clauses):
+        for l in c:
+            (pos if l > 0 else neg)[abs(l), i] = True
+    values = np.zeros((S_, n + 1), dtype=bool)
+    for v, b in start.items():
+        values[:, v] = b
+    sat = np.zeros((S_, m), dtype=bool)
+    open_vars = np.zeros((S_, m), dtype=np.int16)  # variables of the clause still unassigned
+    for i, c in enumerate(cnf.clauses):
+        sat[:, i] = any(S.lit_value(l, start) is True for l in c)
+        open_vars[:, i] = len({abs(l) for l in c} - set(start))
+    if not free:  # nothing to commit: GREEDY returns the start state unchecked
+        return {assignment_key(S.to_assignment(cnf, dict(start))): S_}
+    rows = np.arange(S_)
+    seq = np.asarray(free)[orders]
+    for t in range(seq.shape[1]):
+        v = seq[:, t]
+        pv, nv = pos[v], neg[v]
+        val = (pv & ~sat).sum(axis=1) >= (nv & ~sat).sum(axis=1)  # v is free, so "open" = not yet satisfied
+        values[rows, v] = val
+        open_vars -= (pv | nv).astype(np.int16)
+        sat |= np.where(val[:, None], pv, nv)
+    # -ABORT stops at the first falsified clause; falsified clauses stay falsified, so a run
+    # dead-ends iff its completed assignment falsifies a clause.
+    unsat = ((~sat) & (open_vars == 0)).any(axis=1) if mode == "ABORT" else np.zeros(S_, dtype=bool)
+    counts: dict[str, int] = {}
+    if unsat.any():
+        counts["UNSAT"] = int(unsat.sum())
+    rows_left, n_left = np.unique(values[~unsat, 1:], axis=0, return_counts=True)
+    for row, cnt in zip(rows_left, n_left):
+        key = assignment_key(S.to_assignment(cnf, {v + 1: bool(x) for v, x in enumerate(row)}))
+        counts[key] = counts.get(key, 0) + int(cnt)
+    return counts
+
+
 @member("RO-GREEDY", "C3", D, "GREEDY in a uniformly random order; the order varies across samples", deterministic=False)
 def ro_greedy(task: SatTask, params: dict[str, Any]) -> Prediction:
+    """GREEDY in a uniformly random order: 10⁴ Monte-Carlo runs (fixed seed), every observed
+    outcome kept, add-ε smoothing (`montecarlo.smoothed`)."""
     cnf = effective_cnf(task)
     rng = np.random.default_rng(params.get("seed", 0))
-    samples = params.get("samples", 1000)
-    counts: Counter[str] = Counter()
+    samples = params.get("samples", SAMPLES)
+    eps = params.get("smoothing_eps", SMOOTHING_EPS)
     start = _start(task, cnf)
     free = [v for v in range(1, cnf.n + 1) if v not in start]
-    for _ in range(samples):
-        order = [free[i] for i in rng.permutation(len(free))]
-        values, _ = greedy_run(cnf, order, start, params.get("mode", "ABORT"))
-        counts["UNSAT" if values is None else assignment_key(S.to_assignment(cnf, values))] += 1
-    top = counts.most_common(params.get("keep", 25))
-    dist = {k: c / samples for k, c in top}
-    if sum(dist.values()) < 1:
-        dist["_other"] = 1 - sum(dist.values())
-    return Prediction(None, {"samples": samples, "P(UNSAT)": counts["UNSAT"] / samples}, dist)
+    counts = ro_greedy_counts(cnf, free, random_orders(rng, len(free), samples), start, params.get("mode", "ABORT"))
+    trace = {"samples": samples, "smoothing_eps": eps, "distinct_outcomes": len(counts),
+             "P(UNSAT)": counts.get("UNSAT", 0) / samples}
+    return Prediction(None, trace, smoothed(counts, eps))
 
 
 # --- C2 unit / shortest clause ------------------------------------------------------------
 
 
 def _unit_style(task: SatTask, params: dict[str, Any], rule: str) -> Prediction:
+    """C §1.3 loop: a falsified clause -> UNSAT (-ABORT), checked before every step and after the
+    last one; else the rule's clause; else the first free variable in π_L set T."""
     cnf = effective_cnf(task)
     values = _start(task, cnf)
     listing = resolve_var_order(task, cnf, {"order": "MENTION"})
     trace: dict[str, Any] = {"commit_order": [], "forced": [], "revisions": 0}
-    while len(values) < cnf.n:
+    while True:
         states = [clause_state(c, values) for c in cnf.clauses]
         if any(s == "falsified" for s, _ in states):
             i = next(i for i, (s, _) in enumerate(states) if s == "falsified")
             trace["dead_end"] = f"C{i + 1}"
             return Prediction("UNSAT", trace)
+        if len(values) == cnf.n:
+            break
         open_clauses = [(i, lits) for i, (s, lits) in enumerate(states) if s == "open"]
         chosen = None
         if rule == "UC":
@@ -241,33 +284,35 @@ def sc_det(task: SatTask, params: dict[str, Any]) -> Prediction:
 
 
 def unit_propagate(cnf: CNF, start: dict[int, bool], rounds: int | None) -> tuple[dict[int, bool], bool, int]:
-    """Stated unit clauses are facts; then `rounds` rounds of parallel unit propagation.
+    """B1 §1.3 `UP(clauses, k)`, parallel (Jacobi) rounds, exactly as its pseudocode runs.
 
-    Returns (values, refuted, rounds used)."""
+    Round 0: the stated unit clauses are facts (on top of the fixed `start` values; a fact that
+    clashes with an earlier one is not applied, so its clause is falsified). Round r = 1..k reads
+    only the round r-1 state: a clause with no open literal is a CONFLICT, as are two opposite
+    derivations; nothing new ends the rounds. Nothing is checked after the last round, so a
+    clause falsified by round k's derivations is found only by round k + 1.
+
+    Returns (values, refuted, rounds run: the conflict's round, or the rounds that derived something)."""
     values = dict(start)
     for c in cnf.clauses:
         if len(c) == 1:
-            if values.get(abs(c[0]), c[0] > 0) != (c[0] > 0):
-                return values, True, 0
-            values[abs(c[0])] = c[0] > 0
+            values.setdefault(abs(c[0]), c[0] > 0)
     r = 0
     while rounds is None or r < rounds:
-        new: dict[int, bool] = {}
+        r += 1
+        new: dict[int, set[bool]] = {}
         for c in cnf.clauses:
             state, lits = clause_state(c, values)
             if state == "falsified":
                 return values, True, r
             if state == "open" and len(lits) == 1:
-                lit = lits[0]
-                if new.get(abs(lit), lit > 0) != (lit > 0):
-                    return values, True, r + 1
-                new[abs(lit)] = lit > 0
+                new.setdefault(abs(lits[0]), set()).add(lits[0] > 0)
         if not new:
-            break
-        values.update(new)
-        r += 1
-    refuted = any(clause_state(c, values)[0] == "falsified" for c in cnf.clauses)
-    return values, refuted, r
+            return values, False, r - 1
+        if any(len(s) == 2 for s in new.values()):
+            return values, True, r
+        values.update({v: s.pop() for v, s in new.items()})
+    return values, False, r
 
 
 @member("UP-k", "B1", D, "propagation steps only; no case splits; UNSAT only from a propagation conflict, else SAT by default")
@@ -334,42 +379,74 @@ def sample_m(task: SatTask, params: dict[str, Any]) -> Prediction:
     return Prediction(None, {"n_solutions": s, "m": m}, {"SAT": p_sat, "UNSAT": 1 - p_sat})
 
 
+def walk_run(cnf: CNF, values: dict[int, bool], flips: int, p: float, pick: str,
+             rng: np.random.Generator) -> tuple[dict[int, bool], dict[str, Any]]:
+    """One WalkSAT/SKC run (D/F §1.3 `WALK-k`) from a complete assignment, at most `flips` flips.
+
+    Each step: stop if every clause is satisfied; else take a falsified clause c (pick FIRST: the
+    lowest index; RANDOM: uniform); break(u) = the number of satisfied clauses that flipping u
+    falsifies; if some u in c has break 0, flip the first such u (the freebie move); otherwise,
+    with probability p flip a uniformly random literal's variable of c, else the first u of c with
+    the least break."""
+    vals = dict(values)
+    occ: dict[int, list[tuple[int, bool]]] = {v: [] for v in range(1, cnf.n + 1)}
+    for i, c in enumerate(cnf.clauses):
+        for l in c:
+            occ[abs(l)].append((i, l > 0))
+    true_count = [sum(1 for l in c if S.lit_value(l, vals)) for c in cnf.clauses]
+    trace: dict[str, Any] = {"flipped": [], "moves": []}
+
+    def breaks(u: int) -> int:
+        mine: Counter[int] = Counter(i for i, positive in occ[u] if vals[u] == positive)
+        return sum(1 for i, k in mine.items() if true_count[i] == k)
+
+    for _ in range(flips):
+        falsified = [i for i, t in enumerate(true_count) if t == 0]
+        if not falsified:
+            break
+        c = cnf.clauses[falsified[0] if pick == "FIRST" else falsified[int(rng.integers(len(falsified)))]]
+        us = list(dict.fromkeys(abs(l) for l in c))
+        bs = [breaks(u) for u in us]
+        if 0 in bs:
+            u, move = us[bs.index(0)], "freebie"
+        elif rng.random() < p:
+            u, move = abs(c[int(rng.integers(len(c)))]), "noise"
+        else:
+            u, move = us[bs.index(min(bs))], "greedy"
+        for i, positive in occ[u]:
+            true_count[i] += -1 if vals[u] == positive else 1
+        vals[u] = not vals[u]
+        trace["flipped"].append(cnf.var_names[u - 1])
+        trace["moves"].append(move)
+    return vals, trace
+
+
 @member("WALK", "F", D, "a full candidate, then repeated local flips of variables in violated clauses; never certifies UNSAT", deterministic=False)
 def walksat(task: SatTask, params: dict[str, Any]) -> Prediction:
-    """WalkSAT (noise 0.5) with `flips` flips from a random start; success rate over `runs` seeds.
-    Default answer when it fails: UNSAT."""
+    """WalkSAT/SKC (`walk_run`) with `flips` flips (k) from a uniformly random start, noise p
+    (default 0.5), falsified clause picked RANDOM (default) or FIRST; the success rate over `runs`
+    seeded runs. A run succeeds if its assignment satisfies every clause within k flips; the
+    default answer when it fails is UNSAT."""
     cnf = effective_cnf(task)
     flips, runs = params.get("flips", 200), params.get("runs", 30)
+    p, pick = params.get("p", 0.5), params.get("pick", "RANDOM")
     rng = np.random.default_rng(params.get("seed", 0))
-    clauses = [list(c) for c in cnf.clauses]
     successes = 0
     for _ in range(runs):
         vals = {v: bool(rng.integers(2)) for v in range(1, cnf.n + 1)}
-        for _ in range(flips):
-            unsat = [c for c in clauses if not any(S.lit_value(l, vals) for l in c)]
-            if not unsat:
-                break
-            c = unsat[rng.integers(len(unsat))]
-            if rng.random() < 0.5:
-                v = abs(c[rng.integers(len(c))])
-            else:
-                def breaks(v: int) -> int:
-                    vals[v] = not vals[v]
-                    b = sum(1 for d in clauses if not any(S.lit_value(l, vals) for l in d))
-                    vals[v] = not vals[v]
-                    return b
-                v = min((abs(l) for l in c), key=breaks)
-            vals[v] = not vals[v]
-        if all(any(S.lit_value(l, vals) for l in c) for c in clauses):
-            successes += 1
+        vals, _ = walk_run(cnf, vals, flips, p, pick, rng)
+        successes += all(any(S.lit_value(l, vals) for l in c) for c in cnf.clauses)
     rate = successes / runs
-    return Prediction(None, {"flips": flips, "runs": runs, "success_rate": rate}, {"SAT": rate, "UNSAT": 1 - rate})
+    trace = {"flips": flips, "runs": runs, "p": p, "pick": pick, "success_rate": rate}
+    return Prediction(None, trace, {"SAT": rate, "UNSAT": 1 - rate})
 
 
 # --- nuisance -------------------------------------------------------------------------------------
 
 
 def dpll_steps(cnf: CNF, pure_literal: bool = False) -> int:
+    """Decisions + propagations of the complete DPLL (MENTION, TRUE), which stops as soon as every
+    clause is satisfied (D/F §1.3), so variables no clause needs never add steps."""
     from reasoning_heuristics.heuristics.search import search_sat
 
     _, trace = search_sat(cnf, {}, {"order": "MENTION", "value": "TRUE", "b": None, "pure": pure_literal})
@@ -391,17 +468,20 @@ def noisy_exact(task: SatTask, params: dict[str, Any]) -> Prediction:
 
 @member("PERCEPTION-NOISE", "nuisance", D, "a misquote of a clause that predicts where the answer goes wrong", deterministic=False)
 def perception_noise(task: SatTask, params: dict[str, Any]) -> Prediction:
-    """Exact on a misread instance: each clause dropped w.p. p_d (Monte Carlo, fixed seed)."""
+    """Exact on a misread instance (A/H §1.5): each clause dropped w.p. p_d and each literal
+    occurrence's sign flipped w.p. p_f (Monte Carlo, fixed seed)."""
     cnf = effective_cnf(task)
-    p_d = params.get("p_d", 0.02)
+    p_d, p_f = params.get("p_d", 0.02), params.get("p_f", 0.01)
     runs = params.get("runs", 200)
     rng = np.random.default_rng(params.get("seed", 0))
     sat = 0
     for _ in range(runs):
         kept = [c for c in cnf.clauses if rng.random() >= p_d]
-        if not kept or S.solve(cnf.with_clauses(kept)) is not None:
+        flip = [rng.random(len(c)) < p_f for c in kept]
+        misread = [tuple(-l if f else l for l, f in zip(c, fs)) for c, fs in zip(kept, flip)]
+        if not misread or S.solve(cnf.with_clauses(misread)) is not None:
             sat += 1
-    return Prediction(None, {"p_d": p_d, "runs": runs}, {"SAT": sat / runs, "UNSAT": 1 - sat / runs})
+    return Prediction(None, {"p_d": p_d, "p_f": p_f, "runs": runs}, {"SAT": sat / runs, "UNSAT": 1 - sat / runs})
 
 
 @member("EXACT", "null", D, "a witness checked against every clause, or a closed refutation")
