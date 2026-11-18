@@ -197,6 +197,8 @@ def run_meta(run: dict[str, Any], label: str) -> dict[str, Any]:
             "providers_served": m.get("providers_served"), "provider_routing": m.get("provider_routing"),
             "status": m["status"], "n_items": m["items"]["n_items"], "n_records": len(recs),
             "from_cache": sum(1 for r in recs if r.get("from_cache")), "spent_usd": m["spend"]["spent_usd"],
+            "max_pre_answer_tokens": max((r.get("pre_answer_tokens") or 0 for r in recs), default=0),
+            "pre_answer_over_20": sum(1 for r in recs if (r.get("pre_answer_tokens") or 0) > 20),
             "run_git_sha": m["git"]["sha"], "scorer_version": run["scoring"]["scorer_version"],
             "scorer_git_sha": run["scoring"]["git"]["sha"], "scored_sha256": run["scored_sha256"],
             "dropped_by_from_scored": run["dropped"], "item_drift": run["drift"]}
@@ -218,6 +220,11 @@ def match_groups(recs: list[dict[str, Any]], field: str) -> list[tuple[str, int]
         merged[frozenset(s)].append(m)
     out = [(" = ".join(ms), len(s)) for s, ms in merged.items()]
     return sorted(out, key=lambda x: (-x[1], x[0]))
+
+
+def median_or_none(xs: list) -> float | None:
+    xs = [x for x in xs if x is not None]
+    return float(np.median(xs)) if xs else None
 
 
 def describe(run: dict[str, Any], item_set: dict[str, Any]) -> dict[str, Any]:
@@ -245,6 +252,10 @@ def describe(run: dict[str, Any], item_set: dict[str, Any]) -> dict[str, Any]:
             "sets_matched": match_groups(ok, "sets_matched"),
             "special_answers": dict(special),
             "truncated_by_cell": dict(Counter(r["cell"] for r in recs if r["category"] == "truncated")),
+            "median_reasoning_tokens": median_or_none([r.get("reasoning_tokens") for r in recs]),
+            "median_completion_tokens": median_or_none([r.get("completion_tokens") for r in recs]),
+            "max_pre_answer_tokens": max((r.get("pre_answer_tokens") or 0 for r in recs), default=0),
+            "pre_answer_over_20": sum(1 for r in recs if (r.get("pre_answer_tokens") or 0) > 20),
             "scorer_git_sha": sorted({r["scorer_git_sha"] for r in recs}),
         }
     return out
@@ -370,6 +381,30 @@ def reach_stats(um: UnitModel, obs: list, T) -> dict[str, float]:
     return {"exact": float(exact.mean()), "beyond_reach": float((~reach).mean()), "special": float(special.mean())}
 
 
+def unit_facts(um: UnitModel) -> dict[str, Any]:
+    """Facts about the unit's items that the doc quotes: ground truth, solution-set sizes, positions
+    per item, and the stored distributions' sizes."""
+    gts = [it["ground_truth"] for it in um.unit.items]
+    out: dict[str, Any] = {"n_items": len(um.items), "n_cells": len(set(um.unit.cells)), "n_clusters": um.unit.n_clusters,
+                           "positions_per_item": sorted({im.space.n for im in um.items if hasattr(im.space, "n")})}
+    if all("satisfiable" in g for g in gts):
+        out["satisfiable_items"] = sum(1 for g in gts if g["satisfiable"])
+    if all("chromatic_number" in g for g in gts):
+        out["chromatic_numbers"] = sorted({g["chromatic_number"] for g in gts})
+    sizes: dict[str, list[int]] = defaultdict(list)
+    dists: dict[str, list[tuple[int, float]]] = defaultdict(list)
+    for im in um.items:
+        for lbl, p in im.preds.items():
+            if p.kind == "set":
+                sizes[lbl].append(p.sol.size)
+            elif p.kind == "dist":
+                dists[lbl].append((len([k for k in p.dist if not k.startswith("_")]), p.dist.get("_other", 0.0)))
+    out["set_sizes"] = {l: {"min": min(v), "median": float(np.median(v)), "max": max(v)} for l, v in sizes.items()}
+    out["stored_distributions"] = {l: {"outcomes_min": min(n for n, _ in v), "outcomes_max": max(n for n, _ in v),
+                                       "other_mass_max": max(o for _, o in v)} for l, v in dists.items()}
+    return out
+
+
 def lump_shares(um: UnitModel, obs: list, T, fitj: dict[str, Any]) -> dict[str, Any]:
     """Stored-distribution members (RO-FF, NOISY-EXACT) keep a Monte Carlo tail, `_other`, that the
     likelihood spreads exactly like q. For each such group: its mean `_other` mass per item, and the
@@ -426,6 +461,7 @@ def fit_job(args: tuple) -> dict[str, Any]:
     rep["near"] = nearest_distances(um, obs)
     rep["reach"] = reach_stats(um, obs, T)
     rep["lumps"] = lump_shares(um, obs, T, rep["fit"])
+    rep["unit_facts"] = unit_facts(um)
     rep["special_check"] = special_check(um)
     rep["seed"] = seed
     rep["seconds"] = round(time.time() - t0, 1)
@@ -540,10 +576,10 @@ def table_runs(meta: list[dict[str, Any]]) -> str:
         ct = m.get("cache_twin")
         cache = f"{m['from_cache']}" + (f" ({ct['cached_same_generation_as_dev_run']} are the dev run's own responses)" if ct else "")
         rows.append([f"`{m['run_id']}`", m["model"], m["condition"], f"{m['max_tokens']:,}", prov, m["n_records"],
-                     cache, f"${m['spent_usd']:.4f}", m["scorer_version"],
-                     ", ".join(sorted(drift)) + " (#22)" if drift else "none"])
-    return md_table(["Run", "Model", "Condition", "max_tokens", "Served by", "Responses", "From the response cache", "API cost",
-                     "Scorer", "Item files changed since the run"], rows)
+                     cache, f"{m['max_pre_answer_tokens']} ({m['pre_answer_over_20']} over 20)",
+                     f"${m['spent_usd']:.4f}", m["scorer_version"], ", ".join(sorted(drift)) + " (#22)" if drift else "none"])
+    return md_table(["Run", "Model", "Condition", "max_tokens", "Served by", "Responses", "From the response cache",
+                     "Visible working: max pre_answer_tokens", "API cost", "Scorer", "Item files changed since the run"], rows)
 
 
 def table_units(special: dict[str, dict[str, Any]], unit_items: dict[str, int]) -> str:
@@ -760,14 +796,16 @@ def descriptive_table(desc: dict[str, dict[str, Any]], run_ids: list[str], fitte
             top = "; ".join(f"{m} {k}" for m, k in d["members_matched"][:3]) or "–"
             sets = "; ".join(f"{m} {k}" for m, k in d["sets_matched"][:2]) or "–"
             spec = ", ".join(f"{k} {v}" for k, v in sorted(d["special_answers"].items()))
+            mr = d["median_reasoning_tokens"]
+            toks = f"{mr:,.0f} / {d['median_completion_tokens']:,.0f}" if mr is not None else "–"
             rows.append([name + (" (fitted)" if name in fitted else ""), label_of(rid), d["n"], d["ok"], other or "–",
                          pct(d["correct"], d["ok"]),
                          pct(d["valid"], d["valid_defined"]) if d["valid_defined"] else "–",
                          pct(d["any_member_match"], d["ok"]), pct(d["wrong_member_match"], d["wrong"]), top, sets,
-                         spec or "–"])
+                         spec or "–", toks])
     return md_table(["Unit", "Run", "Responses", "ok", "Not ok", "Correct of ok", "Valid of ok",
                      "Match ≥1 member (of ok)", "Wrong answers matching ≥1 member", "Members matched most (answers)",
-                     "Sets matched (answers)", "Special-token answers"], rows)
+                     "Sets matched (answers)", "Special-token answers", "Median tokens: reasoning / completion"], rows)
 
 
 def render(results: dict[str, Any]) -> dict[str, str]:
