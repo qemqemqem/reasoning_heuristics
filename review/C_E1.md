@@ -40,6 +40,10 @@ Readings of the doc (also in docs/GENERATORS.md):
 - E1-KNAP / E1-TSP copies, the 20% re-themed subset and the names variant are not built.
 - MIN-CONFLICTS / WALK (F) are not in the zoo for colouring; NOISY-EXACT is included for
   colouring (slip mass spread like EXACT's optimal set) but not for SAT witnesses.
+- SAT items list the A1 constant give-up, ALWAYS-UNSAT, as C E5 does. Without it a model that
+  answers UNSAT on every item is read as RO-GREEDY (C3), whose distribution puts about 0.4-0.6
+  on UNSAT here (docs/RECOVERY.md, `null_always`). COL items need none: the fewest-colours
+  format offers no IMPOSSIBLE answer.
 - The theory §5 arms are parameters: `serialisation` ("adjacency" | "edge_list_shuffled";
   the edge order is shuffled once per base and kept across copies) and `repeat_prompt`.
 ```
@@ -127,6 +131,7 @@ After the line ANSWER:, write UNSAT, or one `<variable>=T` or `<variable>=F` per
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
+| ALWAYS-UNSAT (A1 give-up) | A1 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | GIVEUP early ('too many constraints to check'); no witness attempted |
 | DPLL-INDEX (D, T first) | D | x16=T x19=T x21=T x22=T x27=T x28=T x33=T x37=F x38=T x42=T x43=T x47=T x52=T x53=F x55=T x63=F x68=F x76=F x86=F x95=F | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
 | DPLL-MENTION (D, T first) | D | x16=T x19=T x21=T x22=T x27=T x28=T x33=T x37=F x38=T x42=T x43=T x47=T x52=T x53=F x55=T x63=F x68=F x76=F x86=F x95=F | p_h(its class) = 1 - eps + eps/K = 0.917, eps/K = 0.017 on each other class (uniform slip eps = 0.1 over the K = 6 outcome classes); the ce… | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
 | EXACT | null | SAT | set-valued: uniform over its 846 solutions (satisfying assignment); a listed solution gets (1 - eps)/846 + eps/K, its unlisted solutions fo… | a witness checked against every clause, or a closed refutation |
@@ -141,9 +146,9 @@ After the line ANSWER:, write UNSAT, or one `<variable>=T` or `<variable>=F` per
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = GREEDY-MENTION / GREEDY-INDEX / GREEDY-OUT (AR)'s prediction*: DPLL-INDEX (D, T first) +1.74, DPLL-MENTION (D, T first) +1.74, GUC-DET (C2) +1.74, POLARITY (C0) +1.74, RANDOM (H) +1.74, UC-DET (C2) +1.74
-- *answer = POLARITY (C0)'s prediction*: DPLL-INDEX (D, T first) +1.74, DPLL-MENTION (D, T first) +1.74, EXACT +1.74, GREEDY-INDEX +1.74, GREEDY-MENTION +1.74, GREEDY-OUT (AR) +1.74
-- *answer = UC-DET (C2) / DPLL-MENTION (D, T first) / DPLL-INDEX (D, T first)'s prediction*: GREEDY-INDEX +1.74, GREEDY-MENTION +1.74, GREEDY-OUT (AR) +1.74, GUC-DET (C2) +1.74, POLARITY (C0) +1.74, RANDOM (H) +1.74
+- *answer = GREEDY-MENTION / GREEDY-INDEX / GREEDY-OUT (AR)'s prediction*: ALWAYS-UNSAT (A1 give-up) +1.74, DPLL-INDEX (D, T first) +1.74, DPLL-MENTION (D, T first) +1.74, GUC-DET (C2) +1.74, POLARITY (C0) +1.74, RANDOM (H) +1.74
+- *answer = POLARITY (C0)'s prediction*: ALWAYS-UNSAT (A1 give-up) +1.74, DPLL-INDEX (D, T first) +1.74, DPLL-MENTION (D, T first) +1.74, EXACT +1.74, GREEDY-INDEX +1.74, GREEDY-MENTION +1.74
+- *answer = UC-DET (C2) / DPLL-MENTION (D, T first) / DPLL-INDEX (D, T first)'s prediction*: ALWAYS-UNSAT (A1 give-up) +1.74, GREEDY-INDEX +1.74, GREEDY-MENTION +1.74, GREEDY-OUT (AR) +1.74, GUC-DET (C2) +1.74, POLARITY (C0) +1.74
 - *answer = UNSAT*: DPLL-INDEX (D, T first) +1.74, DPLL-MENTION (D, T first) +1.74, EXACT +1.74, GREEDY-INDEX +1.74, GREEDY-MENTION +1.74, GREEDY-OUT (AR) +1.74
 
 Notes: GREEDY-MENTION's prediction moves with clause order (c6); GREEDY-INDEX's with labels (c1 vs c2); POLARITY and UC's unit steps do not.
@@ -229,6 +234,7 @@ After the line ANSWER:, write UNSAT, or one `<variable>=T` or `<variable>=F` per
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
+| ALWAYS-UNSAT (A1 give-up) | A1 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.912, eps/K = 0.013 on each other class (uniform slip eps = 0.1 over the K = 8 outcome classes); the ce… | GIVEUP early ('too many constraints to check'); no witness attempted |
 | DPLL-INDEX (D, T first) | D | x16=T x19=T x21=T x22=T x27=T x28=T x33=T x37=T x38=F x42=F x43=F x47=T x52=T x53=T x55=F x63=F x68=T x76=F x86=F x95=T | p_h(its class) = 1 - eps + eps/K = 0.912, eps/K = 0.013 on each other class (uniform slip eps = 0.1 over the K = 8 outcome classes); the ce… | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
 | DPLL-MENTION (D, T first) | D | x16=T x19=F x21=T x22=T x27=F x28=T x33=F x37=F x38=T x42=F x43=T x47=F x52=F x53=T x55=T x63=T x68=T x76=T x86=T x95=T | p_h(its class) = 1 - eps + eps/K = 0.912, eps/K = 0.013 on each other class (uniform slip eps = 0.1 over the K = 8 outcome classes); the ce… | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
 | EXACT | null | SAT | set-valued: uniform over its 846 solutions (satisfying assignment); a listed solution gets (1 - eps)/846 + eps/K, its unlisted solutions fo… | a witness checked against every clause, or a closed refutation |
@@ -243,10 +249,10 @@ After the line ANSWER:, write UNSAT, or one `<variable>=T` or `<variable>=F` per
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = DPLL-INDEX (D, T first)'s prediction*: DPLL-MENTION (D, T first) +1.86, GREEDY-INDEX +1.86, GREEDY-MENTION +1.86, GREEDY-OUT (AR) +1.86, GUC-DET (C2) +1.86, POLARITY (C0) +1.86
-- *answer = GREEDY-INDEX's prediction*: DPLL-INDEX (D, T first) +1.86, DPLL-MENTION (D, T first) +1.86, GREEDY-MENTION +1.86, GREEDY-OUT (AR) +1.86, GUC-DET (C2) +1.86, POLARITY (C0) +1.86
-- *answer = GREEDY-MENTION / GREEDY-OUT (AR)'s prediction*: DPLL-INDEX (D, T first) +1.86, DPLL-MENTION (D, T first) +1.86, GREEDY-INDEX +1.86, GUC-DET (C2) +1.86, POLARITY (C0) +1.86, RANDOM (H) +1.86
-- *answer = POLARITY (C0)'s prediction*: DPLL-INDEX (D, T first) +1.86, DPLL-MENTION (D, T first) +1.86, EXACT +1.86, GREEDY-INDEX +1.86, GREEDY-MENTION +1.86, GREEDY-OUT (AR) +1.86
+- *answer = DPLL-INDEX (D, T first)'s prediction*: ALWAYS-UNSAT (A1 give-up) +1.86, DPLL-MENTION (D, T first) +1.86, GREEDY-INDEX +1.86, GREEDY-MENTION +1.86, GREEDY-OUT (AR) +1.86, GUC-DET (C2) +1.86
+- *answer = GREEDY-INDEX's prediction*: ALWAYS-UNSAT (A1 give-up) +1.86, DPLL-INDEX (D, T first) +1.86, DPLL-MENTION (D, T first) +1.86, GREEDY-MENTION +1.86, GREEDY-OUT (AR) +1.86, GUC-DET (C2) +1.86
+- *answer = GREEDY-MENTION / GREEDY-OUT (AR)'s prediction*: ALWAYS-UNSAT (A1 give-up) +1.86, DPLL-INDEX (D, T first) +1.86, DPLL-MENTION (D, T first) +1.86, GREEDY-INDEX +1.86, GUC-DET (C2) +1.86, POLARITY (C0) +1.86
+- *answer = POLARITY (C0)'s prediction*: ALWAYS-UNSAT (A1 give-up) +1.86, DPLL-INDEX (D, T first) +1.86, DPLL-MENTION (D, T first) +1.86, EXACT +1.86, GREEDY-INDEX +1.86, GREEDY-MENTION +1.86
 
 Notes: GREEDY-MENTION's prediction moves with clause order (c6); GREEDY-INDEX's with labels (c1 vs c2); POLARITY and UC's unit steps do not.
 
@@ -341,6 +347,7 @@ After the line ANSWER:, write UNSAT, or one `<variable>=T` or `<variable>=F` per
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
+| ALWAYS-UNSAT (A1 give-up) | A1 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.912, eps/K = 0.013 on each other class (uniform slip eps = 0.1 over the K = 8 outcome classes); the ce… | GIVEUP early ('too many constraints to check'); no witness attempted |
 | DPLL-INDEX (D, T first) | D | x12=T x20=F x22=T x24=T x30=T x31=T x34=T x37=T x40=F x47=F x55=T x56=F x67=T x76=T x78=T x83=T x87=F x88=F x92=T x96=F | p_h(its class) = 1 - eps + eps/K = 0.912, eps/K = 0.013 on each other class (uniform slip eps = 0.1 over the K = 8 outcome classes); the ce… | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
 | DPLL-MENTION (D, T first) | D | x12=F x20=F x22=T x24=T x30=T x31=T x34=T x37=T x40=F x47=F x55=T x56=F x67=T x76=T x78=T x83=T x87=T x88=T x92=T x96=F | p_h(its class) = 1 - eps + eps/K = 0.912, eps/K = 0.013 on each other class (uniform slip eps = 0.1 over the K = 8 outcome classes); the ce… | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
 | EXACT | null | SAT | set-valued: uniform over its 334 solutions (satisfying assignment); a listed solution gets (1 - eps)/334 + eps/K, its unlisted solutions fo… | a witness checked against every clause, or a closed refutation |
@@ -355,10 +362,10 @@ After the line ANSWER:, write UNSAT, or one `<variable>=T` or `<variable>=F` per
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = DPLL-INDEX (D, T first)'s prediction*: DPLL-MENTION (D, T first) +1.86, GREEDY-INDEX +1.86, GREEDY-MENTION +1.86, GREEDY-OUT (AR) +1.86, GUC-DET (C2) +1.86, POLARITY (C0) +1.86
-- *answer = DPLL-MENTION (D, T first)'s prediction*: DPLL-INDEX (D, T first) +1.86, GREEDY-INDEX +1.86, GREEDY-MENTION +1.86, GREEDY-OUT (AR) +1.86, GUC-DET (C2) +1.86, POLARITY (C0) +1.86
-- *answer = GREEDY-INDEX / GREEDY-OUT (AR)'s prediction*: DPLL-INDEX (D, T first) +1.86, DPLL-MENTION (D, T first) +1.86, GREEDY-MENTION +1.86, GUC-DET (C2) +1.86, POLARITY (C0) +1.86, RANDOM (H) +1.86
-- *answer = GREEDY-MENTION's prediction*: DPLL-INDEX (D, T first) +1.86, DPLL-MENTION (D, T first) +1.86, GREEDY-INDEX +1.86, GREEDY-OUT (AR) +1.86, GUC-DET (C2) +1.86, POLARITY (C0) +1.86
+- *answer = DPLL-INDEX (D, T first)'s prediction*: ALWAYS-UNSAT (A1 give-up) +1.86, DPLL-MENTION (D, T first) +1.86, GREEDY-INDEX +1.86, GREEDY-MENTION +1.86, GREEDY-OUT (AR) +1.86, GUC-DET (C2) +1.86
+- *answer = DPLL-MENTION (D, T first)'s prediction*: ALWAYS-UNSAT (A1 give-up) +1.86, DPLL-INDEX (D, T first) +1.86, GREEDY-INDEX +1.86, GREEDY-MENTION +1.86, GREEDY-OUT (AR) +1.86, GUC-DET (C2) +1.86
+- *answer = GREEDY-INDEX / GREEDY-OUT (AR)'s prediction*: ALWAYS-UNSAT (A1 give-up) +1.86, DPLL-INDEX (D, T first) +1.86, DPLL-MENTION (D, T first) +1.86, GREEDY-MENTION +1.86, GUC-DET (C2) +1.86, POLARITY (C0) +1.86
+- *answer = GREEDY-MENTION's prediction*: ALWAYS-UNSAT (A1 give-up) +1.86, DPLL-INDEX (D, T first) +1.86, DPLL-MENTION (D, T first) +1.86, GREEDY-INDEX +1.86, GREEDY-OUT (AR) +1.86, GUC-DET (C2) +1.86
 
 Notes: GREEDY-MENTION's prediction moves with clause order (c6); GREEDY-INDEX's with labels (c1 vs c2); POLARITY and UC's unit steps do not.
 
@@ -453,6 +460,7 @@ After the line ANSWER:, write UNSAT, or one `<variable>=T` or `<variable>=F` per
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
+| ALWAYS-UNSAT (A1 give-up) | A1 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.911, eps/K = 0.011 on each other class (uniform slip eps = 0.1 over the K = 9 outcome classes); the ce… | GIVEUP early ('too many constraints to check'); no witness attempted |
 | DPLL-INDEX (D, T first) | D | x12=T x20=F x22=T x24=T x30=T x31=T x34=T x37=T x40=F x47=F x55=T x56=F x67=T x76=T x78=T x83=T x87=F x88=F x92=T x96=F | p_h(its class) = 1 - eps + eps/K = 0.911, eps/K = 0.011 on each other class (uniform slip eps = 0.1 over the K = 9 outcome classes); the ce… | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
 | DPLL-MENTION (D, T first) | D | x12=F x20=F x22=T x24=T x30=T x31=T x34=T x37=T x40=F x47=F x55=T x56=F x67=T x76=T x78=T x83=T x87=T x88=T x92=T x96=F | p_h(its class) = 1 - eps + eps/K = 0.911, eps/K = 0.011 on each other class (uniform slip eps = 0.1 over the K = 9 outcome classes); the ce… | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
 | EXACT | null | SAT | set-valued: uniform over its 334 solutions (satisfying assignment); a listed solution gets (1 - eps)/334 + eps/K, its unlisted solutions fo… | a witness checked against every clause, or a closed refutation |
@@ -467,10 +475,10 @@ After the line ANSWER:, write UNSAT, or one `<variable>=T` or `<variable>=F` per
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = DPLL-INDEX (D, T first)'s prediction*: DPLL-MENTION (D, T first) +1.91, GREEDY-INDEX +1.91, GREEDY-MENTION +1.91, GREEDY-OUT (AR) +1.91, GUC-DET (C2) +1.91, POLARITY (C0) +1.91
-- *answer = DPLL-MENTION (D, T first)'s prediction*: DPLL-INDEX (D, T first) +1.91, GREEDY-INDEX +1.91, GREEDY-MENTION +1.91, GREEDY-OUT (AR) +1.91, GUC-DET (C2) +1.91, POLARITY (C0) +1.91
-- *answer = GREEDY-INDEX's prediction*: DPLL-INDEX (D, T first) +1.91, DPLL-MENTION (D, T first) +1.91, GREEDY-MENTION +1.91, GREEDY-OUT (AR) +1.91, GUC-DET (C2) +1.91, POLARITY (C0) +1.91
-- *answer = GREEDY-MENTION's prediction*: DPLL-INDEX (D, T first) +1.91, DPLL-MENTION (D, T first) +1.91, GREEDY-INDEX +1.91, GREEDY-OUT (AR) +1.91, GUC-DET (C2) +1.91, POLARITY (C0) +1.91
+- *answer = DPLL-INDEX (D, T first)'s prediction*: ALWAYS-UNSAT (A1 give-up) +1.91, DPLL-MENTION (D, T first) +1.91, GREEDY-INDEX +1.91, GREEDY-MENTION +1.91, GREEDY-OUT (AR) +1.91, GUC-DET (C2) +1.91
+- *answer = DPLL-MENTION (D, T first)'s prediction*: ALWAYS-UNSAT (A1 give-up) +1.91, DPLL-INDEX (D, T first) +1.91, GREEDY-INDEX +1.91, GREEDY-MENTION +1.91, GREEDY-OUT (AR) +1.91, GUC-DET (C2) +1.91
+- *answer = GREEDY-INDEX's prediction*: ALWAYS-UNSAT (A1 give-up) +1.91, DPLL-INDEX (D, T first) +1.91, DPLL-MENTION (D, T first) +1.91, GREEDY-MENTION +1.91, GREEDY-OUT (AR) +1.91, GUC-DET (C2) +1.91
+- *answer = GREEDY-MENTION's prediction*: ALWAYS-UNSAT (A1 give-up) +1.91, DPLL-INDEX (D, T first) +1.91, DPLL-MENTION (D, T first) +1.91, GREEDY-INDEX +1.91, GREEDY-OUT (AR) +1.91, GUC-DET (C2) +1.91
 
 Notes: GREEDY-MENTION's prediction moves with clause order (c6); GREEDY-INDEX's with labels (c1 vs c2); POLARITY and UC's unit steps do not.
 

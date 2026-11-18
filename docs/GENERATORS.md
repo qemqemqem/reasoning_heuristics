@@ -147,7 +147,9 @@ The full list is in the module docstrings. The ones that change what an item is:
 - **E8 items are specs.** They carry the host prompt, the source items' hashes, the cue values and the predictions that don't depend on a response (A2 DENSITY, A1 ALWAYS-UNSAT, C0 POLARITY). The continuation prompt can only be built from a model's own response. So can the trace-driven and D∘DENSITY predictions, which `materialise` computes:
   - on a transplant, trace-driven is the donor response's final answer, and D∘DENSITY is that answer, or the host's cue if the donor gave up;
   - on early answering and mistake insertion, the point prediction needs the trace replayed, which isn't built, so `materialise` returns the response's final answer.
-- **C E5 give-up members.** Every part lists the A1 constant: ALWAYS-IMPOSSIBLE, ALWAYS-UNSAT, or NONE (always NO). So an IMPOSSIBLE answer on a STUCK item is no longer credited only to the members that abort at the dead end. On ENT items NONE equals EXACT.
+- **C give-up members.** Every part of C E5 lists the A1 constant: ALWAYS-IMPOSSIBLE, ALWAYS-UNSAT, or NONE (always NO). So an IMPOSSIBLE answer on a STUCK item is no longer credited only to the members that abort at the dead end. On ENT items NONE equals EXACT.
+  - C E1 and C E2 SAT items now list the A1 constant too (ALWAYS-UNSAT). Without it, the recovery harness read a model that answers UNSAT on every item as RO-GREEDY (C3), whose distribution puts 0.4–1.0 on UNSAT on these items (RECOVERY.md, `null_always`).
+  - Their colouring items list none: they ask for the fewest colours, and that format offers no IMPOSSIBLE answer (the scorer counts one as `declared_impossible`). Knapsack has no give-up token either.
 - **Selection on members' behaviour (a design question).** Some §2.8 filters select bases on a named member's success or failure:
   - C E1-SAT needs GREEDY to satisfy in all three orders;
   - C E1-COL needs FF to use χ + 1 colours in some order;
