@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 import time
@@ -132,6 +133,20 @@ def prompt_tokens_estimate(rec: dict[str, Any]) -> int:
     return usage["prompt_tokens"] + usage["completion_tokens"]
 
 
+CONTEXT_MARGIN = 1.01  # on the estimate: the probes' forced prompts came to 1.0007-1.0033 times it
+TEMPLATE_TOKENS = 64  # the template's own tokens, generously
+MIN_ANSWER_TOKENS = 256  # below this a call is skipped (and counted) rather than sent
+
+
+def call_max_tokens(rec: dict[str, Any], max_tokens: int, context_length: int | None) -> int:
+    """One forced call's max_tokens: the pass's, lowered so that prompt plus answer fits the pinned endpoint's
+    context. DeepInfra serves Qwen3 with a 40,960-token context, which a 32,768-token trace, a long item and
+    4,096 answer tokens can overflow: an HTTP 400, which stops the pass (2026-11-18, one dev item per Qwen3 run)."""
+    if not context_length:
+        return max_tokens
+    return min(max_tokens, context_length - math.ceil(CONTEXT_MARGIN * prompt_tokens_estimate(rec)) - TEMPLATE_TOKENS)
+
+
 class ForcedRunner(Runner):
     """run.py's Runner for forced calls: each call reserves a worst case priced from its source response's
     usage (not from the prompt's bytes), and its raw record says where its prompt came from."""
@@ -187,8 +202,12 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
         picked = picked[: a.limit]
     if any(r["request"].get("provider") != routing for r in picked):
         raise SystemExit(f"{src}: some source requests were not routed {routing}")
+    limits = [call_max_tokens(r, a.max_tokens, cfg.context_length) for r in picked]
+    no_room = sum(1 for m in limits if m < MIN_ANSWER_TOKENS)
+    picked, limits = zip(*[(r, m) for r, m in zip(picked, limits) if m >= MIN_ANSWER_TOKENS]) if no_room < len(picked) else ((), ())
+    picked, limits = list(picked), list(limits)
     try:
-        bodies = [forced_body(r["request"], trace_of(r), a.max_tokens) for r in picked]
+        bodies = [forced_body(r["request"], trace_of(r), m) for r, m in zip(picked, limits)]
     except UnsupportedModel as e:
         raise SystemExit(str(e)) from e
     items_ref = (src_manifest.get("git") or {}).get("sha") if a.items_at_run_sha else None
@@ -196,13 +215,16 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
         raise SystemExit(f"{src}: the source manifest records no git SHA")
     load_run_items(src_manifest, a.allow_item_drift, items_ref)  # the scorer's items, checked before anything is spent
     prompt_tokens = sum(prompt_tokens_estimate(r) for r in picked)
+    lowered = sum(1 for m in limits if m < a.max_tokens)
     est = {"calls": len(picked), "prompt_tokens": prompt_tokens, "cost_usd": round(price.cost(prompt_tokens, 0), 4),
-           "worst_case_usd": round(price.cost(prompt_tokens, a.max_tokens * len(picked)), 4),
+           "worst_case_usd": round(price.cost(prompt_tokens, sum(limits)), 4),
            "assumptions": "prompt tokens: each source response's prompt plus completion tokens; cost_usd is the prompt "
-                          "alone (every call answers at once), worst_case_usd has every call at max_tokens"}
+                          "alone (every call answers at once), worst_case_usd has every call at its max_tokens"}
     print(f"## Forced final answers: {source_id} ({cfg.slug}, template {TEMPLATE}, max_tokens {a.max_tokens})\n\n"
           f"{len(picked)} calls: the responses that stopped at the cap with a reasoning trace"
           f"{f' (the first {a.limit})' if a.limit else ''}. {no_trace} stopped there without a trace and are skipped.\n"
+          f"{lowered} calls get a lower max_tokens to fit the endpoint's context ({cfg.context_length}); "
+          f"{no_room} would have under {MIN_ANSWER_TOKENS} tokens and are skipped.\n"
           f"Prompt tokens (each source response's prompt plus completion tokens): {prompt_tokens:,}.\n"
           f"Estimate at ${price.prompt}/M prompt, ${price.completion}/M completion ({price.source}): "
           f"${est['cost_usd']:.4f} if every call answers at once; ${est['worst_case_usd']:.4f} if every call runs to max_tokens.")
@@ -230,7 +252,7 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
         sample = r.get("sample", 0)
         if (r["item_id"], sample) not in done:
             jobs.append({"item": {k: r[k] for k in ITEM_FIELDS}, "sample": sample, "body": body, "key": cache_key(body, sample),
-                         "worst": guard.safety * price.cost(prompt_tokens_estimate(r), a.max_tokens),
+                         "worst": guard.safety * price.cost(prompt_tokens_estimate(r), body["max_tokens"]),
                          "provenance": {"source_run_id": source_id, "source_cache_key": r["cache_key"], "forced_template": TEMPLATE}})
     src_cond = src_manifest["condition"]
     manifest: dict[str, Any] = {
@@ -241,14 +263,14 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
                       "max_tokens": a.max_tokens, "system_prompt": src_cond.get("system_prompt"), "reasoning": None,
                       "sampling": src_cond.get("sampling"), "template": TEMPLATE},
         "provider_routing": routing, "price": price.__dict__, "model_notes": cfg.notes,
-        "items": {"files": src_manifest["items"]["files"], "n_items": len(picked), "skipped": {"no_trace": no_trace},
+        "items": {"files": src_manifest["items"]["files"], "n_items": len(picked), "skipped": {"no_trace": no_trace, "no_room": no_room},
                   "limit": a.limit, "allow_item_drift": a.allow_item_drift, "items_ref": items_ref},
         "estimate": est, "cap_usd": cap, "cap_requested_usd": a.cap_usd, "budget_tag": a.budget_tag,
         "budget_usd": a.budget_usd, "budget_spent_before_usd": spent_before, "git": git_info(), "versions": versions(),
         "client": {"timeout_s": client.timeout_s, "max_attempts": client.max_attempts, "concurrency": a.concurrency},
         "notes": a.notes, "resumed_from": len(done),
-        "counts": {"selected": len(picked), "skipped_no_trace": no_trace, "responses": None, "answered": None,
-                   "still_reasoning": None},
+        "counts": {"selected": len(picked), "skipped_no_trace": no_trace, "skipped_no_room": no_room,
+                   "max_tokens_lowered": lowered, "responses": None, "answered": None, "still_reasoning": None},
     }
     manifest_path = out / "manifest.json"
     if manifest_path.exists():  # a resumed pass keeps every earlier invocation's provenance
