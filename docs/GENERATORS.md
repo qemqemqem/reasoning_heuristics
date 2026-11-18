@@ -32,7 +32,9 @@ python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
 | dev | dev | [10⁵, 10⁶) | 5 (configurable 5–10) |
 | test | test | [10⁶, 2·10⁶) | set by the study |
 
-Every item records the seed of its base; every variant of a base inherits the base's seed and split. Test batches are written to the gitignored `data/items/test/` and are used here only for the leakage check.
+Every item records the seed of its base; every variant of a base inherits the base's seed and split. The validators check the seed against its tier's range, not only its split's. Test batches are written to the gitignored `data/items/test/` and are used here only for the leakage check.
+
+Random streams come from `seeds.rng_for(seed, salt)`, which keys a stream on the first 8 bytes of the salt only ("AH-E1-SAT-critical" and "AH-E1-SAT-null" both key "AH-E1-SA"). The truncation is kept so existing items regenerate identically; `rng_for` raises if one seed is asked for with two salts that agree in their first 8 bytes, since they would share a stream. Give a new salt its own 8-byte prefix.
 
 ## The item schema
 
@@ -55,6 +57,10 @@ Every item records the seed of its base; every variant of a base inherits the ba
 | `seed`, `split`, `tier`, `generator`, `generator_version` | Provenance. |
 | `extra` | Outcome-class map for `disconfirms`, and (for converted library items) every field that did not map. |
 
+**Lineage rules** (`validate/checks.py`, `LINEAGE_RULES`): a variant's `source_hash` is the content hash of an item in the same set; an item with no source is its own base (`content_hash == base_hash`); a variant shares its source's `base_hash`; and every item of one base carries the base's seed, split and tier. Several generators break the first two today. Those (generator, rule) pairs are listed in `KNOWN_LINEAGE_GAPS` and reported in each set's report and in `review/summary.md` rather than failed; any other violation fails.
+
+**Entailment ground truth** follows the prompts: a conclusion follows when it "must be true whenever all the statements are true", so inconsistent premises would entail everything. No design intends them, and the validators flag any item whose stated premises are inconsistent.
+
 **Likelihood-ratio sign convention (one for the repo):** `disconfirms[o][h] = log10 max_h' P(o|h') − log10 P(o|h)`. Positive = evidence against theory *h*; 0 = *h* is among the best-fitting theories for outcome *o*. Outcome classes are the distinct answers of the deterministic members on the item's scoring channel plus "other"; deterministic members slip with ε = 0.1; distributional members use their own distributions; set-valued members (the exact solver on witness tasks, uniform fills) spread their mass over their solution sets.
 
 **Example libraries.** `python -m reasoning_heuristics.schema.convert` maps all six `data/examples/*.jsonl` libraries into the schema (`data/library/`, gitignored) and writes `data/library/CONVERSION_REPORT.md`, which lists every field that did not map. The libraries used three LR sign conventions; the converter unifies them.
@@ -66,7 +72,7 @@ Every item records the seed of its base; every variant of a base inherits the ba
 | `problems/{sat,coloring,entailment,knapsack,tsp}` | Instances with presentation orders, exact solvers paired with independent validator-path solvers, renderers |
 | `heuristics/` | The zoo: one interface, `member(task, params) -> Prediction(answer, trace_features)`, a registry, and the composite `SEARCH(b, order, value, default)` |
 | `counterfactual/` | Isomorphic copies and re-orderings, the minimal-edit search engine, surface matching |
-| `validate/` | Independent ground truth; item, set and leakage checks |
+| `validate/` | Ground truth twice (`truth.py`: the generator path; `independent.py`: the validator's own instance reading, stated-rule transforms and solvers, CaDiCaL rather than MiniSat, plus the readouts behind the likelihood tables); item, set, hash-collision, lineage and leakage checks (`checks.py`) |
 | `generators/` | One module per eval; `common.py` assembles items, LR tables and hypotheses |
 | `generate.py`, `review.py` | The CLI and the review/summary builder |
 | `tokens.py`, `lexicon.py`, `seeds.py`, `hashing.py` | Tokenizer proxy, naming, tiers and seeds, canonical hashes |

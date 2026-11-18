@@ -12,6 +12,7 @@ from reasoning_heuristics.generators.common import predict_all
 from reasoning_heuristics.heuristics.base import run
 from reasoning_heuristics.heuristics.tasks import ColouringTask, EntailmentTask, KnapsackTask, SatTask
 from reasoning_heuristics.problems.coloring import graph as G
+from reasoning_heuristics.problems.coloring import render as colouring_render
 from reasoning_heuristics.problems.coloring.render import render_neighbours
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.knapsack.knapsack import Knapsack
@@ -34,7 +35,7 @@ def test_e1_col_copies_match_library(rec):
     g = graph_from_neighbours(rec["prompt"])
     order = answer_order(rec["prompt"])
     task = ColouringTask(g, None, (), tuple(order) if order else None)
-    assert render_neighbours(g, "fewest", order) == rec["prompt"]
+    assert render_neighbours(g, "fewest", order, style="library") == rec["prompt"]
     copy = rec["cell"]
     preds = predict_all(task, c_e1.col_members(copy))
     lib = rec["predictions"]
@@ -51,7 +52,7 @@ def test_e1_col_copies_match_library(rec):
 def test_e1_sat_copies_match_library(rec):
     cnf = cnf_from_c_prompt(rec["prompt"])
     order = answer_order(rec["prompt"])
-    assert render_c(cnf, order) == rec["prompt"]
+    assert render_c(cnf, order, style="library") == rec["prompt"]
     preds = predict_all(SatTask(cnf, (), tuple(order)), c_e1.sat_members(rec["cell"]))
 
     def lib_assignment(d):
@@ -94,7 +95,9 @@ def test_e2_col_library_edits_have_their_signatures():
     assert s["TRUTH"]
 
 
-def test_e3_library_gadget_prompts_and_lemma():
+def test_e3_library_gadget_prompts_and_lemma(monkeypatch):
+    # u_prompt (generator code) renders with the default answer wording: ask for the library's
+    monkeypatch.setattr(colouring_render, "DEFAULT_ANSWER_STYLE", "library")
     base_u = find("C_constructive", pair_id="E3-COL-A", cell="d=2/BASE/U-LIST")
     base_i = find("C_constructive", pair_id="E3-COL-A", cell="d=2/BASE/I")
     crit_i = find("C_constructive", pair_id="E3-COL-A", cell="d=2/CRITICAL/I")
@@ -114,7 +117,7 @@ def test_e5_library_prompts_and_states():
         rec = find("C_constructive", pair_id="E5-SAT-STATE-A", cell=cell)
         cnf = cnf_from_c_prompt(rec["prompt"])
         fixed = {k: v == "T" for k, v in rec["params"]["fixed"].items()}
-        assert render_c(cnf, list(cnf.var_names), fixed) == rec["prompt"]
+        assert render_c(cnf, list(cnf.var_names), fixed, style="library") == rec["prompt"]
         assert c_e5.sat_state_classes(cnf, fixed) == want
     L = F.lit
     for cell, prem in (("ORDER-A", (F.nand(L("E"), L("C")), F.disj(L("B"), L("C")), F.nand(L("B"), L("A")), F.disj(L("E"), L("A")))),):

@@ -66,8 +66,12 @@ def canonical_tour(t: TSP, tour: list[str], start: str | None = None) -> list[st
 
 def solve_held_karp(t: TSP) -> tuple[int, list[str]]:
     n = t.n
+    if n == 0:
+        raise ValueError("a tour needs at least one city")
     if n > 14:
         raise ValueError("Held-Karp limited to n <= 14")
+    if n == 1:
+        return 0, [t.names[0]]
     D = t.dist
     best: dict[tuple[int, int], tuple[int, int]] = {}
     for j in range(1, n):
@@ -93,6 +97,10 @@ def solve_held_karp(t: TSP) -> tuple[int, list[str]]:
 def solve_bnb(t: TSP) -> int:
     """Optimal tour length by depth-first branch and bound (validator path)."""
     n, D = t.n, t.dist
+    if n == 0:
+        raise ValueError("a tour needs at least one city")
+    if n == 1:
+        return 0
     best = [sum(D[i][(i + 1) % n] for i in range(n))]
     min_out = [min(D[i][j] for j in range(n) if j != i) for i in range(n)]
 

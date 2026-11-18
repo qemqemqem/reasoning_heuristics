@@ -43,9 +43,28 @@ def base_seed(tier: str, user_seed: int, attempt: int) -> int:
     return value
 
 
+SALT_BYTES = 8
+
+# (seed, salt key) -> the first salt that used it, for every stream handed out in this process.
+_STREAM_OWNERS: dict[tuple[int, int], str] = {}
+
+
 def rng_for(seed: int, salt: str) -> np.random.Generator:
-    """A numpy Generator keyed on (seed, salt): different evals never share streams."""
-    salt_int = int.from_bytes(salt.encode("utf-8")[:8].ljust(8, b"\0"), "little")
+    """A numpy Generator keyed on (seed, salt): different evals never share streams.
+
+    Only the first SALT_BYTES (8) UTF-8 bytes of the salt key the stream: "AH-E1-SAT-critical",
+    "AH-E1-SAT-null" and "AH-E1-SAT-B1" all key "AH-E1-SA". The truncation stays, so existing
+    items regenerate identically. What it must never do is hand two different salts the same
+    stream, so asking for a seed with a salt that agrees with an earlier one in its first 8 bytes
+    raises AssertionError. Salts that differ only after byte 8 are therefore usable only with
+    different seeds (A/H E1's kinds each draw their own base seeds). Give a new salt its own
+    8-byte prefix.
+    """
+    salt_int = int.from_bytes(salt.encode("utf-8")[:SALT_BYTES].ljust(SALT_BYTES, b"\0"), "little")
+    owner = _STREAM_OWNERS.setdefault((seed, salt_int), salt)
+    if owner != salt:
+        raise AssertionError(f"rng_for: salts {owner!r} and {salt!r} agree in their first {SALT_BYTES} bytes, "
+                             f"so with seed {seed} they would share one random stream")
     return np.random.default_rng([seed, salt_int])
 
 

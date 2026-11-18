@@ -135,4 +135,4 @@ def test_render_neighbours_reproduces_c_library_prompt():
                 edges.append((v, u))
     g = G.Graph(tuple(vertices), tuple(edges))
     order = vertices
-    assert render_neighbours(g, "fewest", order) == rec["prompt"]
+    assert render_neighbours(g, "fewest", order, style="library") == rec["prompt"]
