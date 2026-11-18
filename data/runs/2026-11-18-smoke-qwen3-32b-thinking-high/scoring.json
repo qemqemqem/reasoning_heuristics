@@ -1,0 +1,27 @@
+{
+  "scorer_version": "scorer-1.5.0",
+  "git": {
+    "sha": "3e9851d22b27d83be96d36180aa8bb87a94ba6f0",
+    "dirty": false,
+    "branch": "smoke-runs"
+  },
+  "versions": {
+    "python": "3.12.12",
+    "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "reasoning_heuristics": "0.1.0",
+    "scorer": "scorer-1.5.0",
+    "tokenizer_proxy": "regex-digit-split-v1",
+    "python-sat": "1.9.dev22",
+    "pyetr": "1.0.0",
+    "numpy": "2.5.5",
+    "networkx": "3.7",
+    "jsonschema": "4.26.0"
+  },
+  "scored_at": "2026-11-18T04:23:10Z",
+  "items_source": "git 03a87c1a14f64d320edbf389ed7975829f0c14db",
+  "records": 254,
+  "categories": {
+    "ok": 248,
+    "truncated": 6
+  }
+}

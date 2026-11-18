@@ -205,6 +205,27 @@ def test_resume_into_the_same_directory_sends_only_the_rest(tmp_path, key):
     run(tmp_path, t, "--no-cache", limit=6)
     assert len(t.calls) == 6
     assert len(read_gz(tmp_path / "run1" / "raw.jsonl.gz")) == 6
+    m = json.loads((tmp_path / "run1" / "manifest.json").read_text())
+    assert m["resumed_from"] == 3 and len(m["previous_invocations"]) == 1
+    assert m["previous_invocations"][0]["git"]["sha"] and m["previous_invocations"][0]["charged_usd"] == pytest.approx(0.0003)
+    assert m["charged_usd"] == pytest.approx(0.0003) and m["charged_usd_all_invocations"] == pytest.approx(0.0006)
+    with pytest.raises(SystemExit, match="different condition"):
+        run(tmp_path, t, "--no-cache", "--effort", "low", limit=6)
+
+
+def test_a_body_cut_short_is_retried(key):
+    """Seen live: http.client.IncompleteRead escaped the retry loop and stopped run (a)."""
+    import http.client
+
+    class CutShort(FakeTransport):
+        def __call__(self, method, url, headers, body, timeout):
+            if not self.calls:
+                self.calls.append({})
+                raise http.client.IncompleteRead(b"{\"id\": \"gen-", 1991)
+            return super().__call__(method, url, headers, body, timeout)
+
+    res = client(CutShort()).chat({"model": "m", "messages": [{"role": "user", "content": "q"}]})
+    assert res.ok and res.attempts == 2 and "IncompleteRead" in res.errors[0]
 
 
 def test_cap_stops_cleanly_before_the_spend_would_pass_it(tmp_path, key):
@@ -249,12 +270,31 @@ def test_fatal_error_stops_the_run_and_is_recorded(tmp_path, key):
     assert scored[0]["category"] == "api_error"
 
 
-def test_unpinned_model_is_refused_without_no_pin(tmp_path, key):
+def test_unpinned_model_is_refused_without_no_pin(tmp_path, key, monkeypatch):
+    import dataclasses
+
+    from reasoning_heuristics.evals import models as M
+
+    monkeypatch.setitem(M.MODELS, "openai/gpt-oss-20b", dataclasses.replace(M.MODELS["openai/gpt-oss-20b"], provider=None))
     args = ["--items", B4E1, "--model", "openai/gpt-oss-20b", "--out", str(tmp_path / "x"), "--cap-usd", "1", "--limit", "1",
             "--cache-dir", str(tmp_path / "c"), "--ledger", str(tmp_path / "L.md")]
     with pytest.raises(SystemExit, match="no pinned provider"):
         run_main(args, client=client(FakeTransport()))
     assert run_main(args + ["--no-pin"], client=client(FakeTransport())) == 0
+
+
+def test_pinned_routing_and_completion_limit(tmp_path, key):
+    t = FakeTransport()
+    args = ["--items", B4E1, "--model", "qwen/qwen3-32b", "--out", str(tmp_path / "p"), "--cap-usd", "1", "--limit", "1",
+            "--cache-dir", str(tmp_path / "c"), "--ledger", str(tmp_path / "L.md")]
+    assert run_main(args, client=client(t)) == 0
+    assert t.calls[0]["provider"] == {"order": ["deepinfra/fp8/flex"], "allow_fallbacks": False,
+                                      "require_parameters": True, "quantizations": ["fp8"]}
+    m = json.loads((tmp_path / "p" / "manifest.json").read_text())
+    assert m["price"]["completion"] == 0.224  # the pinned endpoint's price, not the list price
+    with pytest.raises(SystemExit, match="completion limit"):
+        run_main(["--items", B4E1, "--model", "qwen/qwen3-235b-a22b-thinking-2507", "--out", str(tmp_path / "q"),
+                  "--cap-usd", "1", "--limit", "1"], client=client(t))
 
 
 def test_dry_run_sends_nothing_and_writes_nothing(tmp_path, capsys):
@@ -263,6 +303,16 @@ def test_dry_run_sends_nothing_and_writes_nothing(tmp_path, capsys):
     assert run_main(args) == 0
     text = capsys.readouterr().out
     assert "| **Total** | | **254** |" in text and not (tmp_path / "d").exists()
+
+
+def test_dry_run_from_a_runs_measured_tokens(tmp_path, key, capsys):
+    run(tmp_path, FakeTransport(), limit=4)  # every fake response reports 1,200 completion tokens
+    capsys.readouterr()
+    args = ["--items", B4E1, "--model", "openai/gpt-oss-20b", "--out", str(tmp_path / "d"), "--dry-run", "--limit", "4",
+            "--tokens-from", str(tmp_path / "run1")]
+    assert run_main(args) == 0
+    text = capsys.readouterr().out
+    assert "Output tokens (measured)" in text and "| B4/C4 | E1 | 4 | " in text and "| 4,800 |" in text
 
 
 def test_direct_run_records_the_system_instruction(tmp_path, key):

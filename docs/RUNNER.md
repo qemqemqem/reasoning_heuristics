@@ -17,9 +17,9 @@ The runner sends items to models through OpenRouter and keeps every response. Th
 ## Running
 
 ```bash
-# cost estimate only: no network, writes nothing
+# cost estimate only: no network, writes nothing (--tokens-from prices it from a run's measured tokens)
 python -m reasoning_heuristics.evals.run --items data/items/smoke --model openai/gpt-oss-20b --effort high \
-    --out data/runs/<run_id> --exclude-eval E8 --dry-run
+    --out data/runs/<run_id> --exclude-eval E8 --dry-run [--tokens-from data/runs/<earlier run>]
 
 # live run (the key comes from the environment; never put it on the command line)
 set -a; . ./keys.env; set +a          # keys.env holds OPENROUTER_API_KEY=...; it is gitignored
@@ -42,10 +42,10 @@ python -m reasoning_heuristics.evals.probe --model qwen/qwen3-32b --out data/run
 
 - **The key** is read from `OPENROUTER_API_KEY` inside each request and is never stored, printed, logged or written. A test greps every output file for it.
 - **Provider pinning.** A live run refuses a model with no pinned provider (SCOPE §1), unless you pass `--provider <slug>` (sent as `order: [slug]`, `allow_fallbacks: false`, `require_parameters: true`) or `--no-pin`. Pins and the pinned endpoint's prices live in `models.py`; they come from the probes.
-- **Resuming.** Re-running into the same `--out` sends only the (item, sample) pairs that have no response yet.
+- **Resuming.** Re-running into the same `--out` sends only the (item, sample) pairs that have no response yet. The manifest keeps every earlier invocation (git SHA, times, status, spend) under `previous_invocations` and the total charge in `charged_usd_all_invocations`. It refuses a resume with a different condition or item set.
 - **Re-scoring after the items change.** `score` refuses a run whose item files no longer hash to its manifest. `--items-at-run-sha` reads each file with `git show <run's SHA>:<path>` and checks it against the manifest's SHA-256 (`--items-ref <ref>` picks another ref). PRs merge with merge commits, so a run made at a pushed branch commit stays re-scorable after the merge.
 - **The cache** (`data/cache/openrouter/`, gitignored) means an identical request is never paid for twice, across runs. Repeat samples are separate keys. The permanent copy is each run's `raw.jsonl.gz`; `ResponseCache.import_runs` rebuilds a cache from those.
-- **Concurrency** defaults to 8. Timeouts are 30 minutes per request. Retries: 6 attempts with exponential backoff and jitter (honouring `Retry-After`) on network errors, 408/409/425/429/5xx and errors inside a 200 body. 400/401/402/403/404/413/422 stop the run at once.
+- **Concurrency** defaults to 8. Timeouts are 30 minutes per request. Retries: 6 attempts with exponential backoff and jitter (honouring `Retry-After`). They cover network errors (including a dropped connection or a body cut short), 408/409/425/429/5xx, and errors inside a 200 body. 400/401/402/403/404/413/422 stop the run at once.
 - **E8 is skipped** (`--exclude-eval E8`; the loader also refuses E8 specs). See [E8](#e8-continuations-and-prefill) below.
 
 ## Conditions
@@ -70,8 +70,8 @@ Decision record: [decisions/2026-11-17-direct-answer-arm.md](decisions/2026-11-1
 
 | File | Contents |
 |---|---|
-| `manifest.json` | run id; status and stop reason; start and finish times; model requested and `models_returned`; `system_fingerprints`; provider routing sent and `providers_served`; the full condition (reasoning, sampling, max_tokens, system prompt); prices; item files with SHA-256, item count, skipped items; the dry-run estimate; cap, budget and spend (`spend.spent_usd` is API-reported, including `failed_attempt_cost_usd`); the key's own usage counter before and after (`key_usage`, numbers only; other users of the key move it too, so its delta is an upper bound); git SHA, branch and dirty flag; Python, python-sat, PyETR, numpy, networkx, tokenizer-proxy and scorer versions; client settings |
-| `raw.jsonl.gz` | one record per (item, sample): `item_id`, `content_hash`, `presentation_hash`, `sample`, `cache_key`, `prompt_hash`, the exact `request` body, the full API `response` (content, reasoning, reasoning_details, usage, provider, model, id, finish reasons), `error` / `errors`, `attempts`, `latency_s`, `from_cache`, `failed_attempt_costs` (API-reported cost of each failed attempt, 0 if none), `charged_usd` (all attempts; 0 for a cache hit) and `cost_usd` (the returned response's) |
+| `manifest.json` | run id; status and stop reason; start and finish times; model requested and `models_returned`; `system_fingerprints`; provider routing sent and `providers_served`; the full condition (reasoning, sampling, max_tokens, system prompt); prices; item files with SHA-256, item count, skipped items; the dry-run estimate; cap, budget and spend (`spend.spent_usd` is API-reported, including `failed_attempt_cost_usd`); the key's own usage counter before and after (`key_usage`, numbers only; other users of the key move it too, so its delta is an upper bound, and it lags the API's own cost reports by minutes); git SHA, branch and a dirty flag (modified code under `src/` or `pyproject.toml`); Python, python-sat, PyETR, numpy, networkx, tokenizer-proxy and scorer versions; client settings; `previous_invocations` for a resumed run |
+| `raw.jsonl.gz` | one record per (item, sample): `item_id`, `content_hash`, `presentation_hash`, `sample`, `cache_key`, `prompt_hash`, the exact `request` body, the full API `response` (content, reasoning, reasoning_details, usage, provider, model, id, finish reasons), `error` / `errors`, `attempts`, `requested_at` and `completed_at` (UTC), `latency_s`, `from_cache`, `failed_attempt_costs` (API-reported cost of each failed attempt, 0 if none), `charged_usd` (all attempts; 0 for a cache hit) and `cost_usd` (the returned response's) |
 | `scored.jsonl.gz` | one scored record per raw record (below) |
 | `scoring.json` | scorer version, git SHA, scoring time, category counts |
 | `REPORT.md` | descriptive summary: categories and accuracy per eval, tokens per eval and kind, truncation by cell, parse flags, the responses that were not ok. No mixture fits and no claims about heuristics |
@@ -80,7 +80,7 @@ Every live run (and probe batch) appends a row to `data/runs/LEDGER.md` with its
 
 ### The scored record
 
-One JSON object per response, the record the identification engine joins on `content_hash` (or `item_id`):
+One JSON object per response. The identification engine joins it to its item on `item_id` and checks `content_hash`; `content_hash` alone is not unique, because several cells present the same content.
 
 | Field | Meaning |
 |---|---|
@@ -106,7 +106,12 @@ For the single-vertex format (C E3, arm I) the members' answers are full colouri
 
 Deterministic, no LLM (DESIGN §5 rule 4), and it reads the item's structured `instance`, never the prompt.
 
-**Parsing.** The last answer block wins: the last line-initial `ANSWER:` marker (also `**ANSWER:**`, `Final answer:`, `ANSWER` alone on a line; an inline `ANSWER:` only when there is no line-initial one), or the last JSON object carrying the format's key. Code fences, markdown emphasis, list bullets, whitespace and case are tolerated, and so is inline `<think>…</think>` in the content (removed first). The reasoning channel is never parsed for the answer; an answer found only there is flagged `answer_only_in_reasoning` and stays a parse failure.
+**Parsing.** The last answer block wins.
+
+- **Markers:** the last line-initial `ANSWER:` marker, also `**ANSWER:**`, `Final answer:`, or `ANSWER` alone on a line, after any symbols (`### ✅ Final Answer`). An inline `ANSWER:` counts only when there is no line-initial one. For the JSON formats, the last JSON object carrying the format's key.
+- **Tolerated and removed first:** code fences, markdown emphasis, list bullets, whitespace and case; inline `<think>…</think>` in the content; and, for the `ANSWER:` formats, LaTeX decoration (`$$\text{ANSWER: C}$$`, `\boxed{C}`; flag `latex_unwrapped`).
+- **No marker at all:** a reply that is nothing but an answer in the format is parsed (flag `no_answer_marker`). This matters in the direct condition. So is a last fenced code block that holds nothing but an answer (flag `fenced_answer_no_marker`). Any other text without a marker is a parse failure.
+- **The reasoning channel is never parsed for the answer.** A finished reply whose answer appears only there is flagged `answer_only_in_reasoning` and stays a parse failure.
 
 | Answer format (items) | Parsed into |
 |---|---|
@@ -142,7 +147,19 @@ Deterministic, no LLM (DESIGN §5 rule 4), and it reads the item's structured `i
 
 **Versioning.** `SCORER_VERSION` is on every record, with the git SHA of the scoring checkout. Bump it on any behavioural change and re-score every run (`python -m reasoning_heuristics.evals.score data/runs/*/`). The channel is rebuilt from the item's `extra.channel_spec` (`generators.common.item_channel`). Items written before it existed are rebuilt from the channel name with the generator's channel functions. A test checks them against every committed item's stored classes.
 
-- **scorer-1.1.0** (fix-generators). It reads `extra.channel_spec` and classifies answers with `generators.common.classify_answer`. An answer that no member predicted is put in the unlisted-solution class of the sets containing it, or in other when it is in none. The record gains `sets_matched`. On items without a `channel_spec` (every set generated before this version) the outcome classes are unchanged.
+**Scorer versions.** This is the one changelog. Two lines of work used overlapping labels before they met: main's (PR #13) and the smoke-runs branch's (PR #15). The branch labels are written below as `runs-x.y.z`; on that branch they appeared in records as plain `scorer-x.y.z`, and every one of those records has since been re-scored with 1.5.0.
+
+| Label | Where | What it added |
+|---|---|---|
+| scorer-1.0.0 | PR #8 | The first scorer |
+| scorer-1.1.0 | main, PR #13 (fix-generators) | Reads `extra.channel_spec` and classifies answers with `generators.common.classify_answer`. An answer that no member predicted goes to the unlisted-solution class of the sets that contain it, or to other when it is in none. The record gains `sets_matched`. On items without a `channel_spec` (every set generated before this version) the outcome classes are unchanged |
+| runs-1.1.0 | smoke-runs branch | A reply that is nothing but the answer, with no `ANSWER:` marker, is parsed (`no_answer_marker`) |
+| runs-1.1.1 | smoke-runs branch | `answer_only_in_reasoning` is no longer set on truncated replies, whose reasoning often just quotes the format |
+| runs-1.2.0 | smoke-runs branch | LaTeX answer decoration is unwrapped in the `ANSWER:` formats (`latex_unwrapped`) |
+| runs-1.3.0, runs-1.3.1 | smoke-runs branch | C SAT and colouring values given without their names, or with the format's `x=T` placeholder, are read in the requested order when the item states one and the count is exact (`positional_values`, `placeholder_names`). Commentary after the values is tolerated |
+| runs-1.4.0 | smoke-runs branch | A line-initial marker may follow any symbols (`### ✅ Final Answer`). With no marker at all, the last fenced block is read if it holds nothing but an answer (`fenced_answer_no_marker`) |
+| runs-1.4.1 | smoke-runs branch | Positional values may use the placeholders the generators switched to (`<variable>=T`, PR #12) |
+| **scorer-1.5.0** | PR #15 | scorer-1.1.0 plus every runs-x.y.z change. Every committed run is scored with it |
 
 ## Cost estimates (dry runs)
 
@@ -191,18 +208,132 @@ Estimate = items × (proxy prompt tokens × prompt price + assumed output tokens
 
 These are assumptions until a smoke run measures them. Each run's `REPORT.md` gives measured completion tokens per eval and kind, and the dev projections should be redone from those.
 
+**Dev projections from the smoke runs** (2026-11-18). These come from `run --dry-run --tokens-from data/runs/<run_id>` on the dev tier (1,270 items, E8 excluded), at the pinned prices:
+
+| Model, condition | Dev, assumed tokens | Dev, measured tokens | Dev worst case |
+|---|---|---|---|
+| gpt-oss-20b, thinking-high | $1.35 | $3.08 | $5.85 |
+| Qwen3-32B, thinking-high | $2.18 | $2.47 | $9.38 |
+| Qwen3-32B, direct | $0.09 | $0.10 | $0.35 |
+
+The measured projection counts each truncated response at the 32,768 cap. With a higher cap it would be a floor: 35% of gpt-oss-20b's smoke responses hit the cap.
+
 **The cap.** Before a request is sent, it reserves its worst case: prompt bytes as a token upper bound plus the full max_tokens, at the configured price, times 1.25. The reservation is settled to the API-reported `usage.cost` when the call returns. A request whose reservation would take spend plus in-flight reservations past `--cap-usd` is not sent; the run stops cleanly with status `stopped`, keeps everything already returned, and scores it. A call that costs more than its reservation means the configured price is wrong, and it also stops the run. A failed attempt can still be charged (a 200 whose body carries an error after the provider generated): any `usage.cost` it reports is booked at once, and the call retries only while spend plus every reservation, its own included, stays within the cap.
+
+## Provider probes and pins (2026-11-17)
+
+Endpoint listings and 62 tiny calls ("What is 17 + 25?") over the SCOPE §1 models cost $0.0055: [data/runs/probes/2026-11-17/PROBES.md](../data/runs/probes/2026-11-17/PROBES.md). Every probed endpoint returned the reasoning text. The pins, and why each was chosen, are in `models.py`:
+
+| Model | Pinned endpoint | Precision | $/M in / out | Max completion | Thinking off |
+|---|---|---|---|---|---|
+| gpt-oss-20b | `dekallm/bf16` | bf16 | 0.029 / 0.14 | 117,964 | rejected on every endpoint (HTTP 400 "Reasoning is mandatory") |
+| gpt-oss-120b | `dekallm/bf16` | bf16 | 0.03 / 0.18 | 117,964 | rejected |
+| Qwen3-32B | `deepinfra/fp8/flex` | fp8 (no bf16 endpoint exists) | 0.064 / 0.224 | 36,864 | honoured: `enabled: false` and `effort: none` give 0 reasoning tokens; `/no_think` leaves an empty think block |
+| Qwen3-14B | `deepinfra/fp8/flex` | fp8 (or int4 elsewhere) | 0.096 / 0.192 | 36,864 | honoured |
+| Qwen3-30B-A3B | `deepinfra/fp8/flex` | fp8 (only provider) | 0.096 / 0.40 | 36,864 | honoured |
+| DeepSeek-R1-0528 | `siliconflow/fp8` | fp8 (its release precision) | 0.50 / 2.18 | 147,456 | rejected |
+| Qwen3-235B-A22B-thinking | `venice/fp8` | fp8 (only endpoint) | 0.45 / 3.50 | **16,384** | rejected; `/no_think` ignored |
+
+- **gpt-oss:** bf16 holds the released MXFP4 expert weights exactly. The endpoints not pinned were rejected for these reasons:
+  - DeepInfra bf16 was rate-limited upstream (HTTP 429 on all 6 attempts);
+  - AkashML fp4 reported 0 reasoning tokens alongside reasoning text;
+  - the fp8 endpoints are a lossy re-quantisation.
+- **Qwen3 hybrids are fp8-only on OpenRouter.** Phase 2 should use the official FP8 checkpoint or say how bf16 differs. DeepInfra's standard tier caps completions at 16,384 and Tenstorrent's context is 20,000, so the flex tier is pinned.
+- **Qwen3-235B-thinking cannot run the 32k condition on OpenRouter today.** The runner refuses a max_tokens above the pinned endpoint's completion limit.
+
+## First live runs (smoke, 2026-11-18)
+
+Three acceptance runs, each on all 254 smoke items except A/H E8, on the pinned endpoints. They used the items as committed before the generator fixes of 2026-11-18. To re-score them, use `score --items-at-run-sha`. Each run's own `REPORT.md` has the details; all are scored with scorer-1.5.0 against the items at their recorded SHA.
+
+| Run | Model, condition | Provider served | Responses | ok | Truncated | Other categories | Correct of ok | API cost | Wall time |
+|---|---|---|---|---|---|---|---|---|---|
+| `2026-11-18-smoke-gpt-oss-20b-thinking-high` | gpt-oss-20b, thinking-high | DekaLLM (254) | 254 | 165 | 89 | – | 160/165 (97%) | $0.6159 | 111 min (2 invocations) |
+| `2026-11-18-smoke-qwen3-32b-thinking-high` | qwen3-32b, thinking-high | DeepInfra (254) | 254 | 248 | 6 | – | 188/248 (76%) | $0.4941 | 56 min |
+| `2026-11-18-smoke-qwen3-32b-direct` | qwen3-32b, direct | DeepInfra (254) | 254 | 250 | 3 | parse_fail 1 | 93/250 (37%) | $0.0194 | 1 min |
+
+**Measured completion tokens per item** (reasoning included, API-reported; truncated responses count at their cap), with the truncation rate at the cap and the actual API cost per item. Use these, not the assumptions above, to price dev runs (`run --dry-run --tokens-from data/runs/<run_id>`):
+
+| Model | Condition | Vertical | Eval | n | Completion tokens, median | mean | Truncated at cap | $/item | Run cost |
+|---|---|---|---|---|---|---|---|---|---|
+| gpt-oss-20b | thinking-high | A/H | E1 | 14 | 15,271 | 18,379 | 5 (36%) | 0.00259 | 0.0363 |
+| gpt-oss-20b | thinking-high | A/H | E2 | 24 | 31,099 | 21,655 | 11 (46%) | 0.00306 | 0.0735 |
+| gpt-oss-20b | thinking-high | A/H | E5 | 17 | 13,409 | 16,479 | 4 (24%) | 0.00232 | 0.0395 |
+| gpt-oss-20b | thinking-high | B4/C4 | E1 | 28 | 2,378 | 2,621 | 0 (0%) | 0.00037 | 0.0104 |
+| gpt-oss-20b | thinking-high | B4/C4 | E2 | 48 | 642 | 684 | 0 (0%) | 0.00010 | 0.0048 |
+| gpt-oss-20b | thinking-high | C | E1 | 12 | 22,545 | 21,770 | 1 (8%) | 0.00307 | 0.0368 |
+| gpt-oss-20b | thinking-high | C | E2 | 40 | 32,768 | 28,699 | 27 (68%) | 0.00403 | 0.1614 |
+| gpt-oss-20b | thinking-high | C | E3 | 54 | 32,768 | 28,065 | 36 (67%) | 0.00397 | 0.2143 |
+| gpt-oss-20b | thinking-high | C | E5 | 17 | 16,135 | 16,197 | 5 (29%) | 0.00229 | 0.0389 |
+| **gpt-oss-20b** | **thinking-high** | **all** | | **254** | **17,564** | **17,179** | **89 (35%)** | **0.00242** | **0.6159** |
+| qwen3-32b | thinking-high | A/H | E1 | 14 | 11,656 | 10,896 | 0 (0%) | 0.00249 | 0.0349 |
+| qwen3-32b | thinking-high | A/H | E2 | 24 | 12,036 | 13,508 | 4 (17%) | 0.00310 | 0.0744 |
+| qwen3-32b | thinking-high | A/H | E5 | 17 | 9,140 | 10,154 | 0 (0%) | 0.00231 | 0.0392 |
+| qwen3-32b | thinking-high | B4/C4 | E1 | 28 | 1,109 | 1,439 | 0 (0%) | 0.00033 | 0.0092 |
+| qwen3-32b | thinking-high | B4/C4 | E2 | 48 | 466 | 507 | 0 (0%) | 0.00012 | 0.0058 |
+| qwen3-32b | thinking-high | C | E1 | 12 | 12,824 | 11,380 | 0 (0%) | 0.00260 | 0.0313 |
+| qwen3-32b | thinking-high | C | E2 | 40 | 11,536 | 13,293 | 0 (0%) | 0.00302 | 0.1207 |
+| qwen3-32b | thinking-high | C | E3 | 54 | 8,960 | 10,743 | 1 (2%) | 0.00252 | 0.1359 |
+| qwen3-32b | thinking-high | C | E5 | 17 | 10,100 | 10,999 | 1 (6%) | 0.00252 | 0.0428 |
+| **qwen3-32b** | **thinking-high** | **all** | | **254** | **7,276** | **8,462** | **6 (2%)** | **0.00195** | **0.4941** |
+| qwen3-32b | direct | A/H | E1 | 14 | 29 | 31 | 0 (0%) | 0.00006 | 0.0008 |
+| qwen3-32b | direct | A/H | E2 | 24 | 38 | 208 | 3 (12%) | 0.00012 | 0.0029 |
+| qwen3-32b | direct | A/H | E5 | 17 | 19 | 30 | 0 (0%) | 0.00004 | 0.0007 |
+| qwen3-32b | direct | B4/C4 | E1 | 28 | 5 | 12 | 0 (0%) | 0.00001 | 0.0003 |
+| qwen3-32b | direct | B4/C4 | E2 | 48 | 5 | 5 | 0 (0%) | 0.00001 | 0.0005 |
+| qwen3-32b | direct | C | E1 | 12 | 110 | 93 | 0 (0%) | 0.00008 | 0.0009 |
+| qwen3-32b | direct | C | E2 | 40 | 103 | 67 | 0 (0%) | 0.00006 | 0.0023 |
+| qwen3-32b | direct | C | E3 | 54 | 472 | 317 | 0 (0%) | 0.00018 | 0.0098 |
+| qwen3-32b | direct | C | E5 | 17 | 8 | 45 | 0 (0%) | 0.00006 | 0.0011 |
+| **qwen3-32b** | **direct** | **all** | | **254** | **8** | **111** | **3 (1%)** | **0.00008** | **0.0194** |
+
+What the runs showed:
+
+- **gpt-oss-20b at high effort writes 2.3× the output tokens the vertical docs assume** (4.36M against 1.89M on smoke), even though 89 of its 254 responses (35%) stop at the 32,768 cap.
+  - The truncation is concentrated in a few kinds of item:
+    - every C E3 full-colouring response (arm U, 36 of 36);
+    - every A/H E2 SAT and C E5 SAT response;
+    - 14 of 15 C E2 knapsack and 7 of 10 C E2 SAT responses.
+  - B4/C4 never truncates, and neither does C E3's single-vertex arm I.
+  - The truncated traces are still working, not looping. Their last 20k characters compress like those of finished traces (gzip ratio about 0.3), and few lines repeat.
+  - The responses that finish are nearly all right (160 of 165), so the censoring removes the hard items, not random ones.
+  - Truncated responses are censored (SCOPE §6 rule 2) and carry no answer. Before a pilot, the item sizes need calibrating for this model (SCOPE §6 rule 1), or the cap needs raising. The pinned endpoint allows 117,964 completion tokens.
+- **Qwen3-32B with thinking is shorter, and truncates less**: 1.14× the assumed tokens, and 6 of 254 responses truncated. It writes its answer in four ways the scorer did not expect, each now handled with a flag:
+  - LaTeX (`$$\boxed{C}$$`; runs-1.2.0);
+  - the C SAT values without their names, or with the format's placeholder `x=T` (runs-1.3.x);
+  - a stray `---` and commentary after the values (runs-1.3.1);
+  - `### ✅ Final Answer` headings, or a colouring in a code fence with no marker at all (runs-1.4.0).
+- **Qwen3-32B direct.**
+  - Thinking off held on all 254 responses.
+  - Several replies drop the `ANSWER:` marker (runs-1.1.0).
+  - Three A/H E2 SAT replies loop on the assignment string (`0101…`) until the 1,024 cap.
+  - A few replies still work in the visible output: see `pre_answer_tokens` in its REPORT.md.
+- **Providers.**
+  - DekaLLM answered HTTP 429 to some first attempts at 16 concurrent requests; all were retried successfully. DeepInfra flex sent none.
+  - One DekaLLM response broke off mid-body (`IncompleteRead`) and stopped run (a) at 188 of 254. The client now retries that error, and the run was resumed into the same directory.
+  - Streams ran at a median of 52 tokens/s on gpt-oss-20b (DekaLLM; 10th–90th percentile 43–64) and 34 tokens/s on Qwen3-32B (DeepInfra flex; 30–38).
+  - Run (a) took 111 minutes over its two invocations at 16 concurrent requests. Run (b) took 56 minutes at 24.
+- **Prompt tokens** (API-reported against the proxy, chat template included):
+  - Qwen3-32B: 1.06× (1.03–1.11 by eval); 1.07× in the direct condition, which adds a system prompt.
+  - gpt-oss-20b: 0.93× overall, from 0.83× on C E3 to 1.64× on B4/C4. On B4/C4's short prompts it reports about 65 tokens per request more than the proxy, against about 10 for Qwen3-32B. That is most likely its chat template's system header. On the C prompts, which are full of vertex and variable numbers, it reports fewer tokens than the proxy: its tokenizer groups up to three digits, while the proxy splits every digit.
+- **One prompt bug, since fixed in the generators.** The C SAT answer line "the values as `x=T` / `x=F`" used `x` as a placeholder, which collides with the variable names `x15`…. PR #12 changed it to `<variable>=T`. Items regenerated from main carry the new wording; the scorer reads both.
 
 ## Before any pilot (SCOPE §1)
 
-To do on the first approved live run; results go in `data/runs/probes/` and the pins in `models.py`:
+Checked on the probes and the 2026-11-18 smoke runs:
 
-- [ ] Each model and provider returns the reasoning text (`reasoning` or `reasoning_details` non-empty; `reasoning_returned` on every scored record).
-- [ ] The provider and precision are pinned per model (`provider.order`, `allow_fallbacks: false`, quantization recorded), with the reason.
-- [ ] Thinking off is honoured for the direct condition on the pinned Qwen3 providers (no reasoning text, zero reasoning tokens, no `<think>` in content).
-- [ ] Reported reasoning tokens and max_tokens behave as configured (DESIGN §5 rule 11): truncated responses stop at 32,768 completion tokens.
-- [ ] The proxy prompt-token counts are compared with API-reported `prompt_tokens`, and the real tokenizers' counts are checked for the surface-matched pairs (`tokens.py` docstring).
-- [ ] The cost estimate is recalibrated from the smoke run's measured tokens before any dev run.
+- [x] **Each model and provider returns the reasoning text.**
+  - Every probed endpoint of the seven models did, on the probe question.
+  - Every thinking response in the smoke runs did (`reasoning_returned`).
+  - One endpoint, AkashML fp4 for gpt-oss-20b, reported 0 reasoning tokens alongside reasoning text, so it is not pinned.
+- [x] **The provider and precision are pinned per model, with the reason** (`models.py`; the table above).
+- [x] **Thinking off is honoured for the direct condition on the pinned Qwen3 provider.**
+  - In the probes, `{enabled: false}` and `{effort: none}` both gave 0 reasoning tokens.
+  - In run (c), all 254 Qwen3-32B direct responses had no reasoning text and 0 reasoning tokens.
+- [x] **max_tokens behaves as configured** (DESIGN §5 rule 11). Truncated responses stop at exactly max_tokens: 32,768 for thinking, 1,024 for direct. Reasoning tokens are reported on every response of the pinned endpoints.
+- [ ] **Proxy and real prompt-token counts compared.**
+  - Done for counts. API-reported prompt tokens are 1.06–1.07× the proxy count on Qwen3-32B (1.03–1.16 by eval and condition). On gpt-oss-20b they are 0.93× (0.83–1.64 by eval), chat template included; see the runs section.
+  - Not done: the per-tokenizer check of the surface-matched pairs (`tokens.py` docstring) needs the tokenizers themselves.
+- [x] **Measured tokens per eval are in the runs section below**, for recalibrating the dev-run estimate.
 
 ## E8: continuations and prefill
 
@@ -219,3 +350,5 @@ E8 items are specs: each continuation is built from the model's own earlier resp
 - **Single-vertex items (C E3 arm I)** cannot be compared with members on `answer_key` (members predict full colourings); use `channel_value`.
 - **C E5 partial colouring / assignment given:** a response that omits the already-fixed vertices is `partial` (flagged `missing_only_fixed`), because the prompt asks for every vertex. Relax this only by a scorer version bump.
 - **A/H decision items with a malformed witness** stay `ok` on the decision channel, with a witness flag. If witness-invalid SAT claims ("infeasible SAT claim") should be a category of their own, that is a scorer change.
+- **gpt-oss-20b at 32,768 tokens censors 35% of the smoke responses**, including all of C E3 arm U. The options are to shrink those items for every model, to raise the cap (the pinned endpoint allows 117,964), or to accept the censoring. That is a design decision (SCOPE §6 rules 1–2), not a runner one.
+- **IMPOSSIBLE on C E3 target-bit items.** The stored outcome classes put it in `answer = other`, and so `channel_value` is null and `outcome_class` is other. The identification engine's bit space counts it as a value of its own. One of the two should change.

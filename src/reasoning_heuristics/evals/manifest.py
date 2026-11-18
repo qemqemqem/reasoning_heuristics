@@ -30,7 +30,8 @@ def git_info(repo: Path = REPO) -> dict[str, Any]:
 
     try:
         sha = git("rev-parse", "HEAD")
-        dirty = bool(git("status", "--porcelain", "--untracked-files=no"))
+        # the code, not data: a run or scoring pass writes tracked files under data/runs/ itself
+        dirty = bool(git("status", "--porcelain", "--untracked-files=no", "--", "src", "pyproject.toml"))
         branch = git("rev-parse", "--abbrev-ref", "HEAD")
     except (OSError, subprocess.CalledProcessError) as e:
         return {"sha": None, "error": str(e)}

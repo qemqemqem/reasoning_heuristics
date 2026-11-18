@@ -48,6 +48,7 @@ class ModelConfig:
     provider: dict[str, Any] | None = None  # pinned routing (probes)
     pinned_price: Pricing | None = None  # the pinned endpoint's prices (probes)
     context_length: int | None = None  # the pinned endpoint's context
+    max_completion_tokens: int | None = None  # the pinned endpoint's completion limit; a larger max_tokens is refused
     notes: str = ""
 
 
@@ -56,29 +57,66 @@ QWEN3_THINKING_SAMPLING = {"temperature": 0.6, "top_p": 0.95, "top_k": 20}  # Qw
 QWEN3_DIRECT_SAMPLING = {"temperature": 0.7, "top_p": 0.8, "top_k": 20}  # Qwen3 model card, non-thinking mode
 R1_SAMPLING = {"temperature": 0.6, "top_p": 0.95}  # DeepSeek-R1 model card
 SCOPE = "SCOPE §1 list price (OpenRouter, 2026-11-13)"
+PROBED = "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
 
+
+def pin(tag: str, quantization: str) -> dict[str, Any]:
+    """One endpoint, no fallbacks, and every request parameter must be supported by it."""
+    return {"order": [tag], "allow_fallbacks": False, "require_parameters": True, "quantizations": [quantization]}
+
+
+# Pins (data/runs/probes/2026-11-17/PROBES.md). Every probed endpoint returned the reasoning text.
+# Full precision is preferred; among equals, the endpoint that reports reasoning tokens, has a
+# completion limit of at least 32,768 and costs least.
 MODELS: dict[str, ModelConfig] = {
     "openai/gpt-oss-20b": ModelConfig(
         "openai/gpt-oss-20b", Pricing(0.03, 0.13, SCOPE), GPT_OSS_SAMPLING, {"effort": "high"},
-        notes="Reasoning cannot be turned off; effort low is a budget arm, not the direct condition."),
+        provider=pin("dekallm/bf16", "bf16"), pinned_price=Pricing(0.029, 0.14, PROBED), context_length=131072,
+        max_completion_tokens=117964,
+        notes="Reasoning cannot be turned off (every endpoint answers HTTP 400 'Reasoning is mandatory' to enabled:false "
+              "and effort:none); effort low is a budget arm, not the direct condition. Pinned to DekaLLM bf16: bf16 holds "
+              "the released MXFP4 expert weights exactly, and it reports reasoning tokens. Not DeepInfra bf16 (HTTP 429 "
+              "rate-limited upstream on all 6 attempts), not AkashML fp4 (reports 0 reasoning tokens alongside reasoning "
+              "text), not the fp8 endpoints (a lossy re-quantisation). Fallback if DekaLLM fails: coreweave/fp4."),
     "openai/gpt-oss-120b": ModelConfig(
         "openai/gpt-oss-120b", Pricing(0.15, 0.60, SCOPE), GPT_OSS_SAMPLING, {"effort": "high"},
-        notes="Reasoning cannot be turned off; effort low is a budget arm, not the direct condition."),
+        provider=pin("dekallm/bf16", "bf16"), pinned_price=Pricing(0.03, 0.18, PROBED), context_length=131072,
+        max_completion_tokens=117964,
+        notes="Reasoning cannot be turned off. Pinned to DekaLLM bf16, the cheapest bf16 endpoint that answered the probe "
+              "(Crusoe bf16 also did, at $0.25/M; DeepInfra bf16 was degraded, status -5)."),
     "qwen/qwen3-14b": ModelConfig(
         "qwen/qwen3-14b", Pricing(0.12, 0.24, SCOPE), QWEN3_THINKING_SAMPLING, {"effort": "high"},
-        QWEN3_DIRECT_SAMPLING, {"enabled": False}, notes="Hybrid thinking checkpoint."),
+        QWEN3_DIRECT_SAMPLING, {"enabled": False}, provider=pin("deepinfra/fp8/flex", "fp8"),
+        pinned_price=Pricing(0.096, 0.192, PROBED), context_length=40960, max_completion_tokens=36864,
+        notes="Hybrid thinking checkpoint. No bf16 endpoint exists on OpenRouter (DeepInfra fp8 tiers and NextBit int4), "
+              "so fp8 is pinned. deepinfra/fp8 (standard tier) caps completions at 16,384, so the flex tier is pinned. "
+              "reasoning {enabled: false} is honoured (0 reasoning tokens); /no_think leaves an empty think block."),
     "qwen/qwen3-32b": ModelConfig(
         "qwen/qwen3-32b", Pricing(0.08, 0.28, SCOPE), QWEN3_THINKING_SAMPLING, {"effort": "high"},
-        QWEN3_DIRECT_SAMPLING, {"enabled": False}, notes="Hybrid thinking checkpoint."),
+        QWEN3_DIRECT_SAMPLING, {"enabled": False}, provider=pin("deepinfra/fp8/flex", "fp8"),
+        pinned_price=Pricing(0.064, 0.224, PROBED), context_length=40960, max_completion_tokens=36864,
+        notes="Hybrid thinking checkpoint. Every OpenRouter endpoint is fp8 (DeepInfra tiers, SiliconFlow, Tenstorrent), "
+              "so fp8 is pinned; Phase 2 should use the official FP8 checkpoint or say how bf16 differs. deepinfra/fp8 "
+              "(standard) caps completions at 16,384 and Tenstorrent's context is 20,000, so the flex tier is pinned "
+              "(36,864 completion tokens, 40,960 context, cheapest). reasoning {enabled: false} and {effort: none} are "
+              "honoured (0 reasoning tokens) on every endpoint; /no_think leaves an empty think block (1 token)."),
     "qwen/qwen3-30b-a3b": ModelConfig(
         "qwen/qwen3-30b-a3b", Pricing(0.12, 0.50, SCOPE), QWEN3_THINKING_SAMPLING, {"effort": "high"},
-        QWEN3_DIRECT_SAMPLING, {"enabled": False}, notes="Hybrid thinking checkpoint (MoE)."),
+        QWEN3_DIRECT_SAMPLING, {"enabled": False}, provider=pin("deepinfra/fp8/flex", "fp8"),
+        pinned_price=Pricing(0.096, 0.40, PROBED), context_length=40960, max_completion_tokens=36864,
+        notes="Hybrid thinking checkpoint (MoE). DeepInfra fp8 is the only provider; flex tier for the 32k budget."),
     "deepseek/deepseek-r1-0528": ModelConfig(
         "deepseek/deepseek-r1-0528", Pricing(0.50, 2.15, SCOPE), R1_SAMPLING, {"effort": "high"},
-        notes="Reasoning is mandatory."),
+        provider=pin("siliconflow/fp8", "fp8"), pinned_price=Pricing(0.50, 2.18, PROBED), context_length=163840,
+        max_completion_tokens=147456,
+        notes="Reasoning is mandatory (HTTP 400 to enabled:false). Pinned to SiliconFlow fp8, R1's release precision; "
+              "DeepInfra serves fp4 (a re-quantisation). No seed support."),
     "qwen/qwen3-235b-a22b-thinking-2507": ModelConfig(
         "qwen/qwen3-235b-a22b-thinking-2507", Pricing(0.45, 3.50, SCOPE), QWEN3_THINKING_SAMPLING, {"effort": "high"},
-        notes="Thinking-only checkpoint; reasoning is mandatory."),
+        provider=pin("venice/fp8", "fp8"), pinned_price=Pricing(0.45, 3.50, PROBED), context_length=128000,
+        max_completion_tokens=16384,
+        notes="Thinking-only checkpoint; reasoning is mandatory and /no_think is ignored. Venice fp8 is the only "
+              "endpoint and caps completions at 16,384, so the 32k best-effort condition cannot run on OpenRouter today."),
 }
 
 

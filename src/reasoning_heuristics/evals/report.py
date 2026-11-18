@@ -32,7 +32,7 @@ def build_report(manifest: dict[str, Any], scored: list[dict[str, Any]], items: 
          f"- **Items:** {manifest['items']['n_items']} ({', '.join(manifest['items']['files'])}); skipped {manifest['items']['skipped']}.",
          f"- **Status:** {manifest.get('status')}" + (f" ({manifest['stop_reason']})" if manifest.get("stop_reason") else "") +
          f"; {manifest.get('responses', '–')} responses, {manifest.get('failed_calls', 0)} failed calls, {manifest.get('cache_hits', 0)} from cache.",
-         f"- **Spend:** ${manifest.get('charged_usd', 0):.4f} API-reported (cap ${manifest.get('cap_usd', 0):.2f}; dry-run estimate "
+         f"- **Spend:** ${manifest.get('charged_usd_all_invocations', manifest.get('charged_usd', 0)):.4f} API-reported over {1 + len(manifest.get('previous_invocations', []))} invocation(s) (last cap ${manifest.get('cap_usd', 0):.2f}; dry-run estimate "
          f"${manifest.get('estimate', {}).get('cost_usd', 0):.2f}, worst case ${manifest.get('estimate', {}).get('worst_case_usd', 0):.2f})."
          + (f" {spend['calls_without_reported_cost']} calls carried no cost and were booked at the configured price." if spend.get("calls_without_reported_cost") else ""),
          f"- **Code:** git `{(manifest.get('git') or {}).get('sha')}`{' (dirty)' if (manifest.get('git') or {}).get('dirty') else ''}; "
@@ -54,8 +54,8 @@ def build_report(manifest: dict[str, Any], scored: list[dict[str, Any]], items: 
     L.append(f"| **All** | | **{len(scored)}** | " + " | ".join(f"**{tot.get(k, 0)}**" for k in cats) +
              f" | **{right_all}/{len(ok_all)} ({_pct(right_all, len(ok_all))})** |")
     L += ["", "## Tokens per response", "", "API-reported. Completion tokens include reasoning tokens. Truncated responses count at the tokens they used.", "",
-          "| Vertical | Eval | Kind | n | Completion median | Completion mean | Reasoning median | Reasoning mean | Prompt mean | Truncated | Reasoning text returned |",
-          "|---|---|---|---|---|---|---|---|---|---|---|"]
+          "| Vertical | Eval | Kind | n | Completion median | Completion mean | Reasoning median | Reasoning mean | Prompt mean | Truncated | Reasoning text returned | API $/item |",
+          "|---|---|---|---|---|---|---|---|---|---|---|---|"]
     by_kind: dict[tuple[str, str, str], list[dict[str, Any]]] = defaultdict(list)
     for r in scored:
         by_kind[(r["vertical"], r["eval_id"], _kind(r))].append(r)
@@ -65,10 +65,11 @@ def build_report(manifest: dict[str, Any], scored: list[dict[str, Any]], items: 
         tr = sum(1 for r in rs if r["truncated"])
         rr = sum(1 for r in rs if r["reasoning_returned"])
         L.append(f"| {v} | {e} | {k} | {len(rs)} | {_num(ct['median'])} | {_num(ct['mean'])} | {_num(rt['median'])} | {_num(rt['mean'])} | "
-                 f"{_num(pt['mean'])} | {tr} ({_pct(tr, len(rs))}) | {rr} ({_pct(rr, len(rs))}) |")
+                 f"{_num(pt['mean'])} | {tr} ({_pct(tr, len(rs))}) | {rr} ({_pct(rr, len(rs))}) | {_cost_per_item(rs)} |")
     ct, rt = token_stats([r["completion_tokens"] for r in scored]), token_stats([r["reasoning_tokens"] for r in scored])
     L.append(f"| **All** | | | **{len(scored)}** | **{_num(ct['median'])}** | **{_num(ct['mean'])}** | **{_num(rt['median'])}** | "
-             f"**{_num(rt['mean'])}** | | **{sum(1 for r in scored if r['truncated'])}** | **{sum(1 for r in scored if r['reasoning_returned'])}** |")
+             f"**{_num(rt['mean'])}** | | **{sum(1 for r in scored if r['truncated'])}** | **{sum(1 for r in scored if r['reasoning_returned'])}** | "
+             f"**{_cost_per_item(scored)}** |")
     pre = token_stats([r["pre_answer_tokens"] for r in scored])
     over = sum(1 for r in scored if (r["pre_answer_tokens"] or 0) > 20)
     L += ["", "## Visible text before the answer", "",
@@ -89,6 +90,11 @@ def build_report(manifest: dict[str, Any], scored: list[dict[str, Any]], items: 
         L += ["## Truncation by cell (censored, SCOPE §6 rule 2)", "", "| Eval | Cell | Truncated |", "|---|---|---|"]
         L += [f"| {e} | {c} | {n} |" for (e, c), n in sorted(trunc_cells.items())] + [""]
     return "\n".join(L) + "\n"
+
+
+def _cost_per_item(rs: list[dict[str, Any]]) -> str:
+    costs = [r["cost_usd"] for r in rs if r.get("cost_usd") is not None]
+    return f"{sum(costs) / len(costs):.5f}" if costs else "–"
 
 
 def _kind(r: dict[str, Any]) -> str:
