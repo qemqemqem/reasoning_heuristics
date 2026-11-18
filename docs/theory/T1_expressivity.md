@@ -2,6 +2,21 @@
 
 *Theory-crafting note, written 2026-11-13, before any project data. One of three: T2 covers RASP-L program length, learnability and simplicity bias; T3 covers LLM precedent and training pressure. Overlaps are marked [→T2] and [→T3] and are not argued here. This note builds on [literature/A_hardness_compute.md](../literature/A_hardness_compute.md), [literature/D_rasp_algorithms.md](../literature/D_rasp_algorithms.md) and [literature/F_heuristic_classes.md](../literature/F_heuristic_classes.md) and does not repeat them. Family labels follow [PAPER_SKELETON.md](../PAPER_SKELETON.md) Table 4.*
 
+**Reproduce.** Every Sim number comes from one command below (pure Python 3, fixed seeds; `pip install -e '.[theory]'` adds tiktoken for `trace_tokens.py`). Run from `scripts/theory/expressivity/`. Wall-clock times were measured on 2026-11-17 on a 14-core laptop under heavy load (load average 25–30), so expect less when idle.
+
+| Command | Produces | Time |
+|---|---|---|
+| `python search_costs.py dpll` | §3.2 DPLL decisions, propagations, conflicts (CSV) | 6 s |
+| `python search_costs.py budget` | §3.2 token costs and share over 32k | 10 s |
+| `python search_costs.py walksat` | §2.4 F, §3.4 WalkSAT flips | 6 s |
+| `python search_costs.py colour` | §3.3 DSATUR node counts and first-fit depth (§3.5) | 1 s |
+| `python search_costs.py colour_naive` | §3.3 listing-order colouring | 153 s |
+| `python search_costs.py satdepth` | §3.5 SAT GREEDY depth | 1 s |
+| `python search_costs.py uprounds` | §2.4 propagation depth per decision | 1 s |
+| `python trace_tokens.py` | §3.1 token costs | 1 s |
+
+Not produced by any script: the n\* values in §3.2 (read off the `budget` CSV by interpolation), the layers-per-round and per-step token estimates, and the model-depth table (from Hugging Face `config.json`).
+
 **Citation status.**
 
 - ✓ = verified in this session by search or fetch: title, authors, year, venue where given, and the specific claim used.
@@ -25,8 +40,8 @@
 1. **Every step function in the zoo is constant depth** (≈ 2–6 layers). Families differ in how many *dependent* steps they need, whether a step needs a *global* aggregate, and how much text a step writes. In **1P** the natural members are A, C0, B4 rewrites, H and a few rounds of B1/E. In **TH** everything except B3, SA and *explicit* E is cheap at our sizes.
 2. **P-completeness overstates 1P difficulty at our sizes.** First-fit colouring on random graphs (n ≤ 40, listing order unrelated to structure) has only **4–10 dependency levels**; SAT mention-order GREEDY has **16–28** at n = 20–60; the NN tour has n − 1 (Sim).
 3. **"L layers ≈ L rounds of message passing" is an upper bound for decoders on text.** About 2 layers per round, forward-in-text paths only (causal mask), half the layers mostly refine, and gpt-oss has only **12 / 18 full-attention layers**. Realistic radius: ≈ 3–9 rounds (gpt-oss) to ≈ 10–16 (Qwen3-14B/32B).
-4. **The 32k budget line depends more on the ordering rule than on verbosity** (Sim). Exact DPLL on UNSAT random 3-SAT: n\* ≈ 30 with listing-order branching vs ≈ 50 most-constrained-first (verbose); terse traces add 13–30; the SAT side lies near 70–80. Each ×4 of budget adds only 11–31 variables.
-5. **Colouring (≤ 40 nodes) and entailment (3–12 premises) sit below the line** for any sensible exact method: DSATUR-ordered search needs ≈ n node visits, and truth tables fit to ≈ 9 atoms. So **errors there at best effort are not compute-forced** (noise, or a chosen shortcut [→T2, →T3]). Heuristics are forced only on SAT above n ≈ 30–50, TSP (10–14 cities) and large-capacity knapsack.
+4. **The 32k budget line depends more on the ordering rule than on verbosity** (Sim). Exact DPLL on UNSAT random 3-SAT: n\* ≈ 30 with listing-order branching vs ≈ 50 with Jeroslow–Wang (JW) branching, a MOMS-like global score (verbose); terse traces add 13–30. The SAT side lies near 40 with listing order and near 70–80 with JW (JW is the only rule simulated on the SAT side beyond n = 60). Each ×4 of budget adds about 7–14 variables under listing order and 16–31 under JW.
+5. **Colouring (≤ 40 nodes) and entailment (3–12 premises) sit below the line** for DSATUR-ordered search (≈ n node visits, on random G(n, c/n) graphs that may be easier than the project's filtered items; listing-order backtracking crosses at n ≈ 20–25) and for truth tables up to ≈ 9 atoms (the 20-atom E1L items are above it). So **errors there at best effort are not compute-forced if the model orders well** (noise, or a chosen shortcut [→T2, →T3]). Heuristics are forced only on SAT above n ≈ 30–50, TSP (10–14 cities) and large-capacity knapsack.
 6. **E is cheap inside a pass and expensive as text** (one explicit BP round at n = 40 ≈ 9–22k tokens), so in TH expect *implicit* E: the value heuristic inside search.
 
 ---
@@ -301,13 +316,13 @@ Two consequences.
 
 ### 3.1 Method
 
-All numbers are medians over 30–40 random instances per cell (Sim; `scripts/theory/expressivity/search_costs.py`).
+All numbers are medians over random instances per cell (Sim; `scripts/theory/expressivity/search_costs.py`): 30–40 per cell for colouring, WalkSAT and propagation depth, and 40 formulas per n for DPLL, which split into SAT cells of 19–31 and UNSAT cells of only 9–21 (10 at n = 25, 13 at n = 60, 12 at n = 70). The UNSAT medians therefore rest on 9–21 formulas each.
 
 - **SAT instances:** random 3-SAT, α = 4.26, 3 distinct variables per clause.
 - **Colouring instances:** G(n, c/n) with c ∈ {3.0, 4.7, 6.0}, listing order a random permutation.
 - **DPLL:** unit propagation plus chronological backtracking, with two branching rules:
   - **INDEX:** the first unassigned variable in listing order, True first. This is C1 order inside D.
-  - **JW:** Jeroslow–Wang, a most-constrained-first rule like MOMS. This is C2 order inside D.
+  - **JW:** Jeroslow–Wang, a clause-length-weighted literal score in the MOMS family. It stands for global-score (C2-style) branching inside D; other scores are not simulated.
 
   Work is counted as decisions (each value tried), propagated literals, and conflicts.
 
@@ -357,8 +372,8 @@ Work doubles about every **12 variables** under JW and every **6** under INDEX (
 **Readings.**
 
 - **The ordering rule is worth about three doublings (×8) of budget.** At 32k with verbose traces, n\* is about 31 with INDEX and about 50 with JW. Per-step global scoring, a constant-depth computation (§2.3), buys an exponential saving in search.
-- **Budget elasticity.** At these sizes, ×4 of budget adds about +11 to +31 variables to n\*: about +12 under listing-order branching, +16 to +31 under most-constrained-first.
-- **SAT/UNSAT asymmetry.** On satisfiable items n\* is roughly 20–30 higher. Above the UNSAT line, an incomplete D answers SAT items correctly while UNSAT items hit the cap and fall to the default, which is the D vertical's E1-H2 prediction.
+- **Budget elasticity.** At these sizes, ×4 of budget (2k → 8k → 32k) adds about +7 to +31 variables to n\*: +7 to +14 under listing-order branching (INDEX terse +14, +13; verbose +12; verbose ×2 +7; the 2k n\* is "< 10" for the verbose styles, so only the 8k → 32k step is known there) and +16 to +31 under JW.
+- **SAT/UNSAT asymmetry.** On satisfiable items n\* is higher: about +10 under listing order (INDEX verbose ≈ 41 vs 31 on UNSAT; 40% of SAT items are already over 32k at n = 40 and 68% at n = 50) and about +20–30 under JW (≈ 70–80 vs 50). The n\* values in this section are read off `out_budget.csv` by interpolation; no script prints them. Above the UNSAT line, an incomplete D answers SAT items correctly while UNSAT items hit the cap and fall to the default, which is the D vertical's E1-H2 prediction.
 - Our planned range n ≈ 10–60 brackets most of these values. JW-terse and the SAT side lie above 60, which is why the D vertical's grid needs to run to 72 ({8, …, 72}).
 
 ### 3.3 Other domains
@@ -382,7 +397,7 @@ Work doubles about every **12 variables** under JW and every **6** under INDEX (
 | B1 `UP` to fixpoint | ≤ n propagations × 7–37 | Never (≤ 2.2k at n = 60) |
 | B4/C4 `ETR`, `ONL(k)` | premises × 37 × (number of models) | Never at 3–12 premises with few disjunctions |
 | C1 / C2 constructive | n steps × 4–40 (+ 8n per step if scores are written) | Never (≤ 15k at n = 40) |
-| D `DPLL` (JW order) | §3.2 | UNSAT n ≈ 42–80 (style); SAT ≈ 70–80+ |
+| D `DPLL` (JW order) | §3.2 | UNSAT n ≈ 42–80 (style); SAT ≈ 70–80+ (listing order: SAT ≈ 40 verbose) |
 | D `DPLL` (listing order) | §3.2 | UNSAT n ≈ 22–44; colouring n ≈ 20–25 |
 | F `WALK-k` | flips × 16–47 | SAT median never at n ≤ 60; the p90 tail crosses at n ≈ 40–50. Never answers UNSAT |
 | F `WALK-k` writing full re-checks | flips × (47 + 30m) | Already at n ≈ 20 |
@@ -432,8 +447,8 @@ Each prediction says what theory expects, what would falsify it, and which eval 
 | **P3** | **gpt-oss is more sensitive to serialisation distance.** When a round's "local" hop spans more than 128 tokens (both hops global), gpt-oss's 1P radius roughly halves; Qwen3's changes much less. | Equal sensitivity across families, or none | E E1 (token placement is already a factor); B1 E1. A cheap added arm: adjacency lists vs shuffled edge lists for colouring |
 | **P4** | **Causal-order asymmetry in 1P.** Premises in derivation order reach deeper k\* than reversed order. Giving the prompt twice narrows the gap (Leviathan et al.). In TH the gap shrinks to the order effects of C1/C4 processing. | No forward/reverse difference in 1P, or no effect of repetition | B1 E3 (position × proof order); E E1 (chain order); B4 E1, E3. A cheap added arm: prompt ×2 |
 | **P5** | **Chains vs branching in 1P.** On fan-in-1 chains, accuracy decays slowly with depth d (doubling, log-depth). On ladders and trees (fan-in ≥ 2) it falls off at d ≈ k\*. So k\*_chain > k\*_tree. | k\*_chain ≈ k\*_tree | B1 E1 (chain / ladder / tree × d) |
-| **P6** | **The budget line fingerprints the branching rule.** At 32k, a model whose D-coded traces branch in listing order has n\*_obs (UNSAT members) ≈ 22–44, and one that branches most-constrained-first ≈ 42–80. Within the band, the coded branching order predicts n\*_obs better than the coded verbosity does. | n\*_obs is unrelated to the coded branching order | D E1 (sweep; τ_W); D E3 (branching by text position) |
-| **P7** | **Budget elasticity.** Each ×4 of budget (2k → 8k → 32k) raises n\* by about 11–31 variables: about +12 under listing-order branching, +16 to +31 under most-constrained-first. `NOISY-EXACT`, C and A each predict no shift. | n\* doesn't move with budget (β ≈ 0), or moves in proportion to budget rather than its log | D E1 (β in the data collapse) |
+| **P6** | **The budget line fingerprints the branching rule.** At 32k, a model whose D-coded traces branch in listing order has n\*_obs (UNSAT members) ≈ 22–44, and one that branches by a global score like JW (MOMS-like) ≈ 42–80. Within the band, the coded branching order predicts n\*_obs better than the coded verbosity does. | n\*_obs is unrelated to the coded branching order | D E1 (sweep; τ_W); D E3 (branching by text position) |
+| **P7** | **Budget elasticity.** Each ×4 of budget (2k → 8k → 32k) raises n\* by about 7–31 variables: +7 to +14 under listing-order branching, +16 to +31 under JW-style global-score branching. `NOISY-EXACT`, C and A each predict no shift. | n\* doesn't move with budget (β ≈ 0), or moves in proportion to budget rather than its log | D E1 (β in the data collapse) |
 | **P8** | **Colouring at n ≤ 40 is below the line.** At best effort, if traces order vertices most-constrained-first, accuracy is high and nearly flat in n, and the remaining errors are perception or slips (`HALLUC-CONSTRAINT`, `NOISY-EXACT`), not cap hits. If traces use listing order with backtracking, accuracy falls from n ≈ 20–25 and cap hits rise. | Errors at n ≤ 40 at best effort show truncation signatures (cap hits, a default "impossible") although the traces are DSATUR-ordered | C E1, E2, E4, E5; D E6 (colouring arm, edge echo) |
 | **P9** | **Entailment at 3–12 premises is below the line, so restriction errors there are not compute-forced.** Moving the budget from 8k to 32k should not change π for B4 or C4 on items with ≤ 8 atoms. Any commission errors at best effort are a learned default [→T2, →T3]. | π_B4 falls substantially with budget on small items. That would be interesting in itself: resource-rational trading of tokens for accuracy | B4 E1, E2, E3 (× budget); B1 E2 |
 | **P10** | **In TH, E is implicit.** Explicit sweeps of two or more rounds over all clauses are rare at n ≥ 20. E's weight in TH comes through value choices and guesses at the cap that follow BP-1 marginals rather than `POLARITY`. Where explicit sweeps do occur, rounds per trace scale as 1/m. | Explicit multi-round sweeps are common at n ≥ 40; or value choices follow `POLARITY` as well as BP-1 on the 2-lift and second-order items | E E2, E5, E6; D E1 (answers at the cap) |

@@ -110,7 +110,7 @@ def up(seq, k=2, first=False, bicond=False):
         partner = seq_map(l2, l3, lambda a, b: np.where(a != 0, a, b))     # previous literal
         cx = seq_map(partner, role, lambda p, r: np.where(r == ROLE_CONS, -p, np.where(r == ROLE_D2, p, 0)))
         cy = seq_map(lit, role, lambda l, r: np.where((r == ROLE_CONS) | (r == ROLE_D2), l, 0))
-        iff = tok_map(role, lambda r: (r == ROLE_CONS) & bicond)               # BICOND table
+        iff = tok_map(role, lambda r: (r == ROLE_CONS) & bicond) if bicond else None   # BICOND table only
         vx, vy = tok_map(cx, np.abs), tok_map(cy, np.abs)
     for r in range(k):
         facts = [A] + slots_b
@@ -119,15 +119,21 @@ def up(seq, k=2, first=False, bicond=False):
         for f, fv in zip(facts, fvars):
             fx = aggregate(select(fv, vx, lambda kk, q: (kk == q) & (q != 0)), f, "max")
             fy = aggregate(select(fv, vy, lambda kk, q: (kk == q) & (q != 0)), f, "max")
-            d = map_n(_forward, fx, fy, cx, cy, iff)
+            d = (map_n(_forward, fx, fy, cx, cy, iff) if bicond
+                 else map_n(lambda a, b, c, e: _forward(a, b, c, e, 0), fx, fy, cx, cy))
             newA = seq_map(newA, d, lambda a, b: np.where(a != 0, a, b))
         z = A if not slots_b else seq_map(slots_b[-1], A, lambda b, a: np.where(b != 0, b, a))
         zv = tok_map(z, np.abs)
         hit_x = select(vx, zv, lambda kk, q: (kk == q) & (q != 0))
         hit_y = select(vy, zv, lambda kk, q: (kk == q) & (q != 0))
-        x_cx, x_cy, x_iff = (aggregate(hit_x, v, "max") for v in (cx, cy, iff))
-        y_cy, y_cx, y_iff = (aggregate(hit_y, v, "max") for v in (cy, cx, iff))
-        derived = map_n(_backward, z, x_cx, x_cy, x_iff, y_cy, y_cx, y_iff)
+        if bicond:
+            x_cx, x_cy, x_iff = (aggregate(hit_x, v, "max") for v in (cx, cy, iff))
+            y_cy, y_cx, y_iff = (aggregate(hit_y, v, "max") for v in (cy, cx, iff))
+            derived = map_n(_backward, z, x_cx, x_cy, x_iff, y_cy, y_cx, y_iff)
+        else:   # no b=>a / -a=>-b lookups: the plain skeleton (and FIRST, a role-table swap) pays nothing for them
+            x_cx, x_cy = (aggregate(hit_x, v, "max") for v in (cx, cy))
+            y_cy, y_cx = (aggregate(hit_y, v, "max") for v in (cy, cx))
+            derived = map_n(lambda z_, a, b, c, e: _backward(z_, a, b, 0, c, e, 0), z, x_cx, x_cy, y_cy, y_cx)
         slots_b.append(derived)
         fvars = (fvars or [None]) + [tok_map(derived, np.abs)]
         A = newA

@@ -1,7 +1,7 @@
 """Length vs accuracy for every member, the Pareto frontier, two-part MDL winners, and
 average sensitivity.  Writes results.json and a figure next to the theory note.
 
-    python frontier.py [--n 400] [--seed 0]
+    python frontier.py [--n 600] [--seed 0]
 
 Training-like distributions (stated assumptions, see T2 section 4):
   SAT-DEC/puzzle  mixed-width CNF (15% units, 35% binary, 50% ternary), n 4-10, m/n 0.5-3
@@ -319,7 +319,7 @@ def capacity_path(members, base=1.5, Ns=(1e2, 1e3, 1e4, 1e5, 1e6, 1e8)):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--n", type=int, default=400)
+    ap.add_argument("--n", type=int, default=600)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--no-think", action="store_true")
     args = ap.parse_args()
