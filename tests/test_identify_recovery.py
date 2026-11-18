@@ -73,10 +73,16 @@ def test_run_unit_end_to_end_small(tmp_path):
         assert k in out["scenarios"], k
     import json
 
+    from reasoning_heuristics.identify.recovery import report
+
+    doc = {"label": "t", "items": "x", "config": cfg, "provenance": {"git_sha": "0" * 40, "git_dirty": False},
+           "units": [out]}
     path = tmp_path / "r.json"
-    path.write_text(json.dumps({"label": "t", "items": "x", "units": [out]}))
-    md = table([str(path)])
-    assert "C_E2/knapsack" in md
+    path.write_text(json.dumps(doc))
+    assert "C_E2/knapsack" in table([str(path)])
+    md = report(str(path), [str(path)])
+    for section in ("<!-- dev -->", "<!-- misspec -->", "<!-- offzoo -->", "<!-- checks -->", "<!-- sweep -->"):
+        assert section in md
 
 
 @pytest.mark.slow

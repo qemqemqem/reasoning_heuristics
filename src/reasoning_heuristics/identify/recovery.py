@@ -235,12 +235,13 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
                 T = um.tensors(obs)
                 X = np.stack([np.ones(T.n), levels[T.item]], 1).astype(float)
                 fr = fit_features(T, X, np.array([[1.0, 0.0], [1.0, 1.0]]), n_boot=cfg["feature_boot"], rng=rng)
-                for lev in (0, 1):
-                    truths.append(truth_vector(um, lw[lev], 0.0))
-                    ests.append(fr["pi"][lev])
-                    los.append(fr["lo"][lev])
-                    his.append(fr["hi"][lev])
-            res = summarise(np.array(truths), np.array(ests), np.array(los), np.array(his), labels)
+                # one quantity per (level, group), so opposite biases at the two levels cannot cancel
+                truths.append(np.concatenate([truth_vector(um, lw[lev], 0.0) for lev in (0, 1)]))
+                ests.append(np.concatenate([fr["pi"][0], fr["pi"][1]]))
+                los.append(np.concatenate([fr["lo"][0], fr["lo"][1]]))
+                his.append(np.concatenate([fr["hi"][0], fr["hi"][1]]))
+            res = summarise(np.array(truths), np.array(ests), np.array(los), np.array(his),
+                            [f"level 0: {l}" for l in labels] + [f"level 1: {l}" for l in labels])
             res["feature"] = desc
             out["scenarios"]["feature"] = res
         if "off_zoo" in scen:
@@ -425,13 +426,135 @@ def table(paths: list[str]) -> str:
     return "\n".join(lines)
 
 
+def _f(x: Any) -> str:
+    return "–" if x is None or (isinstance(x, float) and math.isnan(x)) else (f"{x:.3f}" if isinstance(x, float) else str(x))
+
+
+def report(dev_path: str, sweep_paths: list[str]) -> str:
+    """The Markdown sections of docs/RECOVERY.md: gates at dev size, details, misspecification,
+    off-zoo leakage, checks, and the items-per-cell sweep."""
+    dev = json.loads(Path(dev_path).read_text())
+    units = [u for u in dev["units"] if "error" not in u]
+    out = [f"Item set `{dev['items']}`, git {dev['provenance']['git_sha'][:10]}"
+           f"{' (dirty)' if dev['provenance']['git_dirty'] else ''}, {dev['config']['reps']} replicates × "
+           f"{dev['config']['boot']} bootstrap draws ({dev['config']['single_reps']} per single member).\n"]
+    out.append("| Unit | items | clusters | single | mix | mix, uniform slips | feature | null q | null ALWAYS | all |")
+    out.append("|---|---|---|---|---|---|---|---|---|---|")
+    for u in units:
+        s = u["scenarios"]
+        single = s.get("single")
+        sm = "–" if not single else ("PASS" if single["pass"] else f"fail {len(single['failing'])}/{len(single['by_group'])}")
+        out.append(f"| {u['unit']} | {u['n_items']} | {u['n_clusters']} | {sm} | {_mark(s.get('mix'))} | "
+                   f"{_mark(s.get('mix_uniform_slips')) if not u['finite_channel'] else 'n/a (finite)'} | "
+                   f"{_mark(s.get('feature'))} | {_mark(s.get('null_q'))} | {_mark(s.get('null_always'))} | "
+                   f"{'PASS' if u['all_gates_pass'] else 'fail'} |")
+    out.append("\n**The 60/30/10 mixture in detail** (worst quantity for each gate):\n")
+    out.append("| Unit | triple (0.6 / 0.3 / 0.1) | max \\|bias\\| | on | min coverage | on | median width |")
+    out.append("|---|---|---|---|---|---|---|")
+    for u in units:
+        m = u["scenarios"].get("mix")
+        if not m:
+            out.append(f"| {u['unit']} | (no triple) ||||||")
+            continue
+        out.append(f"| {u['unit']} | {' / '.join(u['triple'])} | {_f(m['max_abs_bias'])} | {m['worst_bias_quantity']} | "
+                   f"{_f(m['min_coverage'])} | {m['worst_coverage_quantity']} | {_f(m['median_width'])} |")
+    out.append("\n**Single members that fail** (the first gate each fails on, and its worst quantity):\n")
+    for u in units:
+        single = u["scenarios"].get("single")
+        if not single or single["pass"]:
+            continue
+        bits = []
+        for g in single["failing"]:
+            r = single["by_group"][g]
+            why = [k for k in ("bias", "coverage", "width") if not r["gates"][k]]
+            bits.append(f"{g} ({', '.join(why)}; bias {r['max_abs_bias']:.2f} on {r['worst_bias_quantity']})")
+        out.append(f"- **{u['unit']}**: " + "; ".join(bits))
+    out.append("\n**Identifiability diagnostics** (finite channels: rank of the (item, value) × (groups + q) "
+               "design; A/H §5.3 asks for σ_min/σ_max ≥ 0.05) and the least-separated pairs:\n")
+    out.append("| Unit | rank / columns | σ ratio | weakest direction | least-separated pair (items) |")
+    out.append("|---|---|---|---|---|")
+    for u in units:
+        d = u.get("design")
+        ls = u.get("least_separated") or []
+        pair = f"{ls[0]['pair'][0]} vs {ls[0]['pair'][1]} ({ls[0]['separating_items']})" if ls else "–"
+        if d:
+            out.append(f"| {u['unit']} | {d['rank']} / {d['columns']} | {d['sigma_ratio']} | {', '.join(d['weakest_direction'][:4])} | {pair} |")
+        else:
+            out.append(f"| {u['unit']} | (witness channel) | | | {pair} |")
+    sections = {"dev": "\n".join(out)}
+
+    mis = ["| Unit | near-miss fit: max \\|bias\\| / min coverage | uniform fit on near-miss data | on | near-miss fit on uniform data | on |",
+           "|---|---|---|---|---|---|"]
+    for u in units:
+        s = u["scenarios"]
+        a, b, c = s.get("mix"), s.get("misspec_uniform_fit_on_near_miss"), s.get("misspec_near_miss_fit_on_uniform")
+        if not b:
+            continue
+        mis.append(f"| {u['unit']} | {_f(a['max_abs_bias'])} / {_f(a['min_coverage'])} | {_f(b['max_abs_bias'])} / {_f(b['min_coverage'])} | "
+                   f"{b['worst_bias_quantity']} | {_f(c['max_abs_bias'])} / {_f(c['min_coverage'])} | {c['worst_bias_quantity']} |")
+    sections["misspec"] = "\n".join(mis)
+
+    oz = ["| Unit | withheld groups | to q (mean) | onto h1 (mean excess) | onto other members (mean) | groups with ≥ 0.2 of the withheld 0.3 on one member |",
+          "|---|---|---|---|---|---|"]
+    for u in units:
+        o = u["scenarios"].get("off_zoo")
+        if not o or not o["by_withheld_group"]:
+            continue
+        rows = list(o["by_withheld_group"].values())
+        to_q = np.mean([r["to_q"] for r in rows])
+        h1 = np.mean([r["to_h1_excess"] for r in rows if r["to_h1_excess"] is not None])
+        oth = np.mean([r["to_other_members"] for r in rows])
+        oz.append(f"| {u['unit']} | {len(rows)} | {to_q:.3f} | {h1:+.3f} | {oth:.3f} | {len(o['failing'])} of {len(rows)} |")
+    sections["offzoo"] = "\n".join(oz)
+
+    ck = ["| Unit | clustered: max \\|bias\\| / min coverage / width | truncated, excluded: bias on h1 | truncated, token model: bias on h1 |",
+          "|---|---|---|---|"]
+    for u in units:
+        s = u["scenarios"]
+        cl, te, tt = s.get("clustered"), s.get("truncated_excluded"), s.get("truncated_token_model")
+        if not cl:
+            continue
+        h1 = u["triple"][0]
+        h1g = next((g for g in te["quantities"] if h1 in g.split(" = ")), None) if te else None
+        b_ex = te["quantities"][h1g]["bias"] if h1g else None
+        b_tm = tt["quantities"][h1g]["bias"] if h1g and h1g in tt["quantities"] else None
+        ck.append(f"| {u['unit']} | {_f(cl['max_abs_bias'])} / {_f(cl['min_coverage'])} / {_f(cl['median_width'])} | {_f(b_ex)} | {_f(b_tm)} |")
+    sections["checks"] = "\n".join(ck)
+
+    if sweep_paths:
+        docs = [json.loads(Path(p).read_text()) for p in sweep_paths]
+        sizes = {"dev": dev}
+        for d in docs:
+            sizes[d["label"]] = d
+        names = sorted({u["unit"] for d in sizes.values() for u in d["units"] if "error" not in u})
+        labels = list(sizes)
+        sw = ["| Unit | " + " | ".join(f"{l} (items/cell)" for l in labels) + " |", "|---" * (len(labels) + 1) + "|"]
+        for n in names:
+            cells = []
+            for l in labels:
+                u = next((x for x in sizes[l]["units"] if x["unit"] == n and "error" not in x), None)
+                if u is None:
+                    cells.append("–")
+                    continue
+                m, q = u["scenarios"].get("mix"), u["scenarios"].get("null_q")
+                tag = ("mix " + ("PASS" if m and m["pass"] else "fail") + f" (b {_f(m['max_abs_bias'])}, c {_f(m['min_coverage'])}, w {_f(m['median_width'])})") if m else "mix –"
+                tag += "; q " + ("PASS" if q and q["pass"] else "fail")
+                cells.append(f"{u['items_per_cell']}: {tag}")
+            sw.append(f"| {n} | " + " | ".join(cells) + " |")
+        sections["sweep"] = "\n".join(sw)
+    return "\n\n".join(f"<!-- {k} -->\n{v}" for k, v in sections.items())
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
-    if not argv or argv[0] not in ("run", "table"):
+    if not argv or argv[0] not in ("run", "table", "report"):
         print(__doc__)
         return 2
     if argv[0] == "run":
         return run(argv[1:])
+    if argv[0] == "report":
+        print(report(argv[1], argv[2:]))
+        return 0
     print(table(argv[1:]))
     return 0
 
