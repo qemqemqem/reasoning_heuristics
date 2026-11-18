@@ -644,9 +644,10 @@ def pct(a: int, b: int) -> str:
 
 
 def pval(p: float | None) -> str:
+    """Permutation p-values to their resolution: with 2,000 permutations the floor is 1/2001 ≈ 0.0005."""
     if p is None:
         return "–"
-    return f"{p:.3f}"
+    return f"{p:.4f}" if p < 0.01 else f"{p:.3f}"
 
 
 def md_table(header: list[str], rows: list[list[str]]) -> str:
@@ -742,12 +743,12 @@ def ident_table(name: str, fits: dict[str, dict[str, Any]]) -> str:
         if key not in seen:
             seen.add(key)
             pairs.append(f"{d['group']} vs {d['nearest']}: {d['separating_items']} of {diag['n_items']} items")
-    dt = sorted({" = ".join(t) for r in fits.values() for t in r["fit"].get("data_ties", [])})
+    dt = sorted({" = ".join(t) for r in DOC_PILOT for t in fits[r]["fit"].get("data_ties", [])})
     sc = rep["special_check"]
     special = ", ".join(f"{k} ({v} items)" for k, v in sc["det_special_predictions"].items()) or "none"
     special += f"; stored distributions with special-token mass: {', '.join(sc['dist_members_with_special_mass']) or 'none'}"
     special += f"; special tokens in the answer space: {', '.join(sc['space_specials']) or 'none'}"
-    same = all(fits[r]["identifiability"]["rank"] == idf["rank"] for r in fits)
+    same = all(fits[r]["identifiability"]["rank"] == idf["rank"] for r in DOC_PILOT)
     rows = [["rank / columns (groups + q)", f"{idf['rank']} / {len(idf['columns'])}" + ("" if same else " (differs between the runs' draws)")],
             ["σ_min / σ_max of the design (columns scaled)", f"{idf['sigma_ratio']:.3f}"],
             ["linear dependencies", "; ".join(d["statement"] for d in idf["dependencies"]) or "none"],
