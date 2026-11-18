@@ -26,14 +26,13 @@
   "accepted": 7,
   "rejections": {}
  },
- "generation_seconds": 1.3,
  "path": "data/items/smoke/AH_E1_smoke_s1.jsonl",
  "validation": {
   "items": 14,
   "sets": 7,
   "items_passed": 14,
   "pass_rate": 1.0,
-  "failures": []
- },
- "validation_seconds": 1.3
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
 }

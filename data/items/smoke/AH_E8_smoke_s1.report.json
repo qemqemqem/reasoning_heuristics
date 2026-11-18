@@ -30,14 +30,13 @@
    "sets": 2
   }
  },
- "generation_seconds": 3.7,
  "path": "data/items/smoke/AH_E8_smoke_s1.jsonl",
  "validation": {
   "items": 12,
   "sets": 1,
   "items_passed": 12,
   "pass_rate": 1.0,
-  "failures": []
- },
- "validation_seconds": 0.2
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
 }

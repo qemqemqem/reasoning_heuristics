@@ -32,19 +32,44 @@ Arms: U-LIST (3-colouring, answer in listing order), U-REV (answer in reversed o
 I (instructed first-fit: "what colour does t get?"). The U readout is the bit "the
 target shares a colour with the first-listed vertex" (always colour 1 under FF).
 
+Depth, two ways. `target_depth` d counts gate layers (the cell label; the critical swap is
+d levels below the target). LOCAL-t-LIST counts rounds: it colours a vertex in the round
+equal to its first-fit dependency depth (1 + the depth of its deepest earlier-listed
+neighbour), and gives it the default colour 1 otherwise. The inputs take a round, and an
+input listed after its pendant ("False") a second, so the target's first-fit depth is
+D = d + 2 (d + 1 when every input in its cone is "True"). Gadgets are kept only if D = d + 2
+in all three versions (filter `target_ff_depth = d + 2`, recorded in params), so LOCAL-t-LIST
+reaches the target iff t >= D and the doc's recovery gate "d* for LOCAL-t-LIST = t" holds with
+depth measured as `target_ff_depth` (in gate layers, d* = t - 2). The listed proxies are
+LOCAL-(D-1) (one round short: the default colour) and LOCAL-D (= FF-LIST on the target).
+
 Balancing: within each depth the BASE target value alternates True / False, so
-P(FF target = colour 1) = 0.5 up to parity. The proxy audit (LOCAL-t-LIST for t < d with
-both leftover defaults, the target's degree, position and earlier-neighbour parity, all
-constant here) is reported in the stats and enforced at |acc - 0.5| <= 0.05 + 1/N_d.
+P(FF target = colour 1) = 0.5 up to parity. The proxy audit enforces |acc - 0.5| <= 0.05 + 1/N_d
+for every LOCAL-t-LIST proxy that cannot see the target or its inputs: t < D with leftovers
+coloured 1, and t < D - 2 with leftovers given their smallest free colour (the target's inputs
+sit at first-fit depth D - 2 or D - 1, and that default reads the target off whichever inputs
+are already coloured, so it reaches the target at t = D - 1). These proxies are constant on the
+target by construction, so the audit checks the balance; the target's degree, position and
+earlier-neighbour parity are constant here too. LOCAL-(D-2)-LIST with the free default is
+reported in the stats, not enforced: it sees the inputs whose cones are all "True", and at
+d = 1 it decodes the target exactly (a True input is coloured in round 1, a False one is not).
+
+Likelihoods. U arms score the bit (same / different; an IMPOSSIBLE answer is class other).
+EXACT is set-valued over the proper 3-colourings; its share of "same" is counted exactly
+(variable elimination; the counts are the same for all versions of a triple). The I arm
+scores the colour number; the instructed procedure *is* FF-LIST, so EXACT (an optimal
+colouring with arbitrary colour names) is not listed there. The I arm's question (the
+listing order and the target) is part of its task and content hash.
 
 Readings of the doc (also in docs/GENERATORS.md):
 - Size: W = 3, D_max = 8 gives n = 67, m = 113 (the doc quotes 68 / 114; its construction
   has one more vertex and edge than the one described, which we could not identify).
   D_max > 11 needs more than 90 vertices, so labels become three-digit (still equal width).
 - E3-SAT (gated on E1-SAT showing GREEDY weight) and E3-NN are not built.
-- NOISY-FF-ε is not in the zoo; RO-FF and RANDOM are left out of these items (their bit
-  probabilities need a channel-aware Monte Carlo); EXACT is order-free and set-valued, so
-  it carries no likelihood on the bit channel.
+- NOISY-FF-ε is not in the zoo; RO-FF is left out of these items (its bit probabilities need a
+  channel-aware Monte Carlo). RANDOM (H) is listed: its channel probabilities are exact.
+- Lineage: BASE/U-LIST is the set's base; BASE/U-REV and BASE/I are derived from it, and each
+  CRITICAL / PLACEBO item from the BASE item of the same arm.
 ```
 
 ## Items
@@ -53,7 +78,7 @@ Readings of the doc (also in docs/GENERATORS.md):
 
 - **Domain / framing:** colouring (gadget) / textbook
 - **Ground truth:** `{"answer": 2, "check": "unique: first-fit colour of the target in listing order", "chromatic_number": 3}`
-- **Hashes:** content `5edc44243161e404`, base `f37ed552f17451ea`, source `None`; seed 841954 (dev)
+- **Hashes:** content `c3493ad5c77d8f98`, base `f16b0067230371e7`, source `f16b0067230371e7`; seed 841954 (dev)
 - **Params:** `{"D_max": 8, "arm": "I", "base_target_true": false, "circuit": {"gates": [["v68", "v19", "v33"], ["v51", "v19", "v33"], ["v89", "v33", "v80"], ["v44", "v19", "v30"], ["v28", "v80", "v30"], ["v81", "v80", "v54"], ["v24", "v51", "v89"], ["v53", "v51", "v89"], ["v14", "v68", "v51"], ["v75", "v44", "v2…`
 - **Prompt tokens (regex-digit-split-v1):** 1455
 
@@ -139,20 +164,21 @@ After the line ANSWER:, write only the colour number of v86.
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| ANSWER-1 (A1 default; = LOCAL-0) | E | v10=1 v11=1 v14=1 v15=1 v16=1 v17=1 v18=1 v19=1 v20=1 v21=1 v22=1 v23=1 v24=1 v25=1 v27=1 v28=1 v29=1 v30=1 v31=1 v32=1… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm I. | no sequential commitments; each vertex looks at its neighbours for t rounds |
-| DPLL-LIST (D, k=3) | D | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=3 v29=2 v30=2 v31=1 v32=2… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm I. | chronological backtracking in order σ, smallest colour first; IMPOSSIBLE only after exhaustive refutation, or… |
-| DSATUR (C2, label ties) | C2 | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=1 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=1 v29=2 v30=2 v31=1 v32=2… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm I. | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
-| EXACT | null | CHI=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm I. | a completed procedure: a checked witness, or a closed refutation |
-| FF-LIST (C1 seq) | C1 | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=3 v29=2 v30=2 v31=1 v32=2… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm I. | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
-| LF (C1 static, label ties) | C1 | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=1 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=1 v29=2 v30=2 v31=1 v32=2… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm I. | commits vertices by degree, highest first; first-fit colour; cites degree |
-| LOCAL-4-LIST (const proxy) | E | v10=1 v11=1 v14=2 v15=2 v16=1 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=1 v24=2 v25=1 v27=1 v28=3 v29=1 v30=2 v31=1 v32=1… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm I. | no sequential commitments; each vertex looks at its neighbours for t rounds |
-| LOCAL-7-LIST (const proxy) | E | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=1 v24=2 v25=1 v27=1 v28=3 v29=2 v30=2 v31=1 v32=1… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm I. | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| ANSWER-1 (A1 default; = LOCAL-0) | E | v10=1 v11=1 v14=1 v15=1 v16=1 v17=1 v18=1 v19=1 v20=1 v21=1 v22=1 v23=1 v24=1 v25=1 v27=1 v28=1 v29=1 v30=1 v31=1 v32=1… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| DPLL-LIST (D, k=3) | D | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=3 v29=2 v30=2 v31=1 v32=2… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | chronological backtracking with forward checking in order σ, smallest colour first; IMPOSSIBLE only after exh… |
+| DSATUR (C2, label ties) | C2 | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=1 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=1 v29=2 v30=2 v31=1 v32=2… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| FF-LIST (C1 seq) | C1 | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=3 v29=2 v30=2 v31=1 v32=2… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| LF (C1 static, label ties) | C1 | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=1 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=1 v29=2 v30=2 v31=1 v32=2… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | commits vertices by degree, highest first; first-fit colour; cites degree |
+| LOCAL-5-LIST (const proxy, one round short) | E | v10=1 v11=1 v14=2 v15=2 v16=1 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=1 v24=2 v25=1 v27=1 v28=3 v29=1 v30=2 v31=1 v32=1… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| LOCAL-6-LIST (const proxy, reaches the target) | E | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=1 v24=2 v25=1 v27=1 v28=3 v29=2 v30=2 v31=1 v32=1… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| RANDOM (H) | H | — | uniform over all answers (uniform over the 67^67 colourings with colours 1..67: the target's colour is uniform on 1..67); on this channel 1… | no procedure determines the answer; trace content and verdict unrelated |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = 1*: DPLL-LIST (D, k=3) +1.45, DSATUR (C2, label ties) +1.45, FF-LIST (C1 seq) +1.45, LF (C1 static, label ties) +1.45, LOCAL-7-LIST (const proxy) +1.45, ANSWER-1 (A1 default; = LOCAL-0) +0.00
-- *answer = 2*: ANSWER-1 (A1 default; = LOCAL-0) +1.45, LOCAL-4-LIST (const proxy) +1.45, DPLL-LIST (D, k=3) +0.00, DSATUR (C2, label ties) +0.00, FF-LIST (C1 seq) +0.00, LF (C1 static, label ties) +0.00
-- *answer = other*: ANSWER-1 (A1 default; = LOCAL-0) +0.00, DPLL-LIST (D, k=3) +0.00, DSATUR (C2, label ties) +0.00, FF-LIST (C1 seq) +0.00, LF (C1 static, label ties) +0.00, LOCAL-4-LIST (const proxy) +0.00
+- *answer = 1*: DPLL-LIST (D, k=3) +1.57, DSATUR (C2, label ties) +1.57, FF-LIST (C1 seq) +1.57, LF (C1 static, label ties) +1.57, LOCAL-6-LIST (const proxy, reaches the target) +1.57, RANDOM (H) +1.38
+- *answer = 2*: ANSWER-1 (A1 default; = LOCAL-0) +1.57, LOCAL-5-LIST (const proxy, one round short) +1.57, RANDOM (H) +1.38, DPLL-LIST (D, k=3) +0.00, DSATUR (C2, label ties) +0.00, FF-LIST (C1 seq) +0.00
+- *answer = 3*: ANSWER-1 (A1 default; = LOCAL-0) +0.19, DPLL-LIST (D, k=3) +0.19, DSATUR (C2, label ties) +0.19, FF-LIST (C1 seq) +0.19, LF (C1 static, label ties) +0.19, LOCAL-5-LIST (const proxy, one round short) +0.19
+- *answer = other*: ANSWER-1 (A1 default; = LOCAL-0) +1.55, DPLL-LIST (D, k=3) +1.55, DSATUR (C2, label ties) +1.55, FF-LIST (C1 seq) +1.55, LF (C1 static, label ties) +1.55, LOCAL-5-LIST (const proxy, one round short) +1.55
 
 Notes: All three versions are the identical labelled graph; only two adjacent vertices swap places in the listing, so ground truth, chromatic number and every order-invariant member are unchanged.
 
@@ -160,9 +186,9 @@ Notes: All three versions are the identical labelled graph; only two adjacent ve
 
 - **Domain / framing:** colouring (gadget) / textbook
 - **Ground truth:** `{"check": "any proper 3-colouring is correct; the bit is a fingerprint, not a correctness criterion", "colourable": true, "k": 3, "readout": "bit = v86 has the same colour as v50 (first-listed vertex)"}`
-- **Hashes:** content `f16b0067230371e7`, base `f37ed552f17451ea`, source `None`; seed 841954 (dev)
+- **Hashes:** content `f16b0067230371e7`, base `f16b0067230371e7`, source `None`; seed 841954 (dev)
 - **Params:** `{"D_max": 8, "arm": "U-LIST", "base_target_true": false, "circuit": {"gates": [["v68", "v19", "v33"], ["v51", "v19", "v33"], ["v89", "v33", "v80"], ["v44", "v19", "v30"], ["v28", "v80", "v30"], ["v81", "v80", "v54"], ["v24", "v51", "v89"], ["v53", "v51", "v89"], ["v14", "v68", "v51"], ["v75", "v44"…`
-- **Prompt tokens (regex-digit-split-v1):** 1717
+- **Prompt tokens (regex-digit-split-v1):** 1721
 
 <details><summary>Prompt</summary>
 
@@ -239,27 +265,28 @@ v64: v11, v48
 v86: v69, v58
 
 Colour every vertex with one of the colours 1, 2, ..., 3 so that neighbours get different colours. If this is impossible, say IMPOSSIBLE.
-After the line ANSWER:, write one line `vertex: colour` per vertex, in this order: v50, v40, v21, v33, v60, v19, v62, v30, v54, v94, v80, v20, v89, v44, v51, v81, v28, v68, v15, v65, v14, v53, v24, v75, v69, v39, v70, v85, v90, v58, v16, v29, v45, v67, v72, v66, v18, v31, v10, v17, v42, v22, v93, v49, v27, v95, v32, v73, v25, v96, v82, v11, v59, v97, v52, v57, v34, v98, v78, v55, v23, v77, v63, v46, v48, v64, v86.
+After the line ANSWER:, write one line `<vertex>: <colour>` per vertex, in this order: v50, v40, v21, v33, v60, v19, v62, v30, v54, v94, v80, v20, v89, v44, v51, v81, v28, v68, v15, v65, v14, v53, v24, v75, v69, v39, v70, v85, v90, v58, v16, v29, v45, v67, v72, v66, v18, v31, v10, v17, v42, v22, v93, v49, v27, v95, v32, v73, v25, v96, v82, v11, v59, v97, v52, v57, v34, v98, v78, v55, v23, v77, v63, v46, v48, v64, v86.
 ```
 
 </details>
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| DPLL-LIST (D, k=3) | D | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=3 v29=2 v30=2 v31=1 v32=2… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm U-LIST. | chronological backtracking in order σ, smallest colour first; IMPOSSIBLE only after exhaustive refutation, or… |
-| DSATUR (C2, label ties) | C2 | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=1 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=1 v29=2 v30=2 v31=1 v32=2… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm U-LIST. | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
-| EXACT | null | POSSIBLE | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm U-LIST. | a completed procedure: a checked witness, or a closed refutation |
-| FF-LIST (C1 seq) | C1 | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=3 v29=2 v30=2 v31=1 v32=2… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm U-LIST. | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
-| FF-OUT (AR, answer order) | C1 | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=3 v29=2 v30=2 v31=1 v32=2… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm U-LIST. | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
-| LF (C1 static, label ties) | C1 | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=1 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=1 v29=2 v30=2 v31=1 v32=2… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm U-LIST. | commits vertices by degree, highest first; first-fit colour; cites degree |
-| LOCAL-4-LIST (const proxy) | E | v10=1 v11=1 v14=2 v15=2 v16=1 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=1 v24=2 v25=1 v27=1 v28=3 v29=1 v30=2 v31=1 v32=1… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm U-LIST. | no sequential commitments; each vertex looks at its neighbours for t rounds |
-| LOCAL-7-LIST (const proxy) | E | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=1 v24=2 v25=1 v27=1 v28=3 v29=2 v30=2 v31=1 v32=1… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 4, version BASE, arm U-LIST. | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| DPLL-LIST (D, k=3) | D | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=3 v29=2 v30=2 v31=1 v32=2… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | chronological backtracking with forward checking in order σ, smallest colour first; IMPOSSIBLE only after exh… |
+| DSATUR (C2, label ties) | C2 | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=1 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=1 v29=2 v30=2 v31=1 v32=2… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| EXACT | null | POSSIBLE | set-valued: uniform over its 206108522422272 solutions (proper 3-colouring), which give same: 0.333, different: 0.667 (uniform slip eps = 0… | a completed procedure: a checked witness, or a closed refutation |
+| FF-LIST (C1 seq) | C1 | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=3 v29=2 v30=2 v31=1 v32=2… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| FF-OUT (AR, answer order) | C1 | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=3 v29=2 v30=2 v31=1 v32=2… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| LF (C1 static, label ties) | C1 | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=1 v21=1 v22=1 v23=2 v24=2 v25=1 v27=2 v28=1 v29=2 v30=2 v31=1 v32=2… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | commits vertices by degree, highest first; first-fit colour; cites degree |
+| LOCAL-5-LIST (const proxy, one round short) | E | v10=1 v11=1 v14=2 v15=2 v16=1 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=1 v24=2 v25=1 v27=1 v28=3 v29=1 v30=2 v31=1 v32=1… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| LOCAL-6-LIST (const proxy, reaches the target) | E | v10=1 v11=1 v14=2 v15=2 v16=2 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=1 v24=2 v25=1 v27=1 v28=3 v29=2 v30=2 v31=1 v32=1… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| RANDOM (H) | H | — | uniform over all answers (uniform over the 3^n colourings with colours 1..3: the target shares the reference vertex's colour with probabili… | no procedure determines the answer; trace content and verdict unrelated |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = different*: DSATUR (C2, label ties) +1.45, LF (C1 static, label ties) +1.45, LOCAL-4-LIST (const proxy) +1.45, DPLL-LIST (D, k=3) +0.00, FF-LIST (C1 seq) +0.00, FF-OUT (AR, answer order) +0.00
-- *answer = other*: DPLL-LIST (D, k=3) +0.00, DSATUR (C2, label ties) +0.00, FF-LIST (C1 seq) +0.00, FF-OUT (AR, answer order) +0.00, LF (C1 static, label ties) +0.00, LOCAL-4-LIST (const proxy) +0.00
-- *answer = same*: DPLL-LIST (D, k=3) +1.45, FF-LIST (C1 seq) +1.45, FF-OUT (AR, answer order) +1.45, LOCAL-7-LIST (const proxy) +1.45, DSATUR (C2, label ties) +0.00, LF (C1 static, label ties) +0.00
+- *answer = different*: DSATUR (C2, label ties) +1.45, LF (C1 static, label ties) +1.45, LOCAL-5-LIST (const proxy, one round short) +1.45, EXACT +0.17, RANDOM (H) +0.17, DPLL-LIST (D, k=3) +0.00
+- *answer = other*: DPLL-LIST (D, k=3) +0.00, DSATUR (C2, label ties) +0.00, EXACT +0.00, FF-LIST (C1 seq) +0.00, FF-OUT (AR, answer order) +0.00, LF (C1 static, label ties) +0.00
+- *answer = same*: DPLL-LIST (D, k=3) +1.45, FF-LIST (C1 seq) +1.45, FF-OUT (AR, answer order) +1.45, LOCAL-6-LIST (const proxy, reaches the target) +1.45, EXACT +0.45, RANDOM (H) +0.45
 
 Notes: All three versions are the identical labelled graph; only two adjacent vertices swap places in the listing, so ground truth, chromatic number and every order-invariant member are unchanged.
 
@@ -267,7 +294,7 @@ Notes: All three versions are the identical labelled graph; only two adjacent ve
 
 - **Domain / framing:** colouring (gadget) / textbook
 - **Ground truth:** `{"answer": 2, "check": "unique: first-fit colour of the target in listing order", "chromatic_number": 3}`
-- **Hashes:** content `0a4db00baed9fb19`, base `6f88dd799883ebb0`, source `None`; seed 266633 (dev)
+- **Hashes:** content `00be677381a3ebc3`, base `99258a2d6e43a78e`, source `99258a2d6e43a78e`; seed 266633 (dev)
 - **Params:** `{"D_max": 8, "arm": "I", "base_target_true": false, "circuit": {"gates": [["v41", "v49", "v98"], ["v37", "v52", "v49"], ["v39", "v49", "v52"], ["v72", "v76", "v98"], ["v35", "v49", "v76"], ["v24", "v49", "v76"], ["v31", "v39", "v41"], ["v88", "v39", "v41"], ["v55", "v37", "v41"], ["v20", "v39", "v4…`
 - **Prompt tokens (regex-digit-split-v1):** 1455
 
@@ -353,20 +380,21 @@ After the line ANSWER:, write only the colour number of v86.
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| ANSWER-1 (A1 default; = LOCAL-0) | E | v10=1 v11=1 v12=1 v13=1 v15=1 v16=1 v17=1 v18=1 v19=1 v20=1 v21=1 v23=1 v24=1 v26=1 v27=1 v29=1 v31=1 v33=1 v34=1 v35=1… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm I. | no sequential commitments; each vertex looks at its neighbours for t rounds |
-| DPLL-LIST (D, k=3) | D | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=2 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm I. | chronological backtracking in order σ, smallest colour first; IMPOSSIBLE only after exhaustive refutation, or… |
-| DSATUR (C2, label ties) | C2 | v10=2 v11=2 v12=2 v13=1 v15=2 v16=1 v17=1 v18=2 v19=1 v20=1 v21=2 v23=1 v24=2 v26=2 v27=2 v29=1 v31=1 v33=2 v34=2 v35=2… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm I. | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
-| EXACT | null | CHI=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm I. | a completed procedure: a checked witness, or a closed refutation |
-| FF-LIST (C1 seq) | C1 | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=2 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm I. | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
-| LF (C1 static, label ties) | C1 | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=1 v18=1 v19=1 v20=2 v21=1 v23=2 v24=1 v26=2 v27=1 v29=2 v31=2 v33=4 v34=2 v35=1… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm I. | commits vertices by degree, highest first; first-fit colour; cites degree |
-| LOCAL-11-LIST (const proxy) | E | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=2 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm I. | no sequential commitments; each vertex looks at its neighbours for t rounds |
-| LOCAL-8-LIST (const proxy) | E | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=1 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm I. | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| ANSWER-1 (A1 default; = LOCAL-0) | E | v10=1 v11=1 v12=1 v13=1 v15=1 v16=1 v17=1 v18=1 v19=1 v20=1 v21=1 v23=1 v24=1 v26=1 v27=1 v29=1 v31=1 v33=1 v34=1 v35=1… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| DPLL-LIST (D, k=3) | D | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=2 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | chronological backtracking with forward checking in order σ, smallest colour first; IMPOSSIBLE only after exh… |
+| DSATUR (C2, label ties) | C2 | v10=2 v11=2 v12=2 v13=1 v15=2 v16=1 v17=1 v18=2 v19=1 v20=1 v21=2 v23=1 v24=2 v26=2 v27=2 v29=1 v31=1 v33=2 v34=2 v35=2… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| FF-LIST (C1 seq) | C1 | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=2 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| LF (C1 static, label ties) | C1 | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=1 v18=1 v19=1 v20=2 v21=1 v23=2 v24=1 v26=2 v27=1 v29=2 v31=2 v33=4 v34=2 v35=1… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | commits vertices by degree, highest first; first-fit colour; cites degree |
+| LOCAL-10-LIST (const proxy, reaches the target) | E | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=2 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| LOCAL-9-LIST (const proxy, one round short) | E | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=1 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| RANDOM (H) | H | — | uniform over all answers (uniform over the 67^67 colourings with colours 1..67: the target's colour is uniform on 1..67); on this channel 1… | no procedure determines the answer; trace content and verdict unrelated |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = 1*: DPLL-LIST (D, k=3) +1.45, FF-LIST (C1 seq) +1.45, LF (C1 static, label ties) +1.45, LOCAL-11-LIST (const proxy) +1.45, ANSWER-1 (A1 default; = LOCAL-0) +0.00, DSATUR (C2, label ties) +0.00
-- *answer = 2*: ANSWER-1 (A1 default; = LOCAL-0) +1.45, DSATUR (C2, label ties) +1.45, LOCAL-8-LIST (const proxy) +1.45, DPLL-LIST (D, k=3) +0.00, FF-LIST (C1 seq) +0.00, LF (C1 static, label ties) +0.00
-- *answer = other*: ANSWER-1 (A1 default; = LOCAL-0) +0.00, DPLL-LIST (D, k=3) +0.00, DSATUR (C2, label ties) +0.00, FF-LIST (C1 seq) +0.00, LF (C1 static, label ties) +0.00, LOCAL-11-LIST (const proxy) +0.00
+- *answer = 1*: DPLL-LIST (D, k=3) +1.57, FF-LIST (C1 seq) +1.57, LF (C1 static, label ties) +1.57, LOCAL-10-LIST (const proxy, reaches the target) +1.57, RANDOM (H) +1.38, ANSWER-1 (A1 default; = LOCAL-0) +0.00
+- *answer = 2*: ANSWER-1 (A1 default; = LOCAL-0) +1.57, DSATUR (C2, label ties) +1.57, LOCAL-9-LIST (const proxy, one round short) +1.57, RANDOM (H) +1.38, DPLL-LIST (D, k=3) +0.00, FF-LIST (C1 seq) +0.00
+- *answer = 3*: ANSWER-1 (A1 default; = LOCAL-0) +0.19, DPLL-LIST (D, k=3) +0.19, DSATUR (C2, label ties) +0.19, FF-LIST (C1 seq) +0.19, LF (C1 static, label ties) +0.19, LOCAL-10-LIST (const proxy, reaches the target) +0.19
+- *answer = other*: ANSWER-1 (A1 default; = LOCAL-0) +1.55, DPLL-LIST (D, k=3) +1.55, DSATUR (C2, label ties) +1.55, FF-LIST (C1 seq) +1.55, LF (C1 static, label ties) +1.55, LOCAL-10-LIST (const proxy, reaches the target) +1.55
 
 Notes: All three versions are the identical labelled graph; only two adjacent vertices swap places in the listing, so ground truth, chromatic number and every order-invariant member are unchanged.
 
@@ -374,9 +402,9 @@ Notes: All three versions are the identical labelled graph; only two adjacent ve
 
 - **Domain / framing:** colouring (gadget) / textbook
 - **Ground truth:** `{"check": "any proper 3-colouring is correct; the bit is a fingerprint, not a correctness criterion", "colourable": true, "k": 3, "readout": "bit = v86 has the same colour as v76 (first-listed vertex)"}`
-- **Hashes:** content `99258a2d6e43a78e`, base `6f88dd799883ebb0`, source `None`; seed 266633 (dev)
+- **Hashes:** content `99258a2d6e43a78e`, base `99258a2d6e43a78e`, source `None`; seed 266633 (dev)
 - **Params:** `{"D_max": 8, "arm": "U-LIST", "base_target_true": false, "circuit": {"gates": [["v41", "v49", "v98"], ["v37", "v52", "v49"], ["v39", "v49", "v52"], ["v72", "v76", "v98"], ["v35", "v49", "v76"], ["v24", "v49", "v76"], ["v31", "v39", "v41"], ["v88", "v39", "v41"], ["v55", "v37", "v41"], ["v20", "v39"…`
-- **Prompt tokens (regex-digit-split-v1):** 1717
+- **Prompt tokens (regex-digit-split-v1):** 1721
 
 <details><summary>Prompt</summary>
 
@@ -453,27 +481,28 @@ v57: v93, v60
 v86: v27, v21
 
 Colour every vertex with one of the colours 1, 2, ..., 3 so that neighbours get different colours. If this is impossible, say IMPOSSIBLE.
-After the line ANSWER:, write one line `vertex: colour` per vertex, in this order: v76, v51, v87, v49, v15, v52, v18, v98, v99, v17, v13, v64, v24, v35, v41, v39, v37, v72, v36, v31, v55, v81, v88, v20, v12, v54, v40, v11, v47, v10, v61, v19, v29, v16, v78, v89, v71, v66, v34, v33, v62, v26, v97, v50, v42, v56, v73, v44, v80, v27, v90, v74, v84, v21, v65, v93, v38, v92, v59, v23, v75, v48, v46, v70, v60, v57, v86.
+After the line ANSWER:, write one line `<vertex>: <colour>` per vertex, in this order: v76, v51, v87, v49, v15, v52, v18, v98, v99, v17, v13, v64, v24, v35, v41, v39, v37, v72, v36, v31, v55, v81, v88, v20, v12, v54, v40, v11, v47, v10, v61, v19, v29, v16, v78, v89, v71, v66, v34, v33, v62, v26, v97, v50, v42, v56, v73, v44, v80, v27, v90, v74, v84, v21, v65, v93, v38, v92, v59, v23, v75, v48, v46, v70, v60, v57, v86.
 ```
 
 </details>
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| DPLL-LIST (D, k=3) | D | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=2 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm U-LIST. | chronological backtracking in order σ, smallest colour first; IMPOSSIBLE only after exhaustive refutation, or… |
-| DSATUR (C2, label ties) | C2 | v10=2 v11=2 v12=2 v13=1 v15=2 v16=1 v17=1 v18=2 v19=1 v20=1 v21=2 v23=1 v24=2 v26=2 v27=2 v29=1 v31=1 v33=2 v34=2 v35=2… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm U-LIST. | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
-| EXACT | null | POSSIBLE | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm U-LIST. | a completed procedure: a checked witness, or a closed refutation |
-| FF-LIST (C1 seq) | C1 | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=2 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm U-LIST. | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
-| FF-OUT (AR, answer order) | C1 | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=2 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm U-LIST. | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
-| LF (C1 static, label ties) | C1 | IMPOSSIBLE | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm U-LIST. | commits vertices by degree, highest first; first-fit colour; cites degree |
-| LOCAL-11-LIST (const proxy) | E | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=2 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm U-LIST. | no sequential commitments; each vertex looks at its neighbours for t rounds |
-| LOCAL-8-LIST (const proxy) | E | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=1 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 8, version BASE, arm U-LIST. | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| DPLL-LIST (D, k=3) | D | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=2 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | chronological backtracking with forward checking in order σ, smallest colour first; IMPOSSIBLE only after exh… |
+| DSATUR (C2, label ties) | C2 | v10=2 v11=2 v12=2 v13=1 v15=2 v16=1 v17=1 v18=2 v19=1 v20=1 v21=2 v23=1 v24=2 v26=2 v27=2 v29=1 v31=1 v33=2 v34=2 v35=2… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| EXACT | null | POSSIBLE | set-valued: uniform over its 371934029389824 solutions (proper 3-colouring), which give same: 0.387, different: 0.613 (uniform slip eps = 0… | a completed procedure: a checked witness, or a closed refutation |
+| FF-LIST (C1 seq) | C1 | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=2 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| FF-OUT (AR, answer order) | C1 | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=2 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| LF (C1 static, label ties) | C1 | IMPOSSIBLE | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | commits vertices by degree, highest first; first-fit colour; cites degree |
+| LOCAL-10-LIST (const proxy, reaches the target) | E | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=2 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| LOCAL-9-LIST (const proxy, one round short) | E | v10=1 v11=1 v12=1 v13=1 v15=1 v16=2 v17=2 v18=1 v19=2 v20=2 v21=1 v23=1 v24=3 v26=1 v27=1 v29=2 v31=2 v33=1 v34=1 v35=3… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| RANDOM (H) | H | — | uniform over all answers (uniform over the 3^n colourings with colours 1..3: the target shares the reference vertex's colour with probabili… | no procedure determines the answer; trace content and verdict unrelated |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = different*: DSATUR (C2, label ties) +1.45, LOCAL-8-LIST (const proxy) +1.45, DPLL-LIST (D, k=3) +0.00, FF-LIST (C1 seq) +0.00, FF-OUT (AR, answer order) +0.00, LOCAL-11-LIST (const proxy) +0.00
-- *answer = other*: DPLL-LIST (D, k=3) +0.00, DSATUR (C2, label ties) +0.00, FF-LIST (C1 seq) +0.00, FF-OUT (AR, answer order) +0.00, LOCAL-11-LIST (const proxy) +0.00, LOCAL-8-LIST (const proxy) +0.00
-- *answer = same*: DPLL-LIST (D, k=3) +1.45, FF-LIST (C1 seq) +1.45, FF-OUT (AR, answer order) +1.45, LOCAL-11-LIST (const proxy) +1.45, DSATUR (C2, label ties) +0.00, LOCAL-8-LIST (const proxy) +0.00
+- *answer = different*: DSATUR (C2, label ties) +1.45, LF (C1 static, label ties) +1.45, LOCAL-9-LIST (const proxy, one round short) +1.45, EXACT +0.20, RANDOM (H) +0.17, DPLL-LIST (D, k=3) +0.00
+- *answer = other*: DPLL-LIST (D, k=3) +1.45, DSATUR (C2, label ties) +1.45, EXACT +1.45, FF-LIST (C1 seq) +1.45, FF-OUT (AR, answer order) +1.45, LOCAL-10-LIST (const proxy, reaches the target) +1.45
+- *answer = same*: DPLL-LIST (D, k=3) +1.45, FF-LIST (C1 seq) +1.45, FF-OUT (AR, answer order) +1.45, LF (C1 static, label ties) +1.45, LOCAL-10-LIST (const proxy, reaches the target) +1.45, RANDOM (H) +0.45
 
 Notes: All three versions are the identical labelled graph; only two adjacent vertices swap places in the listing, so ground truth, chromatic number and every order-invariant member are unchanged.
 
@@ -481,7 +510,7 @@ Notes: All three versions are the identical labelled graph; only two adjacent ve
 
 - **Domain / framing:** colouring (gadget) / textbook
 - **Ground truth:** `{"answer": 1, "check": "unique: first-fit colour of the target in listing order", "chromatic_number": 3}`
-- **Hashes:** content `3461633802888c3b`, base `c0939805c3d1628b`, source `None`; seed 731088 (dev)
+- **Hashes:** content `5a5f4c98390a9b2d`, base `63bf8369317bf870`, source `63bf8369317bf870`; seed 731088 (dev)
 - **Params:** `{"D_max": 8, "arm": "I", "base_target_true": true, "circuit": {"gates": [["v23", "v75", "v91"], ["v33", "v44", "v91"], ["v51", "v91", "v75"], ["v62", "v16", "v26"], ["v77", "v26", "v16"], ["v14", "v19", "v16"], ["v41", "v23", "v33"], ["v47", "v33", "v51"], ["v39", "v33", "v23"], ["v80", "v62", "v33…`
 - **Prompt tokens (regex-digit-split-v1):** 1455
 
@@ -567,19 +596,20 @@ After the line ANSWER:, write only the colour number of v76.
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| ANSWER-1 (A1 default; = LOCAL-0) | E | v11=1 v12=1 v13=1 v14=1 v15=1 v16=1 v17=1 v18=1 v19=1 v20=1 v21=1 v22=1 v23=1 v25=1 v26=1 v28=1 v29=1 v31=1 v32=1 v33=1… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 2, version BASE, arm I. | no sequential commitments; each vertex looks at its neighbours for t rounds |
-| DPLL-LIST (D, k=3) | D | v11=1 v12=2 v13=1 v14=3 v15=3 v16=1 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=3 v25=1 v26=2 v28=2 v29=2 v31=2 v32=2 v33=3… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 2, version BASE, arm I. | chronological backtracking in order σ, smallest colour first; IMPOSSIBLE only after exhaustive refutation, or… |
-| DSATUR (C2, label ties) | C2 | v11=1 v12=1 v13=1 v14=1 v15=1 v16=2 v17=2 v18=2 v19=2 v20=1 v21=2 v22=2 v23=1 v25=2 v26=2 v28=1 v29=1 v31=1 v32=1 v33=1… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 2, version BASE, arm I. | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
-| EXACT | null | CHI=3 | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 2, version BASE, arm I. | a completed procedure: a checked witness, or a closed refutation |
-| FF-LIST (C1 seq) | C1 | v11=1 v12=2 v13=1 v14=3 v15=3 v16=1 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=3 v25=1 v26=2 v28=2 v29=2 v31=2 v32=2 v33=3… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 2, version BASE, arm I. | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
-| LF (C1 static, label ties) | C1 | v11=2 v12=3 v13=1 v14=2 v15=2 v16=1 v17=1 v18=1 v19=1 v20=2 v21=1 v22=1 v23=1 v25=1 v26=1 v28=2 v29=1 v31=2 v32=1 v33=1… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 2, version BASE, arm I. | commits vertices by degree, highest first; first-fit colour; cites degree |
-| LOCAL-2-LIST (const proxy) | E | v11=1 v12=1 v13=1 v14=1 v15=1 v16=1 v17=1 v18=1 v19=2 v20=1 v21=1 v22=1 v23=1 v25=1 v26=2 v28=1 v29=1 v31=1 v32=1 v33=1… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 2, version BASE, arm I. | no sequential commitments; each vertex looks at its neighbours for t rounds |
-| LOCAL-5-LIST (const proxy) | E | v11=1 v12=2 v13=1 v14=3 v15=1 v16=1 v17=1 v18=1 v19=2 v20=1 v21=1 v22=1 v23=3 v25=1 v26=2 v28=1 v29=1 v31=1 v32=2 v33=3… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. Depth 2, version BASE, arm I. | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| ANSWER-1 (A1 default; = LOCAL-0) | E | v11=1 v12=1 v13=1 v14=1 v15=1 v16=1 v17=1 v18=1 v19=1 v20=1 v21=1 v22=1 v23=1 v25=1 v26=1 v28=1 v29=1 v31=1 v32=1 v33=1… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| DPLL-LIST (D, k=3) | D | v11=1 v12=2 v13=1 v14=3 v15=3 v16=1 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=3 v25=1 v26=2 v28=2 v29=2 v31=2 v32=2 v33=3… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | chronological backtracking with forward checking in order σ, smallest colour first; IMPOSSIBLE only after exh… |
+| DSATUR (C2, label ties) | C2 | v11=1 v12=1 v13=1 v14=1 v15=1 v16=2 v17=2 v18=2 v19=2 v20=1 v21=2 v22=2 v23=1 v25=2 v26=2 v28=1 v29=1 v31=1 v32=1 v33=1… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | next vertex = most distinct colours among its neighbours ('most constrained'); first-fit colour |
+| FF-LIST (C1 seq) | C1 | v11=1 v12=2 v13=1 v14=3 v15=3 v16=1 v17=1 v18=1 v19=2 v20=2 v21=1 v22=1 v23=3 v25=1 v26=2 v28=2 v29=2 v31=2 v32=2 v33=3… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | commits vertices in order σ; colour = smallest number not used by an earlier neighbour; no revisions |
+| LF (C1 static, label ties) | C1 | v11=2 v12=3 v13=1 v14=2 v15=2 v16=1 v17=1 v18=1 v19=1 v20=2 v21=1 v22=1 v23=1 v25=1 v26=1 v28=2 v29=1 v31=2 v32=1 v33=1… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | commits vertices by degree, highest first; first-fit colour; cites degree |
+| LOCAL-3-LIST (const proxy, one round short) | E | v11=1 v12=1 v13=1 v14=3 v15=1 v16=1 v17=1 v18=1 v19=2 v20=1 v21=1 v22=1 v23=3 v25=1 v26=2 v28=1 v29=1 v31=1 v32=1 v33=3… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| LOCAL-4-LIST (const proxy, reaches the target) | E | v11=1 v12=1 v13=1 v14=3 v15=1 v16=1 v17=1 v18=1 v19=2 v20=1 v21=1 v22=1 v23=3 v25=1 v26=2 v28=1 v29=1 v31=1 v32=1 v33=3… | p_h(its class) = 1 - eps + eps/K = 0.925, eps/K = 0.025 on each other class (uniform slip eps = 0.1 over the K = 4 outcome classes); the ce… | no sequential commitments; each vertex looks at its neighbours for t rounds |
+| RANDOM (H) | H | — | uniform over all answers (uniform over the 67^67 colourings with colours 1..67: the target's colour is uniform on 1..67); on this channel 1… | no procedure determines the answer; trace content and verdict unrelated |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = 1*: DSATUR (C2, label ties) +1.45, LF (C1 static, label ties) +1.45, ANSWER-1 (A1 default; = LOCAL-0) +0.00, DPLL-LIST (D, k=3) +0.00, FF-LIST (C1 seq) +0.00, LOCAL-2-LIST (const proxy) +0.00
-- *answer = 2*: ANSWER-1 (A1 default; = LOCAL-0) +1.45, DPLL-LIST (D, k=3) +1.45, FF-LIST (C1 seq) +1.45, LOCAL-2-LIST (const proxy) +1.45, LOCAL-5-LIST (const proxy) +1.45, DSATUR (C2, label ties) +0.00
-- *answer = other*: ANSWER-1 (A1 default; = LOCAL-0) +0.00, DPLL-LIST (D, k=3) +0.00, DSATUR (C2, label ties) +0.00, FF-LIST (C1 seq) +0.00, LF (C1 static, label ties) +0.00, LOCAL-2-LIST (const proxy) +0.00
+- *answer = 1*: DSATUR (C2, label ties) +1.57, LF (C1 static, label ties) +1.57, RANDOM (H) +1.38, ANSWER-1 (A1 default; = LOCAL-0) +0.00, DPLL-LIST (D, k=3) +0.00, FF-LIST (C1 seq) +0.00
+- *answer = 2*: ANSWER-1 (A1 default; = LOCAL-0) +1.57, DPLL-LIST (D, k=3) +1.57, FF-LIST (C1 seq) +1.57, LOCAL-3-LIST (const proxy, one round short) +1.57, LOCAL-4-LIST (const proxy, reaches the target) +1.57, RANDOM (H) +1.38
+- *answer = 3*: ANSWER-1 (A1 default; = LOCAL-0) +0.19, DPLL-LIST (D, k=3) +0.19, DSATUR (C2, label ties) +0.19, FF-LIST (C1 seq) +0.19, LF (C1 static, label ties) +0.19, LOCAL-3-LIST (const proxy, one round short) +0.19
+- *answer = other*: ANSWER-1 (A1 default; = LOCAL-0) +1.55, DPLL-LIST (D, k=3) +1.55, DSATUR (C2, label ties) +1.55, FF-LIST (C1 seq) +1.55, LF (C1 static, label ties) +1.55, LOCAL-3-LIST (const proxy, one round short) +1.55
 
 Notes: All three versions are the identical labelled graph; only two adjacent vertices swap places in the listing, so ground truth, chromatic number and every order-invariant member are unchanged.

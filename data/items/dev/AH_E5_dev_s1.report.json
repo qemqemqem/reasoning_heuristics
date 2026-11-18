@@ -29,14 +29,13 @@
   "accepted": 20,
   "rejections": {}
  },
- "generation_seconds": 0.2,
  "path": "data/items/dev/AH_E5_dev_s1.jsonl",
  "validation": {
   "items": 85,
   "sets": 20,
   "items_passed": 85,
   "pass_rate": 1.0,
-  "failures": []
- },
- "validation_seconds": 0.9
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
 }

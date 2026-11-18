@@ -26,14 +26,13 @@
   "accepted": 35,
   "rejections": {}
  },
- "generation_seconds": 9.9,
  "path": "data/items/dev/AH_E1_dev_s1.jsonl",
  "validation": {
   "items": 70,
   "sets": 35,
   "items_passed": 70,
   "pass_rate": 1.0,
-  "failures": []
- },
- "validation_seconds": 10.3
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
 }

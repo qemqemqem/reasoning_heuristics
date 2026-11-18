@@ -30,14 +30,13 @@
    "sets": 6
   }
  },
- "generation_seconds": 12.8,
  "path": "data/items/dev/AH_E8_dev_s1.jsonl",
  "validation": {
   "items": 60,
   "sets": 5,
   "items_passed": 60,
   "pass_rate": 1.0,
-  "failures": []
- },
- "validation_seconds": 1.0
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
 }

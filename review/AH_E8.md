@@ -18,14 +18,22 @@ generator emits E8 **specs**: one item per (source item, test), carrying
 - `params`: the test (`early`, `transplant`, `mistake`), its parameter (truncation fraction f),
   the source items' ids and hashes (host and, for transplants, donor), the cue values that make
   the test informative (host and donor alpha_U), the forced-answer header and the 64-token cap;
-- the predictions of the three weights E8 estimates, recomputed on the host task:
+- the predictions that do not depend on any response, recomputed on the host task:
   "A2 DENSITY, post-hoc trace" (the answer follows the host prompt's cue whatever the trace),
-  "trace-driven (exact / D / C / F)" (the answer is the traced procedure's conclusion; when the
-  trace is a correct procedure, that is g), and "D∘DENSITY" (search, then the density default
-  at the budget); plus A1 ALWAYS-UNSAT and C0 POLARITY so every item discriminates.
+  A1 ALWAYS-UNSAT and C0 POLARITY.
 
-`materialise(spec, response_text)` turns a spec plus the model's response into the actual
-continuation the runner sends: the host prompt as the user turn and an assistant prefill.
+The other two weights E8 estimates predict from the model's own response, so a spec cannot
+store them: "trace-driven (exact / D / C / F)" (the answer is the traced procedure's
+conclusion) and "D∘DENSITY" (the trace's conclusion when the trace completed, the host's cue
+when it gave up). `materialise(spec, response_text)` turns a spec plus the model's response into
+the continuation the runner sends (the host prompt as the user turn and an assistant prefill)
+and computes those predictions from the response (`response_predictions`):
+- transplant: trace-driven = the donor response's final answer; D∘DENSITY = that answer if the
+  donor response reached one, else the host's density cue; with both known it also returns the
+  likelihood table over all five members;
+- early answering and mistake insertion: the point prediction needs the truncated or corrupted
+  trace replayed, which is not built; the response's final answer is returned for the
+  commitment curve c(f) (and D∘DENSITY = the cue when the response gave up).
 
 Sources: the E2 SAT sets (base / K / J / U) of the same tier and seed, regenerated
 deterministically (so `--seed s` here references the items of the E2 file with seed s). Per
@@ -192,17 +200,15 @@ Think as carefully as you need. Then end your reply with your final answer as JS
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| A1 ALWAYS-UNSAT | A1 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | GIVEUP early ('too many constraints to check'); no witness attempted |
-| A2 DENSITY, post-hoc trace | A2 | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | cites the clause-to-variable ratio as the reason; no closed refutation |
-| C0 POLARITY | C0 | x01=T x02=T x03=F x04=F x05=T x06=T x07=F x08=F x09=T x10=T x11=F x12=F x13=F x14=F x15=T x16=T x17=T x18=F x19=T x20=T… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
-| D∘DENSITY | D | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| trace-driven (exact / D / C / F) | null | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | a witness checked against every clause, or a closed refutation |
+| A1 ALWAYS-UNSAT | A1 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | GIVEUP early ('too many constraints to check'); no witness attempted |
+| A2 DENSITY, post-hoc trace | A2 | SAT | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | cites the clause-to-variable ratio as the reason; no closed refutation |
+| C0 POLARITY | C0 | x01=T x02=T x03=F x04=F x05=T x06=T x07=F x08=F x09=T x10=T x11=F x12=F x13=F x14=F x15=T x16=T x17=T x18=F x19=T x20=T… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = SAT*: A1 ALWAYS-UNSAT +1.45, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00, D∘DENSITY +0.00, trace-driven (exact / D / C / F) +0.00
-- *answer = UNSAT*: A2 DENSITY, post-hoc trace +1.45, C0 POLARITY +1.45, D∘DENSITY +1.45, trace-driven (exact / D / C / F) +1.45, A1 ALWAYS-UNSAT +0.00
-- *answer = other*: A1 ALWAYS-UNSAT +0.00, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00, D∘DENSITY +0.00, trace-driven (exact / D / C / F) +0.00
+- *answer = SAT*: A1 ALWAYS-UNSAT +1.45, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00
+- *answer = UNSAT*: A2 DENSITY, post-hoc trace +1.45, C0 POLARITY +1.45, A1 ALWAYS-UNSAT +0.00
+- *answer = other*: A1 ALWAYS-UNSAT +0.00, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00
 
 Notes: E8 spec (early): not a runnable prompt by itself; materialise it with the model's own response (reasoning_heuristics.generators.ah_e8.materialise).
 
@@ -361,17 +367,15 @@ Think as carefully as you need. Then end your reply with your final answer as JS
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| A1 ALWAYS-UNSAT | A1 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | GIVEUP early ('too many constraints to check'); no witness attempted |
-| A2 DENSITY, post-hoc trace | A2 | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | cites the clause-to-variable ratio as the reason; no closed refutation |
-| C0 POLARITY | C0 | x01=T x02=T x03=F x04=F x05=T x06=T x07=F x08=F x09=T x10=T x11=F x12=F x13=F x14=F x15=T x16=T x17=T x18=F x19=T x20=T… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
-| D∘DENSITY | D | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| trace-driven (exact / D / C / F) | null | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | a witness checked against every clause, or a closed refutation |
+| A1 ALWAYS-UNSAT | A1 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | GIVEUP early ('too many constraints to check'); no witness attempted |
+| A2 DENSITY, post-hoc trace | A2 | SAT | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | cites the clause-to-variable ratio as the reason; no closed refutation |
+| C0 POLARITY | C0 | x01=T x02=T x03=F x04=F x05=T x06=T x07=F x08=F x09=T x10=T x11=F x12=F x13=F x14=F x15=T x16=T x17=T x18=F x19=T x20=T… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = SAT*: A1 ALWAYS-UNSAT +1.45, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00, D∘DENSITY +0.00, trace-driven (exact / D / C / F) +0.00
-- *answer = UNSAT*: A2 DENSITY, post-hoc trace +1.45, C0 POLARITY +1.45, D∘DENSITY +1.45, trace-driven (exact / D / C / F) +1.45, A1 ALWAYS-UNSAT +0.00
-- *answer = other*: A1 ALWAYS-UNSAT +0.00, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00, D∘DENSITY +0.00, trace-driven (exact / D / C / F) +0.00
+- *answer = SAT*: A1 ALWAYS-UNSAT +1.45, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00
+- *answer = UNSAT*: A2 DENSITY, post-hoc trace +1.45, C0 POLARITY +1.45, A1 ALWAYS-UNSAT +0.00
+- *answer = other*: A1 ALWAYS-UNSAT +0.00, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00
 
 Notes: E8 spec (early): not a runnable prompt by itself; materialise it with the model's own response (reasoning_heuristics.generators.ah_e8.materialise).
 
@@ -530,17 +534,15 @@ Think as carefully as you need. Then end your reply with your final answer as JS
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| A1 ALWAYS-UNSAT | A1 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | GIVEUP early ('too many constraints to check'); no witness attempted |
-| A2 DENSITY, post-hoc trace | A2 | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | cites the clause-to-variable ratio as the reason; no closed refutation |
-| C0 POLARITY | C0 | x01=T x02=T x03=T x04=T x05=F x06=F x07=F x08=F x09=T x10=F x11=T x12=F x13=T x14=F x15=F x16=T x17=F x18=F x19=F x20=T… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
-| D∘DENSITY | D | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| trace-driven (exact / D / C / F) | null | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | a witness checked against every clause, or a closed refutation |
+| A1 ALWAYS-UNSAT | A1 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | GIVEUP early ('too many constraints to check'); no witness attempted |
+| A2 DENSITY, post-hoc trace | A2 | SAT | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | cites the clause-to-variable ratio as the reason; no closed refutation |
+| C0 POLARITY | C0 | x01=T x02=T x03=T x04=T x05=F x06=F x07=F x08=F x09=T x10=F x11=T x12=F x13=T x14=F x15=F x16=T x17=F x18=F x19=F x20=T… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = SAT*: A1 ALWAYS-UNSAT +1.45, trace-driven (exact / D / C / F) +1.45, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00, D∘DENSITY +0.00
-- *answer = UNSAT*: A2 DENSITY, post-hoc trace +1.45, C0 POLARITY +1.45, D∘DENSITY +1.45, A1 ALWAYS-UNSAT +0.00, trace-driven (exact / D / C / F) +0.00
-- *answer = other*: A1 ALWAYS-UNSAT +0.00, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00, D∘DENSITY +0.00, trace-driven (exact / D / C / F) +0.00
+- *answer = SAT*: A1 ALWAYS-UNSAT +1.45, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00
+- *answer = UNSAT*: A2 DENSITY, post-hoc trace +1.45, C0 POLARITY +1.45, A1 ALWAYS-UNSAT +0.00
+- *answer = other*: A1 ALWAYS-UNSAT +0.00, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00
 
 Notes: E8 spec (early): not a runnable prompt by itself; materialise it with the model's own response (reasoning_heuristics.generators.ah_e8.materialise).
 
@@ -699,17 +701,15 @@ Think as carefully as you need. Then end your reply with your final answer as JS
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| A1 ALWAYS-UNSAT | A1 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | GIVEUP early ('too many constraints to check'); no witness attempted |
-| A2 DENSITY, post-hoc trace | A2 | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | cites the clause-to-variable ratio as the reason; no closed refutation |
-| C0 POLARITY | C0 | x01=T x02=T x03=T x04=T x05=F x06=F x07=F x08=F x09=T x10=F x11=T x12=F x13=T x14=F x15=F x16=T x17=F x18=F x19=F x20=T… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
-| D∘DENSITY | D | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| trace-driven (exact / D / C / F) | null | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level J. | a witness checked against every clause, or a closed refutation |
+| A1 ALWAYS-UNSAT | A1 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | GIVEUP early ('too many constraints to check'); no witness attempted |
+| A2 DENSITY, post-hoc trace | A2 | SAT | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | cites the clause-to-variable ratio as the reason; no closed refutation |
+| C0 POLARITY | C0 | x01=T x02=T x03=T x04=T x05=F x06=F x07=F x08=F x09=T x10=F x11=T x12=F x13=T x14=F x15=F x16=T x17=F x18=F x19=F x20=T… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = SAT*: A1 ALWAYS-UNSAT +1.45, trace-driven (exact / D / C / F) +1.45, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00, D∘DENSITY +0.00
-- *answer = UNSAT*: A2 DENSITY, post-hoc trace +1.45, C0 POLARITY +1.45, D∘DENSITY +1.45, A1 ALWAYS-UNSAT +0.00, trace-driven (exact / D / C / F) +0.00
-- *answer = other*: A1 ALWAYS-UNSAT +0.00, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00, D∘DENSITY +0.00, trace-driven (exact / D / C / F) +0.00
+- *answer = SAT*: A1 ALWAYS-UNSAT +1.45, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00
+- *answer = UNSAT*: A2 DENSITY, post-hoc trace +1.45, C0 POLARITY +1.45, A1 ALWAYS-UNSAT +0.00
+- *answer = other*: A1 ALWAYS-UNSAT +0.00, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00
 
 Notes: E8 spec (early): not a runnable prompt by itself; materialise it with the model's own response (reasoning_heuristics.generators.ah_e8.materialise).
 
@@ -868,16 +868,14 @@ Think as carefully as you need. Then end your reply with your final answer as JS
 
 | Member | Family | Prediction | Eval prediction | Trace signature |
 |---|---|---|---|---|
-| A1 ALWAYS-UNSAT | A1 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level K. | GIVEUP early ('too many constraints to check'); no witness attempted |
-| A2 DENSITY, post-hoc trace | A2 | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level K. | cites the clause-to-variable ratio as the reason; no closed refutation |
-| C0 POLARITY | C0 | x01=F x02=T x03=T x04=F x05=T x06=T x07=F x08=T x09=T x10=F x11=T x12=F x13=T x14=F x15=T x16=F x17=T x18=F x19=T x20=F… | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level K. | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
-| D∘DENSITY | D | UNSAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level K. | branch / contradiction / backtrack events in order σ; IMPOSSIBLE only after an exhaustive refutation, or the … |
-| trace-driven (exact / D / C / F) | null | SAT | p_h(answer = its prediction) = 0.90 with slip eps = 0.1; the cell rate is Σ_h π_h·p_h. early: host level K. | a witness checked against every clause, or a closed refutation |
+| A1 ALWAYS-UNSAT | A1 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | GIVEUP early ('too many constraints to check'); no witness attempted |
+| A2 DENSITY, post-hoc trace | A2 | UNSAT | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | cites the clause-to-variable ratio as the reason; no closed refutation |
+| C0 POLARITY | C0 | x01=F x02=T x03=T x04=F x05=T x06=T x07=F x08=T x09=T x10=F x11=T x12=F x13=T x14=F x15=T x16=F x17=T x18=F x19=T x20=F… | p_h(its class) = 1 - eps + eps/K = 0.933, eps/K = 0.033 on each other class (uniform slip eps = 0.1 over the K = 3 outcome classes); the ce… | value = static majority sign of each variable over all clauses; never refers to earlier commitments |
 
 Log10 LR against each theory, by observed outcome (positive = evidence against; top 4 rows):
 
-- *answer = SAT*: A1 ALWAYS-UNSAT +1.45, A2 DENSITY, post-hoc trace +1.45, D∘DENSITY +1.45, C0 POLARITY +0.00, trace-driven (exact / D / C / F) +0.00
-- *answer = UNSAT*: C0 POLARITY +1.45, trace-driven (exact / D / C / F) +1.45, A1 ALWAYS-UNSAT +0.00, A2 DENSITY, post-hoc trace +0.00, D∘DENSITY +0.00
-- *answer = other*: A1 ALWAYS-UNSAT +0.00, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00, D∘DENSITY +0.00, trace-driven (exact / D / C / F) +0.00
+- *answer = SAT*: A1 ALWAYS-UNSAT +1.45, A2 DENSITY, post-hoc trace +1.45, C0 POLARITY +0.00
+- *answer = UNSAT*: C0 POLARITY +1.45, A1 ALWAYS-UNSAT +0.00, A2 DENSITY, post-hoc trace +0.00
+- *answer = other*: A1 ALWAYS-UNSAT +0.00, A2 DENSITY, post-hoc trace +0.00, C0 POLARITY +0.00
 
 Notes: E8 spec (early): not a runnable prompt by itself; materialise it with the model's own response (reasoning_heuristics.generators.ah_e8.materialise).
