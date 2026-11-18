@@ -48,6 +48,7 @@ PAGE = REPO / "docs" / "results" / "2026-11-18-results.html"
 
 UNEXPLAINED = "unexplained (q)"
 TOL = 1e-9
+DIST_ALPHA = 0.05  # the distance-profile check fails at a Monte Carlo p below this
 STATS = (("exact", "Answers equal to a member's answer"),
          ("beyond_reach", "Answers beyond every member's slip reach"),
          ("special", "Special-token answers (UNSAT, IMPOSSIBLE, X)"))
@@ -145,9 +146,23 @@ class Fit:
         return out
 
     @property
+    def dist(self) -> dict[str, Any] | None:
+        """The distance-profile check (JSONs from before it existed have none)."""
+        return (self.rec or {}).get("distance_check")
+
+    @property
+    def dist_misfit(self) -> bool:
+        return self.dist is not None and self.dist["p_value"] < DIST_ALPHA
+
+    @property
+    def n_checks(self) -> int:
+        return len(STATS) + (1 if self.dist is not None else 0)
+
+    @property
     def n_outside(self) -> int | None:
+        """Checks the data fail: the three statistics outside their 5–95% ranges, plus the distance profile."""
         p = self.ppc
-        return None if p is None else sum(not s["inside"] for s in p)
+        return None if p is None else sum(not s["inside"] for s in p) + int(self.dist_misfit)
 
     @property
     def reproduces(self) -> bool:
@@ -164,7 +179,7 @@ class Fit:
         if self.n_outside is None:
             parts.append("the predictive check was not run")
         elif self.n_outside:
-            parts.append(f"the fitted model misses {self.n_outside} of {len(STATS)} statistics of the data")
+            parts.append(f"the fitted model fails {self.n_outside} of {self.n_checks} checks against the data")
         return " and ".join(parts)
 
 
@@ -380,8 +395,8 @@ def ppc_chip(f: Fit) -> str:
     if n is None:
         return chip("warn", "predictive check not run")
     if n == 0:
-        return chip("good", f"reproduces the data ({len(STATS)} of {len(STATS)} statistics)")
-    return chip("bad", f"misses the data ({n} of {len(STATS)} statistics outside)")
+        return chip("good", f"reproduces the data ({f.n_checks} of {f.n_checks} checks)")
+    return chip("bad", f"misses the data ({n} of {f.n_checks} checks failed)")
 
 
 def reading_chip(f: Fit) -> str:
@@ -436,7 +451,9 @@ def section_header(d: Data) -> str:
     nav = ('<nav class="toc" aria-label="Sections"><a href="#findings">Findings</a><a href="#runs">Runs</a>'
            '<a href="#accuracy">Accuracy</a><a href="#weights">Weights</a><a href="#ppc">Predictive check</a>'
            '<a href="#ea">Error agreement</a><a href="#distance">Distance</a><a href="#compare">Comparisons</a>'
-           '<a href="#descriptive">Not fitted</a><a href="#limits">Limits</a><a href="#reproduce">Reproduce</a></nav>')
+           + ('<a href="#textbook">Textbook transfer</a>' if any(
+               "by_framing" in x for units in d.r["descriptive"].values() for x in units.values()) else "")
+           + '<a href="#descriptive">Not fitted</a><a href="#limits">Limits</a><a href="#reproduce">Reproduce</a></nav>')
     return (f'<header><p class="kicker">Heuristics Under Hardness · results page</p>'
             f'<h1>Which heuristics do LLMs use on NP-hard problems? Preliminary results</h1>{banner}'
             f'<div id="verdict">{hero}{lead}{board}</div>{nav}</header>')
@@ -490,12 +507,37 @@ def heat_cell(numr: float, den: float, what: str) -> str:
     return f'<td class="hc h{k}" title="{e(what)}: {numr:.0f} of {den:.0f}">{share(numr, den)}</td>'
 
 
+EXCLUDED_FLAG = 0.10  # flag a share whose denominator leaves out this much of the responses or more
+
+
+def excluded(desc: dict[str, Any]) -> int:
+    """Responses that are not ok (truncated, parse failures, partial answers...): left out of every share."""
+    return desc["n"] - desc["ok"]
+
+
+def heavily_excluded(desc: dict[str, Any]) -> bool:
+    return bool(desc["n"]) and excluded(desc) / desc["n"] >= EXCLUDED_FLAG
+
+
+def correct_cell(desc: dict[str, Any]) -> str:
+    """The correct-of-ok heat cell, with a dagger when a tenth or more of the responses are excluded from it."""
+    cell = heat_cell(desc["correct"], desc["ok"], "correct of ok")
+    if not heavily_excluded(desc) or not desc["ok"]:
+        return cell
+    cats = ", ".join(f"{k} {v}" for k, v in desc["categories"].items() if k != "ok" and v)
+    return (cell.replace('">', f'; {excluded(desc)} of {desc["n"]} responses excluded ({e(cats)})">', 1)
+            .replace("</td>", '<sup class="dag">†</sup></td>'))
+
+
 def section_accuracy(d: Data) -> str:
     out = ['<section id="accuracy"><h2>Accuracy and answer validity</h2>'
            "<p>For every unit (eval × domain) and run: the share of <em>ok</em> answers that are correct, and the share that are "
            "valid (a proper colouring, a feasible packing, a satisfying assignment). Excluded responses (parse failures, truncation) "
            "are not in the denominators. Validity is not defined on decision and entailment units (–). "
-           '<span class="pill">fitted</span> marks the units whose mixture fits pass the recovery gates at that size.</p>',
+           '<span class="pill">fitted</span> marks the units whose mixture fits pass the recovery gates at that size.</p>'
+           f'<p class="plain"><strong>† Selected answers.</strong> A dagger marks a share from which {EXCLUDED_FLAG:.0%} or more of '
+           "the responses were excluded, almost always because they were cut off at the token cap. Those are likely the harder "
+           "items, so the share describes the items the model finished, not the unit: hover a cell for the counts.</p>",
            heat_legend()]
     for s in d.sets:
         runs = d.runs_of(s)
@@ -510,7 +552,7 @@ def section_accuracy(d: Data) -> str:
                 if desc is None:
                     cells += ['<td class="hc na">–</td>'] * 2
                     continue
-                cells.append(heat_cell(desc["correct"], desc["ok"], "correct of ok"))
+                cells.append(correct_cell(desc))
                 cells.append(heat_cell(desc["valid"], desc["valid_defined"], "valid of ok"))
             rows.append(cells)
         out.append(f"<h3>{e(set_label(s))}</h3>" + table([], rows, "heat", head, fit=True))
@@ -553,7 +595,7 @@ def weights_panel(f: Fit, labels: list[str]) -> str:
                 "These weights say whose answers this model's answers are near, not which procedures it runs.</p>")
     else:
         read = ('<p class="reading ok"><strong>Reproduces the data.</strong> ε is below its cap and the fitted model '
-                "reproduces all three statistics checked. That makes the weights a fair description of these answers; "
+                f"passes all {f.n_checks} checks. That makes the weights a fair description of these answers; "
                 "it does not show that the model runs these procedures.</p>")
     rec = f.rec
     if rec:
@@ -631,11 +673,26 @@ def weights_table(fits: list[Fit], labels: list[str]) -> str:
 
 def section_ppc(d: Data) -> str:
     st = d.r["settings"]
+    has_dist = any(f.dist is not None for f in d.fits)
     out = ['<section id="ppc"><h2>The predictive check: does the fitted model reproduce the data?</h2>'
            f"<p>{st['recovery_reps']} fake data sets are drawn from each fitted mixture (its weights, those below {st['plant_min']:g} "
            "set to 0, its ε and its ρ), on the same items with the same exclusions. Three simple statistics of the real answers are "
            "compared with the same statistics over the fake data sets: their mean and 5–95% range. An observed value outside that "
-           "range means the fitted model does not generate answers like these. A fit passes only if all three lie inside.</p>",
+           "range means the fitted model does not generate answers like these."
+           + (" The fourth check is the <strong>distance profile</strong>: the shares of answers at each distance from the nearest "
+              "member (0, 1, 2, 3, 4–6, more than 6, a special token), against the same shares in the fake data sets. Its statistic "
+              "is the total variation distance from the fake data sets' mean profile, and p is the share of fake data sets at least "
+              f"as far from it as the real data. It fails at p &lt; {DIST_ALPHA:g}." if has_dist else "")
+           + " A fit passes only if every check passes.</p>"
+           + ("<p class=\"plain\"><strong>Why the fourth check.</strong> The first statistic can barely fail while ε is below its cap: "
+              "the fit chooses ε so that the expected share of exact matches is close to the observed share. On C E2 knapsack the "
+              "other two are 0 by construction (no special tokens, no answer out of reach), so the first three checks there amount "
+              "to “ε is below its cap”. The distance profile tests the shape of the near misses, which no single parameter fits. "
+              "Because the fake data come from parameters fitted to the real data, the real data sit closer to the fake data's "
+              "mean than a fresh data set would: the check is conservative. Still, each fit faces four checks against 100 fake data "
+              "sets, so a single marginal failure is weak evidence; the clear failures are those with ε at its cap or several "
+              "checks failed. This check was added on 2026-11-18, after the first results; it changes two verdicts (see the "
+              "findings).</p>" if has_dist else ""),
            legend([(SW_SIM, "fake data from the fitted model: 5–95% range and mean"), (SW_OBS_IN, "observed, inside the range"),
                    (SW_OBS_OUT, "observed, outside the range")])]
     scale = UNIT_SCALE
@@ -658,7 +715,21 @@ def section_ppc(d: Data) -> str:
                 val = (f"{s['obs']:.2f} vs {s['mean']:.2f} [{s['lo']:.2f}, {s['hi']:.2f}]"
                        + ("" if s["inside"] else ' <span class="out-word"><span aria-hidden="true">✗</span> outside</span>'))
                 rows.append(row(e(s["name"]), svg, val))
-            rows.append(axis_row(scale, lambda t: f"{t:g}", "share of answers"))
+            dc = f.dist
+            if dc is not None:
+                lo, hi = dc["tv_simulated_p05_p95"]
+                bad = f.dist_misfit
+                tip = (f"Distance profile: total variation from the fitted model's mean profile, observed {dc['tv_observed']:.3f}; "
+                       f"fake data {dc['tv_simulated_mean']:.3f} [{lo:.3f}, {hi:.3f}]; p = {dc['p_value']:.3g}")
+                marks = [f'<rect class="sim" x="{pc(scale(lo))}" y="{MID - 6}" width="{pc(max(scale(hi) - scale(lo), 0.0))}" '
+                         'height="12" rx="2"/>', vtick(scale(dc["tv_simulated_mean"]), "simmean"),
+                         dot(scale(dc["tv_observed"]), "obs" + (" out" if bad else ""))]
+                val = (f"{dc['tv_observed']:.2f} vs {dc['tv_simulated_mean']:.2f} [{lo:.2f}, {hi:.2f}] "
+                       f'<span class="nw">· p {dc["p_value"]:.3g}</span>'
+                       + (' <span class="out-word"><span aria-hidden="true">✗</span> misfit</span>' if bad else ""))
+                rows.append(row("Distance profile (total variation from the fitted model's)",
+                                band(scale, [tip_group(tip, *marks, hit_x=scale(dc["tv_observed"]))]), val))
+            rows.append(axis_row(scale, lambda t: f"{t:g}", "share of answers (distance profile: total variation)"))
             blocks.append(f'<article class="panel{" is-near" if f.nearness else ""}"><h4>{e(f.run["label"])}</h4>'
                           f'<div class="chips">{ppc_chip(f)}{eps_chip(f)}</div>'
                           f'{rowchart(rows, f"Predictive check, {unit}, {f.run["label"]}")}</article>')
@@ -670,11 +741,37 @@ def section_ppc(d: Data) -> str:
         for s in ppc:
             cells.append(num(f"{s['obs']:.3f} vs {s['mean']:.3f} [{s['lo']:.3f}, {s['hi']:.3f}]" + ("" if s["inside"] else " <strong>outside</strong>")))
         cells += ["not run"] * (len(STATS) - len(ppc))
+        if has_dist:
+            dc = f.dist
+            cells.append(num(f"{dc['tv_observed']:.3f} vs {dc['tv_simulated_mean']:.3f} [{dc['tv_simulated_p05_p95'][0]:.3f}, "
+                             f"{dc['tv_simulated_p05_p95'][1]:.3f}]; p {dc['p_value']:.3g}" + (" <strong>misfit</strong>" if f.dist_misfit else ""))
+                         if dc else "not run")
         rows.append(cells)
     out.append(details("Table: the predictive check for every fit",
-                       table(["Unit", "Run"] + [e(n) + ": observed vs fitted model [5–95%]" for _, n in STATS], rows)))
+                       table(["Unit", "Run"] + [e(n) + ": observed vs fitted model [5–95%]" for _, n in STATS]
+                             + (["Distance profile: total variation, observed vs fake data [5–95%]; p"] if has_dist else []), rows)))
+    if has_dist:
+        out.append(details("Table: the distance profile of every fit, bin by bin", dist_table(d.fits)))
     out.append("</section>")
     return "".join(out)
+
+
+def dist_table(fits: list[Fit]) -> str:
+    """Observed share of answers per distance bin against the fake data sets' mean [5–95%]."""
+    bins = next(f.dist["bins"] for f in fits if f.dist)
+    rows = []
+    for f in fits:
+        dc = f.dist
+        if not dc:
+            continue
+        cells = [e(f.unit), e(f.run["label"])]
+        for b in bins:
+            o, m, (lo, hi) = dc["observed"][b], dc["mean"][b], dc["p05_p95"][b]
+            flag = "" if lo - TOL <= o <= hi + TOL else " <strong>outside</strong>"
+            cells.append(num(f"{o:.2f} vs {m:.2f} [{lo:.2f}, {hi:.2f}]{flag}"))
+        rows.append(cells)
+    head = [f"d = {b}" if b[0].isdigit() or b[0] == ">" else b for b in bins]
+    return table(["Unit", "Run"] + head, rows)
 
 
 def section_ea(d: Data) -> str:
@@ -806,8 +903,13 @@ def near_legend() -> str:
     return legend(items)
 
 
+def cond_rank(cond: str) -> int:
+    return COND_ORDER.index(cond) if cond in COND_ORDER else len(COND_ORDER)
+
+
 def comparison_pairs(d: Data) -> tuple[list[tuple[dict, dict, str]], list[tuple[dict, dict, str]]]:
-    """(thinking vs direct within a model, size within a family): pairs of runs on the same item set."""
+    """(condition within a model, size within a family): pairs of runs on the same item set. Condition pairs are
+    every two conditions one model ran on the same items (direct → thinking, low → high effort), in COND_ORDER."""
     think, size = [], []
     by_model: dict[tuple[str, str], list[dict]] = defaultdict(list)
     by_family: dict[tuple[str, str, str], list[dict]] = defaultdict(list)
@@ -817,11 +919,11 @@ def comparison_pairs(d: Data) -> tuple[list[tuple[dict, dict, str]], list[tuple[
         if sz is not None:
             by_family[(fam, m["condition"], m["item_set"])].append(m)
     for (model, s), ms in by_model.items():
-        direct = [m for m in ms if m["condition"] == "direct"]
-        thinking = [m for m in ms if m["condition"].startswith("thinking")]
-        for a in direct:
-            for b in thinking:
-                think.append((a, b, f"{model_name(a)}: {a['condition']} → {b['condition']}, {set_label(s)}"))
+        ms = sorted(ms, key=lambda m: cond_rank(m["condition"]))
+        for i, a in enumerate(ms):
+            for b in ms[i + 1:]:
+                if a["condition"] != b["condition"]:
+                    think.append((a, b, f"{model_name(a)}: {a['condition']} → {b['condition']}, {set_label(s)}"))
     for (fam, cond, s), ms in by_family.items():
         ms = sorted(ms, key=lambda m: family_size(m["model"])[1])
         for a, b in zip(ms, ms[1:]):
@@ -843,17 +945,20 @@ def dumbbell(d: Data, a: dict, b: dict, title: str) -> str:
         va, vb = da["correct"] / da["ok"], db["correct"] / db["ok"]
         xa, xb = UNIT_SCALE(va), UNIT_SCALE(vb)
         tip = (f"{unit}: {a['label']} {da['correct']}/{da['ok']} ({share(da['correct'], da['ok'])}) → "
-               f"{b['label']} {db['correct']}/{db['ok']} ({share(db['correct'], db['ok'])})")
+               f"{b['label']} {db['correct']}/{db['ok']} ({share(db['correct'], db['ok'])})"
+               + (f"; excluded {excluded(da)} of {da['n']} → {excluded(db)} of {db['n']}" if excluded(da) or excluded(db) else ""))
         marks = [hline(min(xa, xb), max(xa, xb), "conn"), dot(xa, "ring", r=4), dot(xb, "dot")]
-        lab = e(unit) + (' <span class="pill">fitted</span>' if d.is_gated(s, unit) else "")
+        dag = '<sup class="dag">†</sup>' if heavily_excluded(da) or heavily_excluded(db) else ""
+        lab = e(unit) + dag + (' <span class="pill">fitted</span>' if d.is_gated(s, unit) else "")
         rows.append(row(lab, band(UNIT_SCALE, [tip_group(tip, *marks, hit_x=xb)]),
                         f"{share(da['correct'], da['ok'])} → {share(db['correct'], db['ok'])}"))
         trows.append([e(unit), num(count_share(da["correct"], da["ok"])), num(count_share(db["correct"], db["ok"])),
+                      num(f"{excluded(da)} / {excluded(db)}"),
                       num(count_share(da["valid"], da["valid_defined"])), num(count_share(db["valid"], db["valid_defined"])),
                       num(count_share(da["any_member_match"], da["ok"])), num(count_share(db["any_member_match"], db["ok"]))])
-    rows.append(axis_row(UNIT_SCALE, lambda t: f"{100 * t:.0f}%", "correct, of ok answers"))
+    rows.append(axis_row(UNIT_SCALE, lambda t: f"{100 * t:.0f}%", "correct, of ok answers (†: 10% or more excluded)"))
     la, lb = e(a["label"]), e(b["label"])
-    tab = table(["Unit", f"Correct: {la}", f"Correct: {lb}", f"Valid: {la}", f"Valid: {lb}",
+    tab = table(["Unit", f"Correct: {la}", f"Correct: {lb}", "Excluded (not ok), each run", f"Valid: {la}", f"Valid: {lb}",
                  f"Matches ≥1 member: {la}", f"Matches ≥1 member: {lb}"], trows)
     return (f'<article class="panel wide"><h4>{e(title)} <span class="tag-desc">descriptive</span></h4>'
             + legend([(SW_RING, a["label"]), (SW_DOT, b["label"])])
@@ -864,16 +969,16 @@ def section_compare(d: Data) -> str:
     think, size = comparison_pairs(d)
     out = ['<section id="compare"><h2>Comparisons the design supports</h2>'
            '<p class="plain"><strong>Descriptive only.</strong> Each comparison sets two runs of one model family on the same items '
-           "side by side: thinking against direct answers within one Qwen3 model, and size within one family and condition. They "
-           "are counts, one sample per item, with no interval and no test. Cross-model claims need one hierarchical model "
-           "(DESIGN §5 rule 7), and no cross-model fit exists. Across families, model and condition change together (Qwen3 answers "
-           "directly, gpt-oss always reasons), so no comparison between families is shown.</p>",
-           "<h3>Thinking against direct answers, within one Qwen3 model</h3>"]
+           "side by side: two conditions of one model (direct against thinking, or low against high reasoning effort), and size "
+           "within one family and condition. They are counts, one sample per item, with no interval and no test. Cross-model "
+           "claims need one hierarchical model (DESIGN §5 rule 7), and no cross-model fit exists. Across families, model and "
+           "condition change together (only Qwen3 has a direct condition; gpt-oss always reasons), so no comparison between "
+           "families is shown.</p>",
+           "<h3>Condition, within one model</h3>"]
     if think:
         out += [dumbbell(d, a, b, t) for a, b, t in think]
     else:
-        out.append('<p class="empty">No pair yet: no model has both a direct run and a thinking run on the same item set in this '
-                   "JSON.</p>")
+        out.append('<p class="empty">No pair yet: no model has two conditions on the same item set in this JSON.</p>')
     out.append("<h3>Size, within one family and condition</h3>")
     if size:
         out += [dumbbell(d, a, b, t) for a, b, t in size]
@@ -881,6 +986,46 @@ def section_compare(d: Data) -> str:
         out.append('<p class="empty">No pair yet: no family has two sizes in the same condition on the same item set.</p>')
     out.append("</section>")
     return "".join(out)
+
+
+FRAMINGS = (("T", "textbook rule"), ("N", "neutral preamble"), ("I", "inverted rule"),
+            ("I+R", "inverted, rule restated"), ("P", "half the constraints inverted"))
+
+
+def section_textbook(d: Data) -> str:
+    """A/H E5 by framing: correct and textbook answers per run and domain (descriptive)."""
+    blocks = []
+    for s in d.sets:
+        units = [u for u in d.units_of(s) if u.startswith("AH_E5/")]
+        rows = []
+        for unit in units:
+            for m in d.runs_of(s):
+                bf = (d.r["descriptive"].get(m["run_id"], {}).get(unit) or {}).get("by_framing")
+                if not bf:
+                    continue
+                cells = [e(unit.split("/", 1)[1]), e(m["label"])]
+                for fr, _ in FRAMINGS:
+                    c = bf.get(fr)
+                    cells.append(num(f"{c['correct']} · {c['textbook']} / {c['ok']}") if c and c["ok"] else '<td class="n">–</td>')
+                rows.append(cells)
+        if rows:
+            head = "<tr><th>Domain</th><th>Run</th>" + "".join(
+                f'<th class="n">{e(fr)}<br><span class="sub">{e(name)}</span></th>' for fr, name in FRAMINGS) + "</tr>"
+            blocks.append(f"<h3>{e(set_label(s))}</h3>" + table([], rows, "tt", head))
+    if not blocks:
+        return ""
+    return ('<section id="textbook"><h2>Textbook transfer under rule inversion (A/H E5)</h2>'
+            "<p>A/H E5 asks whether a model, given a familiar problem with an inverted rule, answers <em>the textbook "
+            "problem</em> instead. Each base instance appears in up to five framings: T (the textbook rule), N (a neutral "
+            "preamble of the same length), I (a preamble that inverts the rule), I+R (I plus the rule restated just before "
+            "the question) and P (SAT only: half the constraints inverted). Each cell reads <strong>correct · textbook / "
+            "ok</strong>: answers correct under the stated rule, and answers that solve the textbook problem instead (equal to an "
+            "A3 TT member's answer, or on colouring and SAT any textbook solution), out of the ok answers. Under T and N the textbook answer is the correct one, so the two counts mostly "
+            "coincide; under I and I+R they are disjoint by construction, so a textbook answer there is the textbook-transfer "
+            "error.</p>"
+            '<p class="plain"><strong>Counts, not weights.</strong> One sample per item and about 20 items per framing; the '
+            "recovery gates pass for none of these units at 20 per cell except SAT (see Limits).</p>"
+            + "".join(blocks) + "</section>")
 
 
 def section_descriptive(d: Data) -> str:
@@ -921,8 +1066,9 @@ def section_limits(d: Data) -> str:
     shared = [m for m in d.runs if (m.get("cache_twin") or {}).get("cached")]
     n_cap = sum(f.at_cap for f in d.fits)
     n_near = sum(f.nearness for f in d.fits)
-    shows = ["<li><strong>Which fits reproduce three simple statistics of their data</strong>, and which do not "
-             f"({len(d.fits) - n_near} of {len(d.fits)} do, with ε below its cap).</li>",
+    shows = ["<li><strong>Which fits pass the predictive checks against their data</strong>, and which do not "
+             f"({len(d.fits) - n_near} of {len(d.fits)} do, with ε below its cap). A pass is weak support, and a single marginal "
+             "failure is weak evidence.</li>",
              "<li><strong>How often each model's wrong answers equal a member's wrong answer</strong>, on the gated units, against "
              "a within-cell permutation chance level where one exists.</li>",
              "<li><strong>Accuracy, validity and member-match counts</strong> on every unit and run.</li>"]
@@ -1010,7 +1156,9 @@ def section_reproduce(d: Data) -> str:
             "OMP_NUM_THREADS=1 python analysis/prelim_2026_11_18.py --runs-root data/runs --workers 6\n"
             "# 2. Rebuild this page from the JSON and docs/results/findings.html (seconds)\n"
             "python analysis/results_page.py\n"
-            "python analysis/results_page.py --check   # fails if the committed page differs (a test runs this)</code></pre>"
+            "python analysis/results_page.py --check   # fails if the committed page differs (a test runs this)\n"
+            "# 3. The checks behind the hand-written claims: near-optimality null, random-order chance, paired tests (seconds)\n"
+            "python analysis/findings_checks.py</code></pre>"
             f'<p>The JSON was computed at commit <code>{e(g.get("sha", "?"))}</code>'
             + (" with uncommitted changes to the code" if g.get("dirty_src") else " on a clean tree")
             + f', by <code>{e(d.r.get("command", "?"))}</code>, with Python {e(str(d.r.get("python", "?")))} and numpy '
@@ -1109,6 +1257,7 @@ code.hash{font-size:.75rem;word-break:break-all}
 .findings ol{padding-left:1.4rem}
 .findings li{margin:0 0 .9rem}
 .findings .not-yet{color:var(--ink-2);font-size:.9rem}
+.findings .summary{font-size:1.02rem;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--s1);border-radius:6px;padding:.75rem 1rem;max-width:none}
 .panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,30rem),1fr));gap:1rem}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.8rem .9rem;min-width:0}
 .panel.wide{margin:0 0 1rem}
@@ -1149,6 +1298,7 @@ svg.axis text{font-size:11px;fill:var(--muted);font-variant-numeric:tabular-nums
 .obs{fill:var(--ink);stroke:var(--surface);stroke-width:2}
 .obs.out{fill:var(--critical)}
 .out-word{color:var(--ink);font-weight:600;white-space:nowrap}
+.dag{font-weight:700;margin-left:1px}
 .out-word span{color:var(--critical)}
 .hit{fill:transparent}
 .sep{stroke:var(--surface);stroke-width:2}
@@ -1190,8 +1340,8 @@ def render(results: dict[str, Any], findings_html: str) -> str:
     d = Data(results)
     body = "".join([
         section_header(d), section_findings(findings_html), section_runs(d), section_accuracy(d), section_weights(d),
-        section_ppc(d), section_ea(d), section_distance(d), section_compare(d), section_descriptive(d), section_limits(d),
-        section_reproduce(d),
+        section_ppc(d), section_ea(d), section_distance(d), section_compare(d), section_textbook(d), section_descriptive(d),
+        section_limits(d), section_reproduce(d),
     ])
     return ("<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n"
             '<meta name="viewport" content="width=device-width, initial-scale=1">\n'

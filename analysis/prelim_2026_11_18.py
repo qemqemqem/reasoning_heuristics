@@ -125,18 +125,21 @@ NOT_FITTED = {
 
 SCHEMA = {
     "runs": "one entry per discovered run: run_id, label, item_set, model, condition, effort, reasoning, max_tokens, "
-            "providers_served, n_records, from_cache, spent_usd (API-reported), scorer, run and scorer git SHAs, scored_sha256, "
+            "providers_served, n_records, from_cache, spent_usd (API-reported, summed over every invocation of a resumed run), scorer, run and scorer git SHAs, scored_sha256, "
             "item_drift (per item file: the manifest's sha256 and the current file's)",
     "skipped_runs": "directories matching the run patterns that have no scored records yet (in progress)",
     "descriptive": "run_id -> unit -> categories, ok, correct, accuracy_of_ok, valid / valid_defined, members_matched and "
                    "sets_matched ([{members, answers, share_of_ok}], members matching the same answers merged), "
-                   "wrong_member_match, special_answers, token medians, truncated_by_cell",
+                   "wrong_member_match, special_answers, token medians, truncated_by_cell; A/H E5 units also by_framing "
+                   "(T, N, I, I+R, P -> n, ok, correct, textbook = ok answers equal to an A3 TT member's or in its solution set, textbook_wrong)",
     "fits": "unit -> run_id -> fit_unit's report (fit.weights: pi with percentile lo/hi, or 'not identified' with a range; "
             "eps, rho with intervals; identifiability; diagnostics; excluded; error_agreement and weight_lift with "
             "permutation baselines) plus bca ({group: [lo, hi]}), ea_counts, q_exact_chance_log10_max, near, reach, lumps, "
             "unit_facts, special_check, seed, item_set",
     "recovery_at_estimate": "unit -> run_id -> fake models planted at the fitted mixture: per-quantity truth, mean, bias, "
-                            "coverage and width (percentile and BCa), gate verdicts, and the simulated reach statistics",
+                            "coverage and width (percentile and BCa), gate verdicts, the simulated reach statistics, and "
+                            "distance_check: the data's shares of answers by distance to the nearest member against the fake "
+                            "data sets' (5-95% per bin; total variation from their mean, with a Monte Carlo p-value)",
     "gated_units": "item set -> the units fitted at that size; every other unit is descriptive only (not_fitted gives why)",
     "not_fitted": "item set -> unit -> why it is descriptive only there, from RECOVERY.md's verdicts; a dev entry also gives "
                   "the unit's status at larger sizes",
@@ -271,7 +274,7 @@ def run_meta(run: dict[str, Any]) -> dict[str, Any]:
             "system_prompt": m["condition"]["system_prompt"], "sampling": m["condition"]["sampling"],
             "providers_served": m.get("providers_served"), "provider_routing": m.get("provider_routing"),
             "status": m["status"], "n_items": m["items"]["n_items"], "n_records": len(recs),
-            "from_cache": sum(1 for r in recs if r.get("from_cache")), "spent_usd": m["spend"]["spent_usd"],
+            "from_cache": sum(1 for r in recs if r.get("from_cache")), "spent_usd": m.get("charged_usd_all_invocations", m["spend"]["spent_usd"]),
             "max_pre_answer_tokens": max((r.get("pre_answer_tokens") or 0 for r in recs), default=0),
             "pre_answer_over_20": sum(1 for r in recs if (r.get("pre_answer_tokens") or 0) > 20),
             "run_git_sha": m["git"]["sha"], "scorer_version": run["scoring"]["scorer_version"],
@@ -335,7 +338,29 @@ def describe(run: dict[str, Any], item_set: dict[str, Any]) -> dict[str, Any]:
             "pre_answer_over_20": sum(1 for r in recs if (r.get("pre_answer_tokens") or 0) > 20),
             "scorer_git_sha": sorted({r["scorer_git_sha"] for r in recs}),
         }
+        if name.startswith("AH_E5/"):
+            out[name]["by_framing"] = by_framing(recs)
     return out
+
+
+def by_framing(recs: list[dict[str, Any]]) -> dict[str, dict[str, int]]:
+    """A/H E5 per framing (the cell after the slash: T, N, I, I+R, P): responses, ok answers, correct ones (under the
+    stated rule), and ok answers equal to a textbook-transfer member's answer (A3 TT...: the textbook problem's answer, or
+    on colouring and SAT any of its solutions).
+    Under T and N the textbook answer is the correct one; under I and I+R the two are disjoint by construction."""
+    out: dict[str, Counter] = defaultdict(Counter)
+    for r in recs:
+        c = out[r["cell"].split("/", 1)[1]]
+        c["n"] += 1
+        if r["category"] != "ok":
+            continue
+        # a set-valued TT member (A3 TT[exact] on colouring and SAT: every textbook solution) matches through sets_matched
+        tt = any(m.startswith("A3") for m in (r.get("members_matched") or []) + (r.get("sets_matched") or []))
+        c["ok"] += 1
+        c["correct"] += bool(r["correct"])
+        c["textbook"] += tt
+        c["textbook_wrong"] += tt and r["correct"] is False
+    return {f: {k: c[k] for k in ("n", "ok", "correct", "textbook", "textbook_wrong")} for f, c in sorted(out.items())}
 
 
 # =============================================================================================
@@ -388,22 +413,25 @@ def special_check(um: UnitModel) -> dict[str, Any]:
             "dist_members_with_special_mass": dict(dist), "n_items": len(um.items)}
 
 
-def set_distance(space: Any, y: str, sol: Any) -> int:
+def set_distance(space: Any, y: str, sol: Any, bound: int | None = None) -> int:
     """Exact distance from answer y to the nearest member of a solution set (`space.distance` on the
     best one). Bit spaces: Hamming distance, vectorised. Partitions: a lower bound for every
     solution first (n minus the best overlap of each of y's blocks, injectivity dropped), then the
-    exact distance on solutions in lower-bound order until the bound exceeds the best found."""
+    exact distance on solutions in lower-bound order until the bound exceeds the best found.
+    With `bound` (a distance already found elsewhere), the result is min(bound, that distance), and
+    the search stops as soon as the lower bound reaches it."""
     S = sol.array(space)
     vy = space.parse(y)
     if S.dtype == bool:
-        return int((S != vy[None, :]).sum(1).min())
+        d = int((S != vy[None, :]).sum(1).min())
+        return d if bound is None else min(bound, d)
     keys = sol.keys()
     by = int(vy.max()) + 1
     C = int(S.max()) + 1
     flat = (np.arange(len(S))[:, None] * (by * C) + vy[None, :] * C + S).ravel()
     O = np.bincount(flat, minlength=len(S) * by * C).reshape(len(S), by, C)
     lb = space.n - O.max(2).sum(1)
-    best = None
+    best = bound
     for k in np.argsort(lb, kind="stable"):
         if best is not None and lb[k] >= best:
             break
@@ -412,9 +440,13 @@ def set_distance(space: Any, y: str, sol: Any) -> int:
     return int(best)
 
 
+NEAR_BINS = ("0", "1", "2", "3", "4-6", ">6", "special token", "no member")
+
+
 def nearest_distances(um: UnitModel, obs: list) -> dict[str, Any]:
     """For each answer: the distance to the nearest deterministic or set-valued member (vertices
-    recoloured up to renaming, variables flipped, items toggled)."""
+    recoloured up to renaming, variables flipped, items toggled). The deterministic members go
+    first: their best distance bounds the search of each solution set, and a 0 skips it."""
     bins = Counter()
     sizes = []
     for ob in obs:
@@ -424,16 +456,19 @@ def nearest_distances(um: UnitModel, obs: list) -> dict[str, Any]:
             bins["special token"] += 1
             continue
         best = None
+        sols = []
         for g in um.columns:
             p = um.pred(i, g.members[0])
             if p.kind == "det" and not im.space.is_special(p.key):
                 d = im.space.distance(y, p.key)
+                best = d if best is None else min(best, d)
             elif p.kind == "set":
                 sizes.append(p.sol.size)
-                d = set_distance(im.space, y, p.sol)
-            else:
-                continue
-            best = d if best is None else min(best, d)
+                sols.append(p.sol)
+        for sol in sols:
+            if best == 0:
+                break
+            best = set_distance(im.space, y, sol, bound=best)
         if best is None:
             bins["no member"] += 1
         elif best <= 3:
@@ -583,12 +618,40 @@ def recovery_job(args: tuple) -> dict[str, Any]:
         res = fit(T, n_boot=n_boot, rng=rng, jackknife=True)
         blo, bhi = bca_interval(res.boot, res.pi, res.jack)
         out.append({"pi": res.pi.tolist(), "lo": res.lo.tolist(), "hi": res.hi.tolist(), "bca_lo": blo.tolist(),
-                    "bca_hi": bhi.tolist(), "eps": res.eps, "rho": res.rho, "reach": reach_stats(um, sim, T)})
+                    "bca_hi": bhi.tolist(), "eps": res.eps, "rho": res.rho, "reach": reach_stats(um, sim, T),
+                    "near": near_shares(um, sim)})
     return {"unit": name, "run_id": run_id, "chunk": chunk, "truth": truth.tolist(), "labels": [g.name for g in um.columns] + [UNEXPLAINED],
             "replicates": out}
 
 
-def summarise_recovery(chunks: list[dict[str, Any]]) -> dict[str, Any]:
+def near_shares(um: UnitModel, obs: list) -> list[float]:
+    """The share of answers in each NEAR_BINS bin of distance to the nearest member."""
+    nb = nearest_distances(um, obs)
+    return [nb["bins"].get(b, 0) / max(nb["n"], 1) for b in NEAR_BINS]
+
+
+def distance_check(observed: dict[str, Any], sims: np.ndarray) -> dict[str, Any]:
+    """Does the fitted model reproduce the data's profile of distances to the nearest member?
+
+    `observed` is a fit's `near` entry; `sims` holds the same shares (NEAR_BINS order) for each fake
+    data set drawn from the fitted mixture. The discrepancy is the total variation distance between
+    a data set's shares and the fake data sets' mean shares; p is the share of fake data sets at
+    least as far from that mean as the real data (with the +1 of a Monte Carlo p-value). The fake
+    data come from parameters fitted to the real data, so the check is conservative: the real data
+    sit closer to the mean than a fresh data set would. With 100 fake data sets and four checks per fit,
+    a single p near 0.05 is weak evidence of misfit."""
+    o = np.array([observed["bins"].get(b, 0) / max(observed["n"], 1) for b in NEAR_BINS])
+    m = sims.mean(0)
+    tv_obs = 0.5 * float(np.abs(o - m).sum())
+    tv_sim = 0.5 * np.abs(sims - m[None, :]).sum(1)
+    return {"bins": list(NEAR_BINS), "observed": dict(zip(NEAR_BINS, map(float, o))), "mean": dict(zip(NEAR_BINS, map(float, m))),
+            "p05_p95": {b: [float(np.percentile(sims[:, j], 5)), float(np.percentile(sims[:, j], 95))] for j, b in enumerate(NEAR_BINS)},
+            "tv_observed": tv_obs, "tv_simulated_mean": float(tv_sim.mean()),
+            "tv_simulated_p05_p95": [float(np.percentile(tv_sim, 5)), float(np.percentile(tv_sim, 95))],
+            "p_value": (1 + int((tv_sim >= tv_obs - 1e-12).sum())) / (1 + len(tv_sim))}
+
+
+def summarise_recovery(chunks: list[dict[str, Any]], observed_near: dict[str, Any] | None = None) -> dict[str, Any]:
     labels, truth = chunks[0]["labels"], np.array(chunks[0]["truth"])
     reps = [r for c in sorted(chunks, key=lambda c: c["chunk"]) for r in c["replicates"]]
     pi = np.array([r["pi"] for r in reps])
@@ -617,7 +680,10 @@ def summarise_recovery(chunks: list[dict[str, Any]]) -> dict[str, Any]:
                             "worst_coverage_quantity": labels[min(planted, key=lambda j: cov[j])],
                             "median_width": bm["planted_median_width"]}
     pv = verdicts["percentile"]
-    return {"replicates": len(reps), "quantities": q,
+    extra = {}
+    if observed_near is not None and all("near" in r for r in reps):
+        extra["distance_check"] = distance_check(observed_near, np.array([r["near"] for r in reps]))
+    return {**extra, "replicates": len(reps), "quantities": q,
             "max_abs_bias": max(abs(v["bias"]) for v in q.values()),
             "worst_bias_quantity": max(q, key=lambda k: abs(q[k]["bias"])),
             "min_coverage": pv["min_coverage"], "worst_coverage_quantity": pv["worst_coverage_quantity"],
@@ -834,9 +900,17 @@ def ppc_table(fits_by_unit: dict[str, dict[str, dict[str, Any]]], rec: dict[str,
                 lo, hi = sim[k]["p05_p95"]
                 flag = "" if lo - 1e-9 <= obs[k] <= hi + 1e-9 else " **outside**"
                 cells.append(f"{obs[k]:.2f} vs {sim[k]['mean']:.2f} [{lo:.2f}, {hi:.2f}]{flag}")
+            dc = rec[name][rid].get("distance_check")
+            if dc:
+                lo, hi = dc["tv_simulated_p05_p95"]
+                cells.append(f"{dc['tv_observed']:.2f} vs {dc['tv_simulated_mean']:.2f} [{lo:.2f}, {hi:.2f}]; "
+                             f"p = {dc['p_value']:.3g}" + (" **misfit**" if dc["p_value"] < 0.05 else ""))
+            else:
+                cells.append("–")
             rows.append([name, lab] + cells)
     return md_table(["Unit", "Run", "Answers equal to a member's answer: observed vs fitted model [5–95%]",
-                     "Answers beyond every member's slip reach", "Special-token answers (UNSAT)"], rows)
+                     "Answers beyond every member's slip reach", "Special-token answers (UNSAT)",
+                     "Distance profile: total variation from the fitted model's mean, observed vs fake data [5–95%]"], rows)
 
 
 def recovery_detail_table(rec: dict[str, dict[str, dict[str, Any]]]) -> str:
@@ -1056,7 +1130,7 @@ def main(argv: list[str] | None = None) -> int:
         by_fit[(c["unit"], c["run_id"])].append(c)
     recovery: dict[str, dict[str, Any]] = defaultdict(dict)
     for (name, rid), cs in by_fit.items():
-        recovery[name][rid] = {**summarise_recovery(cs), "planted": planted_by[(name, rid)]}
+        recovery[name][rid] = {**summarise_recovery(cs, fits[name][rid]["near"]), "planted": planted_by[(name, rid)]}
 
     results = {
         "description": "Preliminary results 2026-11-18 (dev split); see docs/results/2026-11-18-preliminary.md",

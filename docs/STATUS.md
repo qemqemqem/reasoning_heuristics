@@ -1,10 +1,10 @@
 # Status
 
-*Current state of the work as of 2026-11-17 (evening). Update this file when a stage finishes or a decision is made.*
+*Current state of the work as of 2026-11-18 (morning). Update this file when a stage finishes or a decision is made.*
 
 ## Summary
 
-The design work and the first stage of question generators are finished. No model has been run yet: **$0 of inference is spent.**
+The design work, the first stage of generators, the identification engine and the first model runs are done. **Preliminary results are in: [results page](results/2026-11-18-results.html)** (dev split, one sample per item, not pre-registered). About $24 of the $40 budget for 2026-11-17/18 is spent.
 
 - We have:
   - a literature review;
@@ -16,7 +16,8 @@ The design work and the first stage of question generators are finished. No mode
 - The Stage 1 item sets were regenerated after the review fixes (#16): 266 smoke and 1,330 dev items across ten evals. All of them pass automatic validation, with no leakage and no hash collisions. CI checks that the committed sets reproduce.
 - **A project review on 2026-11-17 found real defects** ([reviews/2026-11-17-project-review.md](reviews/2026-11-17-project-review.md)). Ground truth was right on every item. But several zoo members collapsed into trivial ones, the per-item likelihood tables credited the exact solver with invalid answers, item identity had gaps, and B4/C4 E1 didn't reproduce. The fixes have merged (#7, #12, #13, #14), and every item set was regenerated with them (#16). What is still open is listed in the review, under [Open after the fixes](reviews/2026-11-17-project-review.md#open-after-the-fixes).
 - **Don't mark the review page yet.** It still shows the pre-fix items, so it is stale until it is rebuilt from the regenerated sets. It also needs a home other than claude.ai.
-- The runner and scorer are built (#8). The identification engine and recovery harness are in progress. Smoke runs on OpenRouter have started, within the $40 budget set on 2026-11-17.
+- The runner and scorer are built (#8; scorer-1.5.1 since #32). The identification engine and the recovery harness are built (#17, #24, #27): mixture weights are reported only where fake-model recovery passes, which on the regenerated items means a few units at 20 or 40 items per cell ([RECOVERY.md](RECOVERY.md)).
+- Runs (#18–#31): dev items (5 per cell) for every model and condition, and pilot items (20 and 40 per cell, `data/items/pc20`, `pc40`) on the gated units, for Qwen3-14B and Qwen3-32B (thinking off, and thinking at high effort) and gpt-oss-20b and gpt-oss-120b (low effort; dev also at high effort). gpt-oss-20b at high effort on dev is still retrying calls the provider rate-limited.
 
 ## Where each part stands
 
@@ -34,14 +35,25 @@ The design work and the first stage of question generators are finished. No mode
 | Stage 1 generators | Built: A/H E1, E2, E5, E8; C E1, E2, E3, E5; B4/C4 E1, E2. **Regenerated after the review fixes (#16):** 266 smoke and 1,330 dev items (3.3 MB of `.jsonl.gz`), all passing validation, every designed cell filled, no dev-to-test leakage, no hash collisions. The sets reproduce byte for byte (checked under four hash seeds), and CI's `reproduce-items` job checks that on every PR. A few lower-priority cells aren't built (listed in GENERATORS.md) | `src/reasoning_heuristics/generators/`, `data/items/`, [review/summary.md](../review/summary.md) |
 | Manual review of items | Page is live, no marks yet. **Stale:** it shows the pre-fix items. Rebuild it from the regenerated sets, and give it a home other than claude.ai, before marking | [Review page](https://claude.ai/artifact/AEidKBQZisLzHB8BudFtb1), `scripts/review_page/` |
 | Runner (OpenRouter client, cache, cost guard, manifests) and scorer | Built and tested with the HTTP layer mocked: thin custom runner, thinking and direct conditions, one versioned scorer. No batch endpoint yet; E8 continuations not built | [RUNNER.md](RUNNER.md), `src/reasoning_heuristics/evals/` |
-| Identification engine (mixture fit with a slip model) | In progress (branch `identify`) | SCOPE §4 item 4 |
-| Recovery harness (fake models with planted mixtures) | In progress (branch `identify`). The C and cross-formalism designs ran their own recovery simulations | SCOPE §4 item 5, `scripts/cross_formalism/recovery_sim.py` |
+| Identification engine (mixture fit with a slip model) | Built: cluster bootstrap with percentile and BCa intervals, permutation baselines, error agreement (#17, #24) | `src/reasoning_heuristics/identify/` |
+| Recovery harness (fake models with planted mixtures) | Built and run on every unit at 5, 10, 20 and 40 items per cell (#24, #27). The gates pass, with both nulls, only on C E2 colouring and A/H E5 SAT at 20 and 40, and on A/H E5 colouring and C E5 SAT with a given state at 40; knapsack's mixture passes at 20 and 40 | [RECOVERY.md](RECOVERY.md) |
 | Trace pipeline (codebook, parsers, LLM coder, faithfulness probes) | Not started. The E8 specs for faithfulness probes exist | SCOPE §4 item 6 |
 | Stage 2 generators (B1/G, D/F, E, cross-formalism) | Not started. The cross-formalism vertical has a working library builder | SCOPE §5, `scripts/cross_formalism/` |
-| Model runs | Provider probes and smoke runs in progress on the pre-fix items (gpt-oss-20b thinking; Qwen3-32B thinking and direct), at most $3. Dev runs wait for the regenerated items, which land with #16. Budget: up to $40 on 2026-11-17 | `data/runs/`, `data/runs/LEDGER.md` |
+| Model runs | Smoke, dev and pilot runs done for gpt-oss-20b, gpt-oss-120b, Qwen3-14B and Qwen3-32B (#15, #18–#31); every run re-scored with scorer-1.5.1 (#32). About $24 spent | `data/runs/`, `data/runs/LEDGER.md` |
+| Analysis and results page | Fits, predictive checks (including a distance-profile check), error agreement against permutation chance, descriptive counts, and a self-contained HTML page with hand-written claims | `analysis/prelim_2026_11_18.py`, `analysis/results_page.py`, [results page](results/2026-11-18-results.html), [findings](results/findings.html) |
 | Phase 2 (mechanistic interpretability) | Gated on behavioural evidence | SCOPE §8 |
 
-## What we've learned so far, before any data
+## What the first data say (2026-11-18, preliminary)
+
+The [results page](results/2026-11-18-results.html) has the numbers, intervals, chance levels and strength labels. In brief:
+
+- **Some errors carry greedy signatures.** On colouring, a wrong colouring that equals any member's is usually first fit in the listed vertex order (40–99 per run, against about 1 from a random-order first fit). On knapsack, gpt-oss's wrong packings often equal a greedy rule's, but mostly because they are near-optimal; the part specific to greedy is modest.
+- **The thinking condition matters most.** Qwen3 is correct far more often in the thinking condition than in the direct one, which also differs in token cap, system prompt and sampling, and its wrong colourings are often listing-order first fit's. That fits the priors' "truncated exact search, seeded by greedy", though answers alone cannot show the search.
+- **The mixture model rarely fits.** Of 24 fits, 14 have the slip rate at its cap, and only 4, all near ceiling, pass every predictive check (6 without a check added after seeing the data). The near-miss noise model is the weak link (see Open decisions).
+- **False impossibility.** gpt-oss and Qwen3 in the thinking condition often call 3-colourable graphs impossible (C E5), and gpt-oss-20b at low effort often calls satisfiable formulas UNSAT. The give-ups are as common on control items, where list-order greedy succeeds, as on the items where it gets stuck.
+- **Textbook transfer.** Under a redefined connective (A/H E5 entailment), gpt-oss-120b at low effort mostly answers the textbook problem; a reworded restatement just before the question fixes most of it (retention or clearer wording; not yet separated).
+
+## What we learned before any data
 
 - **Thinking and direct answering should use different heuristics.**
   - Direct answers favour short, shallow programs: defaults, the density cue, a few rounds of unit propagation, one-shot scoring.
@@ -67,8 +79,8 @@ The design work and the first stage of question generators are finished. No mode
 1. ~~Land the review fixes, then regenerate every item set and add a CI check that the committed sets reproduce.~~ Done: the fixes in #7, #12, #13 and #14; the regeneration and the CI check in #16.
 2. **Review the items.** Rebuild the review page from the regenerated items, then mark the 50 items keep, fix or drop. The marks become generator changes, not edits to single items.
 3. ~~Build the runner.~~ Done (#8): a thin custom OpenRouter runner, as SCOPE §4 specifies, with thinking and direct conditions and one versioned scorer.
-4. **Build the identification engine and recovery harness** (in progress). Pass the recovery gates on fake models (free): |bias| ≤ 0.05, 95% coverage ≥ 0.9, median interval width ≤ 0.2.
-5. **First runs.** Smoke (in progress), then dev on gpt-oss-20b, Qwen3-32B and Qwen3-14B (thinking and direct) and gpt-oss-120b, within the budget. Then calibrate sizes so the hardest cell scores 40–80%, and freeze.
+4. ~~Build the identification engine and recovery harness.~~ Done (#17, #24, #27); see RECOVERY.md for where the gates pass.
+5. ~~First runs.~~ Done: smoke, dev and pilot runs (#15, #18–#31), with preliminary results (#28, #29 and the results page). Still to do: calibrate sizes so the hardest cell scores 40–80%, and freeze. Decide the noise model first (Open decisions).
 6. **Pilot and power analysis**, then the Stage 2 generators (SCOPE §5).
 
 ## Open decisions
@@ -77,6 +89,12 @@ The design work and the first stage of question generators are finished. No mode
   - Phase 1 stays mostly on thinking models, with a cheap direct-answer (thinking off) arm on every eval ([decision](decisions/2026-11-17-direct-answer-arm.md)).
   - The runner is a thin custom one (DESIGN §9 question 5).
   - Agents open and merge PRs regularly ([RULES.md](../RULES.md)).
+- **From the 2026-11-18 results:**
+  - **The noise model.** Most fits put the slip rate at its cap: answers miss the members in ways the near-miss model with a uniform q cannot produce (on knapsack, more two-item swaps than one-item slips; with thinking, more exact matches and fewer far answers than predicted). The options are a validity-aware q, a richer error model, or per-member ε. Each departs from SCOPE §6 rule 3.
+  - **Boundary-aware intervals.** Percentile and BCa intervals under-cover at the edge of the simplex (π₀ = 1 on knapsack); about a day's work.
+  - **gpt-oss's 32k-token cap** truncates up to 95% of gpt-oss-120b's high-effort responses on some dev units. Raise it, or calibrate item sizes to it.
+  - **Repeat samples.** Every count is one sample per item; DESIGN §5 rule 8 asks for repeats.
+  - **Where the results page lives** (it is a repo file for now).
 - **From the 2026-11-17 review** (its "Design questions" section):
   - selection filters that depend on one member's behaviour vs SCOPE §6 rule 6;
   - where the rebuilt review page lives;

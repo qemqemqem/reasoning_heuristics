@@ -2,6 +2,11 @@
 
 *Dev split, one sample per item, two cheap conditions. This is not the pre-registered study, and nothing here tests a hypothesis of DESIGN §4.*
 
+> **Update (2026-11-18, later the same day).** This doc is kept as written for its five pinned runs, with three corrections. The current claims, over every run, are on the [results page](2026-11-18-results.html) and in [findings.html](findings.html).
+> 1. **No fit here reproduces its data.** A distance-profile predictive check, added after these results, finds that gpt-oss-20b's knapsack fit also misses its data (p = 0.0099). Its wrong packings are one-for-one swaps more often than the slip model allows. The check is the last column of the table in §3.5.
+> 2. **Near-optimality explains much of the knapsack greedy agreement.** A null that keeps the model's spread over value ranks predicts 46 of gpt-oss-20b's 57 greedy matches (`analysis/findings_checks.py`).
+> 3. **C E2 colouring has a structure-matched chance level after all.** A random-order first fit (the stored RO-FF distribution) gives FF-LIST's wrong colouring on about 1 item, against gpt-oss-20b's 40.
+
 Every table between `<!-- BEGIN prelim:… -->` markers is written by one command (DESIGN §5 rule 6), from the committed item sets and the committed runs:
 
 ```bash
@@ -24,7 +29,7 @@ python analysis/prelim_2026_11_18.py --render-only --check                      
   - on A/H E5 SAT, they predict UNSAT on 47% and 43% of items; the data have 3% and 27%.
 
   Read these fits' weights as "whose answers the model's answers are near", not as procedures the model runs.
-- **The one fit whose model reproduces its data is gpt-oss-20b on C E2 knapsack.**
+- **The one fit whose model passed the three checks used here was gpt-oss-20b on C E2 knapsack.** It fails the later distance-profile check (see the update above).
   - 158 of 300 answers are optimal, and EXACT's weight is 0.616 [0.535, 0.688].
   - When it errs, its answer is often a greedy rule's: 57 of 142 wrong answers equal one exactly. The weights on RATIO-SKIP (0.136), VALUE (0.115) and DIFF (0.096) each lie far above their permutation chance levels (0.005–0.008; p = 0.0005, the smallest possible with 2,000 permutations).
   - Its fitted model reproduces the data: 72% of answers equal a member's answer, and the model predicts 72%. Fake data planted at its estimate are recovered with |bias| ≤ 0.007 and coverage 0.89–0.96 (BCa 0.91–0.96).
@@ -39,11 +44,11 @@ python analysis/prelim_2026_11_18.py --render-only --check                      
 <!-- BEGIN prelim:runs -->
 | Run | Model | Condition | max_tokens | Served by | Responses | From the response cache | Visible working: max pre_answer_tokens | API cost | Scorer | Item files changed since the run |
 |---|---|---|---|---|---|---|---|---|---|---|
-| `2026-11-18-pc20-qwen3-32b-direct` | qwen/qwen3-32b | direct | 1,024 | DeepInfra (1380) | 1380 | 160 (160 are the dev run's own responses) | 4 (0 over 20) | $0.0702 | scorer-1.5.0 | C_E1, C_E2 |
-| `2026-11-18-pc20-gpt-oss-20b-thinking-low` | openai/gpt-oss-20b | thinking-low | 32,768 | DekaLLM (1380) | 1380 | 160 (160 are the dev run's own responses) | 140 (1 over 20) | $0.2330 | scorer-1.5.0 | C_E1, C_E2 |
-| `2026-11-18-dev-qwen3-32b-direct` | qwen/qwen3-32b | direct | 1,024 | DeepInfra (1270) | 1270 | 0 | 1129 (8 over 20) | $0.0986 | scorer-1.5.0 | C_E1, C_E2 |
-| `2026-11-18-dev-qwen3-14b-direct` | qwen/qwen3-14b | direct | 1,024 | DeepInfra (1270) | 1270 | 0 | 1025 (10 over 20) | $0.1266 | scorer-1.5.0 | C_E1, C_E2 |
-| `2026-11-18-dev-gpt-oss-20b-thinking-low` | openai/gpt-oss-20b | thinking-low | 32,768 | DekaLLM (1270) | 1270 | 0 | 567 (81 over 20) | $0.1710 | scorer-1.5.0 | C_E1, C_E2 |
+| `2026-11-18-pc20-qwen3-32b-direct` | qwen/qwen3-32b | direct | 1,024 | DeepInfra (1380) | 1380 | 160 (160 are the dev run's own responses) | 4 (0 over 20) | $0.0702 | scorer-1.5.1 | C_E1, C_E2 |
+| `2026-11-18-pc20-gpt-oss-20b-thinking-low` | openai/gpt-oss-20b | thinking-low | 32,768 | DekaLLM (1380) | 1380 | 160 (160 are the dev run's own responses) | 140 (1 over 20) | $0.2330 | scorer-1.5.1 | C_E1, C_E2 |
+| `2026-11-18-dev-qwen3-32b-direct` | qwen/qwen3-32b | direct | 1,024 | DeepInfra (1270) | 1270 | 0 | 1129 (8 over 20) | $0.0986 | scorer-1.5.1 | C_E1, C_E2 |
+| `2026-11-18-dev-qwen3-14b-direct` | qwen/qwen3-14b | direct | 1,024 | DeepInfra (1270) | 1270 | 0 | 1025 (10 over 20) | $0.1266 | scorer-1.5.1 | C_E1, C_E2 |
+| `2026-11-18-dev-gpt-oss-20b-thinking-low` | openai/gpt-oss-20b | thinking-low | 32,768 | DekaLLM (1270) | 1270 | 0 | 567 (81 over 20) | $0.1710 | scorer-1.5.1 | C_E1, C_E2 |
 <!-- END prelim:runs -->
 
 - **Pilot size, 20 items per design cell**, on [data/items/pc20/](../../data/items/pc20/): C E2 (800 items), A/H E5 (340) and C E1 (240). These are dev-split items: same tier and seed as `data/items/dev`, more items per cell.
@@ -86,7 +91,7 @@ DESIGN §5 rule 12 allows mixture weights only for units and item sizes where th
 - **What the gates test.** Each uses one planted triple per unit (FF-LABEL / DPLL-LIST / EXACT; DIFF / RATIO-SKIP / EXACT; C0 POLARITY / C1 GREEDY / A3 TT[exact]), with slips at ε = 0.1 and ρ = 0.3, plus the two nulls. They do not test weight planted on other members, or the slip rates the real data produce. §3.5 checks both at the fitted estimates.
 - **The special-token fix of #24 does not touch these units.** That fix stops deterministic predictions of UNSAT, IMPOSSIBLE or X from slipping, and it applies only where some member makes such a prediction. On the three fitted units, no member predicts a special token on any item: not as a deterministic answer, and not as mass in a stored distribution (last column above; last row of each identifiability table). The colouring (fewest colours) and knapsack answer spaces have no special token at all. A/H E5 SAT's has UNSAT, but only q gives it mass. RECOVERY.md reports that A/H E5 SAT, rerun as a control, reproduces its results exactly, and the point estimates here are the same before and after the merge ([audit](#audit)).
 - **Four other pc20 units do have such members**: A/H E5 colouring and entailment, and C E1 and C E2 SAT. Under the strict rule, C E1 SAT and A/H E5 entailment still fail after the fix, so they stay descriptive.
-- **A fourth gated unit, for later runs.** The script also fits C E5 SAT with a given partial assignment on 40-per-cell runs, where its mixture and both nulls pass (RECOVERY.md). There, GUC-DET and SC-DET from state are tied on every item, so the engine gives them one weight. The script stops if that tie ever breaks, because the gate covers only their sum. No 40-per-cell run is on main yet, so this doc has no such fit.
+- **A fourth gated unit, for later runs.** The script also fits C E5 SAT with a given partial assignment on 40-per-cell runs, where its mixture and both nulls pass (RECOVERY.md). There, GUC-DET and SC-DET from state are tied on every item, so the engine gives them one weight. The script stops if that tie ever breaks, because the gate covers only their sum. This doc's tables cover only the five pc20 runs it pins, so it has no such fit; the 40-per-cell fits are on the [results page](2026-11-18-results.html).
 
 **Dev-size runs (5 per cell): descriptive only.** No unit passes the gates at the committed dev size (RECOVERY.md, Bottom line). Some also fail for reasons that more items will not fix:
 
@@ -295,14 +300,14 @@ The Stage 0 gates were run at one operating point (a 0.6 / 0.3 / 0.1 triple, ε 
 **Does the fitted model reproduce the data?** Three statistics of the real answers, against the same statistics of the fake data sets (mean, and 5th–95th percentile over the 100). "Outside" marks an observed value outside that range.
 
 <!-- BEGIN prelim:ppc -->
-| Unit | Run | Answers equal to a member's answer: observed vs fitted model [5–95%] | Answers beyond every member's slip reach | Special-token answers (UNSAT) |
-|---|---|---|---|---|
-| C_E2/colouring | Qwen3-32B direct | 0.00 vs 0.33 [0.29, 0.38] **outside** | 0.33 vs 0.34 [0.29, 0.38] | 0.00 vs 0.00 [0.00, 0.00] |
-| C_E2/colouring | gpt-oss-20b thinking-low | 0.28 vs 0.39 [0.35, 0.43] **outside** | 0.10 vs 0.12 [0.09, 0.15] | 0.00 vs 0.00 [0.00, 0.00] |
-| C_E2/knapsack | Qwen3-32B direct | 0.08 vs 0.46 [0.41, 0.51] **outside** | 0.00 vs 0.00 [0.00, 0.00] | 0.00 vs 0.00 [0.00, 0.00] |
-| C_E2/knapsack | gpt-oss-20b thinking-low | 0.72 vs 0.72 [0.69, 0.75] | 0.00 vs 0.00 [0.00, 0.00] | 0.00 vs 0.00 [0.00, 0.00] |
-| AH_E5/SAT | Qwen3-32B direct | 0.00 vs 0.02 [0.00, 0.05] | 0.27 vs 0.55 [0.46, 0.62] **outside** | 0.03 vs 0.47 [0.38, 0.55] **outside** |
-| AH_E5/SAT | gpt-oss-20b thinking-low | 0.00 vs 0.07 [0.03, 0.10] **outside** | 0.32 vs 0.50 [0.42, 0.58] **outside** | 0.27 vs 0.43 [0.34, 0.52] **outside** |
+| Unit | Run | Answers equal to a member's answer: observed vs fitted model [5–95%] | Answers beyond every member's slip reach | Special-token answers (UNSAT) | Distance profile: total variation from the fitted model's mean, observed vs fake data [5–95%] |
+|---|---|---|---|---|---|
+| C_E2/colouring | Qwen3-32B direct | 0.00 vs 0.33 [0.29, 0.38] **outside** | 0.33 vs 0.34 [0.29, 0.38] | 0.00 vs 0.00 [0.00, 0.00] | 0.45 vs 0.05 [0.02, 0.08]; p = 0.0099 **misfit** |
+| C_E2/colouring | gpt-oss-20b thinking-low | 0.28 vs 0.39 [0.35, 0.43] **outside** | 0.10 vs 0.12 [0.09, 0.15] | 0.00 vs 0.00 [0.00, 0.00] | 0.14 vs 0.05 [0.02, 0.08]; p = 0.0099 **misfit** |
+| C_E2/knapsack | Qwen3-32B direct | 0.08 vs 0.46 [0.41, 0.51] **outside** | 0.00 vs 0.00 [0.00, 0.00] | 0.00 vs 0.00 [0.00, 0.00] | 0.41 vs 0.04 [0.02, 0.08]; p = 0.0099 **misfit** |
+| C_E2/knapsack | gpt-oss-20b thinking-low | 0.72 vs 0.72 [0.69, 0.75] | 0.00 vs 0.00 [0.00, 0.00] | 0.00 vs 0.00 [0.00, 0.00] | 0.07 vs 0.03 [0.01, 0.05]; p = 0.0099 **misfit** |
+| AH_E5/SAT | Qwen3-32B direct | 0.00 vs 0.02 [0.00, 0.05] | 0.27 vs 0.55 [0.46, 0.62] **outside** | 0.03 vs 0.47 [0.38, 0.55] **outside** | 0.46 vs 0.08 [0.03, 0.13]; p = 0.0099 **misfit** |
+| AH_E5/SAT | gpt-oss-20b thinking-low | 0.00 vs 0.07 [0.03, 0.10] **outside** | 0.32 vs 0.50 [0.42, 0.58] **outside** | 0.27 vs 0.43 [0.34, 0.52] **outside** | 0.25 vs 0.09 [0.05, 0.14]; p = 0.0099 **misfit** |
 <!-- END prelim:ppc -->
 
 **Reading the two checks.**
@@ -522,12 +527,12 @@ These are counts, not mixture weights. On a unit that is not fitted they say whi
 | AH_E5/KNAP | gpt-oss-20b thinking-low | 80 | 80 | – | 60/80 (75%) | 74/80 (92%) | 55/80 (69%) | 1/20 (5%) | exact 50; C1 RATIO-SKIP 31; A3 TT[exact] 27 | exact 10; A3 TT[exact] 4 | – | 1,157 / 1,178 |
 | AH_E5/SAT (fitted) | Qwen3-32B direct | 100 | 95 | parse_fail 5 | 0/95 (0%) | 0/92 (0%) | 0/95 (0%) | 0/95 (0%) | – | – | UNSAT 3 | 0 / 29 |
 | AH_E5/SAT (fitted) | gpt-oss-20b thinking-low | 100 | 97 | parse_fail 3 | 0/97 (0%) | 0/71 (0%) | 0/97 (0%) | 0/97 (0%) | – | – | UNSAT 26 | 2,140 / 2,164 |
-| C_E1/3-SAT | Qwen3-32B direct | 120 | 116 | parse_fail 3, truncated 1 | 6/116 (5%) | 6/101 (6%) | 13/116 (11%) | 12/110 (11%) | UC-DET (C2) 12; GUC-DET (C2) 6; GREEDY-OUT (AR) 1 | EXACT 6 | UNSAT 15 | 0 / 103 |
-| C_E1/3-SAT | gpt-oss-20b thinking-low | 120 | 110 | parse_fail 8, partial 2 | 7/110 (6%) | 7/57 (12%) | 46/110 (42%) | 46/103 (45%) | UC-DET (C2) 40; GUC-DET (C2) 27; GREEDY-OUT (AR) 4 | EXACT 7 | UNSAT 53 | 386 / 486 |
+| C_E1/3-SAT | Qwen3-32B direct | 120 | 116 | parse_fail 3, truncated 1 | 6/116 (5%) | 6/101 (6%) | 16/116 (14%) | 15/110 (14%) | ALWAYS-UNSAT (A1 give-up) 15; UC-DET (C2) 12; GUC-DET (C2) 6 | EXACT 6 | UNSAT 15 | 0 / 103 |
+| C_E1/3-SAT | gpt-oss-20b thinking-low | 120 | 110 | parse_fail 8, partial 2 | 7/110 (6%) | 7/57 (12%) | 53/110 (48%) | 53/103 (51%) | ALWAYS-UNSAT (A1 give-up) 53; UC-DET (C2) 40; GUC-DET (C2) 27 | EXACT 7 | UNSAT 53 | 386 / 486 |
 | C_E1/colouring | Qwen3-32B direct | 120 | 120 | – | 1/120 (1%) | 1/120 (1%) | 0/120 (0%) | 0/119 (0%) | – | EXACT 1 | – | 0 / 116 |
 | C_E1/colouring | gpt-oss-20b thinking-low | 120 | 118 | parse_fail 2 | 66/118 (56%) | 104/118 (88%) | 14/118 (12%) | 4/52 (8%) | FF-LIST = GREEDY+REPAIR-LIST (C->F) 12; FF-OUT (AR) 9; DPLL-LIST (D) 8 | EXACT 66 | – | 1,254 / 1,358 |
-| C_E2/3-SAT | Qwen3-32B direct | 200 | 199 | partial 1 | 2/199 (1%) | 0/194 (0%) | 5/199 (3%) | 3/197 (2%) | GREEDY-INDEX = GREEDY-MENTION 5; GUC-DET (C2) = UC-DET (C2) 4; DPLL-MENTION (D, T first) = EXACT = SC-DET (C2) 2 | – | UNSAT 5 | 0 / 103 |
-| C_E2/3-SAT | gpt-oss-20b thinking-low | 200 | 200 | – | 16/200 (8%) | 3/120 (2%) | 80/200 (40%) | 67/184 (36%) | GUC-DET (C2) 71; UC-DET (C2) 70; GREEDY-INDEX = GREEDY-MENTION 62 | EXACT 3 | UNSAT 80 | 1,492 / 1,590 |
+| C_E2/3-SAT | Qwen3-32B direct | 200 | 199 | partial 1 | 2/199 (1%) | 0/194 (0%) | 5/199 (3%) | 3/197 (2%) | ALWAYS-UNSAT (A1 give-up) = GREEDY-INDEX = GREEDY-MENTION 5; GUC-DET (C2) = UC-DET (C2) 4; DPLL-MENTION (D, T first) = EXACT = SC-DET (C2) 2 | – | UNSAT 5 | 0 / 103 |
+| C_E2/3-SAT | gpt-oss-20b thinking-low | 200 | 200 | – | 16/200 (8%) | 3/120 (2%) | 80/200 (40%) | 67/184 (36%) | ALWAYS-UNSAT (A1 give-up) 80; GUC-DET (C2) 71; UC-DET (C2) 70 | EXACT 3 | UNSAT 80 | 1,492 / 1,590 |
 | C_E2/colouring (fitted) | Qwen3-32B direct | 300 | 300 | – | 0/300 (0%) | 1/300 (0%) | 0/300 (0%) | 0/300 (0%) | – | – | – | 0 / 116 |
 | C_E2/colouring (fitted) | gpt-oss-20b thinking-low | 300 | 299 | parse_fail 1 | 43/299 (14%) | 246/299 (82%) | 53/299 (18%) | 41/256 (16%) | FF-LIST = GREEDY+REPAIR-LIST (C->F) 47; DPLL-LIST (D) 10; LF 4 | EXACT 43 | – | 1,007 / 1,110 |
 | C_E2/knapsack (fitted) | Qwen3-32B direct | 300 | 300 | – | 1/300 (0%) | 272/300 (91%) | 24/300 (8%) | 23/299 (8%) | RATIO+BEST-SINGLE = RATIO-PREFIX 15; DIFF 11; RATIO-SKIP 10 | – | – | 0 / 8 |
@@ -577,13 +582,13 @@ These are counts, not mixture weights. On a unit that is not fitted they say whi
 | B4C4_E2/entailment | gpt-oss-20b thinking-low | 240 | 240 | – | 237/240 (99%) | – | 240/240 (100%) | 3/3 (100%) | ETR-default = EXACT = FIRST = MATCH-A = MATCH-L = ONL(2) = ONL(4) = UP-1 237; ETR-1p 214; ETR-1p-R2 189 | – | – | 75 / 86 |
 | C_E1/3-SAT | Qwen3-32B direct | 30 | 27 | parse_fail 2, truncated 1 | 1/27 (4%) | 1/27 (4%) | 0/27 (0%) | 0/26 (0%) | – | EXACT 1 | – | 0 / 103 |
 | C_E1/3-SAT | Qwen3-14B direct | 30 | 28 | parse_fail 1, truncated 1 | 0/28 (0%) | 0/28 (0%) | 0/28 (0%) | 0/28 (0%) | – | – | – | 0 / 103 |
-| C_E1/3-SAT | gpt-oss-20b thinking-low | 30 | 27 | parse_fail 2, partial 1 | 0/27 (0%) | 0/17 (0%) | 6/27 (22%) | 6/27 (22%) | GUC-DET (C2) 5; UC-DET (C2) 5 | – | UNSAT 10 | 333 / 421 |
+| C_E1/3-SAT | gpt-oss-20b thinking-low | 30 | 27 | parse_fail 2, partial 1 | 0/27 (0%) | 0/17 (0%) | 10/27 (37%) | 10/27 (37%) | ALWAYS-UNSAT (A1 give-up) 10; GUC-DET (C2) 5; UC-DET (C2) 5 | – | UNSAT 10 | 333 / 421 |
 | C_E1/colouring | Qwen3-32B direct | 30 | 30 | – | 0/30 (0%) | 0/30 (0%) | 0/30 (0%) | 0/30 (0%) | – | – | – | 0 / 116 |
 | C_E1/colouring | Qwen3-14B direct | 30 | 30 | – | 0/30 (0%) | 4/30 (13%) | 0/30 (0%) | 0/30 (0%) | – | – | – | 0 / 116 |
 | C_E1/colouring | gpt-oss-20b thinking-low | 30 | 29 | parse_fail 1 | 15/29 (52%) | 27/29 (93%) | 2/29 (7%) | 0/14 (0%) | DPLL-LABEL (D) = FF-LABEL = FF-OUT (AR) 2; DPLL-LIST (D) = FF-LIST = GREEDY+REPAIR-LIST (C->F) 1 | EXACT 15 | – | 1,322 / 1,426 |
-| C_E2/3-SAT | Qwen3-32B direct | 50 | 49 | partial 1 | 1/49 (2%) | 0/45 (0%) | 4/49 (8%) | 3/48 (6%) | GUC-DET (C2) = SC-DET (C2) = UC-DET (C2) 4; GREEDY-INDEX = GREEDY-MENTION 3; DPLL-MENTION (D, T first) = EXACT 1 | – | UNSAT 4 | 0 / 103 |
+| C_E2/3-SAT | Qwen3-32B direct | 50 | 49 | partial 1 | 1/49 (2%) | 0/45 (0%) | 4/49 (8%) | 3/48 (6%) | ALWAYS-UNSAT (A1 give-up) = GUC-DET (C2) = SC-DET (C2) = UC-DET (C2) 4; GREEDY-INDEX = GREEDY-MENTION 3; DPLL-MENTION (D, T first) = EXACT 1 | – | UNSAT 4 | 0 / 103 |
 | C_E2/3-SAT | Qwen3-14B direct | 50 | 50 | – | 0/50 (0%) | 0/50 (0%) | 0/50 (0%) | 0/50 (0%) | – | – | – | 0 / 103 |
-| C_E2/3-SAT | gpt-oss-20b thinking-low | 50 | 50 | – | 4/50 (8%) | 0/24 (0%) | 26/50 (52%) | 22/46 (48%) | SC-DET (C2) 25; UC-DET (C2) 24; GUC-DET (C2) 23 | – | UNSAT 26 | 208 / 269 |
+| C_E2/3-SAT | gpt-oss-20b thinking-low | 50 | 50 | – | 4/50 (8%) | 0/24 (0%) | 26/50 (52%) | 22/46 (48%) | ALWAYS-UNSAT (A1 give-up) 26; SC-DET (C2) 25; UC-DET (C2) 24 | – | UNSAT 26 | 208 / 269 |
 | C_E2/colouring | Qwen3-32B direct | 75 | 75 | – | 0/75 (0%) | 0/75 (0%) | 0/75 (0%) | 0/75 (0%) | – | – | – | 0 / 116 |
 | C_E2/colouring | Qwen3-14B direct | 75 | 75 | – | 0/75 (0%) | 23/75 (31%) | 0/75 (0%) | 0/75 (0%) | – | – | – | 0 / 116 |
 | C_E2/colouring | gpt-oss-20b thinking-low | 75 | 75 | – | 11/75 (15%) | 62/75 (83%) | 13/75 (17%) | 11/64 (17%) | FF-LIST = GREEDY+REPAIR-LIST (C->F) 12; LF 3; DPLL-LIST (D) 1 | EXACT 11 | – | 874 / 977 |
@@ -643,7 +648,7 @@ Every statement below is about these dev-split items, one sample each, in two ch
    - 158 of 300 answers are optimal. EXACT's weight is 0.616 [0.535, 0.688] (BCa [0.540, 0.692]), against a permutation chance level of 0.039.
    - Of the 142 wrong answers, 57 equal a greedy member's answer exactly.
    - Per member, where both are wrong, gpt-oss-20b gives RATIO-SKIP's answer on 29 of 112 items (0.26), DIFF's on 27 of 125 (0.22) and VALUE's on 19 of 101 (0.19). The within-cell permutation chance for each is 0.005–0.008 (p = 0.0005 each).
-   - This is the one fit whose model reproduces the data (§3.5). At its estimate, fake data are recovered with |bias| ≤ 0.007 and coverage 0.89–0.96.
+   - This is the one fit whose model passed the three checks of §3.5. It fails the later distance-profile check (see the update at the top). At its estimate, fake data are recovered with |bias| ≤ 0.007 and coverage 0.89–0.96.
 2. **gpt-oss-20b reproduces one colouring heuristic's wrong answers, and essentially no other's.** Where both are wrong, it gives listing-order first fit's (FF-LIST's) colouring on 40 of 232 C E2 items. For each other deterministic greedy member (FF-LABEL, LF, DSATUR, DSATUR-LABEL), the count is 0–2 out of 86–216.
    - This unit has no structure-matched chance level (§4). The comparison is between members, which are all exact 16-vertex colourings.
 3. **Qwen3-32B with thinking off reproduces greedy knapsack answers above chance, but rarely.**

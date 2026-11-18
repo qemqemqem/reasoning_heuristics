@@ -60,3 +60,39 @@ def test_a_fit_reads_as_use_only_below_the_cap_and_inside_every_range():
 
     unchecked = _fit(mod, 0.29, (0.7, 0.0, 0.0), inside, with_check=False)  # no check run: not "use"
     assert unchecked.n_outside is None and unchecked.nearness
+
+    shape = _fit(mod, 0.29, (0.7, 0.0, 0.0), inside)  # every statistic inside, but the distance profile misfits
+    shape.rec["distance_check"] = {"p_value": 0.01}
+    assert shape.n_checks == 4 and shape.n_outside == 1 and not shape.reproduces and shape.nearness
+    shape.rec["distance_check"] = {"p_value": 0.2}
+    assert shape.n_outside == 0 and shape.reproduces and not shape.nearness
+
+
+def test_condition_pairs_cover_effort_as_well_as_thinking():
+    mod = _page_module()
+    runs = [{"run_id": f"r-{c}", "model": "openai/gpt-oss-20b", "condition": c, "item_set": "dev", "label": f"gpt-oss-20b {c}"}
+            for c in ("thinking-high", "thinking-low")]
+    runs += [{"run_id": f"q-{c}", "model": "qwen/qwen3-32b", "condition": c, "item_set": "dev", "label": f"Qwen3-32B {c}"}
+             for c in ("direct", "thinking-high")]
+    d = mod.Data({"runs": runs, "settings": {"eps_max": 0.5}, "gated_units": {}, "fits": {}})
+    think, _ = mod.comparison_pairs(d)
+    assert [(a["condition"], b["condition"]) for a, b, _ in think] == [("thinking-low", "thinking-high"), ("direct", "thinking-high")]
+
+
+def test_textbook_section_shows_each_framing():
+    mod = _page_module()
+    runs = [{"run_id": "r", "model": "openai/gpt-oss-120b", "condition": "thinking-low", "item_set": "pc20",
+             "label": "gpt-oss-120b thinking-low"}]
+    bf = {"I": {"n": 20, "ok": 20, "correct": 0, "textbook": 16, "textbook_wrong": 16},
+          "I+R": {"n": 20, "ok": 20, "correct": 16, "textbook": 3, "textbook_wrong": 3}}
+    d = mod.Data({"runs": runs, "settings": {"eps_max": 0.5}, "gated_units": {}, "fits": {},
+                  "unit_items": {"pc20": {"AH_E5/ENT": 80}}, "descriptive": {"r": {"AH_E5/ENT": {"by_framing": bf}}}})
+    html = mod.section_textbook(d)
+    assert "0 · 16 / 20" in html and "16 · 3 / 20" in html and html.count('<td class="n">–</td>') == 3
+
+
+def test_findings_checks_match_the_committed_json():
+    """The numbers the hand-written claims take from analysis/findings_checks.py are what it computes today."""
+    r = subprocess.run([sys.executable, str(REPO / "analysis" / "findings_checks.py"), "--check"],
+                       capture_output=True, text=True, cwd=REPO)
+    assert r.returncode == 0, r.stdout + r.stderr
