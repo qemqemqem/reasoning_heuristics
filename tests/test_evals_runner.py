@@ -284,6 +284,16 @@ def test_dry_run_sends_nothing_and_writes_nothing(tmp_path, capsys):
     assert "| **Total** | | **254** |" in text and not (tmp_path / "d").exists()
 
 
+def test_dry_run_from_a_runs_measured_tokens(tmp_path, key, capsys):
+    run(tmp_path, FakeTransport(), limit=4)  # every fake response reports 1,200 completion tokens
+    capsys.readouterr()
+    args = ["--items", B4E1, "--model", "openai/gpt-oss-20b", "--out", str(tmp_path / "d"), "--dry-run", "--limit", "4",
+            "--tokens-from", str(tmp_path / "run1")]
+    assert run_main(args) == 0
+    text = capsys.readouterr().out
+    assert "Output tokens (measured)" in text and "| B4/C4 | E1 | 4 | " in text and "| 4,800 |" in text
+
+
 def test_direct_run_records_the_system_instruction(tmp_path, key):
     t = FakeTransport()
     args = ["--items", B4E1, "--model", "qwen/qwen3-32b", "--condition", "direct", "--out", str(tmp_path / "direct"),

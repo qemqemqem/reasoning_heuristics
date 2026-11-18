@@ -230,6 +230,7 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
     ap.add_argument("--cap-usd", type=float, help="hard cap on API-reported spend for this run (required for live runs)")
     ap.add_argument("--out", required=True, help="run directory, data/runs/<run_id>")
     ap.add_argument("--dry-run", action="store_true", help="print the cost estimate and exit; no network")
+    ap.add_argument("--tokens-from", help="estimate output tokens from this run's measured means per eval and kind (data/runs/<run_id>)")
     ap.add_argument("--exclude-eval", action="append", default=[], help="eval to skip (E8, or AH-E8); repeatable")
     ap.add_argument("--include-eval", action="append", default=[], help="run only these evals; repeatable")
     ap.add_argument("--limit", type=int, help="only the first N items (after filters)")
@@ -268,7 +269,8 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
     price: Pricing = cfg.pinned_price if (cfg.pinned_price and not a.provider) else cfg.list_price
     if a.price:
         price = Pricing(a.price[0], a.price[1], "--price")
-    est = C.estimate(items, cond, price, a.samples)
+    measured = C.measured_output_tokens(Path(a.tokens_from) / "scored.jsonl.gz") if a.tokens_from else None
+    est = C.estimate(items, cond, price, a.samples, measured, a.tokens_from)
     print(C.format_estimate(est, f"Cost estimate: {run_id} ({cfg.slug}, {len(items)} items, skipped {skipped})"))
     if a.dry_run:
         return 0
