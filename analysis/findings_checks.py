@@ -2,7 +2,8 @@
 
     python analysis/findings_checks.py            # writes analysis/out/findings_checks.json (about a minute)
 
-It reads the committed item sets and the scored pilot runs (data/runs/2026-11-18-{pc20,pc40}-*), nothing else.
+It reads the committed item sets, the scored pilot runs (data/runs/2026-11-18-{pc20,pc40}-*) and the scored dev runs
+(data/runs/2026-11-18-dev-*), nothing else.
 Each check answers a question a sceptical reader asked of the first draft (2026-11-18):
 
 1. knapsack_near_optimality (pc20 C E2 knapsack). Is the agreement of wrong packings with greedy rules more than
@@ -21,6 +22,11 @@ Each check answers a question a sceptical reader asked of the first draft (2026-
    instance, with an exact McNemar test.
 5. size_paired (pc20 and pc40). gpt-oss-120b against gpt-oss-20b at low effort, per unit, correctness paired by
    item (both ok), with an exact McNemar test.
+6. effort_paired (dev). gpt-oss-20b at high effort against low effort, per unit and overall, correctness paired by
+   item (both ok), with an exact McNemar test; and over every item, counting a truncated or unparseable response as
+   not correct. Pairs where both answered condition on high effort finishing, which goes with being right, so both
+   views are needed. Also: on the items high effort left truncated, how many the low-effort run answered and got
+   right; and what became at high effort of each wrong low-effort answer, by kind (see effort_paired's docstring).
 """
 
 from __future__ import annotations
@@ -226,11 +232,13 @@ def textbook_paired(items: dict[str, dict[str, Any]], runs: dict[str, list[dict[
 # --- 5. gpt-oss sizes ---------------------------------------------------------------------------
 
 
+def unit(it: dict[str, Any]) -> str:
+    return f"{'AH' if it['vertical'] == 'A/H' else it['vertical'].replace('/', '')}_{it['eval_id']}/{it['domain']}"
+
+
 def size_paired(items: dict[str, dict[str, Any]], runs: dict[str, list[dict[str, Any]]], big: str, small: str) -> dict[str, Any]:
     if big not in runs or small not in runs:
         return {}
-    def unit(it):
-        return f"{'AH' if it['vertical'] == 'A/H' else it['vertical'].replace('/', '')}_{it['eval_id']}/{it['domain']}"
     a = {r["item_id"]: r for r in runs[big] if r["category"] == "ok"}
     b = {r["item_id"]: r for r in runs[small] if r["category"] == "ok"}
     res = defaultdict(Counter)
@@ -245,23 +253,87 @@ def size_paired(items: dict[str, dict[str, Any]], runs: dict[str, list[dict[str,
     return {u: {**dict(v), "mcnemar_p": float(f"{mcnemar(v['big_only'], v['small_only']):.3g}")} for u, v in sorted(res.items())}
 
 
+# --- 6. gpt-oss-20b effort ----------------------------------------------------------------------
+
+
+def outcome(r: dict[str, Any]) -> str:
+    if r["category"] == "ok":
+        return "correct" if r["correct"] else "wrong"
+    return r["category"]
+
+
+def answer_kind(r: dict[str, Any]) -> str:
+    """give_up: IMPOSSIBLE or UNSAT. built: a full colouring, assignment or packing. other: decisions (yes/no, a
+    letter, SAT), open entailment answers, and C E3's single colour numbers."""
+    p = r.get("parsed")
+    if p in ("IMPOSSIBLE", "UNSAT"):
+        return "give_up"
+    if r["domain"] in ("coloring", "sat", "knapsack") and isinstance(p, (dict, list)) \
+            and "only the colour number" not in (r.get("answer_format") or ""):
+        return "built"
+    return "other"
+
+
+def effort_paired(items: dict[str, dict[str, Any]], runs: dict[str, list[dict[str, Any]]], high: str, low: str) -> dict[str, Any]:
+    """Also:
+    - over every item, counting truncated and unparseable responses as not correct: items_high_only, items_low_only
+      and their exact McNemar p (items_mcnemar_p);
+    - each wrong low-effort answer followed to its high-effort outcome (low_wrong_high_<outcome>), split for the wrong
+      answers that equal some member's by the kind of answer (low_member_wrong_<kind>_high_<outcome>);
+    - every wrong low-effort IMPOSSIBLE or UNSAT, member-matched or not (low_give_up_wrong_high_<outcome>)."""
+    if high not in runs or low not in runs:
+        return {}
+    hi = {r["item_id"]: r for r in runs[high]}
+    lo = {r["item_id"]: r for r in runs[low]}
+    res = defaultdict(Counter)
+    for iid in sorted(set(hi) & set(lo)):
+        h, l = hi[iid], lo[iid]
+        for u in (unit(items[iid]), "ALL"):
+            c = res[u]
+            c["items"] += 1
+            c["items_high_only"] += outcome(h) == "correct" and outcome(l) != "correct"
+            c["items_low_only"] += outcome(l) == "correct" and outcome(h) != "correct"
+            if outcome(l) == "wrong":
+                c[f"low_wrong_high_{outcome(h)}"] += 1
+                if l.get("members_matched") or l.get("sets_matched"):
+                    c[f"low_member_wrong_{answer_kind(l)}_high_{outcome(h)}"] += 1
+                if answer_kind(l) == "give_up":
+                    c[f"low_give_up_wrong_high_{outcome(h)}"] += 1
+            if h["category"] == "ok" and l["category"] == "ok":
+                ch, cl = bool(h["correct"]), bool(l["correct"])
+                c["pairs"] += 1
+                c["high_correct"] += ch
+                c["low_correct"] += cl
+                c["high_only"] += ch and not cl
+                c["low_only"] += cl and not ch
+            if h["category"] == "truncated":
+                c["high_truncated"] += 1
+                if l["category"] == "ok":
+                    c["high_truncated_low_ok"] += 1
+                    c["high_truncated_low_correct"] += bool(l["correct"])
+    return {u: {**dict(v), "mcnemar_p": float(f"{mcnemar(v['high_only'], v['low_only']):.3g}"),
+                "items_mcnemar_p": float(f"{mcnemar(v['items_high_only'], v['items_low_only']):.3g}")}
+            for u, v in sorted(res.items())}
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--runs-root", type=Path, default=REPO / "data" / "runs")
     ap.add_argument("--out", type=Path, default=OUT)
     ap.add_argument("--check", action="store_true", help="recompute and compare with --out; write nothing")
     args = ap.parse_args(argv)
-    pc20, pc40 = load_items("pc20"), load_items("pc40")
-    r20, r40 = load_runs("pc20", args.runs_root), load_runs("pc40", args.runs_root)
+    pc20, pc40, dev = load_items("pc20"), load_items("pc40"), load_items("dev")
+    r20, r40, rdev = load_runs("pc20", args.runs_root), load_runs("pc40", args.runs_root), load_runs("dev", args.runs_root)
     res = {
         "description": "Checks behind docs/results/findings.html; see the docstring of analysis/findings_checks.py",
-        "runs": {"pc20": sorted(r20), "pc40": sorted(r40)},
+        "runs": {"pc20": sorted(r20), "pc40": sorted(r40), "dev": sorted(rdev)},
         "knapsack_near_optimality": knapsack_near_optimality(pc20, r20),
         "colouring_ro_ff_chance": colouring_ro_ff_chance(pc20, r20),
         "impossible_by_cell": impossible_by_cell(r40),
         "textbook_paired": textbook_paired(pc20, r20),
         "size_paired": {"pc20": size_paired(pc20, r20, "pc20-gpt-oss-120b-thinking-low", "pc20-gpt-oss-20b-thinking-low"),
                         "pc40": size_paired(pc40, r40, "pc40-gpt-oss-120b-thinking-low", "pc40-gpt-oss-20b-thinking-low")},
+        "effort_paired": {"dev": effort_paired(dev, rdev, "dev-gpt-oss-20b-thinking-high", "dev-gpt-oss-20b-thinking-low")},
     }
     text = json.dumps(res, indent=1, sort_keys=True) + "\n"
     if args.check:

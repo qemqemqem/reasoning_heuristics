@@ -6,7 +6,9 @@
      Numbers: analysis/out/prelim_2026_11_18.json (fits, checks, counts, the A/H E5 framing counts) and
      analysis/out/findings_checks.json (the near-optimality null, the random-order chance level, the cell
      contrasts and the paired tests; written by analysis/findings_checks.py). A read-only hostile audit of the
-     first draft (2026-11-18) changed claims 1, 2, 3, 5, 6 and 8; its corrections are folded in.
+     first draft (2026-11-18) changed claims 1, 2, 3, 5, 6 and 8; its corrections are folded in. Claim 7 and the
+     effort paragraph of claim 5 were rewritten after that audit, when the last dev run (gpt-oss-20b at high effort)
+     came in; their numbers are effort_paired in analysis/out/findings_checks.json.
      After editing, rebuild the page: python analysis/results_page.py -->
 <p class="summary"><strong>In short.</strong>
 Some wrong answers are exactly what a simple greedy procedure gives. The clearest case is colouring: when a wrong
@@ -16,9 +18,10 @@ but mostly because they are near-optimal; the part specific to greedy is modest.
 correct far more often than in the direct condition, and its wrong colourings are often first fit's. A mixture of
 heuristics run exactly, plus near misses, rarely reproduces the data: 4 of 24 fits pass every check, all near ceiling
 (79–97% correct), and that count depends on a check added after seeing the data. The models often call 3-colourable
-graphs impossible, but not where list-order greedy gets stuck. Under a redefined connective, gpt-oss-120b at low
-effort mostly answers the textbook problem until the rule is restated. All of this is preliminary: dev items, one
-sample per item, nothing pre-registered.</p>
+graphs impossible, but not where list-order greedy gets stuck. At high effort, gpt-oss rarely answers wrongly but
+often runs out of tokens: of the 542 dev items gpt-oss-20b got wrong at low effort, 190 become correct, 347 hit the
+token cap and 4 stay wrong. Under a redefined connective, gpt-oss-120b at low effort mostly answers the textbook problem until
+the rule is restated. All of this is preliminary: dev items, one sample per item, nothing pre-registered.</p>
 <ol>
 
 <li>
@@ -156,6 +159,15 @@ unit is not fitted.</p>
 <p>gpt-oss-20b at low effort likewise answers UNSAT on satisfiable formulas: 53 of 110 on C E1 3-SAT (pc20), and 68 of
 119 on C E5 3-SAT (pc40). The C E5 cases are again flat across cells: 23 of 40 on controls, 26 of 40 on dead-end
 formulas and 19 of 39 on their permutations.</p>
+<p>At high effort, gpt-oss-20b gives up far less where it finishes, but often does not finish (dev, 5 items per cell,
+one sample each; claim 7). Of the 275 wrong IMPOSSIBLE or UNSAT answers it gave at low effort, at high effort 64
+become correct, 1 stays wrong and 210 run out of tokens, including 145 of the 150 on C E3. For example:</p>
+<ul>
+<li>On the 25 C E5 3-colouring items, it colours none at low effort. At high effort it colours all 18 it finishes,
+17 of which it had called impossible, and runs out of tokens on the other 7.</li>
+<li>On C E1 3-SAT, it solves 22 of the 23 items both runs answered. Low effort solved none of them: it answered
+UNSAT on 8 and gave invalid assignments on 15.</li>
+</ul>
 <p>Counts, without intervals. Chance level: none; the control cell is the comparison.
 <span class="strength c">(c) descriptive count</span></p>
 </li>
@@ -185,16 +197,40 @@ pc20) is reported because it stood out.</p>
 </li>
 
 <li>
-<p><strong>At high effort, gpt-oss-120b runs out of tokens on the hardest units.</strong>
-On dev items, 284 of its 1,270 responses hit the 32,768-token cap, including:</p>
+<p><strong>At high effort, gpt-oss rarely answers wrongly, but it often runs out of tokens.</strong>
+On the dev items, with a 32,768-token cap and one sample per item at temperature 1:</p>
 <ul>
-<li>143 of 270 on C E3 colouring gadgets;</li>
-<li>38 of 40 on A/H E2 SAT;</li>
-<li>29 of 50 on C E2 3-SAT.</li>
+<li>gpt-oss-120b: 284 of 1,270 responses truncated; 969 of the other 986 correct;</li>
+<li>gpt-oss-20b: 462 of 1,270 truncated; of the other 808, 799 correct, 7 wrong and 2 unparseable.</li>
 </ul>
-<p>Its correct shares on those units describe only the items it finished, which are likely the easier ones; the tables
-mark them †.</p>
-<p>Counts. Chance level: none.
+<p>The truncations concentrate on a few units (gpt-oss-120b, then gpt-oss-20b): C E3's uninstructed colouring
+gadgets (COL-U) 143 and 174 of 180, A/H E2 SAT 38 and 39 of 40, C E2 3-SAT 29 and 42 of 50, C E2 knapsack 14 and 69
+of 75.</p>
+<p>gpt-oss-20b also ran the dev items at low effort. The two runs send identical requests except for the effort
+setting, so its answers pair by item:</p>
+<ul>
+<li>Counting a truncated or unparseable response as not correct, high effort is right on 799 of the 1,270 items and
+low effort on 716. 198 are right only at high effort and 115 only at low, 111 of those because high effort ran out
+of tokens (exact McNemar p = 3×10<sup>−6</sup>). The net gain hides losses: on C E2 knapsack it is 6 against 34 of
+75.</li>
+<li>On the 798 items both runs answered, low effort gets 604 right and high effort 791 (190 against 3). But which
+items high effort finishes goes with how easy they are: low effort was wrong on 24% of these 798, and on 76% of the
+458 that high effort left unfinished.</li>
+<li>Of the 542 items it got wrong at low effort, at high effort it gets 190 right, runs out of tokens on 347 and gets
+4 wrong, each with a different wrong answer; 1 is unparseable.</li>
+<li>Low effort's wrong answers that equal some member's (196) are of three kinds. 114 are IMPOSSIBLE or UNSAT
+give-ups: at high effort 55 become correct, 58 run out of tokens and 1 stays wrong. 59 are full colourings,
+assignments or packings: 11 correct, 47 out of tokens, 1 wrong. 23 are decisions and other short answers: 17
+correct, 6 out of tokens.</li>
+</ul>
+<p>So with more reasoning, gpt-oss-20b does not trade one wrong answer for another: where it finishes, the answer is
+almost always right. But low effort's greedy-looking constructions mostly turn into truncations at high effort, so
+whether enough reasoning would replace them with correct answers cannot be told at this cap. At high effort there are
+too few wrong answers to fit. Qwen3 was run at a single reasoning setting, and in the thinking condition it still
+makes the first-fit errors of claim 1. Correct shares on heavily truncated units describe only the items the model
+finished; the tables mark them †.</p>
+<p>Counts, with paired tests (analysis/findings_checks.py). Dev items, 5 per cell; gpt-oss-120b has no low-effort
+dev run to pair with. Chance level: none.
 <span class="strength c">(c) descriptive count</span></p>
 </li>
 
@@ -216,5 +252,3 @@ better on:</p>
 </li>
 
 </ol>
-<p class="not-yet"><strong>Not yet in:</strong> gpt-oss-20b at high effort on the dev items. It is still retrying calls
-the provider rate-limited, and many of its C-vertical responses hit the token cap.</p>
