@@ -1,0 +1,250 @@
+{
+  "run_id": "forced-2/all-k8192/2026-11-18-dev-gpt-oss-120b-thinking-high",
+  "status": "complete",
+  "started_at": "2026-11-18T23:15:43Z",
+  "model_requested": "openai/gpt-oss-120b",
+  "source": {
+    "run_id": "2026-11-18-dev-gpt-oss-120b-thinking-high",
+    "raw_sha256": "4dc97b5b5b858a8da39eb9e3db85415c2cbb24d4ceff0bc42516e63d03f8d7fd",
+    "condition": "thinking-high",
+    "git": {
+      "sha": "12095bc719ce00f4d3ff50c8e7f73dc16c37054a",
+      "dirty": false,
+      "branch": "dev-runs-2026-11-18"
+    },
+    "provider_routing": {
+      "order": [
+        "dekallm/bf16"
+      ],
+      "allow_fallbacks": false,
+      "require_parameters": true,
+      "quantizations": [
+        "bf16"
+      ]
+    }
+  },
+  "forced": {
+    "template": "force-2",
+    "endpoint": "https://openrouter.ai/api/v1/completions",
+    "max_tokens": 4096,
+    "select": "all",
+    "logit_bias": {
+      "200005": -100,
+      "200006": -100,
+      "200007": -100
+    },
+    "budget": {
+      "truncate_at": 8192
+    },
+    "tokenizer": {
+      "name": "o200k_harmony",
+      "revision": null,
+      "sha256": "446a9538cb6c348e3516120d7c08b09f57c36495e2acfffe59a5bf8b0cfb1a2d"
+    }
+  },
+  "condition": {
+    "name": "forced",
+    "label": "thinking-high-forced-k8192",
+    "effort": "high",
+    "max_tokens": 4096,
+    "system_prompt": null,
+    "reasoning": null,
+    "sampling": {
+      "temperature": 1.0,
+      "top_p": 1.0
+    },
+    "template": "force-2"
+  },
+  "provider_routing": {
+    "order": [
+      "deepinfra/bf16"
+    ],
+    "allow_fallbacks": false,
+    "require_parameters": true,
+    "quantizations": [
+      "bf16"
+    ]
+  },
+  "price": {
+    "prompt": 0.037,
+    "completion": 0.17,
+    "source": "DeepInfra bf16 endpoint listing (OpenRouter, 2026-11-17: data/runs/probes/2026-11-17)"
+  },
+  "context_length": 131072,
+  "routing_notes": "DeepInfra bf16 passes raw prompts through (93 prompt tokens raw, 147 as a chat message; data/runs/probes/2026-11-18-forced-answer, batch 11) and supports logit_bias, not logprobs. It serves the released weights upcast to bf16, as DekaLLM bf16 (the source pin) does.",
+  "model_notes": "Reasoning cannot be turned off. Pinned to DekaLLM bf16, the cheapest bf16 endpoint that answered the probe (Crusoe bf16 also did, at $0.25/M; DeepInfra bf16 was degraded, status -5).",
+  "raw_check": {
+    "passed": true,
+    "routing": {
+      "order": [
+        "deepinfra/bf16"
+      ],
+      "allow_fallbacks": false,
+      "require_parameters": true,
+      "quantizations": [
+        "bf16"
+      ]
+    },
+    "prompt": "<|start|>system<|message|>You are ChatGPT, a large language model trained by OpenAI.\nKnowledge cutoff: 2024-06\n\nReasoning: low\n\n# Valid channels: analysis, commentary, final. Channel must be included for every message.<|end|><|start|>user<|message|>Is 17 a prime number? Answer with one word, YES or NO.<|end|><|start|>assistant<|channel|>analysis<|message|>17 has no divisors other than 1 and itself.<|end|><|start|>assistant<|channel|>final<|message|>",
+    "max_tokens": 8,
+    "temperature": 0,
+    "checked_at": "2026-11-18T23:15:41Z",
+    "completions": {
+      "provider": "DeepInfra",
+      "prompt_tokens": 93,
+      "completion_tokens": 2,
+      "text": "YES",
+      "reasoning": null,
+      "finish_reason": "stop",
+      "cost_usd": 2.597e-06,
+      "generation_id": "gen-1795043742-nOuhwg28w07fRMmv3O5s"
+    },
+    "chat": {
+      "provider": "DeepInfra",
+      "prompt_tokens": 147,
+      "completion_tokens": 8,
+      "text": null,
+      "reasoning": "The user asks: \"",
+      "finish_reason": "length",
+      "cost_usd": 5.615e-06,
+      "generation_id": "gen-1795043742-F7v1lqLXyjOvzJdpVFZM"
+    },
+    "cost_usd": 8.21e-06
+  },
+  "tokenizer": {
+    "name": "o200k_harmony",
+    "library": "tiktoken",
+    "version": "0.14.0",
+    "revision": null,
+    "file": "https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken",
+    "sha256": "446a9538cb6c348e3516120d7c08b09f57c36495e2acfffe59a5bf8b0cfb1a2d"
+  },
+  "tokens": {
+    "traces": 115,
+    "trace_tokens": 1879950,
+    "vs_reasoning_tokens": {
+      "traces": 115,
+      "trace_tokens": 1879950,
+      "provider_tokens": 1850198,
+      "ratio": 1.0161
+    },
+    "vs_completion_tokens_without_answer": {
+      "traces": 26,
+      "trace_tokens": 851888,
+      "provider_tokens": 851968,
+      "ratio": 0.9999
+    }
+  },
+  "items": {
+    "files": {
+      "data/items/dev/AH_E1_dev_s1.jsonl.gz": "fa35e1822bb7efe6ac8d084ba4980251455001aa3e3e0e572135643740ce6800",
+      "data/items/dev/AH_E2_dev_s1.jsonl.gz": "bb0789337ed83654006a00d2a5e5d3bd11a352563a74c78a081167dd2eded400",
+      "data/items/dev/AH_E5_dev_s1.jsonl.gz": "f1d564f97c03be1acc1ea30be855405491ccb99e54425326f0b9c48765146e96",
+      "data/items/dev/AH_E8_dev_s1.jsonl.gz": "f9bf218cd603da959a2a5cf4b880e94191b7664c7bbb8e970fe9693933a31702",
+      "data/items/dev/B4C4_E1_dev_s1.jsonl.gz": "4cee1ba3813a8cb1480bac511d888f3cb88eff4488c90b8f3d7ade4c0d090103",
+      "data/items/dev/B4C4_E2_dev_s1.jsonl.gz": "80ea78120cf5e1aa8d15dabcabbdf4f7172ee5facfedb2620ee026c700ef5e26",
+      "data/items/dev/C_E1_dev_s1.jsonl.gz": "209c7e207cc4765b77ea3f8556ece02c8b0f087cbf313e25b34b4e22b22edc13",
+      "data/items/dev/C_E2_dev_s1.jsonl.gz": "62bb0495cd0aee96c8f0c98080234ebc6fc203ca52633f2e0630015001c7d839",
+      "data/items/dev/C_E3_dev_s1.jsonl.gz": "22453a622e973d1cfe1d9019212d09951009edea552186aed63f3ce338099f7f",
+      "data/items/dev/C_E5_dev_s1.jsonl.gz": "4bcbfc03f5444cdc8f589e6ffa60a4ba4b0de9942454a51816df8d4bb1ed35b3"
+    },
+    "n_items": 115,
+    "skipped": {
+      "no_trace": 0,
+      "no_content": 0,
+      "no_room": 0
+    },
+    "per_unit": 5,
+    "limit": null,
+    "samples": 1,
+    "allow_item_drift": true,
+    "items_ref": null
+  },
+  "estimate": {
+    "calls": 76,
+    "prompt_tokens": 694516,
+    "cost_usd": 0.0257,
+    "worst_case_usd": 0.0786,
+    "assumptions": "prompt tokens: each sent record's source prompt tokens plus its cut trace's tokens (by the model's tokenizer); cost_usd is the prompt alone (every call answers at once), worst_case_usd has every call at its max_tokens",
+    "within_budget": 39
+  },
+  "cap_usd": 0.2,
+  "cap_requested_usd": 0.2,
+  "budget_tag": "sweep-2026-11-18",
+  "budget_usd": 3.0,
+  "budget_spent_before_usd": 0.400803,
+  "git": {
+    "sha": "2c27e2b27f86f29699b08001a77d758bc9e977f4",
+    "dirty": false,
+    "branch": "sweep-runs-2-2026-11-18"
+  },
+  "versions": {
+    "python": "3.12.12",
+    "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "reasoning_heuristics": "0.1.0",
+    "scorer": "scorer-1.5.2",
+    "tokenizer_proxy": "regex-digit-split-v1",
+    "python-sat": "1.9.dev22",
+    "pyetr": "1.0.0",
+    "numpy": "2.5.5",
+    "networkx": "3.7",
+    "jsonschema": "4.26.0"
+  },
+  "client": {
+    "timeout_s": 1800.0,
+    "max_attempts": 6,
+    "concurrency": 3
+  },
+  "notes": "budget sweep, per-unit 5",
+  "resumed_from": 0,
+  "counts": {
+    "candidates": 1270,
+    "selected": 115,
+    "units": 23,
+    "samples": 1,
+    "within_budget": 39,
+    "sent": 76,
+    "calls": 76,
+    "skipped_no_trace": 0,
+    "skipped_no_content": 0,
+    "skipped_no_room": 0,
+    "max_tokens_lowered": 0,
+    "responses": 76,
+    "answered": 76,
+    "parsed": 75,
+    "still_reasoning": 0,
+    "renewed_reasoning": 0,
+    "natural_ok": 50,
+    "same_as_natural": 13
+  },
+  "stop_reason": null,
+  "finished_at": "2026-11-18T23:19:02Z",
+  "wall_s": 199.4,
+  "models_returned": [
+    "openai/gpt-oss-120b"
+  ],
+  "providers_served": {
+    "DeepInfra": 76
+  },
+  "responses": 76,
+  "failed_calls": 0,
+  "cache_hits": 0,
+  "spend": {
+    "cap_usd": 0.2,
+    "spent_usd": 0.027173,
+    "calls": 78,
+    "refused_reservations": 0,
+    "calls_without_reported_cost": 0,
+    "failed_attempt_cost_usd": 0.0,
+    "failed_attempts_charged": 0,
+    "safety_factor": 1.25,
+    "price": {
+      "prompt": 0.037,
+      "completion": 0.17,
+      "source": "DeepInfra bf16 endpoint listing (OpenRouter, 2026-11-17: data/runs/probes/2026-11-17)"
+    }
+  },
+  "charged_usd": 0.027173,
+  "charged_usd_all_invocations": 0.027173,
+  "api_reported_cost_usd_all_responses": 0.027165
+}
