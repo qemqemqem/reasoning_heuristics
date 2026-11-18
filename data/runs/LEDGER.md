@@ -56,3 +56,5 @@ One row per live run or probe batch. Costs are API-reported (`usage.cost`, summe
 | 2026-11-18 | forced-2/done/2026-11-18-dev-qwen3-14b-thinking-high | qwen/qwen3-14b | thinking-high-forced | 69 | 0.074581 | forced2-2026-11-18 | force-2 acceptance: repeatability status=complete |
 | 2026-11-18 | forced-2/cut/2026-11-18-dev-gpt-oss-20b-thinking-high | openai/gpt-oss-20b | thinking-high-forced | 462 | 0.479219 | forced2-2026-11-18 | force-2: all cut traces status=complete |
 | 2026-11-18 | forced-2/cut/2026-11-18-dev-gpt-oss-120b-thinking-high | openai/gpt-oss-120b | thinking-high-forced | 284 | 0.357814 | forced2-2026-11-18 | force-2: all cut traces status=complete |
+| 2026-11-18 | forced-2/cut/2026-11-18-dev-gpt-oss-120b-thinking-high | openai/gpt-oss-120b | thinking-high-forced | 9 | 0.011808 | forced2-2026-11-18 | force-2: resumed after #42 to re-send the 9 provider-empty replies status=complete |
+| 2026-11-18 | probes/2026-11-18-forced-answer | openai/gpt-oss-20b, openai/gpt-oss-120b, qwen/qwen3-32b, qwen/qwen3-14b | probe | 125 | 0.094900 | forced2-2026-11-18 | batch 13: answer-format header probe (PROBES.md), API-reported |

@@ -2,13 +2,13 @@
  "by_model": {
   "gpt-oss-120b": {
    "cut": {
-    "answered": 275,
-    "answered_pct": 96.8,
+    "answered": 284,
+    "answered_pct": 100.0,
     "forced": 284,
-    "parsed": 261,
-    "parsed_pct": 91.9,
-    "parsed_pct_without_provider_empty": 94.9,
-    "provider_empty": 9,
+    "parsed": 270,
+    "parsed_pct": 95.1,
+    "parsed_pct_without_provider_empty": 95.1,
+    "provider_empty": 0,
     "renewed_reasoning": 0,
     "still_writing": 0
    },
@@ -108,10 +108,10 @@
  "description": "Acceptance tests of force-2; see the docstring of analysis/forcing_acceptance.py",
  "passes": {
   "cut/2026-11-18-dev-gpt-oss-120b-thinking-high": {
-   "answered": 275,
+   "answered": 284,
    "forced": 284,
-   "parsed": 261,
-   "provider_empty": 9,
+   "parsed": 270,
+   "provider_empty": 0,
    "renewed_reasoning": 0,
    "still_writing": 0
   },

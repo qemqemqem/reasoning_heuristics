@@ -1,9 +1,9 @@
 {
   "scorer_version": "scorer-1.5.2",
   "git": {
-    "sha": "75fb55fb5ebeafb80486f7fb27a1954c03404897",
+    "sha": "c30616bc9159d4af81b231aef1079c2107f48800",
     "dirty": false,
-    "branch": "forced2-acceptance-2026-11-18"
+    "branch": "forced2-120b-resume"
   },
   "versions": {
     "python": "3.12.12",
@@ -17,12 +17,12 @@
     "networkx": "3.7",
     "jsonschema": "4.26.0"
   },
-  "scored_at": "2026-11-18T20:53:29Z",
+  "scored_at": "2026-11-18T21:21:25Z",
   "items_source": "working tree",
   "records": 284,
   "categories": {
-    "ok": 261,
-    "parse_fail": 19,
+    "ok": 270,
+    "parse_fail": 10,
     "partial": 4
   }
 }
