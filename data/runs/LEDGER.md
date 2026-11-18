@@ -16,3 +16,5 @@ One row per live run or probe batch. Costs are API-reported (`usage.cost`, summe
 | 2026-11-18 | 2026-11-18-dev-gpt-oss-20b-thinking-low | openai/gpt-oss-20b | thinking-low | 1270 | 0.171011 | dev-2026-11-18 | status=complete |
 | 2026-11-18 | 2026-11-18-dev-qwen3-14b-thinking-high | qwen/qwen3-14b | thinking-high | 22 | 0.101905 | dev-2026-11-18 | status=incomplete |
 | 2026-11-18 | 2026-11-18-dev-qwen3-32b-thinking-high | qwen/qwen3-32b | thinking-high | 24 | 0.135034 | dev-2026-11-18 | status=incomplete |
+| 2026-11-18 | 2026-11-18-pc20-qwen3-32b-direct | qwen/qwen3-32b | direct | 1380 | 0.070247 | pilot-2026-11-18 | status=complete |
+| 2026-11-18 | 2026-11-18-pc20-gpt-oss-20b-thinking-low | openai/gpt-oss-20b | thinking-low | 1380 | 0.232987 | pilot-2026-11-18 | status=complete |

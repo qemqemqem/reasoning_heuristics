@@ -1,0 +1,138 @@
+{
+  "run_id": "2026-11-18-pc20-qwen3-32b-direct",
+  "status": "complete",
+  "started_at": "2026-11-18T06:18:07Z",
+  "model_requested": "qwen/qwen3-32b",
+  "condition": {
+    "name": "direct",
+    "label": "direct",
+    "effort": null,
+    "max_tokens": 1024,
+    "system_prompt": "Respond with only the final answer in the requested format. Do not explain or show your working.",
+    "reasoning": {
+      "enabled": false
+    },
+    "sampling": {
+      "temperature": 0.7,
+      "top_p": 0.8,
+      "top_k": 20
+    },
+    "prompt_suffix": ""
+  },
+  "provider_routing": {
+    "order": [
+      "deepinfra/fp8/flex"
+    ],
+    "allow_fallbacks": false,
+    "require_parameters": true,
+    "quantizations": [
+      "fp8"
+    ]
+  },
+  "price": {
+    "prompt": 0.064,
+    "completion": 0.224,
+    "source": "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
+  },
+  "model_notes": "Hybrid thinking checkpoint. Every OpenRouter endpoint is fp8 (DeepInfra tiers, SiliconFlow, Tenstorrent), so fp8 is pinned; Phase 2 should use the official FP8 checkpoint or say how bf16 differs. deepinfra/fp8 (standard) caps completions at 16,384 and Tenstorrent's context is 20,000, so the flex tier is pinned (36,864 completion tokens, 40,960 context, cheapest). reasoning {enabled: false} and {effort: none} are honoured (0 reasoning tokens) on every endpoint; /no_think leaves an empty think block (1 token).",
+  "samples_per_item": 1,
+  "seed_base": null,
+  "items": {
+    "files": {
+      "data/items/pc20/C_E2_dev_s1.jsonl.gz": "533f43bb5fabd8d061e250844bc4d8394a5ebf850bdf095b93de2d89325b5ca6",
+      "data/items/pc20/AH_E5_dev_s1.jsonl.gz": "c0cf6a23b09e11841d3060abb3722e13d7c497e054ee170ccfd25972bb8e353f",
+      "data/items/pc20/C_E1_dev_s1.jsonl.gz": "ccb91baa3557c39b80288da7cb3e543db80a9c8b1482b0801055a44b6f9e2bdc"
+    },
+    "n_items": 1380,
+    "skipped": {
+      "excluded_eval": 0,
+      "unsupported": 0,
+      "not_included": 0
+    },
+    "exclude_eval": [],
+    "include_eval": [],
+    "limit": null
+  },
+  "estimate": {
+    "cost_usd": 0.0843,
+    "worst_case_usd": 0.3742,
+    "output_tokens": 118600,
+    "prompt_tokens_proxy": 901560
+  },
+  "cap_usd": 0.5,
+  "cap_requested_usd": 0.5,
+  "budget_tag": "pilot-2026-11-18",
+  "budget_usd": 12.0,
+  "budget_spent_before_usd": 0.0,
+  "git": {
+    "sha": "9677076ddcc42f1649a601b502371ccf394584c5",
+    "dirty": false,
+    "branch": "dev-runs-2026-11-18"
+  },
+  "versions": {
+    "python": "3.12.12",
+    "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "reasoning_heuristics": "0.1.0",
+    "scorer": "scorer-1.5.0",
+    "tokenizer_proxy": "regex-digit-split-v1",
+    "python-sat": "1.9.dev23",
+    "pyetr": "1.0.0",
+    "numpy": "2.5.5",
+    "networkx": "3.7",
+    "jsonschema": "4.26.0"
+  },
+  "client": {
+    "timeout_s": 1800.0,
+    "max_attempts": 6,
+    "concurrency": 16
+  },
+  "notes": "",
+  "resumed_from": 0,
+  "key_usage": {
+    "before": {
+      "usage": 83.89359215,
+      "usage_daily": 3.24898429,
+      "limit": null,
+      "limit_remaining": null
+    },
+    "after": {
+      "usage": 84.237205499,
+      "usage_daily": 3.592597639,
+      "limit": null,
+      "limit_remaining": null
+    },
+    "delta_usd": 0.343613,
+    "note": "the key's own usage counter (GET /key); other users of the key move it too"
+  },
+  "stop_reason": null,
+  "finished_at": "2026-11-18T06:23:13Z",
+  "wall_s": 306.4,
+  "models_returned": [
+    "qwen/qwen3-32b"
+  ],
+  "system_fingerprints": [],
+  "providers_served": {
+    "DeepInfra": 1380
+  },
+  "responses": 1380,
+  "failed_calls": 0,
+  "cache_hits": 160,
+  "spend": {
+    "cap_usd": 0.5,
+    "spent_usd": 0.070247,
+    "calls": 1220,
+    "refused_reservations": 0,
+    "calls_without_reported_cost": 0,
+    "failed_attempt_cost_usd": 0.0,
+    "failed_attempts_charged": 0,
+    "safety_factor": 1.25,
+    "price": {
+      "prompt": 0.064,
+      "completion": 0.224,
+      "source": "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
+    }
+  },
+  "charged_usd": 0.070247,
+  "charged_usd_all_invocations": 0.070247,
+  "api_reported_cost_usd_all_responses": 0.082664
+}
