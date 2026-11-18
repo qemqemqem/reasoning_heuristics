@@ -131,7 +131,7 @@ SCHEMA = {
     "descriptive": "run_id -> unit -> categories, ok, correct, accuracy_of_ok, valid / valid_defined, members_matched and "
                    "sets_matched ([{members, answers, share_of_ok}], members matching the same answers merged), "
                    "wrong_member_match, special_answers, token medians, truncated_by_cell; A/H E5 units also by_framing "
-                   "(T, N, I, I+R, P -> n, ok, correct, textbook = ok answers equal to an A3 TT member's, textbook_wrong)",
+                   "(T, N, I, I+R, P -> n, ok, correct, textbook = ok answers equal to an A3 TT member's or in its solution set, textbook_wrong)",
     "fits": "unit -> run_id -> fit_unit's report (fit.weights: pi with percentile lo/hi, or 'not identified' with a range; "
             "eps, rho with intervals; identifiability; diagnostics; excluded; error_agreement and weight_lift with "
             "permutation baselines) plus bca ({group: [lo, hi]}), ea_counts, q_exact_chance_log10_max, near, reach, lumps, "
@@ -345,7 +345,8 @@ def describe(run: dict[str, Any], item_set: dict[str, Any]) -> dict[str, Any]:
 
 def by_framing(recs: list[dict[str, Any]]) -> dict[str, dict[str, int]]:
     """A/H E5 per framing (the cell after the slash: T, N, I, I+R, P): responses, ok answers, correct ones (under the
-    stated rule), and ok answers equal to a textbook-transfer member's answer (A3 TT...: the textbook problem's answer).
+    stated rule), and ok answers equal to a textbook-transfer member's answer (A3 TT...: the textbook problem's answer, or
+    on colouring and SAT any of its solutions).
     Under T and N the textbook answer is the correct one; under I and I+R the two are disjoint by construction."""
     out: dict[str, Counter] = defaultdict(Counter)
     for r in recs:
@@ -353,7 +354,8 @@ def by_framing(recs: list[dict[str, Any]]) -> dict[str, dict[str, int]]:
         c["n"] += 1
         if r["category"] != "ok":
             continue
-        tt = any(m.startswith("A3") for m in r.get("members_matched") or [])
+        # a set-valued TT member (A3 TT[exact] on colouring and SAT: every textbook solution) matches through sets_matched
+        tt = any(m.startswith("A3") for m in (r.get("members_matched") or []) + (r.get("sets_matched") or []))
         c["ok"] += 1
         c["correct"] += bool(r["correct"])
         c["textbook"] += tt

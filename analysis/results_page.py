@@ -1017,8 +1017,8 @@ def section_textbook(d: Data) -> str:
             "problem</em> instead. Each base instance appears in up to five framings: T (the textbook rule), N (a neutral "
             "preamble of the same length), I (a preamble that inverts the rule), I+R (I plus the rule restated just before "
             "the question) and P (SAT only: half the constraints inverted). Each cell reads <strong>correct · textbook / "
-            "ok</strong>: answers correct under the stated rule, and answers equal to the textbook problem's answer (an A3 TT "
-            "member's), out of the ok answers. Under T and N the textbook answer is the correct one, so the two counts mostly "
+            "ok</strong>: answers correct under the stated rule, and answers that solve the textbook problem instead (equal to an "
+            "A3 TT member's answer, or on colouring and SAT any textbook solution), out of the ok answers. Under T and N the textbook answer is the correct one, so the two counts mostly "
             "coincide; under I and I+R they are disjoint by construction, so a textbook answer there is the textbook-transfer "
             "error.</p>"
             '<p class="plain"><strong>Counts, not weights.</strong> One sample per item and about 20 items per framing; the '
