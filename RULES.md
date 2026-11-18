@@ -4,6 +4,7 @@ Andrew's rules for this repo. They add to, and where they speak, override, the u
 
 ## Merging and deploying
 
+- Open pull requests and merge them into `main` regularly, as each coherent, tested piece of work is ready. Many small PRs, not long-lived branches. You have Andrew's authority to do this without asking him (Andrew, 2026-11-17).
 - Merge any pull request into `main` once it looks good to you: you've read the whole diff, it does what it says, and any tests pass. You don't need Andrew's approval.
 - The same goes for deploying or publishing what's merged, once this repo has somewhere to deploy to.
 - Still tell Andrew what you merged (`work-manager status shipped "…"`), and hold a PR for him if you're unsure about it.
