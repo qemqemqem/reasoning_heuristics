@@ -17,9 +17,9 @@ The runner sends items to models through OpenRouter and keeps every response. Th
 ## Running
 
 ```bash
-# cost estimate only: no network, writes nothing
+# cost estimate only: no network, writes nothing (--tokens-from prices it from a run's measured tokens)
 python -m reasoning_heuristics.evals.run --items data/items/smoke --model openai/gpt-oss-20b --effort high \
-    --out data/runs/<run_id> --exclude-eval E8 --dry-run
+    --out data/runs/<run_id> --exclude-eval E8 --dry-run [--tokens-from data/runs/<earlier run>]
 
 # live run (the key comes from the environment; never put it on the command line)
 set -a; . ./keys.env; set +a          # keys.env holds OPENROUTER_API_KEY=...; it is gitignored
@@ -42,10 +42,10 @@ python -m reasoning_heuristics.evals.probe --model qwen/qwen3-32b --out data/run
 
 - **The key** is read from `OPENROUTER_API_KEY` inside each request and is never stored, printed, logged or written. A test greps every output file for it.
 - **Provider pinning.** A live run refuses a model with no pinned provider (SCOPE §1), unless you pass `--provider <slug>` (sent as `order: [slug]`, `allow_fallbacks: false`, `require_parameters: true`) or `--no-pin`. Pins and the pinned endpoint's prices live in `models.py`; they come from the probes.
-- **Resuming.** Re-running into the same `--out` sends only the (item, sample) pairs that have no response yet.
+- **Resuming.** Re-running into the same `--out` sends only the (item, sample) pairs that have no response yet. The manifest keeps every earlier invocation (git SHA, times, status, spend) under `previous_invocations` and the total charge in `charged_usd_all_invocations`. It refuses a resume with a different condition or item set.
 - **Re-scoring after the items change.** `score` refuses a run whose item files no longer hash to its manifest. `--items-at-run-sha` reads each file with `git show <run's SHA>:<path>` and checks it against the manifest's SHA-256 (`--items-ref <ref>` picks another ref). PRs merge with merge commits, so a run made at a pushed branch commit stays re-scorable after the merge.
 - **The cache** (`data/cache/openrouter/`, gitignored) means an identical request is never paid for twice, across runs. Repeat samples are separate keys. The permanent copy is each run's `raw.jsonl.gz`; `ResponseCache.import_runs` rebuilds a cache from those.
-- **Concurrency** defaults to 8. Timeouts are 30 minutes per request. Retries: 6 attempts with exponential backoff and jitter (honouring `Retry-After`) on network errors, 408/409/425/429/5xx and errors inside a 200 body. 400/401/402/403/404/413/422 stop the run at once.
+- **Concurrency** defaults to 8. Timeouts are 30 minutes per request. Retries: 6 attempts with exponential backoff and jitter (honouring `Retry-After`). They cover network errors (including a dropped connection or a body cut short), 408/409/425/429/5xx, and errors inside a 200 body. 400/401/402/403/404/413/422 stop the run at once.
 - **E8 is skipped** (`--exclude-eval E8`; the loader also refuses E8 specs). See [E8](#e8-continuations-and-prefill) below.
 
 ## Conditions
@@ -70,7 +70,7 @@ Decision record: [decisions/2026-11-17-direct-answer-arm.md](decisions/2026-11-1
 
 | File | Contents |
 |---|---|
-| `manifest.json` | run id; status and stop reason; start and finish times; model requested and `models_returned`; `system_fingerprints`; provider routing sent and `providers_served`; the full condition (reasoning, sampling, max_tokens, system prompt); prices; item files with SHA-256, item count, skipped items; the dry-run estimate; cap, budget and spend (`spend.spent_usd` is API-reported, including `failed_attempt_cost_usd`); the key's own usage counter before and after (`key_usage`, numbers only; other users of the key move it too, so its delta is an upper bound); git SHA, branch and dirty flag; Python, python-sat, PyETR, numpy, networkx, tokenizer-proxy and scorer versions; client settings |
+| `manifest.json` | run id; status and stop reason; start and finish times; model requested and `models_returned`; `system_fingerprints`; provider routing sent and `providers_served`; the full condition (reasoning, sampling, max_tokens, system prompt); prices; item files with SHA-256, item count, skipped items; the dry-run estimate; cap, budget and spend (`spend.spent_usd` is API-reported, including `failed_attempt_cost_usd`); the key's own usage counter before and after (`key_usage`, numbers only; other users of the key move it too, so its delta is an upper bound, and it lags the API's own cost reports by minutes); git SHA, branch and a dirty flag (modified code under `src/` or `pyproject.toml`); Python, python-sat, PyETR, numpy, networkx, tokenizer-proxy and scorer versions; client settings; `previous_invocations` for a resumed run |
 | `raw.jsonl.gz` | one record per (item, sample): `item_id`, `content_hash`, `presentation_hash`, `sample`, `cache_key`, `prompt_hash`, the exact `request` body, the full API `response` (content, reasoning, reasoning_details, usage, provider, model, id, finish reasons), `error` / `errors`, `attempts`, `requested_at` and `completed_at` (UTC), `latency_s`, `from_cache`, `failed_attempt_costs` (API-reported cost of each failed attempt, 0 if none), `charged_usd` (all attempts; 0 for a cache hit) and `cost_usd` (the returned response's) |
 | `scored.jsonl.gz` | one scored record per raw record (below) |
 | `scoring.json` | scorer version, git SHA, scoring time, category counts |
@@ -80,7 +80,7 @@ Every live run (and probe batch) appends a row to `data/runs/LEDGER.md` with its
 
 ### The scored record
 
-One JSON object per response, the record the identification engine joins on `content_hash` (or `item_id`):
+One JSON object per response. The identification engine joins it to its item on `item_id` and checks `content_hash`; `content_hash` alone is not unique, because several cells present the same content.
 
 | Field | Meaning |
 |---|---|
