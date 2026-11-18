@@ -622,7 +622,7 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
                 else:
                     tag = "mix " + ("PASS" if m["pass"] else "fail") + f" (b {_f(m['max_abs_bias'])}, c {_f(m['min_coverage'])}, w {_f(m['median_width'])})"
                 tag += "; q " + ("not testable" if q and q.get("testable") is False else ("PASS" if q and q["pass"] else "fail"))
-                cells.append(f"{u['items_per_cell']}: {tag}")
+                cells.append(f"{u['items_per_cell']:g}: {tag}")
             sw.append(f"| {n} | " + " | ".join(cells) + " |")
         sections["sweep"] = "\n".join(sw)
         # the smallest size at which the 60/30/10 mixture passes bias + width, and all three gates
