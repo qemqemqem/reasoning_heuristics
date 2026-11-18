@@ -1,0 +1,40 @@
+{
+ "vertical": "C",
+ "eval_id": "E1",
+ "tier": "smoke",
+ "seed": 1,
+ "per_cell": 1,
+ "params": {},
+ "cells": [
+  "COL/c1-NAT",
+  "COL/c2-RELABEL",
+  "COL/c3-ANS-LABEL",
+  "COL/c4-ANS-RAND",
+  "COL/c5-ANS-FREE",
+  "COL/c6-RELIST",
+  "SAT/c1-NAT",
+  "SAT/c2-RELABEL",
+  "SAT/c3-ANS-LABEL",
+  "SAT/c4-ANS-RAND",
+  "SAT/c5-ANS-FREE",
+  "SAT/c6-RELIST"
+ ],
+ "generation": {
+  "attempts": 149,
+  "accepted": 2,
+  "rejections": {
+   "GREEDY assignments closer than the Hamming threshold": 2,
+   "a GREEDY order does not reach a satisfying assignment": 145
+  }
+ },
+ "generation_seconds": 3.3,
+ "path": "data/items/smoke/C_E1_smoke_s1.jsonl",
+ "validation": {
+  "items": 12,
+  "sets": 2,
+  "items_passed": 12,
+  "pass_rate": 1.0,
+  "failures": []
+ },
+ "validation_seconds": 2.3
+}

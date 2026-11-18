@@ -1,0 +1,42 @@
+{
+ "vertical": "A/H",
+ "eval_id": "E5",
+ "tier": "dev",
+ "seed": 1,
+ "per_cell": 5,
+ "params": {},
+ "cells": [
+  "SAT/T",
+  "SAT/N",
+  "SAT/I",
+  "SAT/I+R",
+  "SAT/P",
+  "COL/T",
+  "COL/N",
+  "COL/I",
+  "COL/I+R",
+  "KNAP/T",
+  "KNAP/N",
+  "KNAP/I",
+  "KNAP/I+R",
+  "ENT/T",
+  "ENT/N",
+  "ENT/I",
+  "ENT/I+R"
+ ],
+ "generation": {
+  "attempts": 20,
+  "accepted": 20,
+  "rejections": {}
+ },
+ "generation_seconds": 0.2,
+ "path": "data/items/dev/AH_E5_dev_s1.jsonl",
+ "validation": {
+  "items": 85,
+  "sets": 20,
+  "items_passed": 85,
+  "pass_rate": 1.0,
+  "failures": []
+ },
+ "validation_seconds": 0.9
+}

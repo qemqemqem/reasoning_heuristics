@@ -1,0 +1,55 @@
+{
+ "vertical": "B4/C4",
+ "eval_id": "E1",
+ "tier": "smoke",
+ "seed": 1,
+ "per_cell": 1,
+ "params": {},
+ "cells": [
+  "M1·DC",
+  "M1·DC·MC",
+  "M1·CD",
+  "M1·CD·MC",
+  "M2·DC",
+  "M2·DC·MC",
+  "M2·CD",
+  "M2·CD·MC",
+  "N1·DC",
+  "N1·CD",
+  "N2·DC",
+  "N2·CD",
+  "U1·DC",
+  "U1·DC·MC",
+  "U1·CD",
+  "U1·CD·MC",
+  "U2·DC",
+  "U2·DC·MC",
+  "U2·CD",
+  "U2·CD·MC",
+  "V1·DC",
+  "V1·DC·MC",
+  "V1·CD",
+  "V1·CD·MC",
+  "V2·DC",
+  "V2·DC·MC",
+  "V2·CD",
+  "V2·CD·MC"
+ ],
+ "generation": {
+  "attempts": 2,
+  "accepted": 1,
+  "rejections": {
+   "antonym pair on one subject": 1
+  }
+ },
+ "generation_seconds": 0.5,
+ "path": "data/items/smoke/B4C4_E1_smoke_s1.jsonl",
+ "validation": {
+  "items": 28,
+  "sets": 4,
+  "items_passed": 28,
+  "pass_rate": 1.0,
+  "failures": []
+ },
+ "validation_seconds": 0.7
+}

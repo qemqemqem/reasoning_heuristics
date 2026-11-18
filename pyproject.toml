@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "reasoning_heuristics"
+version = "0.1.0"
+description = "Item generators, exact solvers and a heuristic zoo for the Heuristics Under Hardness evals"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "networkx>=3.2",
+    "python-sat>=1.8.dev0",
+    "jsonschema>=4.20",
+    "pyetr==1.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+reasoning_heuristics = ["schema/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["slow: generator end-to-end runs (deselect with -m 'not slow')"]
+filterwarnings = ["ignore::DeprecationWarning:pyetr.*", "ignore::DeprecationWarning:pyparsing.*", "ignore::UserWarning:networkx.*"]

@@ -1,0 +1,43 @@
+{
+ "vertical": "A/H",
+ "eval_id": "E8",
+ "tier": "smoke",
+ "seed": 1,
+ "per_cell": 1,
+ "params": {},
+ "cells": [
+  "early/K/f=0.0",
+  "early/K/f=0.25",
+  "early/K/f=0.5",
+  "early/K/f=0.75",
+  "early/J/f=0.0",
+  "early/J/f=0.25",
+  "early/J/f=0.5",
+  "early/J/f=0.75",
+  "transplant/K->J",
+  "transplant/J->K",
+  "mistake/K",
+  "mistake/J"
+ ],
+ "generation": {
+  "attempts": 5,
+  "accepted": 1,
+  "rejections": {},
+  "source": {
+   "eval": "A/H E2",
+   "tier": "smoke",
+   "seed": 1,
+   "sets": 2
+  }
+ },
+ "generation_seconds": 3.7,
+ "path": "data/items/smoke/AH_E8_smoke_s1.jsonl",
+ "validation": {
+  "items": 12,
+  "sets": 1,
+  "items_passed": 12,
+  "pass_rate": 1.0,
+  "failures": []
+ },
+ "validation_seconds": 0.2
+}
