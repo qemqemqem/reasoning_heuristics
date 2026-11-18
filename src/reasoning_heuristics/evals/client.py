@@ -14,8 +14,9 @@ Fields follow OpenRouter's public API reference (openrouter.ai/docs, read 2026-1
   (always returned; the old `usage: {include: true}` flag is deprecated and has no effect);
 - raw text completions (`POST /completions`, used by the forced-answer pass, evals/force.py): the
   request carries `prompt` (the chat template written by the caller) instead of `messages`, and the
-  choice carries `text` instead of `message`. For gpt-oss the provider parses the harmony output:
-  `text` is the final channel and `reasoning` any analysis the model wrote (probes, 2026-11-18).
+  choice carries `text` instead of `message`, and `reasoning` for any analysis the model wrote. Not
+  every provider passes the prompt through: DekaLLM wraps it as a chat user message (probes,
+  2026-11-18), which force.py's raw-prompt check detects.
 
 The whole response JSON is kept; nothing is dropped. The API key is read from the environment
 (`OPENROUTER_API_KEY`) inside each request and never stored, returned, logged or written.

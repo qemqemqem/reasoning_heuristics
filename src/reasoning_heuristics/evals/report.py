@@ -95,21 +95,42 @@ def build_report(manifest: dict[str, Any], scored: list[dict[str, Any]], items: 
 
 
 def forced_outcomes(scored: list[dict[str, Any]]) -> dict[str, int]:
-    """A forced pass's outcomes: `answered` (stopped by itself with a non-empty reply, whatever its category)
-    and `still_reasoning` (stopped at max_tokens again)."""
-    return {"answered": sum(1 for r in scored if not r["truncated"] and r["category"] != "api_error" and r["content_chars"]),
-            "still_reasoning": sum(1 for r in scored if r["truncated"])}
+    """A forced pass's outcomes: `answered` (stopped by itself with a non-empty reply, whatever its category),
+    `parsed` (category ok), `still_reasoning` (stopped at max_tokens again) and `renewed_reasoning` (the choice
+    carries non-empty reasoning: the model or the provider left the answer). A `--select done` pass adds
+    `natural_ok` (the source response's own answer is ok) and `same_as_natural` (the same answer key, both ok)."""
+    out = {"answered": sum(1 for r in scored if not r["truncated"] and r["category"] != "api_error" and r["content_chars"]),
+           "parsed": sum(1 for r in scored if r["category"] == "ok"),
+           "still_reasoning": sum(1 for r in scored if r["truncated"]),
+           "renewed_reasoning": sum(1 for r in scored if r["reasoning_returned"])}
+    if any("same_as_natural" in r for r in scored):
+        out["natural_ok"] = sum(1 for r in scored if r.get("natural_category") == "ok")
+        out["same_as_natural"] = sum(1 for r in scored if r.get("same_as_natural"))
+    return out
 
 
 def _forced_section(manifest: dict[str, Any], scored: list[dict[str, Any]]) -> list[str]:
     f, counts, out = manifest["forced"], manifest.get("counts") or {}, forced_outcomes(scored)
-    return ["## Forced final answers", "",
-            f"The responses of `{manifest['source']['run_id']}` that stopped at the cap with a reasoning trace, replayed with the "
-            f"thinking closed (template `{f['template']}`, `{f['endpoint']}`, max_tokens {f['max_tokens']}): "
-            f"{counts.get('selected', '–')} selected; {counts.get('skipped_no_trace', '–')} stopped at the cap without a trace and were skipped. "
-            f"Of {len(scored)} forced responses, {out['answered']} answered and {out['still_reasoning']} went back to reasoning "
-            "and stopped at max_tokens again (`truncated` below).", "",
-            "These records are a stratum of their own. The source run's records stay `truncated` (censored, SCOPE §6 rule 2).", ""]
+    source, check = manifest["source"], manifest.get("raw_check") or {}
+    what = ("that finished with a reasoning trace and an answer, each whole trace replayed with the answer forced (the f = 1 "
+            "acceptance test)") if f.get("select") == "done" else "that stopped at the cap with a reasoning trace, replayed with the thinking closed"
+    skipped = "; ".join(f"{v} skipped ({k.removeprefix('skipped_').replace('_', ' ')})" for k, v in counts.items() if k.startswith("skipped_"))
+    L = ["## Forced final answers", "",
+         f"The responses of `{source['run_id']}` {what} (template `{f['template']}`, `{f['endpoint']}`, max_tokens {f['max_tokens']}"
+         + (f", logit_bias `{f['logit_bias']}`" if f.get("logit_bias") else "") + "): "
+         f"{counts.get('selected', '–')} selected" + (f"; {skipped}" if skipped else "") + ". "
+         f"Of {len(scored)} forced responses, {out['answered']} answered and {out['still_reasoning']} went back to reasoning "
+         f"and stopped at max_tokens again (`truncated` below). {out['parsed']} parsed (`ok`); {out['renewed_reasoning']} carried "
+         "reasoning again (`renewed_reasoning`, which should be 0 under force-2).", "",
+         f"- **Routing:** forced calls `{manifest.get('provider_routing')}`; the source run `{source.get('provider_routing', '–')}`."]
+    if check.get("passed"):
+        L.append(f"- **Raw-prompt check:** the same text gave {check['completions']['prompt_tokens']} prompt tokens as a raw prompt and "
+                 f"{check['chat']['prompt_tokens']} as a chat user message, so the provider passed the raw prompt through.")
+    if "same_as_natural" in out:
+        L.append(f"- **Agreement with the natural answer:** {out['same_as_natural']} of the {out['natural_ok']} forced responses whose "
+                 "source response is `ok` gave its answer (`same_as_natural`: the same answer key, both ok).")
+    return L + ["", "These records are a stratum of their own. The source run's records stay as they are (a truncated one stays "
+                "`truncated`: censored, SCOPE §6 rule 2).", ""]
 
 
 def _cost_per_item(rs: list[dict[str, Any]]) -> str:

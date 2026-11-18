@@ -2,7 +2,8 @@
 everything is re-scored from raw outputs).
 
     python -m reasoning_heuristics.evals.score data/runs/<run_id> [data/runs/<other> ...]
-    python -m reasoning_heuristics.evals.score data/runs/forced/<source_run_id>    (a forced-answer pass)
+    python -m reasoning_heuristics.evals.score data/runs/forced-2/<select>/<source_run_id>    (a forced-answer pass;
+        force-1's are in data/runs/forced/<source_run_id>)
 
 Reads manifest.json (which item files, with their SHA-256) and raw.jsonl.gz; writes
 scored.jsonl.gz, scoring.json (scorer version, git SHA, counts) and REPORT.md. The item files
@@ -96,8 +97,19 @@ def score_raw(manifest: dict[str, Any], raw: list[dict[str, Any]], items: dict[s
                     "scorer_git_dirty": git.get("dirty")})
         if r.get("forced_template"):  # a forced final answer (force.py): a stratum of its own, never the source's
             rec.update({"forced": True, "forced_template": r["forced_template"], "source_run_id": r["source_run_id"]})
+            rec.update({k: r[k] for k in ("forced_select", "forced_sample", "source_sample") if k in r})
+            if r.get("natural_response") is not None:  # --select done: the source response's own answer
+                rec.update(natural_scoring(it, r, ctx, rec))
         out.append(rec)
     return out
+
+
+def natural_scoring(item: dict[str, Any], raw: dict[str, Any], ctx: ItemContext, forced: dict[str, Any]) -> dict[str, Any]:
+    """The source response's own scoring, beside a forced answer to the same trace (force.py --select done), and
+    whether the two agree: `same_as_natural` is the same answer key with both ok."""
+    nat = score_response(item, ResponseView.from_api(raw["natural_response"], max_tokens=raw.get("natural_max_tokens")), ctx)
+    return {"natural_category": nat["category"], "natural_correct": nat["correct"], "natural_answer_key": nat["answer_key"],
+            "same_as_natural": nat["category"] == "ok" and forced["category"] == "ok" and nat["answer_key"] == forced["answer_key"]}
 
 
 def score_run(run_dir: Path, allow_item_drift: bool = False, items_at_run_sha: bool = False,
