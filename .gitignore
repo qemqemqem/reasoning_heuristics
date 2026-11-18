@@ -8,3 +8,4 @@ data/items/test/
 data/items/**/*.jsonl
 keys.env
 .env
+data/cache/

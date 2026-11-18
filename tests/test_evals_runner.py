@@ -1,0 +1,341 @@
+"""The runner with the HTTP layer mocked: retries, cache hits, the cost cap, budgets, manifests,
+resumption, re-scoring from disk, and the API key never leaving the environment."""
+
+from __future__ import annotations
+
+import gzip
+import json
+import urllib.error
+from pathlib import Path
+
+import pytest
+from evals_helpers import ITEMS, api_response
+
+from reasoning_heuristics.evals import cost as C
+from reasoning_heuristics.evals import ledger
+from reasoning_heuristics.evals.cache import ResponseCache, cache_key
+from reasoning_heuristics.evals.client import FatalAPIError, HttpResponse, MissingKeyError, OpenRouterClient
+from reasoning_heuristics.evals.models import DIRECT_SYSTEM_PROMPT, Pricing, condition, get_model, request_body
+from reasoning_heuristics.evals.run import main as run_main
+from reasoning_heuristics.evals.score import main as score_main
+
+SECRET = "sk-or-test-SECRET-do-not-write"
+B4E1 = str(ITEMS / "smoke" / "B4C4_E1_smoke_s1.jsonl.gz")
+
+
+class FakeTransport:
+    """Answers chat completions like a model; can fail first, and records every call."""
+
+    def __init__(self, fail_first: list[int] | None = None, cost: float = 0.0001, exc_first: int = 0):
+        self.calls: list[dict] = []
+        self.fail_first = list(fail_first or [])
+        self.exc_first = exc_first
+        self.cost = cost
+
+    def __call__(self, method, url, headers, body, timeout):
+        assert headers["Authorization"] == f"Bearer {SECRET}"
+        if method == "GET":
+            return HttpResponse(200, json.dumps({"data": {"endpoints": []}}).encode())
+        req = json.loads(body)
+        self.calls.append(req)
+        if self.exc_first:
+            self.exc_first -= 1
+            raise urllib.error.URLError("connection reset")
+        if self.fail_first:
+            return HttpResponse(self.fail_first.pop(0), b'{"error": {"message": "busy"}}', {})
+        prompt = req["messages"][-1]["content"]
+        content = "ANSWER: C" if '"ANSWER: <letter>"' in prompt else "ANSWER: YES"
+        resp = api_response(content, cost=self.cost, model=req["model"], provider="FakeProvider",
+                            gen_id=f"gen-{len(self.calls)}")
+        return HttpResponse(200, json.dumps(resp).encode())
+
+
+@pytest.fixture
+def key(monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", SECRET)
+
+
+def client(transport):
+    return OpenRouterClient(transport, sleep=lambda s: None)
+
+
+def run(tmp_path, transport, *extra, out="run1", items=B4E1, limit=6):
+    args = ["--items", items, "--model", "openai/gpt-oss-20b", "--out", str(tmp_path / out), "--cap-usd", "1",
+            "--provider", "fakeprovider", "--cache-dir", str(tmp_path / "cache"), "--ledger", str(tmp_path / "LEDGER.md"),
+            "--concurrency", "3", *([] if limit is None else ["--limit", str(limit)]), *extra]
+    return run_main(args, client=client(transport))
+
+
+def read_gz(p: Path) -> list[dict]:
+    with gzip.open(p, "rt", encoding="utf-8") as fh:
+        return [json.loads(line) for line in fh]
+
+
+# --- client ------------------------------------------------------------------------------------------------
+
+
+def test_retries_with_backoff_then_succeeds(key):
+    sleeps = []
+    t = FakeTransport(fail_first=[503, 429])
+    c = OpenRouterClient(t, sleep=sleeps.append)
+    res = c.chat({"model": "m", "messages": [{"role": "user", "content": 'x "ANSWER: YES"'}]})
+    assert res.ok and res.attempts == 3 and len(res.errors) == 2 and len(sleeps) == 2
+    assert 0 < sleeps[0] <= sleeps[1] * 2  # exponential with jitter
+
+
+def test_network_errors_and_errors_inside_200_are_retried(key):
+    t = FakeTransport(exc_first=2)
+    assert client(t).chat({"model": "m", "messages": [{"role": "user", "content": "q"}]}).attempts == 3
+
+    class ErrorBody(FakeTransport):
+        def __call__(self, method, url, headers, body, timeout):
+            if len(self.calls) == 0:
+                self.calls.append({})
+                return HttpResponse(200, json.dumps({"choices": [{"finish_reason": "error", "error": {"code": 502}}]}).encode())
+            return super().__call__(method, url, headers, body, timeout)
+
+    res = client(ErrorBody()).chat({"model": "m", "messages": [{"role": "user", "content": "q"}]})
+    assert res.ok and res.attempts == 2
+
+
+def test_exhausted_retries_return_an_error_not_an_exception(key):
+    res = OpenRouterClient(FakeTransport(fail_first=[503] * 10), max_attempts=3, sleep=lambda s: None).chat(
+        {"model": "m", "messages": [{"role": "user", "content": "q"}]})
+    assert not res.ok and res.attempts == 3 and "503" in res.error
+
+
+@pytest.mark.parametrize("status", [400, 401, 402, 403, 404])
+def test_fatal_statuses_are_not_retried(key, status):
+    t = FakeTransport(fail_first=[status])
+    with pytest.raises(FatalAPIError):
+        client(t).chat({"model": "m", "messages": [{"role": "user", "content": "q"}]})
+    assert len(t.calls) == 1
+
+
+def test_key_is_read_from_the_environment_at_call_time(monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    c = client(FakeTransport())
+    with pytest.raises(MissingKeyError):
+        c.chat({"model": "m", "messages": []})
+    monkeypatch.setenv("OPENROUTER_API_KEY", SECRET)
+    assert c.chat({"model": "m", "messages": [{"role": "user", "content": "q"}]}).ok
+    assert SECRET not in json.dumps(vars(c), default=str)
+
+
+# --- requests and conditions -------------------------------------------------------------------------------
+
+
+def test_thinking_and_direct_requests():
+    q = get_model("qwen/qwen3-32b")
+    th = request_body(q, condition(q, "thinking"), "PROMPT", {"order": ["p"], "allow_fallbacks": False})
+    assert th["max_tokens"] == 32768 and th["reasoning"] == {"enabled": True} and th["messages"] == [{"role": "user", "content": "PROMPT"}]
+    assert th["provider"] == {"order": ["p"], "allow_fallbacks": False} and th["temperature"] == 0.6
+    di = request_body(q, condition(q, "direct"), "PROMPT", None)
+    assert di["max_tokens"] == 1024 and di["reasoning"] == {"enabled": False}
+    assert di["messages"][0] == {"role": "system", "content": DIRECT_SYSTEM_PROMPT}
+    g = get_model("openai/gpt-oss-20b")
+    assert request_body(g, condition(g, "thinking", "low"), "P", None)["reasoning"] == {"effort": "low"}
+    with pytest.raises(ValueError, match="cannot turn reasoning off"):
+        condition(g, "direct")
+
+
+def test_samples_are_separate_cache_keys():
+    g = get_model("openai/gpt-oss-20b")
+    body = request_body(g, condition(g, "thinking"), "P", None)
+    assert cache_key(body, 0) != cache_key(body, 1)
+    assert cache_key(body, 0) == cache_key(json.loads(json.dumps(body)), 0)
+    other = request_body(g, condition(g, "thinking"), "P", {"order": ["x"], "allow_fallbacks": False})
+    assert cache_key(other, 0) != cache_key(body, 0)  # provider routing is part of the key
+
+
+# --- runs ------------------------------------------------------------------------------------------------------------
+
+
+def test_run_writes_raw_scored_report_manifest_and_ledger(tmp_path, key):
+    t = FakeTransport()
+    assert run(tmp_path, t) == 0
+    out = tmp_path / "run1"
+    m = json.loads((out / "manifest.json").read_text())
+    assert m["status"] == "complete" and m["model_requested"] == "openai/gpt-oss-20b"
+    assert m["models_returned"] == ["openai/gpt-oss-20b"] and m["providers_served"] == {"FakeProvider": 6}
+    assert m["provider_routing"] == {"order": ["fakeprovider"], "allow_fallbacks": False, "require_parameters": True}
+    assert m["condition"]["max_tokens"] == 32768 and m["condition"]["reasoning"] == {"effort": "high"}
+    assert list(m["items"]["files"]) == ["data/items/smoke/B4C4_E1_smoke_s1.jsonl.gz"]
+    assert all(len(h) == 64 for h in m["items"]["files"].values())
+    assert m["git"]["sha"] and m["versions"]["python-sat"] and m["versions"]["pyetr"] == "1.0.0"
+    assert m["versions"]["scorer"].startswith("scorer-") and m["spend"]["spent_usd"] == pytest.approx(0.0006)
+    raw = read_gz(out / "raw.jsonl.gz")
+    assert len(raw) == 6 and all(r["request"]["messages"][-1]["content"] for r in raw)
+    assert all(r["response"]["usage"]["cost"] == 0.0001 for r in raw)
+    scored = read_gz(out / "scored.jsonl.gz")
+    need = {"item_id", "content_hash", "model", "category", "parsed", "answer_key", "outcome_class", "correct",
+            "reasoning_tokens", "completion_tokens", "truncated", "scorer_version", "pre_answer_tokens", "condition"}
+    assert all(need <= set(r) for r in scored) and {r["category"] for r in scored} == {"ok"}
+    assert "Response categories" in (out / "REPORT.md").read_text()
+    rows = ledger.rows(tmp_path / "LEDGER.md")
+    assert len(rows) == 1 and rows[0]["run_id"] == "run1" and float(rows[0]["cost_usd"]) == pytest.approx(0.0006)
+
+
+def test_rerun_hits_the_cache_and_never_repays(tmp_path, key):
+    t = FakeTransport()
+    run(tmp_path, t)
+    n = len(t.calls)
+    run(tmp_path, t, out="run2")
+    assert len(t.calls) == n  # nothing sent
+    m = json.loads((tmp_path / "run2" / "manifest.json").read_text())
+    assert m["cache_hits"] == 6 and m["charged_usd"] == 0 and m["status"] == "complete"
+    assert all(r["from_cache"] for r in read_gz(tmp_path / "run2" / "raw.jsonl.gz"))
+    assert len(ledger.rows(tmp_path / "LEDGER.md")) == 1  # a cache-only run costs nothing and books nothing
+
+
+def test_resume_into_the_same_directory_sends_only_the_rest(tmp_path, key):
+    t = FakeTransport()
+    run(tmp_path, t, "--no-cache", limit=3)
+    run(tmp_path, t, "--no-cache", limit=6)
+    assert len(t.calls) == 6
+    assert len(read_gz(tmp_path / "run1" / "raw.jsonl.gz")) == 6
+
+
+def test_cap_stops_cleanly_before_the_spend_would_pass_it(tmp_path, key):
+    g = get_model("openai/gpt-oss-20b")
+    # each reservation is >= 1.25 * 32768 * $0.13/M = $0.00533; each call then costs $0.005
+    t = FakeTransport(cost=0.005)
+    cap = 0.012  # two calls fit ($0.010); a third reservation ($0.010 + $0.0053) would pass the cap
+    args = ["--items", B4E1, "--model", g.slug, "--out", str(tmp_path / "capped"), "--cap-usd", str(cap), "--provider", "fp",
+            "--cache-dir", str(tmp_path / "c"), "--ledger", str(tmp_path / "L.md"), "--concurrency", "1", "--limit", "10"]
+    assert run_main(args, client=client(t)) == 2
+    m = json.loads((tmp_path / "capped" / "manifest.json").read_text())
+    assert m["status"] == "stopped" and m["stop_reason"].startswith("cap:")
+    assert len(t.calls) == 2 and m["spend"]["spent_usd"] == pytest.approx(0.010) and m["spend"]["spent_usd"] <= cap
+    assert len(read_gz(tmp_path / "capped" / "scored.jsonl.gz")) == 2
+
+
+def test_budget_tag_caps_a_run_by_the_ledger_total(tmp_path, key):
+    led = tmp_path / "LEDGER.md"
+    ledger.append(led, date="2026-11-17", run_id="probe", model="m", condition="probe", items=1, cost_usd=2.99, budget_tag="mine")
+    t = FakeTransport()
+    with pytest.raises(C.CapReached):
+        run(tmp_path, t, "--budget-tag", "mine", "--budget-usd", "2.99")
+    assert run(tmp_path, t, "--budget-tag", "mine", "--budget-usd", "3.00") in (0, 2)
+    m = json.loads((tmp_path / "run1" / "manifest.json").read_text())
+    assert m["cap_usd"] == pytest.approx(0.01) and m["budget_spent_before_usd"] == pytest.approx(2.99)
+    assert ledger.spent(led, "mine") <= 3.00 + 1e-9
+
+
+def test_price_mismatch_stops_the_run(tmp_path, key):
+    t = FakeTransport(cost=5.0)  # far above any reserved worst case
+    assert run(tmp_path, t, limit=4) == 2
+    m = json.loads((tmp_path / "run1" / "manifest.json").read_text())
+    assert m["status"] == "stopped" and "worst case" in m["stop_reason"]
+
+
+def test_fatal_error_stops_the_run_and_is_recorded(tmp_path, key):
+    t = FakeTransport(fail_first=[402])
+    assert run(tmp_path, t, "--concurrency", "1", limit=3) == 2
+    m = json.loads((tmp_path / "run1" / "manifest.json").read_text())
+    assert m["status"] == "stopped" and "402" in m["stop_reason"]
+    scored = read_gz(tmp_path / "run1" / "scored.jsonl.gz")
+    assert scored[0]["category"] == "api_error"
+
+
+def test_unpinned_model_is_refused_without_no_pin(tmp_path, key):
+    args = ["--items", B4E1, "--model", "openai/gpt-oss-20b", "--out", str(tmp_path / "x"), "--cap-usd", "1", "--limit", "1",
+            "--cache-dir", str(tmp_path / "c"), "--ledger", str(tmp_path / "L.md")]
+    with pytest.raises(SystemExit, match="no pinned provider"):
+        run_main(args, client=client(FakeTransport()))
+    assert run_main(args + ["--no-pin"], client=client(FakeTransport())) == 0
+
+
+def test_dry_run_sends_nothing_and_writes_nothing(tmp_path, capsys):
+    args = ["--items", str(ITEMS / "smoke"), "--model", "qwen/qwen3-32b", "--condition", "direct", "--out", str(tmp_path / "d"),
+            "--dry-run", "--exclude-eval", "E8"]
+    assert run_main(args) == 0
+    text = capsys.readouterr().out
+    assert "| **Total** | | **254** |" in text and not (tmp_path / "d").exists()
+
+
+def test_direct_run_records_the_system_instruction(tmp_path, key):
+    t = FakeTransport()
+    args = ["--items", B4E1, "--model", "qwen/qwen3-32b", "--condition", "direct", "--out", str(tmp_path / "direct"),
+            "--cap-usd", "1", "--provider", "fp", "--cache-dir", str(tmp_path / "c"), "--ledger", str(tmp_path / "L.md"), "--limit", "2"]
+    assert run_main(args, client=client(t)) == 0
+    m = json.loads((tmp_path / "direct" / "manifest.json").read_text())
+    assert m["condition"]["system_prompt"] == DIRECT_SYSTEM_PROMPT and m["condition"]["label"] == "direct"
+    assert t.calls[0]["messages"][0]["content"] == DIRECT_SYSTEM_PROMPT and t.calls[0]["max_tokens"] == 1024
+
+
+def test_score_command_rescores_from_disk_and_refuses_item_drift(tmp_path, key):
+    run(tmp_path, FakeTransport())
+    out = tmp_path / "run1"
+    before = read_gz(out / "scored.jsonl.gz")
+    (out / "scored.jsonl.gz").unlink()
+    assert score_main([str(out)]) == 0
+    after = read_gz(out / "scored.jsonl.gz")
+    assert [r["parsed"] for r in after] == [r["parsed"] for r in before]
+    m = json.loads((out / "manifest.json").read_text())
+    m["items"]["files"]["data/items/smoke/B4C4_E1_smoke_s1.jsonl.gz"] = "0" * 64
+    (out / "manifest.json").write_text(json.dumps(m))
+    with pytest.raises(SystemExit, match="changed since the run"):
+        score_main([str(out)])
+
+
+def test_the_key_is_never_written_anywhere(tmp_path, key):
+    run(tmp_path, FakeTransport())
+    for p in tmp_path.rglob("*"):
+        if p.is_file():
+            data = gzip.decompress(p.read_bytes()) if p.suffix == ".gz" else p.read_bytes()
+            assert SECRET.encode() not in data, p
+
+
+def test_cache_import_from_runs(tmp_path, key):
+    run(tmp_path, FakeTransport())
+    fresh = ResponseCache(tmp_path / "fresh")
+    assert fresh.import_runs([tmp_path / "run1" / "raw.jsonl.gz"]) == 6
+    raw = read_gz(tmp_path / "run1" / "raw.jsonl.gz")
+    assert fresh.get(raw[0]["cache_key"])["response"] == raw[0]["response"]
+
+
+def test_cost_guard_reservations():
+    g = C.CostGuard(0.01, Pricing(0.0, 0.1, "test"), 1000, safety=1.0)  # worst case 0.0001 + prompt
+    w = g.worst_case("")
+    n = 0
+    while g.reserve(w):
+        n += 1
+    assert abs(n - 0.01 / w) <= 1 and g.refused == 1 and g.reserved <= g.cap
+    g.settle(w, {"cost": w / 2})
+    assert g.spent == pytest.approx(w / 2)
+    with pytest.raises(C.CapReached):
+        C.CostGuard(0, Pricing(0, 0, "t"), 1)
+
+
+def test_probe_records_listing_reasoning_and_thinking_off(tmp_path, key):
+    from reasoning_heuristics.evals.probe import main as probe_main
+
+    listing = {"data": {"id": "qwen/qwen3-32b", "endpoints": [
+        {"provider_name": "Alpha", "tag": "alpha/bf16", "quantization": "bf16", "context_length": 40960,
+         "max_completion_tokens": 40960, "pricing": {"prompt": "0.0000001", "completion": "0.0000003"},
+         "supported_parameters": ["reasoning", "top_k", "seed"], "status": 0}]}}
+
+    class ProbeTransport(FakeTransport):
+        def __call__(self, method, url, headers, body, timeout):
+            assert headers["Authorization"] == f"Bearer {SECRET}"
+            if method == "GET":
+                return HttpResponse(200, json.dumps(listing).encode())
+            req = json.loads(body)
+            self.calls.append(req)
+            off = req.get("reasoning") in ({"enabled": False}, {"effort": "none"}) or req["messages"][0]["content"].endswith("/no_think")
+            resp = api_response("42", reasoning=None if off else "17 plus 25 is 42.", reasoning_tokens=0 if off else 12,
+                                provider="Alpha", model=req["model"], cost=0.00001)
+            return HttpResponse(200, json.dumps(resp).encode())
+
+    t = ProbeTransport()
+    led = tmp_path / "L.md"
+    assert probe_main(["--model", "qwen/qwen3-32b", "--out", str(tmp_path / "p"), "--cap-usd", "0.05", "--ledger", str(led),
+                       "--budget-tag", "mine", "--budget-usd", "3"], client=client(t)) == 0
+    assert len(t.calls) == 4 and all(c["provider"] == {"order": ["alpha/bf16"], "allow_fallbacks": False} for c in t.calls)
+    md = (tmp_path / "p" / "PROBES.md").read_text()
+    assert "| `alpha/bf16` | Alpha | bf16 | 40960 |" in md and "| `alpha/bf16` | off | Alpha | 0 chars | 0 |" in md
+    results = json.loads((tmp_path / "p" / "probes.json").read_text())
+    on = next(p for p in results["models"]["qwen/qwen3-32b"]["probed"] if p["variant"] == "on")
+    assert on["summary"]["reasoning_returned"] and not on["summary"]["thinking_off_honoured"]
+    assert ledger.spent(led, "mine") == pytest.approx(0.00004)

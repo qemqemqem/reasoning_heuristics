@@ -31,7 +31,7 @@ The design work and the first stage of question generators are finished. No mode
 | Shared engineering: item schema, domain library, heuristic zoo code, counterfactual tooling, validators | Built and tested (246 tests) | `src/reasoning_heuristics/`, [GENERATORS.md](GENERATORS.md) |
 | Stage 1 generators | Built: A/H E1, E2, E5, E8; C E1, E2, E3, E5; B4/C4 E1, E2. Output is 266 smoke and 1,330 dev items, all passing validation, with no dev-to-test leakage. A few lower-priority cells aren't built (listed in GENERATORS.md) | `src/reasoning_heuristics/generators/`, `data/items/` |
 | Manual review of items | Page is live, no marks yet | [Review page](https://claude.ai/artifact/AEidKBQZisLzHB8BudFtb1), `scripts/review_page/` |
-| Runner (OpenRouter client, batch, cache, cost guard) | Not started | SCOPE §4 item 1 |
+| Runner (OpenRouter client, cache, cost guard, manifests) and scorer | Built and tested with the HTTP layer mocked: thin custom runner, thinking and direct conditions, one versioned scorer. No batch endpoint yet; E8 continuations not built | [RUNNER.md](RUNNER.md), `src/reasoning_heuristics/evals/` |
 | Identification engine (mixture fit with a slip model) | Not started | SCOPE §4 item 4 |
 | Recovery harness (fake models with planted mixtures) | Not started. The C and cross-formalism designs ran their own recovery simulations | SCOPE §4 item 5, `scripts/cross_formalism/recovery_sim.py` |
 | Trace pipeline (codebook, parsers, LLM coder, faithfulness probes) | Not started. The E8 specs for faithfulness probes exist | SCOPE §4 item 6 |
@@ -94,4 +94,4 @@ python scripts/review_page/build_review.py out.html
 pytest -q
 ```
 
-API keys go in `keys.env`, which is gitignored. Nothing in the repo calls a model yet.
+API keys go in `keys.env`, which is gitignored. The runner reads `OPENROUTER_API_KEY` from the environment; see [RUNNER.md](RUNNER.md).
