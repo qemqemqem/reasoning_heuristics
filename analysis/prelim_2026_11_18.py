@@ -81,6 +81,9 @@ RUN_PATTERNS = ("2026-11-18-dev-*", "2026-11-18-pc20-*", "2026-11-18-pc40-*")
 # Per item set (the directory under data/items/ a run's manifest names), the units whose recovery
 # gates pass at that set's size on the regenerated items (RECOVERY.md, "Regenerated items:
 # candidate units", #24). Nothing else is fitted (DESIGN §5 rule 12).
+# A/H E5 colouring also passes at 40 per cell after #27 (the mixture with either interval, and both
+# nulls; RECOVERY.md, "Where the gates pass"). It is not listed: data/items/pc40 holds C E5 only, so
+# no A/H E5 run at 40 per cell exists. Add it under the item set such runs answer, when they land.
 GATED = {
     "pc20": ["C_E2/colouring", "C_E2/knapsack", "AH_E5/SAT"],
     "pc40": ["C_E5/3-SAT (partial assignment given)"],
@@ -96,26 +99,28 @@ DOC_PILOT = ["2026-11-18-pc20-qwen3-32b-direct", "2026-11-18-pc20-gpt-oss-20b-th
 DOC_DEV = ["2026-11-18-dev-qwen3-32b-direct", "2026-11-18-dev-qwen3-14b-direct", "2026-11-18-dev-gpt-oss-20b-thinking-low"]
 DOC_FIT_UNITS = GATED["pc20"]
 
-# Why every other unit gets descriptive statistics only. RECOVERY.md "Regenerated items: candidate
-# units" (#24) where a unit was rerun on the regenerated items, else its pre-regeneration "Where the
-# gates pass" and sweep tables; dev units are at 5 per cell, where no unit passes ("Bottom line").
+# Why every other unit gets descriptive statistics only: the verdicts of RECOVERY.md after #27, all
+# on the regenerated items (its closing table "Where the gates pass", the "Items per cell" sweep and
+# "Why the others fail"). "Passes" means the 60/30/10 mixture with percentile intervals and 100
+# replicates, as in GATED; the nulls are named where they fail. Dev units are at 5 per cell, where no
+# unit passes ("Bottom line").
 NOT_FITTED = {
-    "AH_E1": "fails by design: q is not identified on a two-valued channel (q = ½ always-positive + ½ always-negative), and the noise models are near-mixtures of the procedures",
+    "AH_E1": "fails by design at every size run (5–20 per cell): q is not identified on a two-valued channel (q = ½ always-positive + ½ always-negative), so the nulls are not testable, and the noise models are near-mixtures of the procedures",
     "AH_E2": "fails by design: as A/H E1",
-    "AH_E5/COL": "not reached by 40 (pre-regeneration): the 0.1 weight's coverage is 0.84 at 40 (100 replicates); at 20, coverage 0.83 and width 0.24",
-    "AH_E5/ENT": "not reached by 40 on the regenerated items: coverage 0.81 at 20 and 0.87 at 40 (B4 FIRST); BCa 0.88 at both",
-    "AH_E5/KNAP": "no mixture test (pre-regeneration): fewer than three members on every item; null q fails at 20",
-    "B4C4_E1": "fails by design: NOISY-EXACT is nearly the EXACT group (σ_min/σ_max = 0.0004)",
-    "B4C4_E2": "fails by design: five linear dependencies, one of them among procedures (the H6 gap)",
-    "C_E1/3-SAT": "fails at 20 on the regenerated items: percentile coverage 0.86 (ALWAYS-UNSAT; BCa 0.92 passes), and null q fails (coverage 0.78)",
-    "C_E1/colouring": "not reached by 40 (pre-regeneration): coverage 0.88 ± 0.03 at 40 (100 replicates); 0.77 at 20",
-    "C_E2/3-SAT": "fails at 20 on the regenerated items: median width 0.28 > 0.2, and null q fails (coverage 0.89)",
-    "C_E3": "fails by design: FF-LIST (= DPLL-LIST) leaks 0.14–0.31 of its weight to the LOCAL-t proxies at every size",
-    "C_E5/3-SAT": "not reached by 40: width 0.23",
-    "C_E5/3-SAT (partial assignment given)": "passes only at 40 per cell (regenerated items); null q fails below 40",
-    "C_E5/colouring (k=3)": "fails by design at these sizes: a near-tie (FF-3-EDGE-MENTION-ABORT vs PHANTOM-ADJACENT); widths stay at 0.4",
-    "C_E5/colouring (k=3, partial colouring given)": "not reached by 40: bias 0.07, width 0.24",
-    "C_E5/propositional entailment": "fails by design: q and NOISY-EXACT are combinations of other members, and EXACT answers NO on every item",
+    "AH_E5/COL": "passes at 40 per cell (the mixture with either interval, and both nulls) but not at 20 (smallest coverage 0.86, median width 0.245; BCa 0.90, 0.239); no A/H E5 run at 40 per cell exists",
+    "AH_E5/ENT": "not reached by 40: bias and width pass from 20, but the 0.1 weight (B4 FIRST) covers 0.81 at 20 and 0.87 at 40 (BCa 0.88 at both); both nulls pass",
+    "AH_E5/KNAP": "no mixture test: fewer than three members on every item; null q fails coverage from 20 per cell on (the boundary)",
+    "B4C4_E1": "fails by design (run at dev size only): NOISY-EXACT is nearly the EXACT group (σ_min/σ_max = 0.0004)",
+    "B4C4_E2": "fails by design (run at dev size only): five linear dependencies, one of them among procedures (the H6 gap)",
+    "C_E1/3-SAT": "the mixture passes only with BCa intervals (0.92 at 20, 0.90 at 40); with percentile intervals the 0.1 ALWAYS-UNSAT weight covers 0.86 at 20 and 0.79 at 40; null q fails at every size (the boundary)",
+    "C_E1/colouring": "the mixture passes only with BCa intervals, at 20 (0.91); with percentile intervals it covers 0.88 at 20 and 0.87 at 40; null ALWAYS fails at every size, by design (the one-colour answer goes to LOCAL-2-ID)",
+    "C_E2/3-SAT": "the mixture passes at 40 per cell but not at 20 (coverage 0.88, median width 0.28), and null q fails at every size (0.88 at 40), so the three never pass together",
+    "C_E3": "fails by design (run at dev size only): DPLL-LIST = FF-LIST and six LOCAL-t proxies span only six directions, so the mixture is not testable, and null q loads 0.41 on members",
+    "C_E5/3-SAT": "not reached by 40: at 40 per cell the median width is 0.24 and the 0.1 weight's coverage 0.89",
+    "C_E5/3-SAT (partial assignment given)": "passes only at 40 per cell (the mixture and both nulls); null q fails below 40, and at 20 the GUC-DET / SC-DET split fails (coverage 0.01–0.03)",
+    "C_E5/colouring (k=3)": "fails at these sizes by a near-tie (FF-3-EDGE-MENTION-ABORT against ALWAYS-IMPOSSIBLE = PHANTOM-ADJACENT): coverage 0.48 at 20; at 40, coverage 0.89 but median width 0.46",
+    "C_E5/colouring (k=3, partial colouring given)": "not reached by 40: bias and coverage pass at 40, but the median width is 0.27, and null q fails at every size",
+    "C_E5/propositional entailment": "fails by design: q and NOISY-EXACT are combinations of other members, and the EXACT group answers 'does not follow' on every item (mixture bias 0.08–0.13 at every size)",
 }
 
 SCHEMA = {
