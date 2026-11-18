@@ -20,9 +20,11 @@ command: nothing in it is tuned to the current items. Workers are processes, so 
 - width: the median 95% interval width over planted quantities and replicates is <= 0.2.
 
 **The planted triple** for `mix`, `feature`, `clustered`, `truncated` and `off_zoo` is chosen by a
-rule, not by hand: h1 (0.6) is the first group of the largest family; h2 (0.3) is h1's nearest
-competitor (the group with the fewest separating items, > 0); h3 (0.1) is the group of another
-family that is most separated from both. Only groups available on every item are planted.
+rule, not by hand: h1 (0.6) is the first deterministic group of the largest family; h2 (0.3) is h1's
+nearest competitor (the group with the fewest separating items, > 0); h3 (0.1) is the group of
+another family that is most separated from both. Only groups available on every item are planted,
+and members of a linear dependency (identified only in combination) are avoided when three
+others remain.
 
 **Feature levels** (`feature`): the first factor of the cell label that takes exactly two values
 in the unit (cells split on "/" and "·"); if there is none, the cells are split into two halves in
@@ -69,10 +71,15 @@ def family_of(um: UnitModel, label: str) -> str:
     return um.unit.families().get(label, "?")
 
 
-def choose_triple(um: UnitModel, sep: dict[str, dict[str, int]]) -> list[str] | None:
-    """h1, h2 from deterministic groups when there are enough (procedures, not noise models), h3 any group."""
+def choose_triple(um: UnitModel, sep: dict[str, dict[str, int]], exclude: set[str] | None = None) -> list[str] | None:
+    """h1, h2 from deterministic groups when there are enough (procedures, not noise models), h3 any group.
+    Groups in `exclude` (members of a linear dependency, which no data can recover on their own) are
+    left out when at least three others remain."""
     cols = um.columns
     full = full_columns(um)
+    if exclude:
+        kept = [j for j in full if cols[j].name not in exclude]
+        full = kept if len(kept) >= 3 else full
     if len(full) < 3:
         return None
     det = [j for j in full if all(um.pred(i, cols[j].members[0]).kind == "det" for i in range(len(um.items)))]
@@ -173,15 +180,14 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
                            "n_cells": len(set(unit.cells)), "items_per_cell": round(len(unit.items) / len(set(unit.cells)), 2),
                            "finite_channel": finite, "groups": [g.members for g in um.columns], "folded_into_q": um.q_members,
                            "scenarios": {}}
-    triple = choose_triple(um, sep)
+    # Gates are checked on identified quantities only (engine.identifiability): members of a linear
+    # dependency are identified only in combination, and the planted triple avoids them when it can.
+    ident = {NEAR_MISS: identifiability(um, rng=rng)}
+    ident[UNIFORM] = ident[NEAR_MISS] if finite else identifiability(gen[UNIFORM], rng=rng)
+    triple = choose_triple(um, sep, exclude=set(ident[NEAR_MISS]["involved"]))
     out["triple"] = triple
     out["design"] = design_rank(um)
     out["least_separated"] = diagnostics_least_separated(sep)
-    # Gates are checked on identified quantities only (engine.identifiability): with a null space,
-    # its pivots are 'not identified' and every other weight is reported with the share of the
-    # pivots' mass the design cannot tell apart from it.
-    ident = {NEAR_MISS: identifiability(um, rng=rng)}
-    ident[UNIFORM] = ident[NEAR_MISS] if finite else identifiability(gen[UNIFORM], rng=rng)
     out["identifiability"] = {m: {k: v for k, v in d.items() if k not in ("transform", "null_basis")} for m, d in ident.items()}
     R, B = cfg["reps"], cfg["boot"]
     scen = cfg["scenarios"]
