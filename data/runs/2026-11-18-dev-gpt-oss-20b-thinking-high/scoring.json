@@ -1,0 +1,28 @@
+{
+  "scorer_version": "scorer-1.5.1",
+  "git": {
+    "sha": "e0b1720b2f4387cadc86c4544081f6dc778aaa0e",
+    "dirty": false,
+    "branch": "run-dev-gpt-oss-20b-high"
+  },
+  "versions": {
+    "python": "3.12.12",
+    "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "reasoning_heuristics": "0.1.0",
+    "scorer": "scorer-1.5.1",
+    "tokenizer_proxy": "regex-digit-split-v1",
+    "python-sat": "1.9.dev22",
+    "pyetr": "1.0.0",
+    "numpy": "2.5.5",
+    "networkx": "3.7",
+    "jsonschema": "4.26.0"
+  },
+  "scored_at": "2026-11-18T16:50:36Z",
+  "items_source": "working tree",
+  "records": 1270,
+  "categories": {
+    "ok": 806,
+    "truncated": 462,
+    "parse_fail": 2
+  }
+}
