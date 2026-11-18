@@ -158,6 +158,10 @@ def build(only: list[tuple[str, str]] | None, seed: int, reuse: bool,
                 print(f"generating {vertical} {eval_id} {tier} ...", flush=True)
                 reports[tier] = generate_and_validate(mod.VERTICAL, mod.EVAL_ID, tier, seed, per, {}, ITEMS,
                                                       validate=(tier != "test"))
+                # timings go to stdout only: the committed reports and summary must regenerate byte for byte
+                print("  seconds (wall / CPU): " + ", ".join(
+                    f"{k} {reports[tier]['seconds'][k]} / {reports[tier]['seconds'][k + '_cpu']}"
+                    for k in ("generation", "validation") if k in reports[tier]["seconds"]), flush=True)
                 reports[tier]["items_list"] = read_jsonl(path)
                 if tier != "test":
                     compress(path)
@@ -172,7 +176,6 @@ def build(only: list[tuple[str, str]] | None, seed: int, reuse: bool,
             "tiers": {t: {"items": len(reports[t]["items_list"]),
                           "bases": reports[t]["generation"]["accepted"],
                           "attempts": reports[t]["generation"]["attempts"],
-                          "seconds": reports[t].get("generation_seconds"),
                           "coverage": coverage(reports[t]["items_list"], designed),
                           "validation": {k: v for k, v in reports[t].get("validation", {}).items()}}
                       for t in ("smoke", "dev")},
@@ -192,8 +195,8 @@ def write_summary(rows: list[dict[str, Any]], seed: int, collisions: list[Failur
         "(smoke [0, 1e5), dev [1e5, 1e6), test [1e6, 2e6)). A one-item-per-cell test batch is generated",
         "only to check dev-vs-test leakage; it is not committed.",
         "",
-        "| Eval | Smoke items | Dev items | Dev bases (attempts) | Cells covered (dev) | Items per cell (dev) | Smoke pass | Dev pass | Leakage | Dev gen. time |",
-        "|---|---|---|---|---|---|---|---|---|---|",
+        "| Eval | Smoke items | Dev items | Dev bases (attempts) | Cells covered (dev) | Items per cell (dev) | Smoke pass | Dev pass | Leakage |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
     failures = []
     for r in rows:
@@ -203,7 +206,7 @@ def write_summary(rows: list[dict[str, Any]], seed: int, collisions: list[Failur
         lines.append(
             f"| {r['vertical']} {r['eval_id']} | {s['items']} | {d['items']} | {d['bases']} ({d['attempts']}) | "
             f"{cov['covered']}/{cov['designed_cells']} | {cov['min_per_cell']}–{cov['max_per_cell']} | "
-            f"{s['validation'].get('pass_rate', 0):.0%} | {d['validation'].get('pass_rate', 0):.0%} | {leak} | {d['seconds']} s |")
+            f"{s['validation'].get('pass_rate', 0):.0%} | {d['validation'].get('pass_rate', 0):.0%} | {leak} |")
         for t in ("smoke", "dev"):
             for f in r["tiers"][t]["validation"].get("failures", []):
                 failures.append(f"| {r['vertical']} {r['eval_id']} | {t} | `{f['item_id']}` | {f['check']} | {_short(f['message'], 120)} |")

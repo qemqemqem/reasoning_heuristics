@@ -1,10 +1,11 @@
 """Follow-ups to the review fixes (docs/reviews/2026-11-17-project-review.md), made with the one
 regeneration of the item sets: C E5 matches on SEARCH's nodes, the distributional members run the
-C doc's 10⁴ samples, and SAT PERCEPTION-NOISE records p_f."""
+C doc's 10⁴ samples, SAT PERCEPTION-NOISE records p_f, and the written reports reproduce."""
 
 import json
 from collections import defaultdict
 
+from reasoning_heuristics.generate import generate_and_validate
 from reasoning_heuristics.generators import ah_common, c_e1, c_e2, c_e5
 from reasoning_heuristics.heuristics.base import run
 from reasoning_heuristics.heuristics.montecarlo import SAMPLES, SMOOTHING_EPS
@@ -80,3 +81,18 @@ def test_sat_perception_noise_records_p_f():
     assert params["p_f"] == 0.01
     tf = run("sat", "PERCEPTION-NOISE", SatTask(sat_cnf()), params).trace_features
     assert tf["p_f"] == params["p_f"]
+
+
+# --- written reports reproduce byte for byte -----------------------------------------------------------
+
+
+def test_written_reports_hold_no_timings(tmp_path):
+    a = generate_and_validate("A/H", "E5", "smoke", 1, None, {}, tmp_path / "a")
+    generate_and_validate("A/H", "E5", "smoke", 1, None, {}, tmp_path / "b")
+    assert set(a["seconds"]) == {"generation", "generation_cpu", "validation", "validation_cpu"}
+    texts = [(tmp_path / d / "smoke" / "AH_E5_smoke_s1.report.json").read_text() for d in ("a", "b")]
+    written = json.loads(texts[0])
+    assert not [k for k in written if "seconds" in k]
+    assert written["validation"]["failures"] == []
+    # outside the repo the report names its output directory; nothing else may differ
+    assert texts[0].replace(str(tmp_path / "a"), "") == texts[1].replace(str(tmp_path / "b"), "")
