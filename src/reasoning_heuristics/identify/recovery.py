@@ -395,7 +395,8 @@ def run(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(prog="recovery run")
     ap.add_argument("--items", required=True, help="a directory of item sets (*.jsonl.gz or *.jsonl) or one file")
     ap.add_argument("--evals", default=None, help="comma-separated eval names, e.g. C_E1,AH_E2")
-    ap.add_argument("--units", default=None, help="comma-separated unit names (eval/domain)")
+    ap.add_argument("--units", default=None,
+                    help="unit names (eval/domain) separated by ';' (names can contain commas)")
     ap.add_argument("--scenarios", default=",".join(ALL_SCENARIOS))
     ap.add_argument("--reps", type=int, default=60)
     ap.add_argument("--boot", type=int, default=150)
@@ -419,12 +420,18 @@ def run(argv: list[str]) -> int:
     cfg = {"reps": a.reps, "boot": a.boot, "single_reps": a.single_reps, "feature_reps": a.feature_reps,
            "feature_boot": a.feature_boot, "offzoo_reps": a.offzoo_reps, "seed": a.seed,
            "scenarios": a.scenarios.split(",")}
-    tasks = []
+    wanted = [u.strip() for u in a.units.split(";") if u.strip()] if a.units else None
+    tasks, found = [], set()
     for ev, ps in sorted(by_eval.items()):
         for name in make_units(load_items(ps)):
-            if a.units and name not in a.units.split(","):
+            found.add(name)
+            if wanted and name not in wanted:
                 continue
             tasks.append((ps, name, cfg))
+    missing = sorted(set(wanted or ()) - found)
+    if missing:
+        print(f"no unit named {missing} in these item sets; units are: {sorted(found)}", file=sys.stderr)
+        return 2
     # longest first, so the pool is not left waiting on one big unit at the end
     tasks.sort(key=lambda t: -sum(p.stat().st_size for p in t[0]))
     prov = provenance(paths)  # before the run, so later edits to the tree cannot leak in
