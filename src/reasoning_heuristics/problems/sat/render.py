@@ -43,6 +43,15 @@ def render_textbook(cnf: CNF, declared: list[str] | None = None) -> str:
     return "\n".join(lines)
 
 
+def _menu_rule(cnf: CNF) -> str:
+    """The request rule, true for the clause widths present (pure 3-CNF keeps the library's text)."""
+    widths = {len(c) for c in cnf.clauses}
+    if widths == {1}:
+        return "Each guest has a request that is met if its condition holds."
+    count = {2: "two ", 3: "three "}.get(next(iter(widths)), "") if len(widths) == 1 else ""
+    return f"Each guest has a request that is met if at least one of its {count}conditions holds."
+
+
 def render_menu(cnf: CNF) -> str:
     """A/H natural-language framing (Hazra et al.'s menu style). Variable x07 renders as dish D07."""
     dish = {v: "D" + v.lstrip("x") for v in cnf.var_names}
@@ -50,7 +59,7 @@ def render_menu(cnf: CNF) -> str:
     lines = [
         f"You are planning which dishes to serve at a dinner. There are {cnf.n} candidate dishes, "
         f"{dish[cnf.var_names[0]]} to {dish[cnf.var_names[-1]]}; each is either served or not served.",
-        "Each guest has a request that is met if at least one of its three conditions holds.",
+        _menu_rule(cnf),
         "",
     ]
     for i, c in enumerate(cnf.clauses, 1):
