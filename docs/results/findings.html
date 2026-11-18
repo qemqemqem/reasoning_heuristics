@@ -1,61 +1,175 @@
 <!-- What we can say so far. Hand-written; the results page shows this fragment verbatim.
-     Each claim gives its number, its interval (or says why it has none), the chance level it was
-     compared against, and one strength label:
+     Each claim gives its numbers, says why it has no interval where it has none, names the chance level it was
+     compared against, and carries one strength label:
        <span class="strength a">(a) fitted, and the fitted model reproduces the data</span>
        <span class="strength b">(b) fitted, but the model does not reproduce the data: read as nearness</span>
        <span class="strength c">(c) descriptive count</span>
-     Numbers are from analysis/out/prelim_2026_11_18.json as computed at be9e0d3 (11 runs).
-     After editing, rebuild the page: python analysis/results_page.py -->
+     Numbers are from analysis/out/prelim_2026_11_18.json (the commit and runs it names under Reproduce), and the
+     A/H E5 framing counts from its descriptive.by_framing. After editing, rebuild the page: python analysis/results_page.py -->
+<p class="summary"><strong>In short.</strong> When these models get a knapsack or colouring instance wrong, their
+answer is often exactly what a simple greedy procedure gives: ratio or value greedy on knapsack, and colouring the
+vertices in the order they are listed. Thinking at high effort turns Qwen3's answers from mostly invalid into mostly
+valid, and mostly correct on most units. Its wrong colourings are often exactly listing-order first fit's: on about
+half the items where both are wrong. But a mixture of heuristics run exactly, plus
+near misses, does not describe the answers. The only fits that reproduce their data are ones where the model almost
+always solves the problem. The models also often call solvable instances impossible. And gpt-oss-120b at low
+effort answers the textbook problem when a connective is redefined, until the rule is restated. All of this is
+preliminary: dev items, one sample per item, nothing pre-registered.</p>
 <ol>
 
 <li>
-<p><strong>Most fitted weights say whose answers a model's answers are near, not which procedures it runs.</strong>
-In 12 of 16 fits the slip rate ε sits at its cap (0.5), and in 14 of 16 the data simulated from the fitted mixture miss at least one of three simple statistics of the real answers. On C E2 colouring, for example, the fitted mixtures expect 0.33 [0.29, 0.38] of Qwen3-32B's answers (thinking off) and 0.39 [0.35, 0.43] of gpt-oss-20b's (low effort) to equal a member's answer; the data have 0.00 and 0.28.</p>
-<p>Interval: 5–95% over 100 fake data sets drawn from each fit. Chance level: none; this checks the fitted model, it is not a test against chance.
-<span class="strength b">(b) fitted, but the model does not reproduce the data</span></p>
+<p><strong>When the models get knapsack wrong, their answer is often a greedy rule's exact answer, far more often than chance.</strong>
+Take the items where both the model and RATIO-SKIP are wrong. RATIO-SKIP adds items by value per unit weight and
+skips any that do not fit. On those items, gpt-oss-20b at low effort gives RATIO-SKIP's packing on 29 of 112, and
+gpt-oss-120b on 35 of 79. The permutation chance levels are 0.008 and 0.009, and p = 0.0005, the smallest possible
+with 2,000 permutations. Difference greedy (DIFF) and value greedy (VALUE) show the same for gpt-oss-20b: 27 of 125
+and 19 of 101. Qwen3 with thinking off does it too, but less often: Qwen3-14B gives RATIO-SKIP's packing on 23 of
+223 (chance 0.007), and Qwen3-32B gives the ratio-prefix packing on 15 of 266 (chance 0.005). With thinking, Qwen3
+is wrong on only 10 of 296 items (Qwen3-32B) and 8 of 278 (Qwen3-14B), too few to say.</p>
+<p>No interval: these are counts, one sample per item. Chance level: the within-cell permutation baseline.
+<span class="strength c">(c) descriptive count</span>, tested against permutation chance</p>
 </li>
 
 <li>
-<p><strong>gpt-oss at low effort solves most C E2 knapsack items, and when it errs it often gives a greedy rule's answer. These are the only two fits that reproduce their data.</strong>
-gpt-oss-20b gives the optimal packing on 158 of 300 items and gpt-oss-120b on 212 of 300. The weight on EXACT is 0.616 [0.535, 0.688] and 0.739 [0.653, 0.823], against permutation chance levels of 0.039 and 0.051. Where both the model and RATIO-SKIP are wrong, the model gives RATIO-SKIP's answer on 29 of 112 items (20b) and 35 of 79 (120b), against chance levels of 0.008 and 0.009; p = 0.0005 for each, the smallest possible with 2,000 permutations.</p>
-<p>The fitted models reproduce the data: they expect 0.72 [0.69, 0.75] and 0.87 [0.85, 0.90] of answers to equal a member's answer, and the data have 0.72 and 0.87, with ε = 0.29 [0.23, 0.34] and 0.13 [0.08, 0.18]. That makes the weights a fair description of these answers. It does not show that the model runs these procedures.
-<span class="strength a">(a) fitted, and the fitted model reproduces the data</span></p>
-</li>
-
-<li>
-<p><strong>On C E2 colouring, the gpt-oss models give listing-order first fit's wrong colouring, and almost never another greedy member's.</strong>
-Where both are wrong, gpt-oss-20b gives FF-LIST's colouring on 40 of 232 items and gpt-oss-120b on 64 of 225. For each other deterministic greedy member (FF-LABEL, LF, DSATUR, DSATUR-LABEL) the count is 0–2. No answer from the two Qwen3 models with thinking off equals any member's colouring.</p>
-<p>No interval: these are counts, one sample per item. No chance level: this unit has no permutation baseline, because no two items in a cell share their vertex labels, so the within-cell shuffle cannot move any answer.
+<p><strong>On C E2 colouring, a wrong colouring that equals any member's is almost always first fit in the listed vertex order.</strong>
+FF-LIST takes the vertices in the order the prompt lists them and gives each the first colour that fits; on these
+items it is identical to greedy with repair in the same order. Of the wrong colourings that equal some member's,
+FF-LIST's account for 64 of 64 for gpt-oss-120b at low effort, 40 of 41 for gpt-oss-20b at low effort, 99 of 111
+for Qwen3-14B with thinking and 80 of 100 for Qwen3-32B with thinking. Most wrong colourings equal no member's. Where both are wrong, the model's colouring
+equals FF-LIST's:</p>
+<ul>
+<li>Qwen3-14B with thinking: 99 of 199 items;</li>
+<li>Qwen3-32B with thinking: 80 of 177;</li>
+<li>gpt-oss-120b at low effort: 64 of 225;</li>
+<li>gpt-oss-20b at low effort: 40 of 232.</li>
+</ul>
+<p>The same greedy rule in other vertex orders rarely matches. In the order above:</p>
+<ul>
+<li>label order (FF-LABEL): 2 of 181, 0, 0 and 0;</li>
+<li>largest degree first (LF): 11 of 185, 20 of 172, 0 and 2;</li>
+<li>DSATUR: 7 of 115, 6 of 105, 0 and 0.</li>
+</ul>
+<p>With thinking off, no Qwen3 colouring equals any member's: Qwen3-32B gives 1 proper colouring in 300, and Qwen3-14B
+66.</p>
+<p>No interval: counts, one sample per item. No permutation baseline: no two items in a cell share their vertex
+labels, so the within-cell shuffle cannot move any answer. A uniformly random colouring would equal a given member's
+with probability below 10<sup>−12</sup>. That is not the right chance level for a model that colours sensibly, so
+the other vertex orders serve as the control.
 <span class="strength c">(c) descriptive count</span></p>
 </li>
 
 <li>
-<p><strong>Qwen3 with thinking off gives greedy knapsack answers more often than chance, but rarely, and its fits do not reproduce the data.</strong>
-Where both are wrong, Qwen3-32B gives the ratio-greedy prefix's answer on 15 of 266 items (0.056) and Qwen3-14B gives RATIO-SKIP's on 23 of 223 (0.103), against permutation chance levels of 0.005 and 0.007 (p = 0.0005 each). Their fitted models expect 0.46 [0.41, 0.51] and 0.47 [0.42, 0.52] of answers to equal a member's answer; the data have 0.08 and 0.16.</p>
-<p>Interval: none for the counts; 5–95% over 100 fake data sets for the check. Chance level: the within-cell permutation baseline.
-<span class="strength c">(c) descriptive count</span> for the agreements; the fits themselves are <span class="strength b">(b)</span>.</p>
+<p><strong>Thinking turns Qwen3's answers from mostly invalid to mostly valid, and mostly correct on most units.</strong>
+Correct answers out of ok answers, for Qwen3-32B on the same pc20 items, thinking off → on:</p>
+<ul>
+<li>C E2 knapsack: 1/300 → 286/296;</li>
+<li>C E2 colouring: 0/300 → 106/290 (proper colourings: 1 → 280);</li>
+<li>C E1 colouring: 1/120 → 113/119;</li>
+<li>C E1 3-SAT: 6/116 → 66/117;</li>
+<li>A/H E5 entailment: 8/80 → 75/78.</li>
+</ul>
+<p>Qwen3-14B shows the same: C E2 knapsack 11/300 → 270/278, C E2 colouring 0/300 → 98/299 (proper colourings: 66 →
+291), and C E1 colouring 0/120 → 110/120. With thinking, each model is correct on most items in 6 of the 9 pc20 units.
+The exceptions are C E2 colouring (above), C E2 3-SAT (37/192 and 59/187) and A/H E5 SAT (20/95 and 22/95). On C E5 SAT with a partial assignment given (pc40), Qwen3-32B
+goes from 5/120 to 93/117, and Qwen3-14B from 1/120 to 104/118.</p>
+<p>The fitted C E5 mixtures show the same shift. With thinking off, they put their largest weight on POLARITY, which
+ignores the given assignment: 0.567 [0.435, 0.703] for Qwen3-32B and 0.483 [0.329, 0.644] for Qwen3-14B, with ε at
+its cap. With thinking, the largest weight is on EXACT: 0.892 [0.810, 0.958] and 0.928 [0.850, 0.989].</p>
+<p>No interval on the counts: one sample per item. Intervals on the weights: 95% percentile. Chance level: none
+(within-model comparison). The direct condition's system message conflicts with the prompts (see Limits), which may
+depress direct accuracy.
+<span class="strength c">(c) descriptive count</span>; the two thinking fits are
+<span class="strength a">(a)</span>, the direct fits <span class="strength b">(b)</span></p>
 </li>
 
 <li>
-<p><strong>On A/H E5 SAT, where the prompt states the clause rule (inverted in some cells), we found no zoo member that accounts for the answers.</strong>
-Qwen3-32B and Qwen3-14B with thinking off and gpt-oss-20b at low effort satisfy the stated rule on no item (0 of 95, 0 of 100 and 0 of 97), and none of their answers equals any member's assignment. Their unexplained mass is 0.942 [0.794, 0.999], 0.968 [0.809, 1.000] and 0.869 [0.738, 0.956], against permutation chance levels of 0.945, 0.970 and 0.984. gpt-oss-120b satisfies the rule on 7 of 99 items, and its fit puts 0.304 [0.152, 0.466] on the stated-rule solutions (chance 0.031), but its fitted model misses all three statistics.</p>
-<p>Interval: 95% percentile. Chance level: the within-cell permutation baseline.
-<span class="strength b">(b) fitted, but the model does not reproduce the data</span></p>
+<p><strong>A mixture of heuristics run exactly, plus near misses, rarely describes the answers.</strong>
+Of 24 fits, 14 have the slip rate ε at its cap (0.5). Only 4 pass every check against their data: Qwen3-32B and
+Qwen3-14B with thinking, on C E2 knapsack and on C E5 SAT with a partial assignment. All four have EXACT at 0.89 or
+more, so their heuristic weights are small. Where errors are common, the
+near-miss model gets their shape wrong:</p>
+<ul>
+<li>gpt-oss-20b's wrong knapsack packings are often two items from the nearest member, one item swapped for another:
+0.15 of answers, against 0.08 predicted (distance-profile p = 0.01).</li>
+<li>gpt-oss-120b's knapsack fit is borderline (p = 0.05).</li>
+<li>The two Qwen3 colouring fits with thinking have ε well below the cap (0.15 and 0.13). Their largest weight is on
+FF-LIST: 0.373 [0.313, 0.436] for Qwen3-32B and 0.464 [0.398, 0.531] for Qwen3-14B. But each expects 0.03–0.04 of
+answers beyond every member's reach, and there are none. Each also expects fewer exact matches than the data have:
+0.66 against 0.71, and 0.65 against 0.70. With thinking, the answers are more procedure-like than the near-miss model
+allows.</li>
+</ul>
+<p>Check: each fit is compared with 100 fake data sets drawn from it. The checks are conservative, so a failure is a
+real misfit. The distance-profile check was added on 2026-11-18, after we saw that the earlier checks could barely
+fail; it makes verdicts stricter, not looser.
+<span class="strength b">(b) fitted, but the model does not reproduce the data</span>, except the four named
+<span class="strength a">(a)</span></p>
 </li>
 
 <li>
-<p><strong>C E5 SAT with a partial assignment given, fitted for the first time at 40 items per cell: none of the four fits reproduces its data.</strong>
-gpt-oss-120b solves 79 of 120 items, and its fit puts 0.843 [0.757, 0.908] on EXACT, with ε = 0.45 [0.35, 0.50], below the cap. But the fitted model expects 0.30 [0.27, 0.33] of answers to be UNSAT, and the data have 0.25. For Qwen3-32B with thinking off, the largest weight is on POLARITY, which ignores the given assignment: 0.567 [0.435, 0.703], with ε at its cap. Its fitted model expects 0.53 [0.45, 0.61] of answers to equal a member's answer; the data have 0.10.</p>
-<p>Interval: 95% percentile for weights; 5–95% over 100 fake data sets for the check. Chance level: none; this unit has no permutation baseline either.
-<span class="strength b">(b) fitted, but the model does not reproduce the data</span></p>
+<p><strong>The models often call a solvable instance impossible.</strong>
+Every C E5 3-colouring graph at pc40 is 3-colourable, yet the answer is IMPOSSIBLE on most of them:</p>
+<ul>
+<li>gpt-oss-20b at low effort: 193 of 200;</li>
+<li>gpt-oss-120b at low effort: 160 of 200;</li>
+<li>Qwen3-32B with thinking: 134 of 197;</li>
+<li>Qwen3-14B with thinking: 119 of 186;</li>
+<li>Qwen3-32B with thinking off: 99 of 199.</li>
+</ul>
+<p>Qwen3-14B with thinking off says IMPOSSIBLE only once in 199, but none of its colourings is proper.</p>
+<p>gpt-oss-20b at low effort also answers UNSAT on satisfiable formulas: 53 of 110 on C E1 3-SAT (pc20) and 68 of
+119 on C E5 3-SAT (pc40), where every formula is satisfiable.</p>
+<p>These answers fit "colour greedily with three colours and give up at the first dead end". On these items, though,
+that rule and "always say impossible" give nearly the same answers, so the data cannot tell them apart. That is also
+why the unit is not fitted.</p>
+<p>No interval: counts, one sample per item. Chance level: none.
+<span class="strength c">(c) descriptive count</span></p>
+</li>
+
+<li>
+<p><strong>When a connective is redefined, gpt-oss-120b at low effort answers the textbook problem, and restating the rule fixes most of it.</strong>
+On A/H E5 entailment, the prompt redefines "either A or B" to mean that neither holds. Under that inverted rule,
+gpt-oss-120b at low effort gives the textbook (inclusive-or) answer on 16 of 20 items and the correct one on none.
+With the rule restated just before the question, the counts are 3 textbook and 16 correct out of 20. gpt-oss-20b
+gives 3 textbook answers in 18 (8 correct), and 1 in 17 once the rule is restated (14 correct). With thinking,
+Qwen3-32B is correct on 17 of 20 under the inversion, with 3 textbook answers; Qwen3-14B on 14 of 19, with 4. Once
+the rule is restated, they are correct on 19 of 19 and 19 of 20, with no textbook answer. On the inverted knapsack and colouring
+rules, textbook answers are absent or nearly so (at most 1 in 20 per run).</p>
+<p>In the eval's terms, restating the rule removes most textbook answers. That points to the redefinition being
+lost by the time the model answers (retention), rather than a fixed prior for the textbook reading. The counts are
+small, though.</p>
+<p>No interval: counts, about 20 items per framing, one sample each. Chance level: none; under the inverted framings,
+the textbook answer and the correct one are disjoint by construction.
+<span class="strength c">(c) descriptive count</span></p>
+</li>
+
+<li>
+<p><strong>At high effort, gpt-oss-120b runs out of tokens on the hardest units.</strong>
+On dev items, 284 of its 1,270 responses hit the 32,768-token cap, including:</p>
+<ul>
+<li>143 of 270 on C E3 colouring gadgets;</li>
+<li>38 of 40 on A/H E2 SAT;</li>
+<li>29 of 50 on C E2 3-SAT.</li>
+</ul>
+<p>Its correct shares on those units describe only the items it finished, which are likely the easier ones; the
+tables mark them †.</p>
+<p>No interval: counts. Chance level: none.
+<span class="strength c">(c) descriptive count</span></p>
 </li>
 
 <li>
 <p><strong>Within gpt-oss at low effort, the larger model solves more of every fitted unit.</strong>
-gpt-oss-120b against gpt-oss-20b: C E2 knapsack 212 of 300 against 158 of 300; C E2 colouring 63 of 300 against 43 of 299; A/H E5 SAT 7 of 99 against 0 of 97; C E5 SAT with a partial assignment given 79 of 120 against 52 of 120.</p>
-<p>No interval and no test: one sample per item. Chance level: none. Only comparisons within a family are made; across families, model and condition change together.
+gpt-oss-120b against gpt-oss-20b:</p>
+<ul>
+<li>C E2 knapsack: 212 of 300 against 158 of 300;</li>
+<li>C E2 colouring: 63 of 300 against 43 of 299;</li>
+<li>A/H E5 SAT: 7 of 99 against 0 of 97;</li>
+<li>C E5 SAT with a partial assignment given: 79 of 120 against 52 of 120.</li>
+</ul>
+<p>No interval and no test: one sample per item. Chance level: none. Comparisons are made only within a family,
+because across families model and condition change together.
 <span class="strength c">(c) descriptive count</span></p>
 </li>
 
 </ol>
-<p class="not-yet"><strong>Not yet in:</strong> the four Qwen3 thinking-high pilot runs (Qwen3-14B and Qwen3-32B on the pc20 and pc40 items) and the four high-effort dev runs (gpt-oss-20b, gpt-oss-120b, Qwen3-14B and Qwen3-32B). Nothing here is about thinking at best effort, the primary condition.</p>
+<p class="not-yet"><strong>Not yet in:</strong> gpt-oss-20b at high effort on the dev items. It is still running,
+and most of its remaining C-vertical responses are hitting the token cap.</p>

@@ -1253,6 +1253,7 @@ code.hash{font-size:.75rem;word-break:break-all}
 .findings ol{padding-left:1.4rem}
 .findings li{margin:0 0 .9rem}
 .findings .not-yet{color:var(--ink-2);font-size:.9rem}
+.findings .summary{font-size:1.02rem;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--s1);border-radius:6px;padding:.75rem 1rem;max-width:none}
 .panels{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,30rem),1fr));gap:1rem}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.8rem .9rem;min-width:0}
 .panel.wide{margin:0 0 1rem}
