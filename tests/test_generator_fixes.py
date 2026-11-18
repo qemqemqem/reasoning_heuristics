@@ -257,5 +257,5 @@ def test_review_reuse_reads_the_committed_gz(tmp_path, monkeypatch):
         path.with_suffix(".report.json").write_text(json.dumps(report))
     monkeypatch.setattr(review, "ITEMS", tmp_path)
     monkeypatch.setattr(review, "REVIEW", tmp_path / "review")
-    rows = review.build([("B4/C4", "E1")], 1, reuse=True, dev_per_cell=None)
+    rows, _ = review.build([("B4/C4", "E1")], 1, reuse=True, dev_per_cell=None)
     assert rows[0]["tiers"]["dev"]["items"] == len(items)
