@@ -1,0 +1,165 @@
+{
+  "run_id": "forced-2/cut/2026-11-18-pc40-qwen3-14b-thinking-high",
+  "status": "complete",
+  "started_at": "2026-11-18T20:22:49Z",
+  "model_requested": "qwen/qwen3-14b",
+  "source": {
+    "run_id": "2026-11-18-pc40-qwen3-14b-thinking-high",
+    "raw_sha256": "3d66de17a649d3805e8ce89e3f275094ec696d6ed9a75d4d8b6e318286c119d9",
+    "condition": "thinking-high",
+    "git": {
+      "sha": "9f33eaae34ec5c7affccdaf2744e5d74a4221624",
+      "dirty": false,
+      "branch": "pc40-c-e5"
+    },
+    "provider_routing": {
+      "order": [
+        "deepinfra/fp8/flex"
+      ],
+      "allow_fallbacks": false,
+      "require_parameters": true,
+      "quantizations": [
+        "fp8"
+      ]
+    }
+  },
+  "forced": {
+    "template": "force-2",
+    "endpoint": "https://openrouter.ai/api/v1/completions",
+    "max_tokens": 4096,
+    "select": "cut",
+    "logit_bias": null
+  },
+  "condition": {
+    "name": "forced",
+    "label": "thinking-high-forced",
+    "effort": "high",
+    "max_tokens": 4096,
+    "system_prompt": null,
+    "reasoning": null,
+    "sampling": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20
+    },
+    "template": "force-2"
+  },
+  "provider_routing": {
+    "order": [
+      "deepinfra/fp8/flex"
+    ],
+    "allow_fallbacks": false,
+    "require_parameters": true,
+    "quantizations": [
+      "fp8"
+    ]
+  },
+  "price": {
+    "prompt": 0.096,
+    "completion": 0.192,
+    "source": "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
+  },
+  "context_length": 40960,
+  "routing_notes": "the source pin, DeepInfra fp8 flex, which passes raw prompts through (42 prompt tokens raw, 51 as a chat message; data/runs/probes/2026-11-18-forced-answer, batch 11)",
+  "model_notes": "Hybrid thinking checkpoint. No bf16 endpoint exists on OpenRouter (DeepInfra fp8 tiers and NextBit int4), so fp8 is pinned. deepinfra/fp8 (standard tier) caps completions at 16,384, so the flex tier is pinned. reasoning {enabled: false} is honoured (0 reasoning tokens); /no_think leaves an empty think block.",
+  "raw_check": {
+    "passed": null,
+    "skipped": "no call to send: every forced call is answered from the response cache"
+  },
+  "items": {
+    "files": {
+      "data/items/pc40/C_E5_dev_s1.jsonl.gz": "1ecb3c5141c28800847e774d8d7a5ede37eb9649e95430e6e98e02661d1e60f7"
+    },
+    "n_items": 21,
+    "skipped": {
+      "no_trace": 0,
+      "no_room": 0
+    },
+    "per_unit": null,
+    "limit": null,
+    "samples": 1,
+    "allow_item_drift": true,
+    "items_ref": null
+  },
+  "estimate": {
+    "calls": 21,
+    "prompt_tokens": 718099,
+    "cost_usd": 0.0689,
+    "worst_case_usd": 0.0855,
+    "assumptions": "prompt tokens: each source response's prompt plus completion tokens; cost_usd is the prompt alone (every call answers at once), worst_case_usd has every call at its max_tokens"
+  },
+  "cap_usd": 0.2,
+  "cap_requested_usd": 0.2,
+  "budget_tag": "forced2-2026-11-18",
+  "budget_usd": 4.0,
+  "budget_spent_before_usd": 0.38878999999999997,
+  "git": {
+    "sha": "75fb55fb5ebeafb80486f7fb27a1954c03404897",
+    "dirty": false,
+    "branch": "forced2-acceptance-2026-11-18"
+  },
+  "versions": {
+    "python": "3.12.12",
+    "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "reasoning_heuristics": "0.1.0",
+    "scorer": "scorer-1.5.2",
+    "tokenizer_proxy": "regex-digit-split-v1",
+    "python-sat": "1.9.dev22",
+    "pyetr": "1.0.0",
+    "numpy": "2.5.5",
+    "networkx": "3.7",
+    "jsonschema": "4.26.0"
+  },
+  "client": {
+    "timeout_s": 1800.0,
+    "max_attempts": 6,
+    "concurrency": 4
+  },
+  "notes": "force-2: all cut traces",
+  "resumed_from": 0,
+  "counts": {
+    "candidates": 21,
+    "selected": 21,
+    "units": 3,
+    "samples": 1,
+    "calls": 21,
+    "skipped_no_trace": 0,
+    "skipped_no_room": 0,
+    "max_tokens_lowered": 0,
+    "responses": 21,
+    "answered": 21,
+    "parsed": 20,
+    "still_reasoning": 0,
+    "renewed_reasoning": 0
+  },
+  "stop_reason": null,
+  "finished_at": "2026-11-18T20:22:49Z",
+  "wall_s": 0.1,
+  "models_returned": [
+    "qwen/qwen3-14b"
+  ],
+  "providers_served": {
+    "DeepInfra": 21
+  },
+  "responses": 21,
+  "failed_calls": 0,
+  "cache_hits": 21,
+  "spend": {
+    "cap_usd": 0.2,
+    "spent_usd": 0.0,
+    "calls": 0,
+    "refused_reservations": 0,
+    "calls_without_reported_cost": 0,
+    "failed_attempt_cost_usd": 0.0,
+    "failed_attempts_charged": 0,
+    "safety_factor": 1.25,
+    "price": {
+      "prompt": 0.096,
+      "completion": 0.192,
+      "source": "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
+    }
+  },
+  "charged_usd": 0.0,
+  "charged_usd_all_invocations": 0.0,
+  "api_reported_cost_usd_all_responses": 0.06989
+}

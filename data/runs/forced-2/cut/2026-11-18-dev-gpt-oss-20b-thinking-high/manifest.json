@@ -1,0 +1,211 @@
+{
+  "run_id": "forced-2/cut/2026-11-18-dev-gpt-oss-20b-thinking-high",
+  "status": "complete",
+  "started_at": "2026-11-18T20:16:14Z",
+  "model_requested": "openai/gpt-oss-20b",
+  "source": {
+    "run_id": "2026-11-18-dev-gpt-oss-20b-thinking-high",
+    "raw_sha256": "b90c253250d4d957d2414da589a341b05138a7532fb05fc8d47db5e0e553e369",
+    "condition": "thinking-high",
+    "git": {
+      "sha": "62d8345a6eec0691e8eb0c36f085239c09d1f46e",
+      "dirty": false,
+      "branch": "dev-runs-2026-11-18"
+    },
+    "provider_routing": {
+      "order": [
+        "dekallm/bf16"
+      ],
+      "allow_fallbacks": false,
+      "require_parameters": true,
+      "quantizations": [
+        "bf16"
+      ]
+    }
+  },
+  "forced": {
+    "template": "force-2",
+    "endpoint": "https://openrouter.ai/api/v1/completions",
+    "max_tokens": 4096,
+    "select": "cut",
+    "logit_bias": {
+      "200005": -100,
+      "200006": -100,
+      "200007": -100
+    }
+  },
+  "condition": {
+    "name": "forced",
+    "label": "thinking-high-forced",
+    "effort": "high",
+    "max_tokens": 4096,
+    "system_prompt": null,
+    "reasoning": null,
+    "sampling": {
+      "temperature": 1.0,
+      "top_p": 1.0
+    },
+    "template": "force-2"
+  },
+  "provider_routing": {
+    "order": [
+      "deepinfra/bf16"
+    ],
+    "allow_fallbacks": false,
+    "require_parameters": true,
+    "quantizations": [
+      "bf16"
+    ]
+  },
+  "price": {
+    "prompt": 0.03,
+    "completion": 0.14,
+    "source": "DeepInfra bf16 endpoint listing (OpenRouter, 2026-11-17: data/runs/probes/2026-11-17)"
+  },
+  "context_length": 131072,
+  "routing_notes": "DeepInfra bf16 passes raw prompts through (93 prompt tokens raw, 147 as a chat message; data/runs/probes/2026-11-18-forced-answer, batch 11) and supports logit_bias, not logprobs. It serves the released weights upcast to bf16, as DekaLLM bf16 (the source pin) does.",
+  "model_notes": "Reasoning cannot be turned off (every endpoint answers HTTP 400 'Reasoning is mandatory' to enabled:false and effort:none); effort low is a budget arm, not the direct condition. Pinned to DekaLLM bf16: bf16 holds the released MXFP4 expert weights exactly, and it reports reasoning tokens. Not DeepInfra bf16 (HTTP 429 rate-limited upstream on all 6 attempts), not AkashML fp4 (reports 0 reasoning tokens alongside reasoning text), not the fp8 endpoints (a lossy re-quantisation). Fallback if DekaLLM fails: coreweave/fp4.",
+  "raw_check": {
+    "passed": true,
+    "routing": {
+      "order": [
+        "deepinfra/bf16"
+      ],
+      "allow_fallbacks": false,
+      "require_parameters": true,
+      "quantizations": [
+        "bf16"
+      ]
+    },
+    "prompt": "<|start|>system<|message|>You are ChatGPT, a large language model trained by OpenAI.\nKnowledge cutoff: 2024-06\n\nReasoning: low\n\n# Valid channels: analysis, commentary, final. Channel must be included for every message.<|end|><|start|>user<|message|>Is 17 a prime number? Answer with one word, YES or NO.<|end|><|start|>assistant<|channel|>analysis<|message|>17 has no divisors other than 1 and itself.<|end|><|start|>assistant<|channel|>final<|message|>",
+    "max_tokens": 8,
+    "temperature": 0,
+    "checked_at": "2026-11-18T20:16:14Z",
+    "completions": {
+      "provider": "DeepInfra",
+      "prompt_tokens": 93,
+      "completion_tokens": 2,
+      "text": "YES",
+      "reasoning": null,
+      "finish_reason": "stop",
+      "cost_usd": 2.59e-06,
+      "generation_id": "gen-1795032974-Rzxck0qYZXrrXc5kVkky"
+    },
+    "chat": {
+      "provider": "DeepInfra",
+      "prompt_tokens": 147,
+      "completion_tokens": 8,
+      "text": null,
+      "reasoning": "We need to answer with",
+      "finish_reason": "length",
+      "cost_usd": 5.05e-06,
+      "generation_id": "gen-1795032974-FRw9xU77ureVHVasY6Ld"
+    },
+    "cost_usd": 7.64e-06
+  },
+  "items": {
+    "files": {
+      "data/items/dev/AH_E1_dev_s1.jsonl.gz": "fa35e1822bb7efe6ac8d084ba4980251455001aa3e3e0e572135643740ce6800",
+      "data/items/dev/AH_E2_dev_s1.jsonl.gz": "bb0789337ed83654006a00d2a5e5d3bd11a352563a74c78a081167dd2eded400",
+      "data/items/dev/AH_E5_dev_s1.jsonl.gz": "f1d564f97c03be1acc1ea30be855405491ccb99e54425326f0b9c48765146e96",
+      "data/items/dev/AH_E8_dev_s1.jsonl.gz": "f9bf218cd603da959a2a5cf4b880e94191b7664c7bbb8e970fe9693933a31702",
+      "data/items/dev/B4C4_E1_dev_s1.jsonl.gz": "4cee1ba3813a8cb1480bac511d888f3cb88eff4488c90b8f3d7ade4c0d090103",
+      "data/items/dev/B4C4_E2_dev_s1.jsonl.gz": "80ea78120cf5e1aa8d15dabcabbdf4f7172ee5facfedb2620ee026c700ef5e26",
+      "data/items/dev/C_E1_dev_s1.jsonl.gz": "209c7e207cc4765b77ea3f8556ece02c8b0f087cbf313e25b34b4e22b22edc13",
+      "data/items/dev/C_E2_dev_s1.jsonl.gz": "62bb0495cd0aee96c8f0c98080234ebc6fc203ca52633f2e0630015001c7d839",
+      "data/items/dev/C_E3_dev_s1.jsonl.gz": "22453a622e973d1cfe1d9019212d09951009edea552186aed63f3ce338099f7f",
+      "data/items/dev/C_E5_dev_s1.jsonl.gz": "4bcbfc03f5444cdc8f589e6ffa60a4ba4b0de9942454a51816df8d4bb1ed35b3"
+    },
+    "n_items": 462,
+    "skipped": {
+      "no_trace": 0,
+      "no_room": 0
+    },
+    "per_unit": null,
+    "limit": null,
+    "samples": 1,
+    "allow_item_drift": true,
+    "items_ref": null
+  },
+  "estimate": {
+    "calls": 462,
+    "prompt_tokens": 15668980,
+    "cost_usd": 0.4701,
+    "worst_case_usd": 0.735,
+    "assumptions": "prompt tokens: each source response's prompt plus completion tokens; cost_usd is the prompt alone (every call answers at once), worst_case_usd has every call at its max_tokens"
+  },
+  "cap_usd": 1.0,
+  "cap_requested_usd": 1.0,
+  "budget_tag": "forced2-2026-11-18",
+  "budget_usd": 4.0,
+  "budget_spent_before_usd": 0.187448,
+  "git": {
+    "sha": "75fb55fb5ebeafb80486f7fb27a1954c03404897",
+    "dirty": false,
+    "branch": "forced2-acceptance-2026-11-18"
+  },
+  "versions": {
+    "python": "3.12.12",
+    "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "reasoning_heuristics": "0.1.0",
+    "scorer": "scorer-1.5.2",
+    "tokenizer_proxy": "regex-digit-split-v1",
+    "python-sat": "1.9.dev22",
+    "pyetr": "1.0.0",
+    "numpy": "2.5.5",
+    "networkx": "3.7",
+    "jsonschema": "4.26.0"
+  },
+  "client": {
+    "timeout_s": 1800.0,
+    "max_attempts": 6,
+    "concurrency": 4
+  },
+  "notes": "force-2: all cut traces",
+  "resumed_from": 0,
+  "counts": {
+    "candidates": 462,
+    "selected": 462,
+    "units": 15,
+    "samples": 1,
+    "calls": 462,
+    "skipped_no_trace": 0,
+    "skipped_no_room": 0,
+    "max_tokens_lowered": 0,
+    "responses": 462,
+    "answered": 461,
+    "parsed": 439,
+    "still_reasoning": 1,
+    "renewed_reasoning": 0
+  },
+  "stop_reason": null,
+  "finished_at": "2026-11-18T20:23:12Z",
+  "wall_s": 417.4,
+  "models_returned": [
+    "openai/gpt-oss-20b"
+  ],
+  "providers_served": {
+    "DeepInfra": 462
+  },
+  "responses": 462,
+  "failed_calls": 0,
+  "cache_hits": 0,
+  "spend": {
+    "cap_usd": 1.0,
+    "spent_usd": 0.479219,
+    "calls": 464,
+    "refused_reservations": 0,
+    "calls_without_reported_cost": 0,
+    "failed_attempt_cost_usd": 0.0,
+    "failed_attempts_charged": 0,
+    "safety_factor": 1.25,
+    "price": {
+      "prompt": 0.03,
+      "completion": 0.14,
+      "source": "DeepInfra bf16 endpoint listing (OpenRouter, 2026-11-17: data/runs/probes/2026-11-17)"
+    }
+  },
+  "charged_usd": 0.479219,
+  "charged_usd_all_invocations": 0.479219,
+  "api_reported_cost_usd_all_responses": 0.479211
+}
