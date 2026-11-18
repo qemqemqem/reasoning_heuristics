@@ -74,3 +74,19 @@ def test_e2_smoke_validates():
     items, stats = b4_e2.generate("smoke", 5)
     assert len(items) == len(b4_e2.cells({})) == 48
     assert run_checks(items, b4_e2.check_set)["failures"] == []
+
+
+def test_e2_never_repeats_a_frame_at_larger_sizes():
+    """Seen at 10 per cell (dev, seed 1): base seeds 564789 and 596465 drew the same abstract frame,
+    so one base carried two seeds and 96 items failed the lineage check. A repeated frame is redrawn."""
+    from reasoning_heuristics.generators import b4_e2
+    from reasoning_heuristics.validate.checks import check_lineage
+
+    items, stats = b4_e2.generate("dev", 1, 10)
+    failures, gaps = check_lineage(items)
+    assert not failures and not gaps
+    assert stats["rejections"].get("duplicate frame (a base already drawn)", 0) >= 1
+    by_base = {}
+    for it in items:
+        by_base.setdefault(it.base_hash, set()).add(it.seed)
+    assert all(len(seeds) == 1 for seeds in by_base.values())
