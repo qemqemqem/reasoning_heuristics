@@ -7,6 +7,7 @@ from __future__ import annotations
 import gzip
 import hashlib
 import json
+import math
 from pathlib import Path
 
 import pytest
@@ -14,7 +15,7 @@ from evals_helpers import ITEMS, api_response
 
 from reasoning_heuristics.evals import ledger
 from reasoning_heuristics.evals.client import HttpResponse, OpenRouterClient
-from reasoning_heuristics.evals.force import UnsupportedModel, forced_body, forced_prompt, select
+from reasoning_heuristics.evals.force import UnsupportedModel, call_max_tokens, forced_body, forced_prompt, select
 from reasoning_heuristics.evals.force import main as force_main
 from reasoning_heuristics.evals.models import get_model
 from reasoning_heuristics.evals.run import main as run_main
@@ -224,7 +225,8 @@ def test_forced_pass_records_and_scores_completions(tmp_path, key):
     assert m["run_id"] == f"forced/{SOURCE}" and m["status"] == "complete"
     assert m["source"]["run_id"] == SOURCE and m["source"]["raw_sha256"] == before["raw.jsonl.gz"]
     assert m["forced"] == {"template": "force-1", "endpoint": "https://openrouter.ai/api/v1/completions", "max_tokens": 4096}
-    assert m["counts"] == {"selected": 3, "skipped_no_trace": 1, "responses": 3, "answered": 2, "still_reasoning": 1}
+    assert m["counts"] == {"selected": 3, "skipped_no_trace": 1, "skipped_no_room": 0, "max_tokens_lowered": 0,
+                           "responses": 3, "answered": 2, "still_reasoning": 1}
     assert m["price"]["completion"] == 0.14 and m["provider_routing"] == get_model("openai/gpt-oss-20b").provider
     assert m["spend"]["spent_usd"] == pytest.approx(0.003) and m["git"]["sha"] and m["versions"]["scorer"]
     report = (out / "REPORT.md").read_text()
@@ -297,3 +299,32 @@ def test_the_dry_run_makes_no_call_and_writes_nothing(tmp_path, key, capsys, mon
     text = capsys.readouterr().out
     assert "3 calls" in text and "1 stopped there without a trace" in text and "$" in text
     assert not (src.parent / "forced").exists()
+
+
+# --- the endpoint's context ----------------------------------------------------------------------------------
+
+
+def test_max_tokens_is_lowered_to_fit_the_context():
+    def rec(prompt, completion):
+        return {"response": {"usage": {"prompt_tokens": prompt, "completion_tokens": completion}}}
+    assert call_max_tokens(rec(1000, 32768), 4096, 40960) == 4096  # room enough
+    # the dev Qwen3 item that overflowed DeepInfra's 40,960 tokens on 2026-11-18 (estimate 36,889)
+    assert call_max_tokens(rec(4121, 32768), 4096, 40960) == 40960 - math.ceil(1.01 * 36889) - 64 < 4096
+    assert call_max_tokens(rec(4121, 32768), 4096, None) == 4096  # no context known: unchanged
+    assert call_max_tokens(rec(8000, 32768), 4096, 40960) < 256  # too little room: the pass skips it
+
+
+def test_a_qwen3_pass_lowers_max_tokens_per_call_to_fit_the_context(tmp_path, key):
+    t = Transport()
+    src = source_run(tmp_path, t, model="qwen/qwen3-32b")
+    source_raw = {r["item_id"]: r for r in read_gz(src / "raw.jsonl.gz")}
+    assert force(src, t, "--max-tokens", "8000") == 0
+    assert len(t.forced) == 3
+    context = get_model("qwen/qwen3-32b").context_length
+    out = tmp_path / "runs" / "forced" / SOURCE
+    for r in read_gz(out / "raw.jsonl.gz"):
+        want = call_max_tokens(source_raw[r["item_id"]], 8000, context)
+        assert r["request"]["max_tokens"] == want < 8000  # 900 + 32,768 prompt tokens leave 6,891 of 40,960
+        assert r["request"]["prompt"].endswith("directly now.\n</think>\n\n")
+    m = json.loads((out / "manifest.json").read_text())
+    assert m["forced"]["max_tokens"] == 8000 and m["counts"]["max_tokens_lowered"] == 3 and m["counts"]["skipped_no_room"] == 0
