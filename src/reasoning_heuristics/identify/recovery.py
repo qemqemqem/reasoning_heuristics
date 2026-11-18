@@ -182,18 +182,18 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
     # pivots' mass the design cannot tell apart from it.
     ident = {NEAR_MISS: identifiability(um, rng=rng)}
     ident[UNIFORM] = ident[NEAR_MISS] if finite else identifiability(gen[UNIFORM], rng=rng)
-    out["identifiability"] = {m: {k: v for k, v in d.items() if k != "transform"} for m, d in ident.items()}
+    out["identifiability"] = {m: {k: v for k, v in d.items() if k not in ("transform", "null_basis")} for m, d in ident.items()}
     R, B = cfg["reps"], cfg["boot"]
     scen = cfg["scenarios"]
 
-    def pivots_of(model: str) -> list[int]:
-        d = ident[model]
-        return [d["columns"].index(l) for l in d["not_identified"]]
-
     def testability(model: str, truth: np.ndarray) -> tuple[bool, str | None]:
-        bad = [ident[model]["columns"][p] for p in pivots_of(model) if truth[p] > 0]
+        """Testable only if every planted weight is identified on its own: a member in a linear
+        dependency (whichever one the pivot is) is identified only in combination."""
+        d = ident[model]
+        bad = [l for l in d["involved"] if truth[d["columns"].index(l)] > 0]
         if bad:
-            return False, f"planted weight on {', '.join(bad)}, which these items cannot identify"
+            deps = [x["statement"] for x in d["dependencies"] if set(x["members"]) & set(bad)]
+            return False, f"planted weight on {', '.join(bad)}, identified only in combination: " + "; ".join(deps)
         return True, None
 
     def replicate(sc: Scenario, gen_model: str, fit_model: str, reps: int, boot: int, token=False, levels=None):
@@ -532,9 +532,10 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
         if not d or not d["deficiency"]:
             continue
         combos = [c for c in d["identified"] if " + " in c]
-        out.append(f"- **{u['unit']}** (rank {d['rank']} of {len(d['columns'])}): " + "; ".join(f"`{x}`" for x in d["null_directions"])
-                   + ". Not identified: " + ", ".join(d["not_identified"])
-                   + (". Identified instead: " + "; ".join(f"`{c}`" for c in combos) if combos else "") + ".")
+        deps = d.get("dependencies") or [{"statement": x} for x in d["null_directions"]]
+        out.append(f"- **{u['unit']}** (rank {d['rank']} of {len(d['columns'])}): " + "; ".join(f"`{x['statement']}`" for x in deps)
+                   + ". Not identified on their own: " + ", ".join(d.get("involved", d["not_identified"]))
+                   + (". Identified combinations reported: " + "; ".join(f"`{c}`" for c in combos) if combos else "") + ".")
     full = [u["unit"] for u in units if not ((u.get("identifiability") or {}).get("near-miss") or {}).get("deficiency")]
     out.append(f"- Full rank: {', '.join(full)}.")
     out.append("\n**Identifiability diagnostics** (finite channels: rank of the (item, value) × (groups + q) "

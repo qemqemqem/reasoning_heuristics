@@ -122,8 +122,10 @@ def test_null_q_is_not_testable_where_q_is_not_identified():
     assert out["scenarios"]["null_q"]["testable"] is False and out["scenarios"]["null_q"]["pass"] is None
     assert "null_q" in out["not_testable"]
     assert out["identifiability"]["near-miss"]["null_directions"] == ["q = 0.5 × POS + 0.5 × NEG"]
+    involved = set(out["identifiability"]["near-miss"]["involved"])
+    assert involved == {"POS", "NEG", "q"}
     mix = out["scenarios"]["mix"]
-    assert mix.get("testable", True) and any(" + 0.5 × q" in k for k in mix["quantities"])
+    assert mix.get("testable", True) == (not involved & set(out["triple"]))
 
 
 def test_engine_marks_non_identified_weights():
@@ -135,8 +137,21 @@ def test_engine_marks_non_identified_weights():
     um = UnitModel(Unit("T_E0", "SAT", _always_items(80, rng)))
     obs = simulate(um, Scenario("m", "mix", {"POS": 0.5, "B": 0.5}), rng)
     rep = fit_unit(um, responses_from(um, obs), n_boot=20, n_perm=0)
-    assert rep["fit"]["weights"]["unexplained (q)"] == "not identified"
+    w = rep["fit"]["weights"]
+    for lab in ("unexplained (q)", "POS", "NEG"):  # every member of the dependency, not just the pivot
+        assert w[lab]["pi"] == "not identified" and 0 <= w[lab]["range"][0] <= w[lab]["range"][1] <= 1
+    assert isinstance(w["B"]["pi"], float)
     assert abs(rep["fit"]["identified"]["POS + 0.5 × q"]["est"] - 0.5) < 0.15
+
+
+def test_weight_ranges_follow_the_null_direction():
+    from reasoning_heuristics.identify.engine import weight_ranges
+
+    # columns A, B, q with q = 1/2 A + 1/2 B: the null vector (A, B, q) = (-1/2, -1/2, 1)
+    lo, hi = weight_ranges(np.array([0.3, 0.3, 0.4]), np.array([[-0.5, -0.5, 1.0]]))
+    assert np.allclose(lo, [0.0, 0.0, 0.0]) and np.allclose(hi, [0.5, 0.5, 1.0])
+    lo, hi = weight_ranges(np.array([0.2, 0.8]), np.zeros((0, 2)))
+    assert np.allclose(lo, [0.2, 0.8]) and np.allclose(hi, [0.2, 0.8])
 
 
 @pytest.mark.slow

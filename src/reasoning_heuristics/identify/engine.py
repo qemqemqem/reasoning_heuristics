@@ -190,13 +190,45 @@ def identifiability(um: UnitModel, tol: float = 1e-7, rng: np.random.Generator |
                 terms.append(f"{-R[j, c]:.3g} × {labels[p]}")
         transform.append(a)
         id_labels.append(labels[c] if not terms else f"{labels[c]} + " + " + ".join(terms))
-    directions = []
+    directions, dependencies = [], []
     for p, j in piv_row.items():
         rhs = [f"{-R[j, c]:.3g} × {labels[c]}" for c in range(C) if c != p and R[j, c] != 0]
-        directions.append(f"{labels[p]} = " + (" + ".join(rhs) if rhs else "0"))
+        rel = f"{labels[p]} = " + (" + ".join(rhs) if rhs else "0")
+        directions.append(rel)
+        members = [labels[c] for c in range(C) if R[j, c] != 0]
+        substantive = all(kinds[c] in ("det", "set") for c in range(C) if R[j, c] != 0)
+        # Among substantive members the pivot is arbitrary, so state the dependency symmetrically.
+        statement = (f"{', '.join(members)} span only {len(members) - 1} directions ({rel}): their weights are "
+                     f"identified only up to this combination") if substantive else rel
+        dependencies.append({"members": members, "substantive": substantive, "relation": rel, "statement": statement})
+    involved = sorted({m for d in dependencies for m in d["members"]}, key=labels.index)
     return {"columns": labels, "rank": rank, "deficiency": C - rank, "sigma_ratio": float(s[-1] / s[0]),
-            "null_directions": directions, "not_identified": [labels[p] for p in pivots],
-            "identified": id_labels, "transform": np.array(transform).reshape(len(transform), C)}
+            "null_directions": directions, "dependencies": dependencies,
+            "not_identified": [labels[p] for p in pivots], "involved": involved,
+            "identified": id_labels, "transform": np.array(transform).reshape(len(transform), C),
+            "null_basis": R}
+
+
+def weight_ranges(pi: np.ndarray, null_basis: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Each weight's smallest and largest value consistent with the fit: every pi + N t with all
+    weights >= 0 gives the same mixture, so min / max pi_c over that polytope (small LPs)."""
+    from scipy.optimize import linprog
+
+    pi = np.asarray(pi, dtype=float)
+    C = len(pi)
+    if len(null_basis) == 0:
+        return pi.copy(), pi.copy()
+    N = np.asarray(null_basis).T  # (C, k)
+    lo, hi = pi.copy(), pi.copy()
+    A_ub, b_ub = -N, pi  # pi + N t >= 0
+    for c in range(C):
+        if not np.any(N[c]):
+            continue
+        for sign, store in ((1.0, lo), (-1.0, hi)):
+            r = linprog(sign * N[c], A_ub=A_ub, b_ub=b_ub, bounds=[(None, None)] * N.shape[1], method="highs")
+            if r.status == 0:
+                store[c] = max(0.0, min(1.0, pi[c] + N[c] @ r.x))
+    return lo, hi
 
 
 def diagnostics(um: UnitModel) -> dict[str, Any]:
@@ -223,12 +255,17 @@ def fit_unit(um: UnitModel, responses: list[Response], n_boot: int = 200, seed: 
     report["fit"] = res.to_json()
     report["fit"]["q_members"] = um.q_members
     ident = identifiability(um, rng=rng)
-    report["identifiability"] = {k: v for k, v in ident.items() if k != "transform"}
+    report["identifiability"] = {k: v for k, v in ident.items() if k not in ("transform", "null_basis")}
     if ident["deficiency"]:
-        # weights the design cannot see are not numbers; their identified combinations are
+        # A weight involved in a linear dependency is not a number: it is reported as not identified,
+        # with the range of values consistent with the fit (pi >= 0), and the identified combinations
+        # are given instead. Every involved member is treated alike, whichever one is the pivot.
         names = [g.name for g in um.columns] + [res.labels[-1]]
-        for p in ident["not_identified"]:
-            report["fit"]["weights"][names[ident["columns"].index(p)]] = "not identified"
+        lo_r, hi_r = weight_ranges(res.pi, ident["null_basis"])
+        for lab in ident["involved"]:
+            c = ident["columns"].index(lab)
+            report["fit"]["weights"][names[c]] = {"pi": "not identified",
+                                                 "range": [round(float(lo_r[c]), 4), round(float(hi_r[c]), 4)]}
         Tid = ident["transform"]
         est = Tid @ res.pi
         if res.boot is not None:
