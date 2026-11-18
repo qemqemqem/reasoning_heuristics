@@ -128,7 +128,7 @@ SCHEMA = {
                    "wrong_member_match, special_answers, token medians, truncated_by_cell",
     "fits": "unit -> run_id -> fit_unit's report (fit.weights: pi with percentile lo/hi, or 'not identified' with a range; "
             "eps, rho with intervals; identifiability; diagnostics; excluded; error_agreement and weight_lift with "
-            "permutation baselines) plus bca ({group: [lo, hi]}), ea_counts, q_exact_chance, near, reach, lumps, "
+            "permutation baselines) plus bca ({group: [lo, hi]}), ea_counts, q_exact_chance_log10_max, near, reach, lumps, "
             "unit_facts, special_check, seed, item_set",
     "recovery_at_estimate": "unit -> run_id -> fake models planted at the fitted mixture: per-quantity truth, mean, bias, "
                             "coverage and width (percentile and BCa), gate verdicts, and the simulated reach statistics",
@@ -527,15 +527,17 @@ def fit_job(args: tuple) -> dict[str, Any]:
     counts = agreement.error_agreement(um, obs, ties="include")
     rep["ea_counts"] = {g: {"n": v.n, "agree": v.agree, "n_h_wrong": v.n_h_wrong,
                             "co_agree": (v.co_error or 0.0) * v.n_h_wrong} for g, v in counts.items()}
-    # the chance that a q draw ("none of the above") is exactly a deterministic member's answer
+    # the chance that a q draw ("none of the above") is exactly a deterministic member's answer, as
+    # log10 of its largest value over the answered items (it is ~1e-15 on colourings, which the
+    # JSON's 6-decimal rounding would turn into 0)
     qx: dict[str, list[float]] = defaultdict(list)
     for ob in obs:
         im = um.items[ob.item]
         for g in um.columns:
             p = um.pred(ob.item, g.members[0])
             if p.kind == "det":
-                qx[g.name].append(math.exp(im.space.log_q(p.key)))
-    rep["q_exact_chance"] = {g: max(v) for g, v in qx.items()}
+                qx[g.name].append(im.space.log_q(p.key) / math.log(10))
+    rep["q_exact_chance_log10_max"] = {g: max(v) for g, v in qx.items()}
     rep["near"] = nearest_distances(um, obs)
     rep["reach"] = reach_stats(um, obs, T)
     rep["lumps"] = lump_shares(um, obs, T, rep["fit"])
