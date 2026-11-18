@@ -1,0 +1,41 @@
+{
+ "vertical": "A/H",
+ "eval_id": "E5",
+ "tier": "dev",
+ "seed": 1,
+ "per_cell": 20,
+ "params": {},
+ "cells": [
+  "SAT/T",
+  "SAT/N",
+  "SAT/I",
+  "SAT/I+R",
+  "SAT/P",
+  "COL/T",
+  "COL/N",
+  "COL/I",
+  "COL/I+R",
+  "KNAP/T",
+  "KNAP/N",
+  "KNAP/I",
+  "KNAP/I+R",
+  "ENT/T",
+  "ENT/N",
+  "ENT/I",
+  "ENT/I+R"
+ ],
+ "generation": {
+  "attempts": 80,
+  "accepted": 80,
+  "rejections": {}
+ },
+ "path": "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc20/dev/AH_E5_dev_s1.jsonl",
+ "validation": {
+  "items": 340,
+  "sets": 80,
+  "items_passed": 340,
+  "pass_rate": 1.0,
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
+}
