@@ -1076,6 +1076,9 @@ def main(argv: list[str] | None = None) -> int:
         "descriptive": descriptive, "special_tokens": special_tokens, "fits": fits, "recovery_at_estimate": recovery,
     }
     results = to_jsonable(results)
+    # render from exactly what the JSON file holds (keys sorted), as --render-only does: tables that list a dict's
+    # entries in order (the excluded categories, say) would otherwise differ between the two paths
+    results = json.loads(json.dumps(results, ensure_ascii=False, sort_keys=True))
     if not args.check:  # the numbers first, so a table-format failure never costs the computation
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(results, indent=1, ensure_ascii=False, sort_keys=True) + "\n")
