@@ -32,7 +32,9 @@ python3 -m venv .venv && .venv/bin/pip install -e '.[dev]'
 | dev | dev | [10⁵, 10⁶) | 5 (configurable 5–10) |
 | test | test | [10⁶, 2·10⁶) | set by the study |
 
-Every item records the seed of its base; every variant of a base inherits the base's seed and split. Test batches are written to the gitignored `data/items/test/` and are used here only for the leakage check.
+Every item records the seed of its base; every variant of a base inherits the base's seed and split. The validators check the seed against its tier's range, not only its split's. Test batches are written to the gitignored `data/items/test/` and are used here only for the leakage check.
+
+Random streams come from `seeds.rng_for(seed, salt)`, which keys a stream on the first 8 bytes of the salt only ("AH-E1-SAT-critical" and "AH-E1-SAT-null" both key "AH-E1-SA"). The truncation is kept so existing items regenerate identically; `rng_for` raises if one seed is asked for with two salts that agree in their first 8 bytes, since they would share a stream. Give a new salt its own 8-byte prefix.
 
 ## The item schema
 
@@ -55,13 +57,15 @@ Every item records the seed of its base; every variant of a base inherits the ba
 | `seed`, `split`, `tier`, `generator`, `generator_version` | Provenance. |
 | `extra` | `outcome_classes` (row label → class key), `channel` (its name) and `channel_spec` (everything needed to rebuild the channel, including each set-valued member's membership rule and set size), `likelihood` (ε, K, each member's kind); for converted library items, every field that did not map. |
 
-**Lineage rule.** Every generator follows it, and `tests/lineage.py` checks it on every eval.
+**Lineage rules** (`validate/checks.py`, `LINEAGE_RULES`). Every generator follows them, and `run_checks` fails any violation (`KNOWN_LINEAGE_GAPS` is empty).
 
 - A *base item* has `source_hash = null` and `base_hash` = its own `content_hash`.
-- A *derived item* has `source_hash` = the `content_hash` of the item it was manipulated from, an item of the same set, and `base_hash` = its source's `base_hash`. In Stage 1 every variant is derived directly from its set's base item (C E3: CRITICAL and PLACEBO from the BASE item of the same arm, and BASE/U-REV and BASE/I from BASE/U-LIST).
+- A *derived item* has `source_hash` = the `content_hash` of the item it was manipulated from, an item of the same set, and `base_hash` = its source's `base_hash`. In Stage 1 every variant is derived directly from its set's base item. Two examples: in C E3, CRITICAL and PLACEBO come from the BASE item of the same arm, and BASE/U-REV and BASE/I from BASE/U-LIST; in A/H E2 ENT, the other seven conclusions come from the first.
+- Every item of one base carries the base's seed, split and tier.
 - A set can hold several lineages. A matched control is a base of its own (C E5), and so is each inference's `cf` item in B4/C4 E2.
-- **Bases that are never shown on their own.** A/H E2 ENT puts eight conclusions on one premise set. Its items are all bases, and they share `base_hash` = the content hash of the premise set posed as an OPEN question (`EntailmentTask(premises, None, "OPEN")`).
-- **Items built from another eval's items.** A/H E8 specs have `source_hash` = the content hash of their host E2 item (`params.host_item_id` names it) and that item's `base_hash`.
+- **Items built from another eval's items.** An A/H E8 spec poses its host E2 item's task, so its content hash is the host's. Its `source_hash` is that hash (`params.host_item_id` names the host), and its `base_hash` is the host's.
+
+**Entailment ground truth** follows the prompts: a conclusion follows when it "must be true whenever all the statements are true", so inconsistent premises would entail everything. No design intends them, and the validators flag any item whose stated premises are inconsistent.
 
 **Likelihood-ratio sign convention (one for the repo):** `disconfirms[o][h] = log10 max_h' P(o|h') − log10 P(o|h)`. Positive = evidence against theory *h*; 0 = *h* is among the best-fitting theories for outcome *o*.
 
@@ -89,7 +93,7 @@ Every item records the seed of its base; every variant of a base inherits the ba
 | `problems/{sat,coloring,entailment,knapsack,tsp}` | Instances with presentation orders, exact solvers paired with independent validator-path solvers, renderers |
 | `heuristics/` | The zoo: one interface, `member(task, params) -> Prediction(answer, trace_features)`, a registry, and the composite `SEARCH(b, order, value, default)` |
 | `counterfactual/` | Isomorphic copies and re-orderings, the minimal-edit search engine, surface matching |
-| `validate/` | Independent ground truth; item, set and leakage checks |
+| `validate/` | Ground truth twice (`truth.py`: the generator path; `independent.py`: the validator's own instance reading, stated-rule transforms and solvers, CaDiCaL rather than MiniSat, plus the readouts behind the likelihood tables); item, set, hash-collision, lineage and leakage checks (`checks.py`) |
 | `generators/` | One module per eval; `common.py` assembles items, LR tables and hypotheses |
 | `generate.py`, `review.py` | The CLI and the review/summary builder |
 | `tokens.py`, `lexicon.py`, `seeds.py`, `hashing.py` | Tokenizer proxy, naming, tiers and seeds, canonical hashes |

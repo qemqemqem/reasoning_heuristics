@@ -58,7 +58,7 @@ from reasoning_heuristics.heuristics.base import run
 from reasoning_heuristics.heuristics.tasks import ColouringTask, EntailmentTask, SatTask, load_task
 from reasoning_heuristics.problems.coloring import graph as G
 from reasoning_heuristics.problems.coloring.graph import Graph
-from reasoning_heuristics.problems.coloring.render import render_neighbours
+from reasoning_heuristics.problems.coloring.render import answer_instruction, render_neighbours
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.sat import cnf as S
 from reasoning_heuristics.problems.sat.render import render_c
@@ -111,7 +111,9 @@ def cells(params: dict[str, Any]) -> list[str]:
 # --- renderers (library wording) --------------------------------------------------------------------
 
 
-def col_edge_prompt(g: Graph) -> str:
+def col_edge_prompt(g: Graph, style: str | None = None) -> str:
+    """The library's edge-list wording; the answer line is the renderer's (`style`: "placeholder",
+    the default, or "library")."""
     return "\n".join([
         f"Graph with {g.n} vertices and {g.m} edges.",
         "Vertices (in this order): " + ", ".join(g.vertices),
@@ -119,8 +121,7 @@ def col_edge_prompt(g: Graph) -> str:
         "",
         "Colour every vertex with one of the colours 1, 2, ..., 3 so that the two ends of every edge get different "
         "colours. If this is impossible, answer IMPOSSIBLE.",
-        "After the line ANSWER:, write IMPOSSIBLE or one line `vertex: colour` per vertex, in this order: "
-        + ", ".join(g.vertices) + ".",
+        answer_instruction(list(g.vertices), True, style),
     ])
 
 

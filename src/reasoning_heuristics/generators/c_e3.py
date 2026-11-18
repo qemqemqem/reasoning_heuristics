@@ -81,6 +81,7 @@ from reasoning_heuristics.heuristics.tasks import ColouringTask, load_task
 from reasoning_heuristics.problems.coloring.graph import Graph
 from reasoning_heuristics.problems.coloring.render import render_neighbours
 from reasoning_heuristics.seeds import TIERS, base_seed, rng_for
+from reasoning_heuristics.validate.independent import recheck_readouts
 from reasoning_heuristics.validate.truth import truth
 
 VERTICAL, EVAL_ID = "C", "E3"
@@ -164,10 +165,10 @@ def swap_pair(listing: list[str], x: str, p: str) -> list[str]:
 # --- items ---------------------------------------------------------------------------------------------
 
 
-def u_prompt(g: Graph, order: list[str], repeat: bool = False) -> str:
+def u_prompt(g: Graph, order: list[str], repeat: bool = False, style: str | None = None) -> str:
     """The library's uninstructed wording: 3-colouring, IMPOSSIBLE allowed in the question,
-    the answer line asks for the colouring."""
-    return render_neighbours(g, "k", order, 3, repeat).replace("write IMPOSSIBLE or one line", "write one line")
+    the answer line asks for the colouring (`style`: the renderer's answer-line wording)."""
+    return render_neighbours(g, "k", order, 3, repeat, style).replace("write IMPOSSIBLE or one line", "write one line")
 
 
 def i_prompt(g: Graph, target: str) -> str:
@@ -506,8 +507,10 @@ def check_set(items: list) -> list[str]:
         if any((ff[x] == 1) != val for x, val in vals.items()):
             errs.append(f"{v}: gadget lemma fails (FF colour 1 iff NOR value True)")
         bits[v] = ff[target] == ff[ref]
-        if by[(v, "I")].ground_truth["answer"] != ff[target]:
-            errs.append(f"{v}: the instructed answer is not FF's target colour")
+        i_item = by[(v, "I")]
+        errs += [f"{v} (I): {m}" for m in recheck_readouts(i_item.instance, i_item.ground_truth, i_item.params)]
+        if (i_item.ground_truth["answer"] == 1) != vals[target]:
+            errs.append(f"{v}: the instructed answer disagrees with the target's NOR value (colour 1 iff True)")
     if any(tasks[(v, "I")].target != target for v in VERSIONS):
         errs.append("an I-arm task does not carry the asked target")
     if len({by[(v, "I")].content_hash for v in VERSIONS}) != len(VERSIONS):

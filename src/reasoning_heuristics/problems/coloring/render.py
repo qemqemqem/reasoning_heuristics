@@ -7,7 +7,9 @@
 - `render_rooms` (A/H style): people, enemy (or friend) pairs, JSON answer.
 
 `task` selects the question: "fewest" (minimise colours), or "k" (colour with 1..k or say
-IMPOSSIBLE). `answer_order` None means FREE (the model chooses the output order).
+IMPOSSIBLE). `answer_order` None means FREE (the model chooses the output order). `style` is
+the answer line's wording: "placeholder" (`<vertex>: <colour>`, the default) or "library" (the
+example libraries' `vertex: colour`, so the library prompts still reproduce byte for byte).
 """
 
 from __future__ import annotations
@@ -29,15 +31,25 @@ def _question(task: str, k: int | None, edge_phrase: str) -> str:
     raise ValueError(task)
 
 
-def answer_instruction(answer_order: list[str] | None, allow_impossible: bool) -> str:
+# How the answer line names its slots: "placeholder" (the default, so every generator gets it)
+# names no real vertex and suggests no colour; "library" reproduces the example libraries.
+ANSWER_STYLES = ("placeholder", "library")
+DEFAULT_ANSWER_STYLE = "placeholder"
+
+
+def answer_instruction(answer_order: list[str] | None, allow_impossible: bool, style: str | None = None) -> str:
+    style = style or DEFAULT_ANSWER_STYLE
+    if style not in ANSWER_STYLES:
+        raise ValueError(f"unknown answer style {style!r}; expected one of {ANSWER_STYLES}")
+    slot = "`vertex: colour`" if style == "library" else "`<vertex>: <colour>`"
     head = "After the line ANSWER:, write " + ("IMPOSSIBLE or " if allow_impossible else "")
     if answer_order is None:
-        return head + "one line `vertex: colour` per vertex, in any order you like."
-    return head + "one line `vertex: colour` per vertex, in this order: " + ", ".join(answer_order) + "."
+        return head + f"one line {slot} per vertex, in any order you like."
+    return head + f"one line {slot} per vertex, in this order: " + ", ".join(answer_order) + "."
 
 
 def render_neighbours(g: Graph, task: str, answer_order: list[str] | None, k: int | None = None,
-                      repeat_prompt: bool = False) -> str:
+                      repeat_prompt: bool = False, style: str | None = None) -> str:
     lines = [
         f"Graph with {g.n} vertices.",
         "Vertices (in this order): " + ", ".join(g.vertices),
@@ -46,19 +58,19 @@ def render_neighbours(g: Graph, task: str, answer_order: list[str] | None, k: in
     for v in g.vertices:
         nbrs = g.neighbours_listed(v)
         lines.append(f"{v}: " + (", ".join(nbrs) if nbrs else "(none)"))
-    lines += ["", _question(task, k, "neighbours"), answer_instruction(answer_order, task == "k")]
+    lines += ["", _question(task, k, "neighbours"), answer_instruction(answer_order, task == "k", style)]
     return _maybe_twice("\n".join(lines), repeat_prompt)
 
 
 def render_edge_list(g: Graph, task: str, answer_order: list[str] | None, k: int | None = None,
-                     repeat_prompt: bool = False) -> str:
+                     repeat_prompt: bool = False, style: str | None = None) -> str:
     lines = [
         f"Graph with {g.n} vertices and {g.m} edges.",
         "Vertices (in this order): " + ", ".join(g.vertices),
         "Edges: " + ", ".join(f"{u}-{v}" for u, v in g.edges),
         "",
         _question(task, k, "the two ends of every edge"),
-        answer_instruction(answer_order, task == "k"),
+        answer_instruction(answer_order, task == "k", style),
     ]
     return _maybe_twice("\n".join(lines), repeat_prompt)
 

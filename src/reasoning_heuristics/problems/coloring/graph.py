@@ -9,7 +9,9 @@ Label order λ is derived from the vertex names (numeric part for v37-style labe
 alphabetical otherwise). Content keys ignore both presentation orders.
 
 Generator path for ground truth: `chromatic_number` / `k_colour` (DSATUR-ordered
-backtracking). Validator path: `k_colourable_sat` (python-sat encoding).
+backtracking). `k_colourable_sat` (a MiniSat encoding) is a second implementation that the
+tests cross-check against it and some zoo members and generators use; the validators
+recompute ground truth with their own code (`validate/independent.py`).
 """
 
 from __future__ import annotations
@@ -190,9 +192,16 @@ def induced(g: Graph, vertices: list[str]) -> Graph:
 def k_colour(g: Graph, k: int, fixed: Colouring | None = None) -> Colouring | None:
     """A proper colouring with colours 1..k extending `fixed`, or None.
 
+    Fixed colours must name vertices of g and lie in 1..k: anything else is not a partial
+    colouring of this problem and raises ValueError (the validator path rejects it too).
     Each connected component is solved separately (so an uncolourable component cannot make
     the search thrash over the others), by DSATUR-ordered backtracking."""
     fixed = dict(fixed or {})
+    for v, c in fixed.items():
+        if v not in g.position:
+            raise ValueError(f"fixed vertex {v!r} is not in the graph")
+        if not 1 <= c <= k:
+            raise ValueError(f"fixed colour {c} of {v} is outside 1..{k}")
     comps = components(g)
     if len(comps) == 1:
         return _k_colour_connected(g, k, fixed)
@@ -273,6 +282,8 @@ def k_colourable_sat(g: Graph, k: int) -> bool:
 
 
 def chromatic_number_sat(g: Graph) -> int:
+    if g.n == 0:
+        return 0  # as chromatic_number: no vertices need no colours
     k = 1
     while not k_colourable_sat(g, k):
         k += 1

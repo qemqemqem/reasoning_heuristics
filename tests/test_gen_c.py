@@ -6,7 +6,6 @@ import numpy as np
 import pytest
 
 from libparse import cnf_from_c_prompt, find, graph_from_edge_list, graph_from_neighbours, library
-from lineage import lineage_problems
 from reasoning_heuristics.counterfactual import edits as E
 from reasoning_heuristics.generators import c_e1, c_e2, c_e3, c_e5
 from reasoning_heuristics.generators.common import predict_all
@@ -35,7 +34,7 @@ def test_e1_col_copies_match_library(rec):
     g = graph_from_neighbours(rec["prompt"])
     order = answer_order(rec["prompt"])
     task = ColouringTask(g, None, (), tuple(order) if order else None)
-    assert render_neighbours(g, "fewest", order) == rec["prompt"]
+    assert render_neighbours(g, "fewest", order, style="library") == rec["prompt"]
     copy = rec["cell"]
     preds = predict_all(task, c_e1.col_members(copy))
     lib = rec["predictions"]
@@ -52,7 +51,7 @@ def test_e1_col_copies_match_library(rec):
 def test_e1_sat_copies_match_library(rec):
     cnf = cnf_from_c_prompt(rec["prompt"])
     order = answer_order(rec["prompt"])
-    assert render_c(cnf, order) == rec["prompt"]
+    assert render_c(cnf, order, style="library") == rec["prompt"]
     preds = predict_all(SatTask(cnf, (), tuple(order)), c_e1.sat_members(rec["cell"]))
 
     def lib_assignment(d):
@@ -100,7 +99,7 @@ def test_e3_library_gadget_prompts_and_lemma():
     base_i = find("C_constructive", pair_id="E3-COL-A", cell="d=2/BASE/I")
     crit_i = find("C_constructive", pair_id="E3-COL-A", cell="d=2/CRITICAL/I")
     g = graph_from_neighbours(base_u["prompt"])
-    assert c_e3.u_prompt(g, list(g.vertices)) == base_u["prompt"]
+    assert c_e3.u_prompt(g, list(g.vertices), style="library") == base_u["prompt"]
     assert c_e3.i_prompt(g, "v29") == base_i["prompt"]
     ff = run("coloring", "FF", ColouringTask(g), {"order": "LIST"}).answer
     assert ff["v29"] == base_i["ground_truth"]["answer"]
@@ -110,12 +109,12 @@ def test_e3_library_gadget_prompts_and_lemma():
 
 def test_e5_library_prompts_and_states():
     stuck = find("C_constructive", pair_id="E5-COL-A", cell="STUCK/vertexA/edgeA")
-    assert c_e5.col_edge_prompt(graph_from_edge_list(stuck["prompt"])) == stuck["prompt"]
+    assert c_e5.col_edge_prompt(graph_from_edge_list(stuck["prompt"]), style="library") == stuck["prompt"]
     for cell, want in (("STATE-s1: POLARITY vs GREEDY", "s1"), ("STATE-s2: UC vs GREEDY", "s2")):
         rec = find("C_constructive", pair_id="E5-SAT-STATE-A", cell=cell)
         cnf = cnf_from_c_prompt(rec["prompt"])
         fixed = {k: v == "T" for k, v in rec["params"]["fixed"].items()}
-        assert render_c(cnf, list(cnf.var_names), fixed) == rec["prompt"]
+        assert render_c(cnf, list(cnf.var_names), fixed, style="library") == rec["prompt"]
         assert c_e5.sat_state_classes(cnf, fixed) == want
     L = F.lit
     for cell, prem in (("ORDER-A", (F.nand(L("E"), L("C")), F.disj(L("B"), L("C")), F.nand(L("B"), L("A")), F.disj(L("E"), L("A")))),):
@@ -171,8 +170,7 @@ def test_e1_edge_list_and_repeat_arms():
 def test_e2_smoke_small_validates():
     items, stats = c_e2.generate("smoke", 3, n_col=12, n_sat=14, n_knap=8)
     assert {it.cell for it in items} == set(c_e2.cells({}))
-    assert run_checks(items, c_e2.check_set)["failures"] == []
-    assert lineage_problems(items) == []
+    assert run_checks(items, c_e2.check_set)["failures"] == []  # includes lineage (no known gaps left)
 
 
 def test_e3_smoke_small_validates():
@@ -185,5 +183,4 @@ def test_e3_smoke_small_validates():
 def test_e5_smoke_validates():
     items, stats = c_e5.generate("smoke", 2)
     assert {it.cell for it in items} == set(c_e5.cells({}))
-    assert run_checks(items, c_e5.check_set)["failures"] == []
-    assert lineage_problems(items) == []
+    assert run_checks(items, c_e5.check_set)["failures"] == []  # includes lineage (no known gaps left)

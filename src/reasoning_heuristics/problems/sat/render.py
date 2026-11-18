@@ -6,6 +6,7 @@ Two house styles, both copied from the example libraries:
   "C01: (x08 ∨ ¬x02 ∨ x09)", JSON answer. Used by the baselines vertical.
 - **C style** (`render_c`): random two-digit labels, clauses "C1: x57 or not x21 or x60",
   `ANSWER:` block with the values in a requested order. Used by the constructive vertical.
+  The answer line says `<variable>=T`; `style="library"` gives the library's `x=T` / `x=F`.
 """
 
 from __future__ import annotations
@@ -43,6 +44,15 @@ def render_textbook(cnf: CNF, declared: list[str] | None = None) -> str:
     return "\n".join(lines)
 
 
+def _menu_rule(cnf: CNF) -> str:
+    """The request rule, true for the clause widths present (pure 3-CNF keeps the library's text)."""
+    widths = {len(c) for c in cnf.clauses}
+    if widths == {1}:
+        return "Each guest has a request that is met if its condition holds."
+    count = {2: "two ", 3: "three "}.get(next(iter(widths)), "") if len(widths) == 1 else ""
+    return f"Each guest has a request that is met if at least one of its {count}conditions holds."
+
+
 def render_menu(cnf: CNF) -> str:
     """A/H natural-language framing (Hazra et al.'s menu style). Variable x07 renders as dish D07."""
     dish = {v: "D" + v.lstrip("x") for v in cnf.var_names}
@@ -50,7 +60,7 @@ def render_menu(cnf: CNF) -> str:
     lines = [
         f"You are planning which dishes to serve at a dinner. There are {cnf.n} candidate dishes, "
         f"{dish[cnf.var_names[0]]} to {dish[cnf.var_names[-1]]}; each is either served or not served.",
-        "Each guest has a request that is met if at least one of its three conditions holds.",
+        _menu_rule(cnf),
         "",
     ]
     for i, c in enumerate(cnf.clauses, 1):
@@ -66,14 +76,30 @@ def render_menu(cnf: CNF) -> str:
     return "\n".join(lines)
 
 
-def c_answer_instruction(order: list[str] | None) -> str:
-    if order is None:
-        return "After the line ANSWER:, write UNSAT or the values as `x=T` / `x=F`, comma-separated, one per variable, in any order you like."
-    return "After the line ANSWER:, write UNSAT or the values as `x=T` / `x=F`, comma-separated, in this order: " + ", ".join(order) + "."
+# How the C-style answer line names its slots. "placeholder" (the default, so every generator gets
+# it): `<variable>=T` names no real variable and suggests no value. "library": the example
+# libraries' `x=T` / `x=F`, kept so the renderer still reproduces the library prompts byte for byte.
+# The library's `x` collides with the variable names: a model answered "x=T, x=T, x=F, ...".
+ANSWER_STYLES = ("placeholder", "library")
+DEFAULT_ANSWER_STYLE = "placeholder"
 
 
-def render_c(cnf: CNF, answer_order: list[str] | None, fixed: dict[str, bool] | None = None) -> str:
-    """C-vertical framing. `answer_order` None means FREE (the model chooses the order)."""
+def c_answer_instruction(order: list[str] | None, style: str | None = None) -> str:
+    style = style or DEFAULT_ANSWER_STYLE
+    if style == "library":
+        if order is None:
+            return "After the line ANSWER:, write UNSAT or the values as `x=T` / `x=F`, comma-separated, one per variable, in any order you like."
+        return "After the line ANSWER:, write UNSAT or the values as `x=T` / `x=F`, comma-separated, in this order: " + ", ".join(order) + "."
+    if style != "placeholder":
+        raise ValueError(f"unknown answer style {style!r}; expected one of {ANSWER_STYLES}")
+    head = "After the line ANSWER:, write UNSAT, or one `<variable>=T` or `<variable>=F` per variable, comma-separated, "
+    return head + ("in any order you like." if order is None else "in this order: " + ", ".join(order) + ".")
+
+
+def render_c(cnf: CNF, answer_order: list[str] | None, fixed: dict[str, bool] | None = None,
+             style: str | None = None) -> str:
+    """C-vertical framing. `answer_order` None means FREE (the model chooses the order); `style`
+    is the answer line's wording (`ANSWER_STYLES`, default `DEFAULT_ANSWER_STYLE`)."""
     lines = [f"A formula over {cnf.n} true/false variables. Every clause must contain at least one true literal."]
     for i, c in enumerate(cnf.clauses, 1):
         lines.append(f"C{i}: " + " or ".join(cnf.name(l) if l > 0 else "not " + cnf.name(l) for l in c))
@@ -84,5 +110,5 @@ def render_c(cnf: CNF, answer_order: list[str] | None, fixed: dict[str, bool] | 
         lines.append("Find values for all variables that make every clause true (keeping the fixed values), or say UNSAT if none exist.")
     else:
         lines.append("Find values for all variables that make every clause true, or say UNSAT if none exist.")
-    lines.append(c_answer_instruction(answer_order))
+    lines.append(c_answer_instruction(answer_order, style))
     return "\n".join(lines)

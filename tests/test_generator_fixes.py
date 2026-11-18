@@ -8,15 +8,14 @@ from functools import lru_cache
 
 import numpy as np
 import pytest
-from lineage import lineage_problems
 
 from reasoning_heuristics.generators import ah_e2, ah_e5, ah_e8, b4_e1, b4_e2, c_e1, c_e3, c_e5
 from reasoning_heuristics.generators.common import EPS, decision_channel, make_item
 from reasoning_heuristics.heuristics.base import run
 from reasoning_heuristics.heuristics.tasks import ColouringTask, SatTask, load_task
 from reasoning_heuristics.problems.sat import cnf as S
-from reasoning_heuristics.validate.checks import check_item
-from reasoning_heuristics.validate.truth import independent_truth
+from reasoning_heuristics.validate.checks import KNOWN_LINEAGE_GAPS, check_item, check_lineage
+from reasoning_heuristics.validate.independent import recheck_readouts
 
 
 @lru_cache(maxsize=None)
@@ -136,7 +135,7 @@ def test_c_e3_instructed_questions_have_their_own_content_hash():
             by_set[it.set_id].append(it)
             task = load_task(it.instance)
             assert task.target == it.params["target"] == it.instance["target"]
-            assert independent_truth(task)["answer"] == it.ground_truth["answer"]
+            assert recheck_readouts(it.instance, it.ground_truth, it.params) == []  # the independent first-fit
     for sid, group in by_set.items():
         assert len({it.content_hash for it in group}) == 3, sid
     t = load_task(items[0].instance)
@@ -147,18 +146,27 @@ def test_c_e3_instructed_questions_have_their_own_content_hash():
 # --- V8: lineage --------------------------------------------------------------------------------------
 
 
+def lineage_failures(items):
+    failures, gaps = check_lineage(list(items), known=set())
+    return [f.message for f in failures + gaps]
+
+
+def test_no_lineage_gaps_are_tolerated():
+    assert KNOWN_LINEAGE_GAPS == set()
+
+
 def test_lineage_of_c_and_b4_sets():
-    assert lineage_problems(c_e1_col()) == []
-    assert lineage_problems(c_e1_sat()) == []
-    assert lineage_problems(c_e3_small()[0]) == []
-    assert lineage_problems(b4_e1.generate("smoke", 3)[0]) == []
-    assert lineage_problems(b4_e2.generate("smoke", 5)[0]) == []
+    assert lineage_failures(c_e1_col()) == []
+    assert lineage_failures(c_e1_sat()) == []
+    assert lineage_failures(c_e3_small()[0]) == []
+    assert lineage_failures(b4_e1.generate("smoke", 3)[0]) == []
+    assert lineage_failures(b4_e2.generate("smoke", 5)[0]) == []
 
 
 def test_lineage_of_a_h_sets():
-    assert lineage_problems(ah_e5.generate("smoke", 6)[0]) == []
+    assert lineage_failures(ah_e5.generate("smoke", 6)[0]) == []
     ent, _ = ah_e2.generate("smoke", 4, domains=["ENT"])
-    assert lineage_problems(ent) == []
+    assert lineage_failures(ent) == []
 
 
 # --- G3: B4/C4 E1 option order -----------------------------------------------------------------------
