@@ -1,0 +1,2016 @@
+{
+ "label": "pc10",
+ "items": "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete",
+ "config": {
+  "reps": 100,
+  "boot": 100,
+  "single_reps": 20,
+  "feature_reps": 20,
+  "feature_boot": 40,
+  "offzoo_reps": 10,
+  "seed": 1,
+  "scenarios": [
+   "mix",
+   "null_q",
+   "null_always"
+  ]
+ },
+ "gates": {
+  "bias": 0.05,
+  "coverage": 0.9,
+  "width": 0.2
+ },
+ "generated": "2026-11-17 21:46",
+ "provenance": {
+  "git_sha": "2c9a5fa20a028f2712355ea99627f6c0179374c5",
+  "git_dirty": false,
+  "item_files": {
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/AH_E1_dev_s1.jsonl": "41bc65fe48b7d06e1b490dbe5b8bbdb51731d8e2d56ccb954d3da40cc37620c1",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/AH_E2_dev_s1.jsonl": "23f975f1aed0b0821c6c8ca117a3820d098fbb18456d554656c0489037c0de9e",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/AH_E5_dev_s1.jsonl": "6dc305eddb974c841a73c59e55d5f7b37ddd4a9fd59c868d9cde0d879d57b7f6",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/B4C4_E1_dev_s1.jsonl": "31308d5d5edfe30798a3c6cf521c3047a4613dcf5f1676d4b0aa968907bd4a81",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/B4C4_E2_dev_s1.jsonl": "5b33b6fb5e78d45cc8eb8f142fa06e8b76ef2875aa6ceb157d086b18b8afbe6a",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/C_E1_dev_s1.jsonl": "a1e863b3e9d73645ed6414232738fa042e347776c3adbe76df4ecf22c0706301",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/C_E2_dev_s1.jsonl": "9275a0db3866ba90fee008e3ecad36d55722fb29107be22c68739159ee264d7f",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/C_E3_dev_s1.jsonl": "fac7a53b11c047937da0cb042a02e6e49f800cdf389d20bc9de3853a1a2790e3",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/C_E5_dev_s1.jsonl": "099a63a6d0d4def248f9c4688b88e4dcead677c9b97be9f6b735448a0eafc0bd"
+  }
+ },
+ "command": "python -m reasoning_heuristics.identify.recovery run --items /tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete --label pc10 --units C_E2/colouring,AH_E5/SAT,AH_E5/ENT,C_E2/knapsack,C_E1/3-SAT,C_E2/3-SAT,C_E5/3-SAT (partial assignment given) --scenarios mix,null_q,null_always --reps 100 --boot 100 --workers 4 --out data/recovery/pc10.json",
+ "units": [
+  {
+   "unit": "AH_E5/ENT",
+   "n_items": 40,
+   "n_clusters": 10,
+   "n_cells": 4,
+   "items_per_cell": 10.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "A1 NONE"
+    ],
+    [
+     "A3 TT[exact]"
+    ],
+    [
+     "B4 FIRST"
+    ],
+    [
+     "exact"
+    ]
+   ],
+   "folded_into_q": [],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.034,
+     "worst_bias_quantity": "exact",
+     "min_coverage": 0.8,
+     "worst_coverage_quantity": "B4 FIRST",
+     "median_width": 0.237,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "A1 NONE": {
+       "truth": 0.6,
+       "mean": 0.585,
+       "bias": -0.015,
+       "coverage": 0.86,
+       "median_width": 0.276,
+       "mean_upper": 0.724
+      },
+      "A3 TT[exact]": {
+       "truth": 0.3,
+       "mean": 0.294,
+       "bias": -0.006,
+       "coverage": 0.85,
+       "median_width": 0.292,
+       "mean_upper": 0.426
+      },
+      "B4 FIRST": {
+       "truth": 0.1,
+       "mean": 0.085,
+       "bias": -0.015,
+       "coverage": 0.8,
+       "median_width": 0.153,
+       "mean_upper": 0.159
+      },
+      "exact": {
+       "truth": 0.0,
+       "mean": 0.034,
+       "bias": 0.034,
+       "coverage": 0.95,
+       "median_width": 0.154,
+       "mean_upper": 0.154
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.85,
+      "worst_coverage_quantity": "B4 FIRST",
+      "median_width": 0.24,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "A1 NONE": 0.87,
+       "A3 TT[exact]": 0.86,
+       "B4 FIRST": 0.85,
+       "exact": 0.94
+      },
+      "median_width_by_quantity": {
+       "A1 NONE": 0.275,
+       "A3 TT[exact]": 0.278,
+       "B4 FIRST": 0.16,
+       "exact": 0.162
+      }
+     }
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.031,
+     "worst_bias_quantity": "exact",
+     "min_coverage": 0.88,
+     "worst_coverage_quantity": "A3 TT[exact]",
+     "median_width": 0.255,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "A1 NONE": {
+       "truth": 0.6,
+       "mean": 0.576,
+       "bias": -0.024,
+       "coverage": 0.91,
+       "median_width": 0.291,
+       "mean_upper": 0.722
+      },
+      "A3 TT[exact]": {
+       "truth": 0.3,
+       "mean": 0.27,
+       "bias": -0.03,
+       "coverage": 0.88,
+       "median_width": 0.271,
+       "mean_upper": 0.402
+      },
+      "B4 FIRST": {
+       "truth": 0.1,
+       "mean": 0.1,
+       "bias": 0.0,
+       "coverage": 0.88,
+       "median_width": 0.179,
+       "mean_upper": 0.194
+      },
+      "exact": {
+       "truth": 0.0,
+       "mean": 0.031,
+       "bias": 0.031,
+       "coverage": 0.94,
+       "median_width": 0.159,
+       "mean_upper": 0.162
+      },
+      "q": {
+       "truth": 0.0,
+       "mean": 0.022,
+       "bias": 0.022,
+       "coverage": 0.98,
+       "median_width": 0.077,
+       "mean_upper": 0.07
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.88,
+      "worst_coverage_quantity": "A1 NONE",
+      "median_width": 0.257,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "A1 NONE": 0.88,
+       "A3 TT[exact]": 0.9,
+       "B4 FIRST": 0.91,
+       "exact": 0.94,
+       "q": 0.88
+      },
+      "median_width_by_quantity": {
+       "A1 NONE": 0.299,
+       "A3 TT[exact]": 0.273,
+       "B4 FIRST": 0.19,
+       "exact": 0.179,
+       "q": 0.1
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.009,
+     "worst_bias_quantity": "q",
+     "min_coverage": 0.99,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.046,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "q": {
+       "truth": 1.0,
+       "mean": 0.991,
+       "bias": -0.009,
+       "coverage": 0.99,
+       "median_width": 0.046,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.98,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.072,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "q": 0.98
+      },
+      "median_width_by_quantity": {
+       "q": 0.072
+      }
+     }
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "q",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "q": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "q": 1.0
+      },
+      "median_width_by_quantity": {
+       "q": 0.0
+      }
+     },
+     "truth_group": "unexplained (q)"
+    }
+   },
+   "triple": [
+    "A1 NONE",
+    "A3 TT[exact]",
+    "B4 FIRST"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "A3 TT[exact]",
+      "exact"
+     ],
+     "separating_items": 20
+    },
+    {
+     "pair": [
+      "B4 FIRST",
+      "exact"
+     ],
+     "separating_items": 20
+    },
+    {
+     "pair": [
+      "A1 NONE",
+      "A3 TT[exact]"
+     ],
+     "separating_items": 40
+    },
+    {
+     "pair": [
+      "A1 NONE",
+      "B4 FIRST"
+     ],
+     "separating_items": 40
+    },
+    {
+     "pair": [
+      "A1 NONE",
+      "exact"
+     ],
+     "separating_items": 40
+    },
+    {
+     "pair": [
+      "A3 TT[exact]",
+      "B4 FIRST"
+     ],
+     "separating_items": 40
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "A1 NONE",
+      "A3 TT[exact]",
+      "B4 FIRST",
+      "exact",
+      "q"
+     ],
+     "rank": 5,
+     "deficiency": 0,
+     "sigma_ratio": 0.32214273971652385,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "A1 NONE",
+      "A3 TT[exact]",
+      "B4 FIRST",
+      "exact",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "A1 NONE",
+      "A3 TT[exact]",
+      "B4 FIRST",
+      "exact",
+      "q"
+     ],
+     "rank": 5,
+     "deficiency": 0,
+     "sigma_ratio": 0.38593716187552823,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "A1 NONE",
+      "A3 TT[exact]",
+      "B4 FIRST",
+      "exact",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 61.5
+  },
+  {
+   "unit": "AH_E5/SAT",
+   "n_items": 50,
+   "n_clusters": 10,
+   "n_cells": 5,
+   "items_per_cell": 10.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "A3 TT[exact]"
+    ],
+    [
+     "C0 POLARITY"
+    ],
+    [
+     "C1 GREEDY"
+    ],
+    [
+     "D DPLL (first solution)"
+    ],
+    [
+     "exact"
+    ]
+   ],
+   "folded_into_q": [],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.006,
+     "worst_bias_quantity": "C0 POLARITY",
+     "min_coverage": 0.83,
+     "worst_coverage_quantity": "C1 GREEDY",
+     "median_width": 0.211,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "A3 TT[exact]": {
+       "truth": 0.1,
+       "mean": 0.096,
+       "bias": -0.004,
+       "coverage": 0.84,
+       "median_width": 0.149,
+       "mean_upper": 0.171
+      },
+      "C0 POLARITY": {
+       "truth": 0.6,
+       "mean": 0.594,
+       "bias": -0.006,
+       "coverage": 0.93,
+       "median_width": 0.248,
+       "mean_upper": 0.718
+      },
+      "C1 GREEDY": {
+       "truth": 0.3,
+       "mean": 0.302,
+       "bias": 0.002,
+       "coverage": 0.83,
+       "median_width": 0.236,
+       "mean_upper": 0.42
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.84,
+      "worst_coverage_quantity": "C1 GREEDY",
+      "median_width": 0.213,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "A3 TT[exact]": 0.89,
+       "C0 POLARITY": 0.89,
+       "C1 GREEDY": 0.84
+      },
+      "median_width_by_quantity": {
+       "A3 TT[exact]": 0.144,
+       "C0 POLARITY": 0.245,
+       "C1 GREEDY": 0.236
+      }
+     }
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.024,
+     "worst_bias_quantity": "D DPLL (first solution)",
+     "min_coverage": 0.73,
+     "worst_coverage_quantity": "A3 TT[exact]",
+     "median_width": 0.211,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "A3 TT[exact]": {
+       "truth": 0.1,
+       "mean": 0.088,
+       "bias": -0.012,
+       "coverage": 0.73,
+       "median_width": 0.14,
+       "mean_upper": 0.159
+      },
+      "C0 POLARITY": {
+       "truth": 0.6,
+       "mean": 0.577,
+       "bias": -0.023,
+       "coverage": 0.92,
+       "median_width": 0.251,
+       "mean_upper": 0.697
+      },
+      "C1 GREEDY": {
+       "truth": 0.3,
+       "mean": 0.291,
+       "bias": -0.009,
+       "coverage": 0.87,
+       "median_width": 0.223,
+       "mean_upper": 0.407
+      },
+      "D DPLL (first solution)": {
+       "truth": 0.0,
+       "mean": 0.024,
+       "bias": 0.024,
+       "coverage": 0.89,
+       "median_width": 0.077,
+       "mean_upper": 0.081
+      },
+      "q": {
+       "truth": 0.0,
+       "mean": 0.017,
+       "bias": 0.017,
+       "coverage": 0.93,
+       "median_width": 0.06,
+       "mean_upper": 0.061
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.77,
+      "worst_coverage_quantity": "A3 TT[exact]",
+      "median_width": 0.213,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "A3 TT[exact]": 0.77,
+       "C0 POLARITY": 0.9,
+       "C1 GREEDY": 0.85,
+       "D DPLL (first solution)": 0.86,
+       "q": 0.87
+      },
+      "median_width_by_quantity": {
+       "A3 TT[exact]": 0.143,
+       "C0 POLARITY": 0.251,
+       "C1 GREEDY": 0.228,
+       "D DPLL (first solution)": 0.079,
+       "q": 0.059
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.006,
+     "worst_bias_quantity": "q",
+     "min_coverage": 0.99,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.041,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "q": {
+       "truth": 1.0,
+       "mean": 0.994,
+       "bias": -0.006,
+       "coverage": 0.99,
+       "median_width": 0.041,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.97,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.057,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "q": 0.97
+      },
+      "median_width_by_quantity": {
+       "q": 0.057
+      }
+     }
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "A3 TT[exact]",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "q": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": 0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "q": 1.0
+      },
+      "median_width_by_quantity": {
+       "q": 0.0
+      }
+     },
+     "truth_group": "unexplained (q)"
+    }
+   },
+   "triple": [
+    "C0 POLARITY",
+    "C1 GREEDY",
+    "A3 TT[exact]"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "A3 TT[exact]",
+      "exact"
+     ],
+     "separating_items": 30
+    },
+    {
+     "pair": [
+      "C1 GREEDY",
+      "D DPLL (first solution)"
+     ],
+     "separating_items": 49
+    },
+    {
+     "pair": [
+      "A3 TT[exact]",
+      "C0 POLARITY"
+     ],
+     "separating_items": 50
+    },
+    {
+     "pair": [
+      "A3 TT[exact]",
+      "C1 GREEDY"
+     ],
+     "separating_items": 50
+    },
+    {
+     "pair": [
+      "A3 TT[exact]",
+      "D DPLL (first solution)"
+     ],
+     "separating_items": 50
+    },
+    {
+     "pair": [
+      "C0 POLARITY",
+      "C1 GREEDY"
+     ],
+     "separating_items": 50
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ],
+     "rank": 6,
+     "deficiency": 0,
+     "sigma_ratio": 0.4984210642707479,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ],
+     "rank": 6,
+     "deficiency": 0,
+     "sigma_ratio": 0.5268867704145169,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 164.6
+  },
+  {
+   "unit": "C_E2/colouring",
+   "n_items": 150,
+   "n_clusters": 30,
+   "n_cells": 15,
+   "items_per_cell": 10.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "DPLL-LIST (D)"
+    ],
+    [
+     "DSATUR"
+    ],
+    [
+     "DSATUR-LABEL"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "FF-LABEL"
+    ],
+    [
+     "FF-LIST",
+     "GREEDY+REPAIR-LIST (C->F)"
+    ],
+    [
+     "LF"
+    ],
+    [
+     "NOISY-EXACT"
+    ],
+    [
+     "RO-FF (C3)"
+    ]
+   ],
+   "folded_into_q": [
+    "RANDOM (H)"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.007,
+     "worst_bias_quantity": "DPLL-LIST (D)",
+     "min_coverage": 0.88,
+     "worst_coverage_quantity": "EXACT",
+     "median_width": 0.141,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "DPLL-LIST (D)": {
+       "truth": 0.3,
+       "mean": 0.307,
+       "bias": 0.007,
+       "coverage": 0.94,
+       "median_width": 0.155,
+       "mean_upper": 0.386
+      },
+      "EXACT": {
+       "truth": 0.1,
+       "mean": 0.099,
+       "bias": -0.001,
+       "coverage": 0.88,
+       "median_width": 0.109,
+       "mean_upper": 0.154
+      },
+      "FF-LABEL": {
+       "truth": 0.6,
+       "mean": 0.594,
+       "bias": -0.006,
+       "coverage": 0.97,
+       "median_width": 0.15,
+       "mean_upper": 0.669
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.9,
+      "worst_coverage_quantity": "EXACT",
+      "median_width": 0.14,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "DPLL-LIST (D)": 0.94,
+       "EXACT": 0.9,
+       "FF-LABEL": 0.95
+      },
+      "median_width_by_quantity": {
+       "DPLL-LIST (D)": 0.155,
+       "EXACT": 0.109,
+       "FF-LABEL": 0.15
+      }
+     }
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.042,
+     "worst_bias_quantity": "FF-LABEL",
+     "min_coverage": 0.76,
+     "worst_coverage_quantity": "FF-LABEL",
+     "median_width": 0.145,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "DPLL-LIST (D)": {
+       "truth": 0.3,
+       "mean": 0.273,
+       "bias": -0.027,
+       "coverage": 0.88,
+       "median_width": 0.15,
+       "mean_upper": 0.345
+      },
+      "DSATUR": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 0.92,
+       "median_width": 0.036,
+       "mean_upper": 0.036
+      },
+      "DSATUR-LABEL": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 0.92,
+       "median_width": 0.039,
+       "mean_upper": 0.039
+      },
+      "EXACT": {
+       "truth": 0.1,
+       "mean": 0.079,
+       "bias": -0.021,
+       "coverage": 0.91,
+       "median_width": 0.123,
+       "mean_upper": 0.145
+      },
+      "FF-LABEL": {
+       "truth": 0.6,
+       "mean": 0.558,
+       "bias": -0.042,
+       "coverage": 0.76,
+       "median_width": 0.153,
+       "mean_upper": 0.63
+      },
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)": {
+       "truth": 0.0,
+       "mean": 0.016,
+       "bias": 0.016,
+       "coverage": 0.76,
+       "median_width": 0.042,
+       "mean_upper": 0.042
+      },
+      "LF": {
+       "truth": 0.0,
+       "mean": 0.016,
+       "bias": 0.016,
+       "coverage": 0.83,
+       "median_width": 0.04,
+       "mean_upper": 0.042
+      },
+      "NOISY-EXACT": {
+       "truth": 0.0,
+       "mean": 0.026,
+       "bias": 0.026,
+       "coverage": 1.0,
+       "median_width": 0.091,
+       "mean_upper": 0.085
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.78,
+      "worst_coverage_quantity": "FF-LABEL",
+      "median_width": 0.138,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": true
+      },
+      "pass": false,
+      "coverage": {
+       "DPLL-LIST (D)": 0.87,
+       "DSATUR": 0.91,
+       "DSATUR-LABEL": 0.9,
+       "EXACT": 0.81,
+       "FF-LABEL": 0.78,
+       "FF-LIST = GREEDY+REPAIR-LIST (C->F)": 0.65,
+       "LF": 0.71,
+       "NOISY-EXACT": 0.71
+      },
+      "median_width_by_quantity": {
+       "DPLL-LIST (D)": 0.15,
+       "DSATUR": 0.037,
+       "DSATUR-LABEL": 0.043,
+       "EXACT": 0.115,
+       "FF-LABEL": 0.144,
+       "FF-LIST = GREEDY+REPAIR-LIST (C->F)": 0.042,
+       "LF": 0.039,
+       "NOISY-EXACT": 0.099
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "q",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "q": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "q": 1.0
+      },
+      "median_width_by_quantity": {
+       "q": 0.0
+      }
+     }
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "NOISY-EXACT",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "q": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "q": 1.0
+      },
+      "median_width_by_quantity": {
+       "q": 0.0
+      }
+     },
+     "truth_group": "unexplained (q)"
+    }
+   },
+   "triple": [
+    "FF-LABEL",
+    "DPLL-LIST (D)",
+    "EXACT"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "DSATUR",
+      "DSATUR-LABEL"
+     ],
+     "separating_items": 89
+    },
+    {
+     "pair": [
+      "DPLL-LIST (D)",
+      "DSATUR-LABEL"
+     ],
+     "separating_items": 119
+    },
+    {
+     "pair": [
+      "DPLL-LIST (D)",
+      "DSATUR"
+     ],
+     "separating_items": 124
+    },
+    {
+     "pair": [
+      "DPLL-LIST (D)",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+     ],
+     "separating_items": 124
+    },
+    {
+     "pair": [
+      "DSATUR-LABEL",
+      "LF"
+     ],
+     "separating_items": 131
+    },
+    {
+     "pair": [
+      "DSATUR",
+      "LF"
+     ],
+     "separating_items": 134
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "LF",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ],
+     "rank": 10,
+     "deficiency": 0,
+     "sigma_ratio": 0.1644690814261691,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "LF",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "LF",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ],
+     "rank": 10,
+     "deficiency": 0,
+     "sigma_ratio": 0.013854756139649338,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "LF",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 748.4
+  },
+  {
+   "unit": "C_E2/knapsack",
+   "n_items": 150,
+   "n_clusters": 30,
+   "n_cells": 15,
+   "items_per_cell": 10.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "DIFF"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "INPUT-FIT"
+    ],
+    [
+     "LARGEST-FIT"
+    ],
+    [
+     "RATIO+BEST-SINGLE",
+     "RATIO-PREFIX"
+    ],
+    [
+     "RATIO-SKIP"
+    ],
+    [
+     "VALUE"
+    ]
+   ],
+   "folded_into_q": [],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.009,
+     "worst_bias_quantity": "RATIO-SKIP",
+     "min_coverage": 0.88,
+     "worst_coverage_quantity": "RATIO-SKIP",
+     "median_width": 0.197,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "DIFF": {
+       "truth": 0.6,
+       "mean": 0.601,
+       "bias": 0.001,
+       "coverage": 0.92,
+       "median_width": 0.222,
+       "mean_upper": 0.712
+      },
+      "EXACT": {
+       "truth": 0.1,
+       "mean": 0.103,
+       "bias": 0.003,
+       "coverage": 0.93,
+       "median_width": 0.111,
+       "mean_upper": 0.162
+      },
+      "RATIO-SKIP": {
+       "truth": 0.3,
+       "mean": 0.291,
+       "bias": -0.009,
+       "coverage": 0.88,
+       "median_width": 0.216,
+       "mean_upper": 0.402
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.89,
+      "worst_coverage_quantity": "RATIO-SKIP",
+      "median_width": 0.191,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": true
+      },
+      "pass": false,
+      "coverage": {
+       "DIFF": 0.92,
+       "EXACT": 0.94,
+       "RATIO-SKIP": 0.89
+      },
+      "median_width_by_quantity": {
+       "DIFF": 0.221,
+       "EXACT": 0.111,
+       "RATIO-SKIP": 0.216
+      }
+     }
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.046,
+     "worst_bias_quantity": "DIFF",
+     "min_coverage": 0.8,
+     "worst_coverage_quantity": "DIFF",
+     "median_width": 0.198,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "DIFF": {
+       "truth": 0.6,
+       "mean": 0.554,
+       "bias": -0.046,
+       "coverage": 0.8,
+       "median_width": 0.224,
+       "mean_upper": 0.66
+      },
+      "EXACT": {
+       "truth": 0.1,
+       "mean": 0.092,
+       "bias": -0.008,
+       "coverage": 0.92,
+       "median_width": 0.111,
+       "mean_upper": 0.148
+      },
+      "INPUT-FIT": {
+       "truth": 0.0,
+       "mean": 0.016,
+       "bias": 0.016,
+       "coverage": 0.73,
+       "median_width": 0.036,
+       "mean_upper": 0.042
+      },
+      "LARGEST-FIT": {
+       "truth": 0.0,
+       "mean": 0.014,
+       "bias": 0.014,
+       "coverage": 0.76,
+       "median_width": 0.036,
+       "mean_upper": 0.038
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "truth": 0.0,
+       "mean": 0.013,
+       "bias": 0.013,
+       "coverage": 0.9,
+       "median_width": 0.038,
+       "mean_upper": 0.04
+      },
+      "RATIO-SKIP": {
+       "truth": 0.3,
+       "mean": 0.276,
+       "bias": -0.024,
+       "coverage": 0.9,
+       "median_width": 0.218,
+       "mean_upper": 0.387
+      },
+      "VALUE": {
+       "truth": 0.0,
+       "mean": 0.018,
+       "bias": 0.018,
+       "coverage": 0.83,
+       "median_width": 0.048,
+       "mean_upper": 0.048
+      },
+      "q": {
+       "truth": 0.0,
+       "mean": 0.016,
+       "bias": 0.016,
+       "coverage": 0.72,
+       "median_width": 0.041,
+       "mean_upper": 0.042
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.84,
+      "worst_coverage_quantity": "DIFF",
+      "median_width": 0.195,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": true
+      },
+      "pass": false,
+      "coverage": {
+       "DIFF": 0.84,
+       "EXACT": 0.93,
+       "INPUT-FIT": 0.69,
+       "LARGEST-FIT": 0.72,
+       "RATIO+BEST-SINGLE = RATIO-PREFIX": 0.87,
+       "RATIO-SKIP": 0.9,
+       "VALUE": 0.79,
+       "q": 0.61
+      },
+      "median_width_by_quantity": {
+       "DIFF": 0.22,
+       "EXACT": 0.114,
+       "INPUT-FIT": 0.039,
+       "LARGEST-FIT": 0.033,
+       "RATIO+BEST-SINGLE = RATIO-PREFIX": 0.043,
+       "RATIO-SKIP": 0.218,
+       "VALUE": 0.049,
+       "q": 0.038
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.01,
+     "worst_bias_quantity": "q",
+     "min_coverage": 0.81,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.035,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "q": {
+       "truth": 1.0,
+       "mean": 0.99,
+       "bias": -0.01,
+       "coverage": 0.81,
+       "median_width": 0.035,
+       "mean_upper": 0.999
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.76,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.036,
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": true
+      },
+      "pass": false,
+      "coverage": {
+       "q": 0.76
+      },
+      "median_width_by_quantity": {
+       "q": 0.036
+      }
+     }
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "q",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "q": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "q": 1.0
+      },
+      "median_width_by_quantity": {
+       "q": 0.0
+      }
+     },
+     "truth_group": "unexplained (q)"
+    }
+   },
+   "triple": [
+    "DIFF",
+    "RATIO-SKIP",
+    "EXACT"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "DIFF",
+      "RATIO-SKIP"
+     ],
+     "separating_items": 62
+    },
+    {
+     "pair": [
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP"
+     ],
+     "separating_items": 90
+    },
+    {
+     "pair": [
+      "DIFF",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX"
+     ],
+     "separating_items": 110
+    },
+    {
+     "pair": [
+      "DIFF",
+      "VALUE"
+     ],
+     "separating_items": 135
+    },
+    {
+     "pair": [
+      "RATIO-SKIP",
+      "VALUE"
+     ],
+     "separating_items": 140
+    },
+    {
+     "pair": [
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "VALUE"
+     ],
+     "separating_items": 144
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE",
+      "q"
+     ],
+     "rank": 8,
+     "deficiency": 0,
+     "sigma_ratio": 0.35600567810110084,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE",
+      "q"
+     ],
+     "rank": 8,
+     "deficiency": 0,
+     "sigma_ratio": 0.4122289830155917,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 267.9
+  },
+  {
+   "unit": "C_E5/3-SAT (partial assignment given)",
+   "n_items": 30,
+   "n_clusters": 10,
+   "n_cells": 3,
+   "items_per_cell": 10.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "ALWAYS-UNSAT (A1 give-up)"
+    ],
+    [
+     "DPLL from state (D)"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "GREEDY-MENTION from state (C1)"
+    ],
+    [
+     "GREEDY-MENTION-ABORT from state (C1)"
+    ],
+    [
+     "GUC-DET from state (C2)",
+     "SC-DET from state (C2)"
+    ],
+    [
+     "POLARITY (C0, ignores state)"
+    ],
+    [
+     "UC-DET from state (C2)"
+    ]
+   ],
+   "folded_into_q": [
+    "RANDOM (H)"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.011,
+     "worst_bias_quantity": "GREEDY-MENTION from state (C1)",
+     "min_coverage": 0.89,
+     "worst_coverage_quantity": "GREEDY-MENTION from state (C1)",
+     "median_width": 0.314,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "GREEDY-MENTION from state (C1)": {
+       "truth": 0.6,
+       "mean": 0.589,
+       "bias": -0.011,
+       "coverage": 0.89,
+       "median_width": 0.381,
+       "mean_upper": 0.774
+      },
+      "GREEDY-MENTION-ABORT from state (C1)": {
+       "truth": 0.3,
+       "mean": 0.305,
+       "bias": 0.005,
+       "coverage": 0.9,
+       "median_width": 0.373,
+       "mean_upper": 0.494
+      },
+      "POLARITY (C0, ignores state)": {
+       "truth": 0.1,
+       "mean": 0.102,
+       "bias": 0.002,
+       "coverage": 0.96,
+       "median_width": 0.169,
+       "mean_upper": 0.201
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.93,
+      "worst_coverage_quantity": "GREEDY-MENTION from state (C1)",
+      "median_width": 0.314,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "GREEDY-MENTION from state (C1)": 0.93,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.93,
+       "POLARITY (C0, ignores state)": 0.95
+      },
+      "median_width_by_quantity": {
+       "GREEDY-MENTION from state (C1)": 0.384,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.359,
+       "POLARITY (C0, ignores state)": 0.178
+      }
+     }
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.054,
+     "worst_bias_quantity": "GREEDY-MENTION from state (C1)",
+     "min_coverage": 0.88,
+     "worst_coverage_quantity": "GREEDY-MENTION from state (C1)",
+     "median_width": 0.334,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.053
+      },
+      "GREEDY-MENTION from state (C1)": {
+       "truth": 0.6,
+       "mean": 0.546,
+       "bias": -0.054,
+       "coverage": 0.88,
+       "median_width": 0.377,
+       "mean_upper": 0.728
+      },
+      "GREEDY-MENTION-ABORT from state (C1)": {
+       "truth": 0.3,
+       "mean": 0.277,
+       "bias": -0.023,
+       "coverage": 0.91,
+       "median_width": 0.374,
+       "mean_upper": 0.48
+      },
+      "GUC-DET from state (C2) = SC-DET from state (C2)": {
+       "truth": 0.0,
+       "mean": 0.014,
+       "bias": 0.014,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 0.048
+      },
+      "POLARITY (C0, ignores state)": {
+       "truth": 0.1,
+       "mean": 0.109,
+       "bias": 0.009,
+       "coverage": 0.89,
+       "median_width": 0.168,
+       "mean_upper": 0.217
+      },
+      "q": {
+       "truth": 0.0,
+       "mean": 0.028,
+       "bias": 0.028,
+       "coverage": 0.99,
+       "median_width": 0.0,
+       "mean_upper": 0.086
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.86,
+      "worst_coverage_quantity": "GREEDY-MENTION from state (C1)",
+      "median_width": 0.334,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.96,
+       "GREEDY-MENTION from state (C1)": 0.86,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.93,
+       "GUC-DET from state (C2) = SC-DET from state (C2)": 0.97,
+       "POLARITY (C0, ignores state)": 0.87,
+       "q": 0.97
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.0,
+       "GREEDY-MENTION from state (C1)": 0.38,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.383,
+       "GUC-DET from state (C2) = SC-DET from state (C2)": 0.0,
+       "POLARITY (C0, ignores state)": 0.167,
+       "q": 0.0
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.088,
+     "worst_bias_quantity": "q",
+     "min_coverage": 0.81,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.347,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": false
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "truth": 0.0,
+       "mean": 0.077,
+       "bias": 0.077,
+       "coverage": 0.89,
+       "median_width": 0.333,
+       "mean_upper": 0.324
+      },
+      "q": {
+       "truth": 1.0,
+       "mean": 0.912,
+       "bias": -0.088,
+       "coverage": 0.81,
+       "median_width": 0.347,
+       "mean_upper": 0.992
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.83,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.333,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": false
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.9,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.79,
+       "q": 0.83
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.337,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.0,
+       "q": 0.333
+      }
+     }
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "ALWAYS-UNSAT (A1 give-up)",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "ALWAYS-UNSAT (A1 give-up)",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "ALWAYS-UNSAT (A1 give-up)",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 1.0
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.0
+      }
+     },
+     "truth_group": "ALWAYS-UNSAT (A1 give-up)"
+    }
+   },
+   "triple": [
+    "GREEDY-MENTION from state (C1)",
+    "GREEDY-MENTION-ABORT from state (C1)",
+    "POLARITY (C0, ignores state)"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "DPLL from state (D)",
+      "UC-DET from state (C2)"
+     ],
+     "separating_items": 3
+    },
+    {
+     "pair": [
+      "DPLL from state (D)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)"
+     ],
+     "separating_items": 8
+    },
+    {
+     "pair": [
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "UC-DET from state (C2)"
+     ],
+     "separating_items": 9
+    },
+    {
+     "pair": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "GREEDY-MENTION-ABORT from state (C1)"
+     ],
+     "separating_items": 10
+    },
+    {
+     "pair": [
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)"
+     ],
+     "separating_items": 16
+    },
+    {
+     "pair": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "UC-DET from state (C2)"
+     ],
+     "separating_items": 17
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)",
+      "q"
+     ],
+     "rank": 9,
+     "deficiency": 0,
+     "sigma_ratio": 0.13388325971191176,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)",
+      "q"
+     ],
+     "rank": 9,
+     "deficiency": 0,
+     "sigma_ratio": 0.14731235259772998,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 101.8
+  }
+ ],
+ "merged": [
+  {
+   "units": [
+    "AH_E5/ENT",
+    "C_E5/3-SAT (partial assignment given)"
+   ],
+   "provenance": {
+    "git_sha": "06e34f4ba0ee9f224bc00b36bb2bfd75dc699c67",
+    "git_dirty": false,
+    "item_files": {
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/AH_E1_dev_s1.jsonl": "41bc65fe48b7d06e1b490dbe5b8bbdb51731d8e2d56ccb954d3da40cc37620c1",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/AH_E2_dev_s1.jsonl": "23f975f1aed0b0821c6c8ca117a3820d098fbb18456d554656c0489037c0de9e",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/AH_E5_dev_s1.jsonl": "6dc305eddb974c841a73c59e55d5f7b37ddd4a9fd59c868d9cde0d879d57b7f6",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/B4C4_E1_dev_s1.jsonl": "31308d5d5edfe30798a3c6cf521c3047a4613dcf5f1676d4b0aa968907bd4a81",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/B4C4_E2_dev_s1.jsonl": "5b33b6fb5e78d45cc8eb8f142fa06e8b76ef2875aa6ceb157d086b18b8afbe6a",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/C_E1_dev_s1.jsonl": "a1e863b3e9d73645ed6414232738fa042e347776c3adbe76df4ecf22c0706301",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/C_E2_dev_s1.jsonl": "9275a0db3866ba90fee008e3ecad36d55722fb29107be22c68739159ee264d7f",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/C_E3_dev_s1.jsonl": "fac7a53b11c047937da0cb042a02e6e49f800cdf389d20bc9de3853a1a2790e3",
+     "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete/C_E5_dev_s1.jsonl": "099a63a6d0d4def248f9c4688b88e4dcead677c9b97be9f6b735448a0eafc0bd"
+    }
+   },
+   "command": "python -m reasoning_heuristics.identify.recovery run --items /tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items_v2/pc10/complete --label pc10 --units C_E5/3-SAT (partial assignment given);AH_E5/ENT --scenarios mix,null_q,null_always --reps 100 --boot 100 --workers 4 --out /tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/b2_pc10.json",
+   "generated": "2026-11-17 23:11"
+  }
+ ],
+ "dropped_before_merge": [
+  "C_E1/3-SAT",
+  "C_E2/3-SAT"
+ ]
+}
