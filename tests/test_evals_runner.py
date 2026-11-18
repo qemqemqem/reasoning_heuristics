@@ -205,6 +205,27 @@ def test_resume_into_the_same_directory_sends_only_the_rest(tmp_path, key):
     run(tmp_path, t, "--no-cache", limit=6)
     assert len(t.calls) == 6
     assert len(read_gz(tmp_path / "run1" / "raw.jsonl.gz")) == 6
+    m = json.loads((tmp_path / "run1" / "manifest.json").read_text())
+    assert m["resumed_from"] == 3 and len(m["previous_invocations"]) == 1
+    assert m["previous_invocations"][0]["git"]["sha"] and m["previous_invocations"][0]["charged_usd"] == pytest.approx(0.0003)
+    assert m["charged_usd"] == pytest.approx(0.0003) and m["charged_usd_all_invocations"] == pytest.approx(0.0006)
+    with pytest.raises(SystemExit, match="different condition"):
+        run(tmp_path, t, "--no-cache", "--effort", "low", limit=6)
+
+
+def test_a_body_cut_short_is_retried(key):
+    """Seen live: http.client.IncompleteRead escaped the retry loop and stopped run (a)."""
+    import http.client
+
+    class CutShort(FakeTransport):
+        def __call__(self, method, url, headers, body, timeout):
+            if not self.calls:
+                self.calls.append({})
+                raise http.client.IncompleteRead(b"{\"id\": \"gen-", 1991)
+            return super().__call__(method, url, headers, body, timeout)
+
+    res = client(CutShort()).chat({"model": "m", "messages": [{"role": "user", "content": "q"}]})
+    assert res.ok and res.attempts == 2 and "IncompleteRead" in res.errors[0]
 
 
 def test_cap_stops_cleanly_before_the_spend_would_pass_it(tmp_path, key):

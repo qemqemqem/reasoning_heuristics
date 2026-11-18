@@ -32,7 +32,7 @@ def build_report(manifest: dict[str, Any], scored: list[dict[str, Any]], items: 
          f"- **Items:** {manifest['items']['n_items']} ({', '.join(manifest['items']['files'])}); skipped {manifest['items']['skipped']}.",
          f"- **Status:** {manifest.get('status')}" + (f" ({manifest['stop_reason']})" if manifest.get("stop_reason") else "") +
          f"; {manifest.get('responses', '–')} responses, {manifest.get('failed_calls', 0)} failed calls, {manifest.get('cache_hits', 0)} from cache.",
-         f"- **Spend:** ${manifest.get('charged_usd', 0):.4f} API-reported (cap ${manifest.get('cap_usd', 0):.2f}; dry-run estimate "
+         f"- **Spend:** ${manifest.get('charged_usd_all_invocations', manifest.get('charged_usd', 0)):.4f} API-reported over {1 + len(manifest.get('previous_invocations', []))} invocation(s) (last cap ${manifest.get('cap_usd', 0):.2f}; dry-run estimate "
          f"${manifest.get('estimate', {}).get('cost_usd', 0):.2f}, worst case ${manifest.get('estimate', {}).get('worst_case_usd', 0):.2f})."
          + (f" {spend['calls_without_reported_cost']} calls carried no cost and were booked at the configured price." if spend.get("calls_without_reported_cost") else ""),
          f"- **Code:** git `{(manifest.get('git') or {}).get('sha')}`{' (dirty)' if (manifest.get('git') or {}).get('dirty') else ''}; "

@@ -308,6 +308,16 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
         "client": {"timeout_s": client.timeout_s, "max_attempts": client.max_attempts, "concurrency": a.concurrency},
         "notes": a.notes, "resumed_from": len(done),
     }
+    old_manifest = out / "manifest.json"
+    if old_manifest.exists():  # a resumed run keeps every earlier invocation's provenance
+        old = json.loads(old_manifest.read_text(encoding="utf-8"))
+        history = old.pop("previous_invocations", [])
+        keep = ("started_at", "finished_at", "status", "stop_reason", "git", "versions", "cap_usd", "charged_usd",
+                "spend", "responses", "failed_calls", "resumed_from", "providers_served", "models_returned",
+                "key_usage", "wall_s", "client", "notes")
+        manifest["previous_invocations"] = history + [{k: old.get(k) for k in keep}]
+        if old.get("condition") != manifest["condition"] or old.get("items", {}).get("files") != manifest["items"]["files"]:
+            raise SystemExit(f"{out}: resuming with a different condition or item set than the run was started with")
     write_json(out / "manifest.json", manifest)
     runner = Runner(client, None if a.no_cache else ResponseCache(a.cache_dir), guard, out, run_id, a.concurrency)
     key_before = client.key_usage() if jobs else {}
@@ -334,6 +344,7 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
             "providers_served": _counts(served_provider(r) for r in responses),
             "responses": len(responses), "failed_calls": runner.failures, "cache_hits": runner.cache_hits,
             "spend": guard.to_json(), "charged_usd": round(runner.charged, 6),
+            "charged_usd_all_invocations": round(runner.charged + sum((p.get("charged_usd") or 0) for p in manifest.get("previous_invocations", [])), 6),
             "api_reported_cost_usd_all_responses": round(sum(float((r.get("usage") or {}).get("cost") or 0) for r in responses), 6),
         })
         write_json(out / "manifest.json", manifest)
