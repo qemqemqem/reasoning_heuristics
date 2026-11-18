@@ -201,6 +201,7 @@ class FitResult:
     iters: int = 0
     converged: bool = True
     extra: dict[str, Any] = field(default_factory=dict)
+    jack: np.ndarray | None = field(default=None, repr=False)  # (clusters, G + 1) leave-one-cluster-out fits
 
     def weight(self, label: str) -> float:
         return float(self.pi[self.labels.index(label)])
@@ -219,8 +220,9 @@ UNEXPLAINED = "unexplained (q)"
 
 def fit(T: Tensors, n_boot: int = 200, rng: np.random.Generator | None = None, chunk: int = 50,
         fix_eps: float | None = None, fix_rho: float | None = None, max_iter: int = 3000, tol: float = 1e-8,
-        q_label: str = UNEXPLAINED) -> FitResult:
-    """Point estimate plus cluster-bootstrap percentile intervals."""
+        q_label: str = UNEXPLAINED, jackknife: bool = False) -> FitResult:
+    """Point estimate plus cluster-bootstrap percentile intervals. With `jackknife`, also the
+    leave-one-cluster-out fits that BCa intervals need (`bca_interval`)."""
     rng = rng or np.random.default_rng(0)
     if fix_eps is None and not T.slip_identified:
         fix_eps = 0.0
@@ -248,10 +250,45 @@ def fit(T: Tensors, n_boot: int = 200, rng: np.random.Generator | None = None, c
     boot = np.concatenate(pis)
     eb, rb = np.concatenate(epss), np.concatenate(rhos)
     lo, hi = np.percentile(boot, 2.5, 0), np.percentile(boot, 97.5, 0)
+    jack = None
+    if jackknife:
+        ids, inv = np.unique(T.cluster, return_inverse=True)
+        Wj = np.ones((len(ids), T.n))
+        Wj[inv, np.arange(T.n)] = 0.0  # replicate k drops cluster k
+        js = []
+        for start in range(0, len(ids), chunk):
+            r = em(T, Wj[start:start + chunk], pi0=pi_hat, eps0=eps_hat, rho0=rho_hat, fix_eps=fix_eps, fix_rho=fix_rho,
+                   max_iter=min(max_iter, 1500), tol=tol)
+            js.append(r.pi)
+        jack = np.concatenate(js)
     return FitResult(labels, pi_hat, lo, hi, eps_hat, (float(np.percentile(eb, 2.5)), float(np.percentile(eb, 97.5))),
                      rho_hat, (float(np.percentile(rb, 2.5)), float(np.percentile(rb, 97.5))), float(point.loglik[0]),
                      T.n, len(np.unique(T.cluster)), boot, point.iters, bool(point.converged[0]),
-                     {"data_ties": data_ties(T), "slip_identified": T.slip_identified})
+                     {"data_ties": data_ties(T), "slip_identified": T.slip_identified}, jack)
+
+
+def bca_interval(boot: np.ndarray, est: np.ndarray, jack: np.ndarray, alpha: float = 0.05) -> tuple[np.ndarray, np.ndarray]:
+    """Bias-corrected and accelerated bootstrap interval (Efron 1987), per column: the bias correction
+    z0 from the share of bootstrap values below the estimate, the acceleration from the
+    leave-one-cluster-out jackknife. Works on any linear combination of weights (pass transformed
+    boot / est / jack). Columns with no bootstrap spread get the degenerate interval [est, est]."""
+    from scipy.stats import norm
+
+    boot, est, jack = np.asarray(boot), np.asarray(est), np.asarray(jack)
+    B = boot.shape[0]
+    frac = ((boot < est[None, :]).sum(0) + 0.5 * (boot == est[None, :]).sum(0)) / B
+    z0 = norm.ppf(np.clip(frac, 0.5 / B, 1 - 0.5 / B))
+    d = jack.mean(0)[None, :] - jack
+    den = 6.0 * np.power((d ** 2).sum(0), 1.5)
+    a = np.where(den > 0, (d ** 3).sum(0) / np.where(den > 0, den, 1.0), 0.0)
+    lo, hi = np.empty(boot.shape[1]), np.empty(boot.shape[1])
+    for j in range(boot.shape[1]):
+        qs = []
+        for z in (norm.ppf(alpha / 2), norm.ppf(1 - alpha / 2)):
+            adj = norm.cdf(z0[j] + (z0[j] + z) / (1 - a[j] * (z0[j] + z)))
+            qs.append(float(np.quantile(boot[:, j], np.clip(adj, 0.0, 1.0))))
+        lo[j], hi[j] = qs
+    return lo, hi
 
 
 def data_ties(T: Tensors) -> list[list[str]]:

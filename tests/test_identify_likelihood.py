@@ -9,6 +9,7 @@ from identify_helpers import decision_item, plant
 
 from reasoning_heuristics.identify.likelihood import NEAR_MISS, UNIFORM, Observation, TruncationTable, UnitModel
 from reasoning_heuristics.identify.members import log_count_colourings
+from reasoning_heuristics.identify.mixture import fit
 from reasoning_heuristics.identify.records import Response
 from reasoning_heuristics.identify.units import Unit, load_items, make_units
 
@@ -147,3 +148,28 @@ def test_planted_member_has_the_highest_likelihood_on_its_own_answers(smoke_unit
     j = T.labels.index(g.name)
     for n in range(T.n):
         assert T.A[n, j] == T.A[n].max()
+
+
+def test_special_token_predictions_do_not_slip():
+    """A deterministic prediction of a special token (UNSAT, IMPOSSIBLE, X) has no near misses, so it
+    does not slip: P(token | h) = 1 at any eps, under both slip models. If it slipped to "q without the
+    token", a member that predicts the token on every item (ALWAYS-UNSAT) would equal q at
+    eps = 1 - q(token) = 0.5 (one special token: the eps cap), and pure noise would load on it."""
+    unit = make_units(load_items(ROOT / "data/items/dev/C_E5_dev_s1.jsonl.gz"))["C_E5/3-SAT (partial assignment given)"]
+    rng = np.random.default_rng(0)
+    au = "ALWAYS-UNSAT (A1 give-up)"
+    for model in (NEAR_MISS, UNIFORM):
+        um = UnitModel(unit, model)
+        j = [g.name for g in um.columns].index(au)
+        for i in range(len(um.items)):
+            assert um.sample(i, au, 0.5, 0.3, rng) == "UNSAT"
+            A, B0, C, _, _ = um.row(i, "UNSAT")
+            assert A[j] == B0[j] == 1 and not C[j].any()
+            A, B0, C, _, _ = um.row(i, um.items[i].space.sample_uniform(rng))
+            assert A[j] == B0[j] == 0 and not C[j].any()
+    # pure noise keeps its weight on q (with slips, ALWAYS-UNSAT took 0.36-0.41 of it on the C E5 pc20 set)
+    um = UnitModel(unit, NEAR_MISS)
+    T = um.tensors([Observation(i, um.sample_q(i, rng)) for i in range(len(um.items)) for _ in range(20)])
+    assert not T.slips[T.labels.index(au)]
+    res = fit(T, n_boot=0)
+    assert res.weight(au) < 0.1 and res.pi[-1] > 0.85, dict(zip(res.labels, res.pi.round(3)))

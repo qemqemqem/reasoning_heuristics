@@ -157,7 +157,17 @@ def test_weight_ranges_follow_the_null_direction():
 @pytest.mark.slow
 def test_cli_run_on_smoke(tmp_path, capsys):
     out = tmp_path / "smoke.json"
-    rc = main(["run", "--items", str(ROOT / "data/items/smoke"), "--units", "C_E2/knapsack,AH_E1/SAT", "--reps", "4",
+    rc = main(["run", "--items", str(ROOT / "data/items/smoke"), "--units", "C_E2/knapsack;AH_E1/SAT", "--reps", "4",
                "--boot", "20", "--single-reps", "2", "--feature-reps", "2", "--feature-boot", "4", "--offzoo-reps", "2",
                "--workers", "2", "--out", str(out)])
     assert rc == 0 and out.exists()
+
+
+def test_cli_units_are_semicolon_separated_and_unknown_names_fail(tmp_path, capsys):
+    """Unit names contain commas ("C_E5/colouring (k=3, partial colouring given)"), so --units takes a
+    ';'-separated list, and a name that matches no unit stops the run instead of being skipped."""
+    out = tmp_path / "none.json"
+    rc = main(["run", "--items", str(ROOT / "data/items/smoke"), "--units", "C_E2/knapsack;C_E2/knapsack,AH_E1/SAT",
+               "--out", str(out)])
+    assert rc == 2 and not out.exists()
+    assert "C_E2/knapsack,AH_E1/SAT" in capsys.readouterr().err

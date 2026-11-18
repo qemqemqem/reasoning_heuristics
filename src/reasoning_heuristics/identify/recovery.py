@@ -51,7 +51,7 @@ import numpy as np
 from reasoning_heuristics.identify.engine import design_rank, identifiability, separations
 from reasoning_heuristics.identify.fake import Scenario, always_answer, simulate, truth_vector
 from reasoning_heuristics.identify.likelihood import NEAR_MISS, UNIFORM, TruncationTable, UnitModel
-from reasoning_heuristics.identify.mixture import UNEXPLAINED, em, fit, fit_features
+from reasoning_heuristics.identify.mixture import UNEXPLAINED, bca_interval, em, fit, fit_features
 from reasoning_heuristics.identify.units import Unit, load_items, make_units
 
 GATES = {"bias": 0.05, "coverage": 0.90, "width": 0.20}
@@ -166,7 +166,7 @@ def point_summary(truths: np.ndarray, ests: np.ndarray, labels: list[str]) -> di
 
 def _fit(um_fit: UnitModel, obs, rng, n_boot, token_model=None):
     T = um_fit.tensors(obs, token_model)
-    return fit(T, n_boot=n_boot, rng=rng)
+    return fit(T, n_boot=n_boot, rng=rng, jackknife=True)
 
 
 def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
@@ -206,7 +206,7 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
 
     def replicate(sc: Scenario, gen_model: str, fit_model: str, reps: int, boot: int, token=False, levels=None):
         Tid = ident[fit_model]["transform"]
-        truths, ests, los, his = [], [], [], []
+        truths, ests, los, his, blo, bhi = [], [], [], [], [], []
         tv = truth_vector(fitm[fit_model], sc.weights, sc.q)
         for _ in range(reps):
             obs = simulate(gen[gen_model], sc, rng, levels)
@@ -226,10 +226,20 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
             ests.append(Tid @ res.pi)
             los.append(np.percentile(tb, 2.5, 0))
             his.append(np.percentile(tb, 97.5, 0))
-        out_s = summarise(np.array(truths), np.array(ests), np.array(los), np.array(his), ident[fit_model]["identified"])
+            bl, bh = bca_interval(tb, Tid @ res.pi, res.jack @ Tid.T)
+            blo.append(bl)
+            bhi.append(bh)
+        idl = ident[fit_model]["identified"]
+        out_s = summarise(np.array(truths), np.array(ests), np.array(los), np.array(his), idl)
+        # the BCa alternative, on the same fits (same estimates, so the same bias)
+        b = summarise(np.array(truths), np.array(ests), np.array(blo), np.array(bhi), idl)
+        out_s["bca"] = {k: b[k] for k in ("min_coverage", "worst_coverage_quantity", "median_width", "gates", "pass")}
+        out_s["bca"]["coverage"] = {q: v["coverage"] for q, v in b["quantities"].items()}
+        out_s["bca"]["median_width_by_quantity"] = {q: v["median_width"] for q, v in b["quantities"].items()}
         ok, why = testability(fit_model, tv)
         if not ok:
             out_s.update({"testable": False, "not_testable": why, "pass": None})
+            out_s["bca"]["pass"] = None
         return out_s
 
     if "single" in scen:
@@ -385,7 +395,8 @@ def run(argv: list[str]) -> int:
     ap = argparse.ArgumentParser(prog="recovery run")
     ap.add_argument("--items", required=True, help="a directory of item sets (*.jsonl.gz or *.jsonl) or one file")
     ap.add_argument("--evals", default=None, help="comma-separated eval names, e.g. C_E1,AH_E2")
-    ap.add_argument("--units", default=None, help="comma-separated unit names (eval/domain)")
+    ap.add_argument("--units", default=None,
+                    help="unit names (eval/domain) separated by ';' (names can contain commas)")
     ap.add_argument("--scenarios", default=",".join(ALL_SCENARIOS))
     ap.add_argument("--reps", type=int, default=60)
     ap.add_argument("--boot", type=int, default=150)
@@ -409,12 +420,18 @@ def run(argv: list[str]) -> int:
     cfg = {"reps": a.reps, "boot": a.boot, "single_reps": a.single_reps, "feature_reps": a.feature_reps,
            "feature_boot": a.feature_boot, "offzoo_reps": a.offzoo_reps, "seed": a.seed,
            "scenarios": a.scenarios.split(",")}
-    tasks = []
+    wanted = [u.strip() for u in a.units.split(";") if u.strip()] if a.units else None
+    tasks, found = [], set()
     for ev, ps in sorted(by_eval.items()):
         for name in make_units(load_items(ps)):
-            if a.units and name not in a.units.split(","):
+            found.add(name)
+            if wanted and name not in wanted:
                 continue
             tasks.append((ps, name, cfg))
+    missing = sorted(set(wanted or ()) - found)
+    if missing:
+        print(f"no unit named {missing} in these item sets; units are: {sorted(found)}", file=sys.stderr)
+        return 2
     # longest first, so the pool is not left waiting on one big unit at the end
     tasks.sort(key=lambda t: -sum(p.stat().st_size for p in t[0]))
     prov = provenance(paths)  # before the run, so later edits to the tree cannot leak in
@@ -508,8 +525,8 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
                    f"{_mark(s.get('feature'))} | {_mark(s.get('null_q'))} | {_mark(s.get('null_always'))} | "
                    f"{'PASS' if u['all_gates_pass'] else 'fail'}{' (' + str(len(u.get('not_testable', []))) + ' not testable)' if u.get('not_testable') else ''} |")
     out.append("\n**The 60/30/10 mixture in detail** (worst quantity for each gate):\n")
-    out.append("| Unit | triple (0.6 / 0.3 / 0.1) | max \\|bias\\| | on | min coverage | on | median width |")
-    out.append("|---|---|---|---|---|---|---|")
+    out.append("| Unit | triple (0.6 / 0.3 / 0.1) | max \\|bias\\| | on | min coverage | on | median width | BCa: min coverage / median width |")
+    out.append("|---|---|---|---|---|---|---|---|")
     for u in units:
         m = u["scenarios"].get("mix")
         if not m:
@@ -518,8 +535,10 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
         if m.get("testable") is False:
             out.append(f"| {u['unit']} | {' / '.join(u['triple'])} | not testable: {m['not_testable']} ||||||")
             continue
+        bc = m.get("bca") or {}
         out.append(f"| {u['unit']} | {' / '.join(u['triple'])} | {_f(m['max_abs_bias'])} | {m['worst_bias_quantity']} | "
-                   f"{_f(m['min_coverage'])} | {m['worst_coverage_quantity']} | {_f(m['median_width'])} |")
+                   f"{_f(m['min_coverage'])} | {m['worst_coverage_quantity']} | {_f(m['median_width'])} | "
+                   f"{_f(bc.get('min_coverage'))} / {_f(bc.get('median_width'))} |")
     out.append("\n**Single members that fail** (the first gate each fails on, and its worst quantity):\n")
     for u in units:
         single = u["scenarios"].get("single")
@@ -620,15 +639,18 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
                 elif m.get("testable") is False:
                     tag = "mix not testable"
                 else:
-                    tag = "mix " + ("PASS" if m["pass"] else "fail") + f" (b {_f(m['max_abs_bias'])}, c {_f(m['min_coverage'])}, w {_f(m['median_width'])})"
+                    bc = m.get("bca") or {}
+                    tag = "mix " + ("PASS" if m["pass"] else "fail") + f" (b {_f(m['max_abs_bias'])}, c {_f(m['min_coverage'])}, w {_f(m['median_width'])}" \
+                        + (f"; BCa c {_f(bc.get('min_coverage'))}, w {_f(bc.get('median_width'))}" if bc else "") + ")"
                 tag += "; q " + ("not testable" if q and q.get("testable") is False else ("PASS" if q and q["pass"] else "fail"))
                 cells.append(f"{u['items_per_cell']:g}: {tag}")
             sw.append(f"| {n} | " + " | ".join(cells) + " |")
         sections["sweep"] = "\n".join(sw)
         # the smallest size at which the 60/30/10 mixture passes bias + width, and all three gates
-        need = ["| Unit | bias and width pass from (items/cell) | all three gates pass at |", "|---|---|---|"]
+        need = ["| Unit | bias and width pass from (items/cell) | all three gates pass at (percentile) | ... with BCa intervals |",
+                "|---|---|---|---|"]
         for n in names:
-            bw, allg = None, []
+            bw, allg, allb = None, [], []
             for l in labels:
                 u = next((x for x in sizes[l]["units"] if x["unit"] == n and "error" not in x), None)
                 m = u["scenarios"].get("mix") if u else None
@@ -638,6 +660,8 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
                     bw = f"{u['items_per_cell']:g}"
                 if m["pass"]:
                     allg.append(f"{u['items_per_cell']:g}")
+                if (m.get("bca") or {}).get("pass"):
+                    allb.append(f"{u['items_per_cell']:g}")
             mixes = [((next((x for x in sizes[l]["units"] if x["unit"] == n and "error" not in x), {}) or {})
                       .get("scenarios", {}).get("mix")) for l in labels]
             mixes = [m for m in mixes if m]
@@ -647,7 +671,7 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
                 status = "not testable"
             else:
                 status = bw if bw is not None else "not reached"
-            need.append(f"| {n} | {status} | {', '.join(allg) if allg else '–'} |")
+            need.append(f"| {n} | {status} | {', '.join(allg) if allg else '–'} | {', '.join(allb) if allb else '–'} |")
         sections["needed"] = "\n".join(need)
     return "\n\n".join(f"<!-- {k} -->\n{v}" for k, v in sections.items())
 

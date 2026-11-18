@@ -71,6 +71,23 @@ def test_rho_is_estimated_on_witness_answers():
     assert abs(r.eps[0] - 0.4) < 0.05 and abs(r.rho[0] - 0.5) < 0.1
 
 
+def test_bca_interval_and_jackknife():
+    from reasoning_heuristics.identify.mixture import bca_interval
+
+    rng = np.random.default_rng(7)
+    boot = rng.normal(0.5, 0.05, size=(4000, 1))
+    jack = 0.5 + rng.normal(0, 0.01, size=(30, 1))
+    lo, hi = bca_interval(boot, np.array([0.5]), jack)
+    plo, phi = np.percentile(boot, 2.5, 0), np.percentile(boot, 97.5, 0)
+    assert abs(lo[0] - plo[0]) < 0.01 and abs(hi[0] - phi[0]) < 0.01  # symmetric and unbiased: BCa = percentile
+    lo2, hi2 = bca_interval(boot, np.array([0.55]), jack)  # estimate above most draws: the interval shifts up
+    assert lo2[0] > lo[0] and hi2[0] > hi[0]
+    um = UnitModel(unit_of(patterned_items(200, rng)))
+    T = um.tensors(plant(um, {"B": 0.6, "C": 0.4}, eps=0.0, rho=0.3, rng=rng))
+    res = fit(T, n_boot=20, rng=rng, jackknife=True)
+    assert res.jack.shape == (len(np.unique(T.cluster)), len(res.labels))
+
+
 def test_cluster_bootstrap_resamples_whole_clusters():
     cluster = np.array([0, 0, 1, 1, 1, 2, 3, 3])
     W = cluster_bootstrap(cluster, 50, np.random.default_rng(0))
