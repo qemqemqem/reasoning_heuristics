@@ -159,7 +159,8 @@ Deterministic, no LLM (DESIGN §5 rule 4), and it reads the item's structured `i
 | runs-1.3.0, runs-1.3.1 | smoke-runs branch | C SAT and colouring values given without their names, or with the format's `x=T` placeholder, are read in the requested order when the item states one and the count is exact (`positional_values`, `placeholder_names`). Commentary after the values is tolerated |
 | runs-1.4.0 | smoke-runs branch | A line-initial marker may follow any symbols (`### ✅ Final Answer`). With no marker at all, the last fenced block is read if it holds nothing but an answer (`fenced_answer_no_marker`) |
 | runs-1.4.1 | smoke-runs branch | Positional values may use the placeholders the generators switched to (`<variable>=T`, PR #12) |
-| **scorer-1.5.0** | PR #15 | scorer-1.1.0 plus every runs-x.y.z change. Every committed run is scored with it |
+| scorer-1.5.0 | PR #15 | scorer-1.1.0 plus every runs-x.y.z change |
+| **scorer-1.5.1** | 2026-11-18 | A knapsack answer block that opens with a lead-in ending in a colon and naming no item ("The chosen items in alphabetical order are:") is read from its next line (`answer_after_lead_in`). Seen on Qwen3-14B with thinking: 98 of its 300 pc20 C E2 knapsack answers were parse failures under 1.5.0. Every committed run is re-scored with it |
 
 ## Cost estimates (dry runs)
 

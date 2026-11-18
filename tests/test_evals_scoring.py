@@ -481,3 +481,18 @@ def test_unlisted_valid_answers_and_invalid_answers_get_their_own_classes():
     invalid = score_text(it, answer([1, 1, 1, 1, 1, 1]))
     assert invalid["outcome_class"] == "answer = other" and invalid["sets_matched"] == []
     assert it["disconfirms"]["answer = other"]["EXACT"] > 0.5
+
+
+def test_knapsack_answer_on_the_line_after_a_lead_in():
+    """Seen live (Qwen3-14B, thinking; scorer-1.5.1): the answer block opens with a lead-in sentence and the items
+    follow on the next line, boxed or fenced. A lead-in with nothing after it stays a parse failure."""
+    it = first_with("ans_knap")
+    chosen = ",".join(sorted(it["predictions"]["EXACT"]["answer"]))
+    for content in (f"### Final Answer\n\nThe chosen items in **alphabetical order** are:\n\n$$\n\\boxed{{{chosen}}}\n$$",
+                    f"### Final Answer:\n\nThe letters of the chosen items, in **alphabetical order**, are:\n\n```\n{chosen}\n```"):
+        rec = score_text(it, content)
+        assert rec["category"] == "ok" and rec["correct"] is True and "answer_after_lead_in" in rec["flags"], rec
+    assert score_text(it, "### Final Answer\n\nThe chosen items in alphabetical order are:")["category"] == "parse_fail"
+    # an answer on the first line is read as before, without the flag
+    rec = score_text(it, f"ANSWER: {chosen}")
+    assert rec["correct"] is True and "answer_after_lead_in" not in rec["flags"]

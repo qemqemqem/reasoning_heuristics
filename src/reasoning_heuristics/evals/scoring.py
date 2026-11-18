@@ -63,7 +63,7 @@ from reasoning_heuristics.problems.coloring import graph as G
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.sat import cnf as S
 
-SCORER_VERSION = "scorer-1.5.0"
+SCORER_VERSION = "scorer-1.5.1"
 # The changelog is in docs/RUNNER.md ("Scorer versions"). 1.5.0 is main's scorer-1.1.0 (outcome classes from
 # extra.channel_spec, sets_matched) plus the parsing changes made on the smoke-runs branch, whose own labels
 # 1.1.0-1.4.1 were never used on main; 1.5.0 is the first label above both lines.
@@ -527,7 +527,17 @@ def _parse_block(ctx: ItemContext, block: str) -> Parse:
         return _parse_pairs(ctx, block, value_rx=r"(?:TRUE|FALSE|T|F|1|0)",
                             convert=lambda s: s.upper() in ("T", "TRUE", "1"), negative_word="UNSAT", what="variable")
     if kind == "ans_knap":
-        return _parse_knap_line(ctx, first)
+        res = _parse_knap_line(ctx, first)
+        if res.status == "parse_fail" and first.rstrip(" *_").endswith(":"):
+            # seen live (Qwen3-14B, thinking): "The chosen items in alphabetical order are:" opens the block and
+            # the items follow on the next line (after unlatex, `\boxed{A,B,D}` is that line)
+            lines = [ln for ln in block.splitlines() if ln.strip()]
+            if len(lines) > 1:
+                nxt = _parse_knap_line(ctx, lines[1])
+                if nxt.status == "ok":
+                    nxt.flags.append("answer_after_lead_in")
+                    return nxt
+        return res
     raise AssertionError(kind)
 
 
