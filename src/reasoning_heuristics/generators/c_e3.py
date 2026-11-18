@@ -35,12 +35,15 @@ depth measured as `target_ff_depth` (in gate layers, d* = t - 2). The listed pro
 LOCAL-(D-1) (one round short: the default colour) and LOCAL-D (= FF-LIST on the target).
 
 Balancing: within each depth the BASE target value alternates True / False, so
-P(FF target = colour 1) = 0.5 up to parity. The proxy audit covers every proxy whose horizon
-stops short of the target: LOCAL-t-LIST for t < D with leftovers coloured 1, and t < D - 1
-with leftovers given their smallest free colour (that default reaches the target one round
-early, since the target's only earlier neighbours are its inputs); the target's degree,
-position and earlier-neighbour parity are constant here. Accuracies are reported in the
-stats and enforced at |acc - 0.5| <= 0.05 + 1/N_d.
+P(FF target = colour 1) = 0.5 up to parity. The proxy audit enforces |acc - 0.5| <= 0.05 + 1/N_d
+for every LOCAL-t-LIST proxy that cannot see the target or its inputs: t < D with leftovers
+coloured 1, and t < D - 2 with leftovers given their smallest free colour (the target's inputs
+sit at first-fit depth D - 2 or D - 1, and that default reads the target off whichever inputs
+are already coloured, so it reaches the target at t = D - 1). These proxies are constant on the
+target by construction, so the audit checks the balance; the target's degree, position and
+earlier-neighbour parity are constant here too. LOCAL-(D-2)-LIST with the free default is
+reported in the stats, not enforced: it sees the inputs whose cones are all "True", and at
+d = 1 it decodes the target exactly (a True input is coloured in round 1, a False one is not).
 
 Likelihoods. U arms score the bit (same / different; an IMPOSSIBLE answer is class other).
 EXACT is set-valued over the proper 3-colourings; its share of "same" is counted exactly
@@ -379,13 +382,19 @@ def make_triple(gadget: dict[str, Any], rng, tier: str, bseed: int, triple: int,
 def proxy_bits(task: ColouringTask, target: str, ref: str, D: int) -> dict[str, bool]:
     """The bit of every LOCAL-t-LIST proxy whose horizon stops short of the target (first-fit
     depth D): t < D with leftovers coloured 1, t < D - 1 with leftovers given their smallest
-    free colour (that default reaches the target one round early)."""
+    free colour (that default reaches the target one round early). `enforced` says which of
+    them the audit enforces."""
     out = {}
     for default, horizon in (("one", D), ("free", D - 1)):
         for t in range(1, horizon):
             col = run("coloring", "LOCAL-t", task, {"t": t, "ids": "LIST", "default": default}).answer
             out[f"LOCAL-{t}-LIST/{default}"] = col[target] == col[ref]
     return out
+
+
+def enforced(proxy: str, D: int) -> bool:
+    """LOCAL-(D-2)-LIST/free sees the target's already-coloured inputs: reported, not enforced."""
+    return proxy != f"LOCAL-{D - 2}-LIST/free"
 
 
 def generate(tier: str, seed: int, per_cell: int | None = None, **params) -> tuple[list, dict]:
@@ -425,10 +434,11 @@ def generate(tier: str, seed: int, per_cell: int | None = None, **params) -> tup
             stats.accepted += 1
         N = len(truths)
         acc = {k: v / N for k, v in proxy_hits.items()}
-        audit[f"d={d}"] = {"N": N, "target_ff_depth": d + 2, "P(target colour 1)": sum(truths) / N, "proxy_accuracy": acc}
+        audit[f"d={d}"] = {"N": N, "target_ff_depth": d + 2, "P(target colour 1)": sum(truths) / N, "proxy_accuracy": acc,
+                           "reported_not_enforced": [k for k in acc if not enforced(k, d + 2)]}
         if N >= 2:
             tol = 0.05 + 1 / N
-            bad = {k: a for k, a in acc.items() if abs(a - 0.5) > tol}
+            bad = {k: a for k, a in acc.items() if enforced(k, d + 2) and abs(a - 0.5) > tol}
             if abs(sum(truths) / N - 0.5) > tol or bad:
                 raise RuntimeError(f"E3 d={d}: balance / proxy audit failed (tolerance {tol:.2f}): {bad}")
     out = stats.to_json()
