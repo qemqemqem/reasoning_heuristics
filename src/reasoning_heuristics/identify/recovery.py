@@ -44,7 +44,7 @@ from typing import Any
 
 import numpy as np
 
-from reasoning_heuristics.identify.engine import design_rank, separations
+from reasoning_heuristics.identify.engine import design_rank, identifiability, separations
 from reasoning_heuristics.identify.fake import Scenario, always_answer, simulate, truth_vector
 from reasoning_heuristics.identify.likelihood import NEAR_MISS, UNIFORM, TruncationTable, UnitModel
 from reasoning_heuristics.identify.mixture import UNEXPLAINED, em, fit, fit_features
@@ -177,11 +177,29 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
     out["triple"] = triple
     out["design"] = design_rank(um)
     out["least_separated"] = diagnostics_least_separated(sep)
+    # Gates are checked on identified quantities only (engine.identifiability): with a null space,
+    # its pivots are 'not identified' and every other weight is reported with the share of the
+    # pivots' mass the design cannot tell apart from it.
+    ident = {NEAR_MISS: identifiability(um, rng=rng)}
+    ident[UNIFORM] = ident[NEAR_MISS] if finite else identifiability(gen[UNIFORM], rng=rng)
+    out["identifiability"] = {m: {k: v for k, v in d.items() if k != "transform"} for m, d in ident.items()}
     R, B = cfg["reps"], cfg["boot"]
     scen = cfg["scenarios"]
 
+    def pivots_of(model: str) -> list[int]:
+        d = ident[model]
+        return [d["columns"].index(l) for l in d["not_identified"]]
+
+    def testability(model: str, truth: np.ndarray) -> tuple[bool, str | None]:
+        bad = [ident[model]["columns"][p] for p in pivots_of(model) if truth[p] > 0]
+        if bad:
+            return False, f"planted weight on {', '.join(bad)}, which these items cannot identify"
+        return True, None
+
     def replicate(sc: Scenario, gen_model: str, fit_model: str, reps: int, boot: int, token=False, levels=None):
+        Tid = ident[fit_model]["transform"]
         truths, ests, los, his = [], [], [], []
+        tv = truth_vector(fitm[fit_model], sc.weights, sc.q)
         for _ in range(reps):
             obs = simulate(gen[gen_model], sc, rng, levels)
             tm = None
@@ -195,20 +213,29 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
             if sc.truncation is not None and not token:
                 obs = [o for o in obs if not o.censored]
             res = _fit(fitm[fit_model], obs, rng, boot, tm)
-            truths.append(truth_vector(fitm[fit_model], sc.weights, sc.q))
-            ests.append(res.pi)
-            los.append(res.lo)
-            his.append(res.hi)
-        return summarise(np.array(truths), np.array(ests), np.array(los), np.array(his), labels)
+            tb = res.boot @ Tid.T
+            truths.append(Tid @ tv)
+            ests.append(Tid @ res.pi)
+            los.append(np.percentile(tb, 2.5, 0))
+            his.append(np.percentile(tb, 97.5, 0))
+        out_s = summarise(np.array(truths), np.array(ests), np.array(los), np.array(his), ident[fit_model]["identified"])
+        ok, why = testability(fit_model, tv)
+        if not ok:
+            out_s.update({"testable": False, "not_testable": why, "pass": None})
+        return out_s
 
     if "single" in scen:
         rows = {}
         for j, g in enumerate(um.columns):
             full = j in full_columns(um)
             sc = Scenario(f"single:{g.name}", "single", {g.members[0]: 1.0 if full else 0.95}, q=0.0 if full else 0.05)
-            rows[g.name] = replicate(sc, NEAR_MISS, NEAR_MISS, cfg["single_reps"], B)
-        out["scenarios"]["single"] = {"by_group": rows, "pass": all(r["pass"] for r in rows.values()),
-                                      "failing": [k for k, r in rows.items() if not r["pass"]]}
+            ok, why = testability(NEAR_MISS, truth_vector(um, sc.weights, sc.q))
+            rows[g.name] = replicate(sc, NEAR_MISS, NEAR_MISS, cfg["single_reps"], B) if ok else \
+                {"testable": False, "not_testable": why, "pass": None}
+        tested = {k: r for k, r in rows.items() if r.get("testable", True)}
+        out["scenarios"]["single"] = {"by_group": rows, "pass": all(r["pass"] for r in tested.values()) if tested else None,
+                                      "failing": [k for k, r in tested.items() if not r["pass"]],
+                                      "not_testable": [k for k, r in rows.items() if not r.get("testable", True)]}
     if triple:
         w = dict(zip(triple, (0.6, 0.3, 0.1)))
         if "mix" in scen:
@@ -229,20 +256,25 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
             levels, desc = feature_levels(unit)
             lw = {0: dict(zip(triple, (0.7, 0.2, 0.1))), 1: dict(zip(triple, (0.2, 0.7, 0.1)))}
             sc = Scenario("feature", "feature", level_weights=lw)
+            Tid = ident[NEAR_MISS]["transform"]
+            idl = ident[NEAR_MISS]["identified"]
             truths, ests, los, his = [], [], [], []
             for _ in range(cfg["feature_reps"]):
                 obs = simulate(um, sc, rng, levels)
                 T = um.tensors(obs)
                 X = np.stack([np.ones(T.n), levels[T.item]], 1).astype(float)
                 fr = fit_features(T, X, np.array([[1.0, 0.0], [1.0, 1.0]]), n_boot=cfg["feature_boot"], rng=rng)
-                # one quantity per (level, group), so opposite biases at the two levels cannot cancel
-                truths.append(np.concatenate([truth_vector(um, lw[lev], 0.0) for lev in (0, 1)]))
-                ests.append(np.concatenate([fr["pi"][0], fr["pi"][1]]))
-                los.append(np.concatenate([fr["lo"][0], fr["lo"][1]]))
-                his.append(np.concatenate([fr["hi"][0], fr["hi"][1]]))
+                # one quantity per (level, identified combination), so opposite biases cannot cancel
+                truths.append(np.concatenate([Tid @ truth_vector(um, lw[lev], 0.0) for lev in (0, 1)]))
+                ests.append(np.concatenate([Tid @ fr["pi"][lev] for lev in (0, 1)]))
+                los.append(np.concatenate([np.percentile(fr["boot"][:, lev] @ Tid.T, 2.5, 0) for lev in (0, 1)]))
+                his.append(np.concatenate([np.percentile(fr["boot"][:, lev] @ Tid.T, 97.5, 0) for lev in (0, 1)]))
             res = summarise(np.array(truths), np.array(ests), np.array(los), np.array(his),
-                            [f"level 0: {l}" for l in labels] + [f"level 1: {l}" for l in labels])
+                            [f"level 0: {l}" for l in idl] + [f"level 1: {l}" for l in idl])
             res["feature"] = desc
+            ok, why = testability(NEAR_MISS, truth_vector(um, lw[0], 0.0) + truth_vector(um, lw[1], 0.0))
+            if not ok:
+                res.update({"testable": False, "not_testable": why, "pass": None})
             out["scenarios"]["feature"] = res
         if "off_zoo" in scen:
             rows = {}
@@ -254,6 +286,9 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
                 keep = [l for l in um.labels if l not in g.members]
                 um_fit = UnitModel(unit, NEAR_MISS, labels=keep)
                 fl = [c.name for c in um_fit.columns] + [UNEXPLAINED]
+                q_identified = True
+                if finite:
+                    q_identified = "q" not in identifiability(um_fit, rng=rng)["not_identified"]
                 sc = Scenario(f"off_zoo:{g.name}", "off_zoo", {triple[0]: 0.7, g.members[0]: 0.3}, withheld=g.members)
                 ests = []
                 for _ in range(cfg["offzoo_reps"]):
@@ -263,14 +298,17 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
                 j1 = um_fit.column_of(triple[0])
                 others = [(fl[j], float(ests[j])) for j in range(len(fl) - 1) if j != j1]
                 top = max(others, key=lambda kv: kv[1]) if others else (None, 0.0)
-                rows[g.name] = {"to_q": round(float(ests[-1]), 3), "to_h1_excess": round(float(ests[j1] - 0.7), 3) if j1 is not None else None,
+                rows[g.name] = {"q_identified": q_identified, "to_q": round(float(ests[-1]), 3), "to_h1_excess": round(float(ests[j1] - 0.7), 3) if j1 is not None else None,
                                 "to_other_members": round(sum(v for _, v in others), 3),
                                 "largest_single_member": top[0], "largest_single_share": round(top[1], 3),
                                 "share_of_withheld_on_one_member": round(max(top[1], float(ests[j1] - 0.7) if j1 is not None else 0) / 0.3, 3)}
+            judged = {k: r for k, r in rows.items() if r["q_identified"]}
             out["scenarios"]["off_zoo"] = {"by_withheld_group": rows,
-                                           "criterion": "< 0.2 of the withheld 0.3 on any single zoo member (A/H §5.3 P6)",
-                                           "pass": all(r["share_of_withheld_on_one_member"] < 0.2 for r in rows.values()),
-                                           "failing": [k for k, r in rows.items() if r["share_of_withheld_on_one_member"] >= 0.2]}
+                                           "criterion": "< 0.2 of the withheld 0.3 on any single zoo member (A/H §5.3 P6); "
+                                                        "not testable where q is not identified in the reduced zoo",
+                                           "pass": all(r["share_of_withheld_on_one_member"] < 0.2 for r in judged.values()) if judged else None,
+                                           "failing": [k for k, r in judged.items() if r["share_of_withheld_on_one_member"] >= 0.2],
+                                           "not_testable": [k for k, r in rows.items() if not r["q_identified"]]}
     if "null_q" in scen:
         out["scenarios"]["null_q"] = replicate(Scenario("null_q", "null_q", {}, q=1.0), NEAR_MISS, NEAR_MISS, R, B)
     if "null_always" in scen:
@@ -284,8 +322,9 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
         res = replicate(sc, NEAR_MISS, NEAR_MISS, max(3, R // 10), B)
         res["truth_group"] = target or UNEXPLAINED
         out["scenarios"]["null_always"] = res
-    gated = [v["pass"] for k, v in out["scenarios"].items() if k in GATED]
+    gated = [v["pass"] for k, v in out["scenarios"].items() if k in GATED and v.get("pass") is not None]
     out["all_gates_pass"] = bool(gated) and all(gated)
+    out["not_testable"] = [k for k, v in out["scenarios"].items() if k in GATED and v.get("pass") is None]
     out["seconds"] = round(time.time() - t0, 1)
     return out
 
@@ -393,9 +432,22 @@ def run(argv: list[str]) -> int:
 # =============================================================================================
 
 
+def _single_mark(single: dict[str, Any] | None) -> str:
+    if not single:
+        return "–"
+    nt = len(single.get("not_testable", []))
+    tested = len(single["by_group"]) - nt
+    if single["pass"] is None:
+        return f"not testable ({nt})"
+    tag = "PASS" if single["pass"] else f"fail {len(single['failing'])}/{tested}"
+    return tag + (f", {nt} not testable" if nt else "")
+
+
 def _mark(res: dict[str, Any] | None) -> str:
     if res is None:
         return "–"
+    if res.get("testable") is False:
+        return "not testable"
     if "gates" not in res:
         return "PASS" if res.get("pass") else "fail"
     g = res["gates"]
@@ -416,8 +468,7 @@ def table(paths: list[str]) -> str:
                 lines.append(f"| {u['unit']} | error: {u['error'][:60]} |||||||||")
                 continue
             s = u["scenarios"]
-            single = s.get("single")
-            sm = "PASS" if single and single["pass"] else (f"fail ({len(single['failing'])}/{len(single['by_group'])})" if single else "–")
+            sm = _single_mark(s.get("single"))
             mix = s.get("mix")
             lines.append(f"| {u['unit']} | {u['items_per_cell']} | {sm} | {_mark(mix)} | {_mark(s.get('feature'))} | "
                          f"{_mark(s.get('null_q'))} | {_mark(s.get('null_always'))} | {_mark(s.get('clustered'))} | "
@@ -442,12 +493,11 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
     out.append("|---|---|---|---|---|---|---|---|---|---|")
     for u in units:
         s = u["scenarios"]
-        single = s.get("single")
-        sm = "–" if not single else ("PASS" if single["pass"] else f"fail {len(single['failing'])}/{len(single['by_group'])}")
+        sm = _single_mark(s.get("single"))
         out.append(f"| {u['unit']} | {u['n_items']} | {u['n_clusters']} | {sm} | {_mark(s.get('mix'))} | "
                    f"{_mark(s.get('mix_uniform_slips')) if not u['finite_channel'] else 'n/a (finite)'} | "
                    f"{_mark(s.get('feature'))} | {_mark(s.get('null_q'))} | {_mark(s.get('null_always'))} | "
-                   f"{'PASS' if u['all_gates_pass'] else 'fail'} |")
+                   f"{'PASS' if u['all_gates_pass'] else 'fail'}{' (' + str(len(u.get('not_testable', []))) + ' not testable)' if u.get('not_testable') else ''} |")
     out.append("\n**The 60/30/10 mixture in detail** (worst quantity for each gate):\n")
     out.append("| Unit | triple (0.6 / 0.3 / 0.1) | max \\|bias\\| | on | min coverage | on | median width |")
     out.append("|---|---|---|---|---|---|---|")
@@ -456,19 +506,37 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
         if not m:
             out.append(f"| {u['unit']} | (no triple) ||||||")
             continue
+        if m.get("testable") is False:
+            out.append(f"| {u['unit']} | {' / '.join(u['triple'])} | not testable: {m['not_testable']} ||||||")
+            continue
         out.append(f"| {u['unit']} | {' / '.join(u['triple'])} | {_f(m['max_abs_bias'])} | {m['worst_bias_quantity']} | "
                    f"{_f(m['min_coverage'])} | {m['worst_coverage_quantity']} | {_f(m['median_width'])} |")
     out.append("\n**Single members that fail** (the first gate each fails on, and its worst quantity):\n")
     for u in units:
         single = u["scenarios"].get("single")
-        if not single or single["pass"]:
+        if not single or single["pass"] is not False:
             continue
         bits = []
         for g in single["failing"]:
             r = single["by_group"][g]
+            if r.get("testable") is False:
+                continue
             why = [k for k in ("bias", "coverage", "width") if not r["gates"][k]]
             bits.append(f"{g} ({', '.join(why)}; bias {r['max_abs_bias']:.2f} on {r['worst_bias_quantity']})")
         out.append(f"- **{u['unit']}**: " + "; ".join(bits))
+    out.append("\n**Linear dependencies** (`engine.identifiability`: rank of the (item, outcome) × (groups + q) "
+               "matrix; witness channels on sampled outcomes). Pivots are not identified; the other weights "
+               "are reported as the identified combinations shown:\n")
+    for u in units:
+        d = (u.get("identifiability") or {}).get("near-miss")
+        if not d or not d["deficiency"]:
+            continue
+        combos = [c for c in d["identified"] if " + " in c]
+        out.append(f"- **{u['unit']}** (rank {d['rank']} of {len(d['columns'])}): " + "; ".join(f"`{x}`" for x in d["null_directions"])
+                   + ". Not identified: " + ", ".join(d["not_identified"])
+                   + (". Identified instead: " + "; ".join(f"`{c}`" for c in combos) if combos else "") + ".")
+    full = [u["unit"] for u in units if not ((u.get("identifiability") or {}).get("near-miss") or {}).get("deficiency")]
+    out.append(f"- Full rank: {', '.join(full)}.")
     out.append("\n**Identifiability diagnostics** (finite channels: rank of the (item, value) × (groups + q) "
                "design; A/H §5.3 asks for σ_min/σ_max ≥ 0.05) and the least-separated pairs:\n")
     out.append("| Unit | rank / columns | σ ratio | weakest direction | least-separated pair (items) |")
@@ -537,8 +605,13 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
                     cells.append("–")
                     continue
                 m, q = u["scenarios"].get("mix"), u["scenarios"].get("null_q")
-                tag = ("mix " + ("PASS" if m and m["pass"] else "fail") + f" (b {_f(m['max_abs_bias'])}, c {_f(m['min_coverage'])}, w {_f(m['median_width'])})") if m else "mix –"
-                tag += "; q " + ("PASS" if q and q["pass"] else "fail")
+                if not m:
+                    tag = "mix –"
+                elif m.get("testable") is False:
+                    tag = "mix not testable"
+                else:
+                    tag = "mix " + ("PASS" if m["pass"] else "fail") + f" (b {_f(m['max_abs_bias'])}, c {_f(m['min_coverage'])}, w {_f(m['median_width'])})"
+                tag += "; q " + ("not testable" if q and q.get("testable") is False else ("PASS" if q and q["pass"] else "fail"))
                 cells.append(f"{u['items_per_cell']}: {tag}")
             sw.append(f"| {n} | " + " | ".join(cells) + " |")
         sections["sweep"] = "\n".join(sw)

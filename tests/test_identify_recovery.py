@@ -85,6 +85,60 @@ def test_run_unit_end_to_end_small(tmp_path):
         assert section in md
 
 
+def _always_items(n, rng):
+    from identify_helpers import decision_item
+
+    items = []
+    for i in range(n):
+        ans = {"POS": "SAT", "NEG": "UNSAT", "B": "SAT" if i % 2 else "UNSAT", "C": "SAT" if rng.random() < 0.5 else "UNSAT"}
+        items.append(decision_item(i, ans, cell=f"c{i % 2}", exact="SAT" if rng.random() < 0.5 else "UNSAT"))
+    return items
+
+
+def test_identifiability_finds_q_as_a_combination():
+    from reasoning_heuristics.identify.engine import identifiability
+
+    rng = np.random.default_rng(0)
+    um = UnitModel(Unit("T_E0", "SAT", _always_items(60, rng)))
+    d = identifiability(um, rng=rng)
+    assert d["deficiency"] == 1 and d["not_identified"] == ["q"]
+    assert d["null_directions"] == ["q = 0.5 × POS + 0.5 × NEG"]
+    assert "POS + 0.5 × q" in d["identified"] and "NEG + 0.5 × q" in d["identified"]
+    # the transform maps weights to the identified combinations, orthogonal to the null direction
+    T, cols = d["transform"], d["columns"]
+    v = np.zeros(len(cols))
+    v[cols.index("q")], v[cols.index("POS")], v[cols.index("NEG")] = 1.0, -0.5, -0.5
+    assert np.allclose(T @ v, 0)
+    d2 = identifiability(UnitModel(Unit("T_E0", "SAT", patterned_items(60, rng))), rng=rng)
+    assert d2["deficiency"] == 0 and np.allclose(d2["transform"], np.eye(len(d2["columns"])))
+
+
+def test_null_q_is_not_testable_where_q_is_not_identified():
+    rng = np.random.default_rng(1)
+    unit = Unit("T_E0", "SAT", _always_items(40, rng))
+    cfg = {"reps": 2, "boot": 10, "single_reps": 2, "feature_reps": 2, "feature_boot": 3, "offzoo_reps": 1, "seed": 0,
+           "scenarios": ["null_q", "single", "mix"]}
+    out = run_unit(unit, cfg)
+    assert out["scenarios"]["null_q"]["testable"] is False and out["scenarios"]["null_q"]["pass"] is None
+    assert "null_q" in out["not_testable"]
+    assert out["identifiability"]["near-miss"]["null_directions"] == ["q = 0.5 × POS + 0.5 × NEG"]
+    mix = out["scenarios"]["mix"]
+    assert mix.get("testable", True) and any(" + 0.5 × q" in k for k in mix["quantities"])
+
+
+def test_engine_marks_non_identified_weights():
+    from identify_helpers import responses_from
+
+    from reasoning_heuristics.identify.engine import fit_unit
+
+    rng = np.random.default_rng(2)
+    um = UnitModel(Unit("T_E0", "SAT", _always_items(80, rng)))
+    obs = simulate(um, Scenario("m", "mix", {"POS": 0.5, "B": 0.5}), rng)
+    rep = fit_unit(um, responses_from(um, obs), n_boot=20, n_perm=0)
+    assert rep["fit"]["weights"]["unexplained (q)"] == "not identified"
+    assert abs(rep["fit"]["identified"]["POS + 0.5 × q"]["est"] - 0.5) < 0.15
+
+
 @pytest.mark.slow
 def test_cli_run_on_smoke(tmp_path, capsys):
     out = tmp_path / "smoke.json"

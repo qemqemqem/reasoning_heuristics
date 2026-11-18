@@ -58,7 +58,7 @@ def _mixture_terms(T: Tensors, pi: np.ndarray, eps: np.ndarray, rho: np.ndarray,
     num = w * L
     numq = pi[:, None, G] * T.Q[None]
     tot = num.sum(-1) + numq
-    savail = w.sum(-1) + pi[:, None, G]
+    savail = np.maximum(w.sum(-1) + pi[:, None, G], TINY)
     return L, S, num, numq, tot, savail
 
 
@@ -160,7 +160,9 @@ def em(T: Tensors, W: np.ndarray | None = None, pi0: np.ndarray | None = None, e
         with np.errstate(invalid="ignore", divide="ignore"):
             alpha = np.where(nv > 0, -nr / np.maximum(nv, TINY), -1.0)
         alpha = np.clip(alpha, -64.0, -1.0)
-        pe = np.maximum(pi - 2 * alpha[:, None] * rp + alpha[:, None] ** 2 * vp, 0.0)
+        # project back onto the simplex with a floor: an exact zero could leave an item with no
+        # available weight at all (and EM can never revive a zero)
+        pe = np.maximum(pi - 2 * alpha[:, None] * rp + alpha[:, None] ** 2 * vp, 1e-12)
         pe /= pe.sum(1, keepdims=True)
         ee = np.clip(eps - 2 * alpha * re + alpha ** 2 * ve, 0.0, eps_max) if fix_eps is None else eps
         p3, e3, r3, ll_ext = step(pe, ee, r2)

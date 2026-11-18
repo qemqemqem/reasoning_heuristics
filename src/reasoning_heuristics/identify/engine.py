@@ -78,6 +78,127 @@ def design_rank(um: UnitModel) -> dict[str, Any] | None:
             "weakest_direction": involved[:8]}
 
 
+def design_matrix(um: UnitModel, eps: float = 0.1, rho: float = 0.3, samples: int = 6,
+                  rng: np.random.Generator | None = None) -> np.ndarray:
+    """Rows: (item, outcome); columns: the unit's column groups, then q; entries P(outcome | component, item).
+
+    Finite channels: every value, without slips (eps is held at 0 there). Witness channels: the
+    answer space is too large to list, so the rows are the candidate answers plus `samples` draws
+    from every component (slips at eps, rho), with the components' likelihoods at those points; a
+    linear dependency among the full distributions holds on any such rows, and with enough draws
+    an independent column shows up as full rank. Unavailable members are 0 on an item (the Luce
+    renormalisation is ignored here)."""
+    from reasoning_heuristics.identify.spaces import FiniteSpace, trunc_geom
+
+    rng = rng or np.random.default_rng(0)
+    cols = um.columns
+    G = len(cols)
+    g = trunc_geom(rho)
+    rows = []
+    for i, im in enumerate(um.items):
+        if isinstance(im.space, FiniteSpace):
+            V = im.space.values
+            block = np.zeros((len(V), G + 1))
+            for j, grp in enumerate(cols):
+                p = um.pred(i, grp.members[0])
+                if p.kind == "det":
+                    block[V.index(p.key), j] = 1.0
+                elif p.kind == "dist":
+                    for k, v in p.dist.items():
+                        block[V.index(k), j] += v
+                elif p.kind == "uniform":
+                    block[:, j] = 1.0 / len(V)
+            block[:, G] = 1.0 / len(V)
+            rows.append(block)
+            continue
+        ys = set(im.candidates)
+        for grp in cols:
+            if um.pred(i, grp.members[0]).available:
+                ys.update(um.sample(i, grp.members[0], eps, rho, rng) for _ in range(samples))
+        ys.update(um.sample_q(i, rng) for _ in range(samples))
+        block = np.zeros((len(ys), G + 1))
+        for r, y in enumerate(sorted(ys)):
+            A, B0, C, Q, avail = um.row(i, y)
+            block[r, :G] = np.where(avail, (1 - eps) * A + eps * (B0 + C @ g), 0.0)
+            block[r, G] = Q
+        # Scale every row by its largest entry: that leaves the null space unchanged and keeps the
+        # tiny probabilities (q on a random colouring, ~1e-15) visible to the SVD.
+        rows.append(block / np.maximum(block.max(1, keepdims=True), 1e-300))
+    return np.vstack(rows)
+
+
+_PIVOT_ORDER = {"q": 0, "dist": 1, "uniform": 2, "set": 3, "det": 4, "na": 5}
+
+
+def identifiability(um: UnitModel, tol: float = 1e-7, rng: np.random.Generator | None = None, **kw: Any) -> dict[str, Any]:
+    """Numerical rank and null space of `design_matrix`, generalising pairwise ties to linear
+    dependencies (on a two-valued channel q = 1/2 ALWAYS-pos + 1/2 ALWAYS-neg, which no pairwise
+    test can see).
+
+    For k null directions, k columns are chosen as **pivots** (q first, then noise models, then
+    procedures) and are *not identified*. Every other column c has an identified quantity
+    theta_c = pi_c - sum_j R[j, c] pi_{pivot_j}: its weight plus the share of the pivots' mass the
+    design cannot tell apart from it (e.g. pi_ALWAYS-SAT + 0.5 pi_0). `transform` maps
+    (columns + q) weights to those quantities; with full rank it is the identity."""
+    M = design_matrix(um, rng=rng, **kw)
+    labels = [g.name for g in um.columns] + ["q"]
+    C = M.shape[1]
+    norms = np.linalg.norm(M, axis=0)
+    norms = np.where(norms > 0, norms, 1.0)
+    _, s, vt = np.linalg.svd(M / norms, full_matrices=False)
+    rank = int((s > tol * s[0]).sum())
+    U = vt[rank:].copy() if rank < C else np.zeros((0, C))  # null basis in column-scaled coordinates
+    kinds = []
+    for j, g in enumerate(um.columns):
+        ks = {um.pred(i, g.members[0]).kind for i in range(len(um.items))} - {"na"}
+        kinds.append(min(ks, key=lambda k: _PIVOT_ORDER[k]) if ks else "na")
+    kinds.append("q")
+    order = sorted(range(C), key=lambda c: (_PIVOT_ORDER[kinds[c]], -c))
+    # Reduce the null basis (Gauss-Jordan in the scaled coordinates, where entries are O(1)), taking
+    # pivots in preference order: q, then noise models, then procedures.
+    pivots: list[int] = []
+    piv_row: dict[int, int] = {}  # pivot column -> its row of the reduced null basis
+    for c in order:
+        if len(pivots) == len(U):
+            break
+        free = [j for j in range(len(U)) if j not in piv_row.values()]
+        cand = [j for j in free if abs(U[j, c]) > 1e-3 * np.abs(U[j]).max()]
+        if not cand:
+            continue
+        j = max(cand, key=lambda r: abs(U[r, c]))
+        U[j] /= U[j, c]
+        for r in range(len(U)):
+            if r != j:
+                U[r] -= U[r, c] * U[j]
+        piv_row[c] = j
+        pivots.append(c)
+    # back to weight coordinates (M v = 0 for v = u / norms), scaled so v[pivot] = 1
+    R = U / norms[None, :]
+    for c, j in piv_row.items():
+        R[j] /= R[j, c]
+    R[np.abs(R) < 1e-4] = 0.0  # numerical residue (e.g. a 1e-7 probability that is 0 in all but name)
+    transform, id_labels = [], []
+    for c in range(C):
+        if c in pivots:
+            continue
+        a = np.zeros(C)
+        a[c] = 1.0
+        terms = []
+        for p, j in piv_row.items():
+            if R[j, c] != 0:
+                a[p] -= R[j, c]
+                terms.append(f"{-R[j, c]:.3g} × {labels[p]}")
+        transform.append(a)
+        id_labels.append(labels[c] if not terms else f"{labels[c]} + " + " + ".join(terms))
+    directions = []
+    for p, j in piv_row.items():
+        rhs = [f"{-R[j, c]:.3g} × {labels[c]}" for c in range(C) if c != p and R[j, c] != 0]
+        directions.append(f"{labels[p]} = " + (" + ".join(rhs) if rhs else "0"))
+    return {"columns": labels, "rank": rank, "deficiency": C - rank, "sigma_ratio": float(s[-1] / s[0]),
+            "null_directions": directions, "not_identified": [labels[p] for p in pivots],
+            "identified": id_labels, "transform": np.array(transform).reshape(len(transform), C)}
+
+
 def diagnostics(um: UnitModel) -> dict[str, Any]:
     sep = separations(um)
     weakest = sorted(((min(v.values()) if v else 0, k, min(v, key=v.get) if v else None) for k, v in sep.items()))[:5]
@@ -101,6 +222,22 @@ def fit_unit(um: UnitModel, responses: list[Response], n_boot: int = 200, seed: 
     res = fit(T, n_boot=n_boot, rng=rng)
     report["fit"] = res.to_json()
     report["fit"]["q_members"] = um.q_members
+    ident = identifiability(um, rng=rng)
+    report["identifiability"] = {k: v for k, v in ident.items() if k != "transform"}
+    if ident["deficiency"]:
+        # weights the design cannot see are not numbers; their identified combinations are
+        names = [g.name for g in um.columns] + [res.labels[-1]]
+        for p in ident["not_identified"]:
+            report["fit"]["weights"][names[ident["columns"].index(p)]] = "not identified"
+        Tid = ident["transform"]
+        est = Tid @ res.pi
+        if res.boot is not None:
+            tb = res.boot @ Tid.T
+            lo, hi = np.percentile(tb, 2.5, 0), np.percentile(tb, 97.5, 0)
+        else:
+            lo = hi = np.full(len(est), np.nan)
+        report["fit"]["identified"] = {l: {"est": round(float(e), 4), "lo": round(float(a), 4), "hi": round(float(b), 4)}
+                                       for l, e, a, b in zip(ident["identified"], est, lo, hi)}
     ea, exch = agreement.ea_lift(um, obs, n_perm=n_perm, rng=rng, ties=ea_ties, stat="ea")
     co, _ = agreement.ea_lift(um, obs, n_perm=n_perm, rng=rng, ties=ea_ties, stat="co_error")
     report["error_agreement"] = {"ties": ea_ties, "exchangeable": round(exch, 3),
