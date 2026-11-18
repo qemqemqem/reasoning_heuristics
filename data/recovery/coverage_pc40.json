@@ -1,0 +1,2070 @@
+{
+ "label": "pc40-coverage",
+ "items": "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items/pc40/complete",
+ "config": {
+  "reps": 100,
+  "boot": 100,
+  "single_reps": 20,
+  "feature_reps": 20,
+  "feature_boot": 40,
+  "offzoo_reps": 10,
+  "seed": 1,
+  "scenarios": [
+   "mix"
+  ]
+ },
+ "gates": {
+  "bias": 0.05,
+  "coverage": 0.9,
+  "width": 0.2
+ },
+ "generated": "2026-11-17 21:14",
+ "provenance": {
+  "git_sha": "988356361c1ded4e90e5438f3a049a1d315cf575",
+  "git_dirty": false,
+  "item_files": {
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items/pc40/complete/AH_E1_dev_s1.jsonl": "753cbf4cab4e5b0a6c9d42ce812d4cf9fd95fdc86424cd33584fb4d464e62bf3",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items/pc40/complete/AH_E2_dev_s1.jsonl": "a07743b996d6319763f58d335d070bfd13aa7a0ba75482ec6129d36018b7229b",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items/pc40/complete/AH_E5_dev_s1.jsonl": "153cf9f29a0e556a002df6d3b3f6ab831204fa14d4fdc4dff2235029f75ecf3b",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items/pc40/complete/B4C4_E1_dev_s1.jsonl": "85fd05a9d71142484bfdae55297fce2dfcf1c7c878787bc24d21bf899bea10da",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items/pc40/complete/B4C4_E2_dev_s1.jsonl": "eb41c683e15676ae0ad5e27162ab00ed48b6c1820eb7eef84c68e62bf9e430cd",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items/pc40/complete/C_E1_dev_s1.jsonl": "c9bba04d572768069cb5f7ed59484b00fa4157541af6a7a3e8421e7b952e011d",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items/pc40/complete/C_E2_dev_s1.jsonl": "8c61291aab35bff45813f39c918289e0a1657ffaab26f9968f4d28311f3008dd",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items/pc40/complete/C_E3_dev_s1.jsonl": "8ef54e972de62db0a31ffb3958b414c3df72127dc41345bcec1e53078a83eb2d",
+   "/tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items/pc40/complete/C_E5_dev_s1.jsonl": "99a9a25a573e8bd7f2558c958cfb5c9f2f2bc5b2f9ac81faf10dc02cbe56c0cb"
+  }
+ },
+ "command": "python -m reasoning_heuristics.identify.recovery run --items /tmp/claude-1000/-home-keenan-Dev-reasoning-heuristics/4f7ad087-91ec-4ff6-9a14-541df5687696/scratchpad/agent_identify/items/pc40/complete --label pc40-coverage --units C_E1/colouring,C_E1/3-SAT,C_E2/colouring,C_E2/knapsack,C_E2/3-SAT,AH_E5/COL,AH_E5/SAT,C_E5/3-SAT (partial assignment given) --scenarios mix --reps 100 --boot 100 --workers 4 --out data/recovery/pc40_coverage.json",
+ "units": [
+  {
+   "unit": "AH_E5/COL",
+   "n_items": 160,
+   "n_clusters": 40,
+   "n_cells": 4,
+   "items_per_cell": 40.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "A3 TT[FIRST-FIT]"
+    ],
+    [
+     "A3 TT[exact]"
+    ],
+    [
+     "B1 DROP-CONSTRAINT(last 3)"
+    ],
+    [
+     "C1 FIRST-FIT (stated rule)"
+    ],
+    [
+     "C2 DSATUR (stated rule)"
+    ],
+    [
+     "D DPLL (first solution)"
+    ],
+    [
+     "exact"
+    ]
+   ],
+   "folded_into_q": [],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.019,
+     "worst_bias_quantity": "D DPLL (first solution)",
+     "min_coverage": 0.84,
+     "worst_coverage_quantity": "exact",
+     "median_width": 0.185,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "A3 TT[FIRST-FIT]": {
+       "truth": 0.6,
+       "mean": 0.599,
+       "bias": -0.001,
+       "coverage": 0.99,
+       "median_width": 0.206,
+       "mean_upper": 0.699
+      },
+      "C1 FIRST-FIT (stated rule)": {
+       "truth": 0.3,
+       "mean": 0.288,
+       "bias": -0.012,
+       "coverage": 0.92,
+       "median_width": 0.205,
+       "mean_upper": 0.387
+      },
+      "D DPLL (first solution)": {
+       "truth": 0.0,
+       "mean": 0.019,
+       "bias": 0.019,
+       "coverage": 0.95,
+       "median_width": 0.081,
+       "mean_upper": 0.085
+      },
+      "exact": {
+       "truth": 0.1,
+       "mean": 0.092,
+       "bias": -0.008,
+       "coverage": 0.84,
+       "median_width": 0.096,
+       "mean_upper": 0.139
+      }
+     },
+     "replicates": 100
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.035,
+     "worst_bias_quantity": "C1 FIRST-FIT (stated rule)",
+     "min_coverage": 0.83,
+     "worst_coverage_quantity": "exact",
+     "median_width": 0.188,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "A3 TT[FIRST-FIT]": {
+       "truth": 0.6,
+       "mean": 0.571,
+       "bias": -0.029,
+       "coverage": 0.89,
+       "median_width": 0.203,
+       "mean_upper": 0.668
+      },
+      "B1 DROP-CONSTRAINT(last 3)": {
+       "truth": 0.0,
+       "mean": 0.018,
+       "bias": 0.018,
+       "coverage": 0.85,
+       "median_width": 0.057,
+       "mean_upper": 0.057
+      },
+      "C1 FIRST-FIT (stated rule)": {
+       "truth": 0.3,
+       "mean": 0.265,
+       "bias": -0.035,
+       "coverage": 0.87,
+       "median_width": 0.214,
+       "mean_upper": 0.363
+      },
+      "C2 DSATUR (stated rule)": {
+       "truth": 0.0,
+       "mean": 0.015,
+       "bias": 0.015,
+       "coverage": 0.88,
+       "median_width": 0.049,
+       "mean_upper": 0.05
+      },
+      "D DPLL (first solution)": {
+       "truth": 0.0,
+       "mean": 0.018,
+       "bias": 0.018,
+       "coverage": 0.98,
+       "median_width": 0.087,
+       "mean_upper": 0.087
+      },
+      "exact": {
+       "truth": 0.1,
+       "mean": 0.089,
+       "bias": -0.011,
+       "coverage": 0.83,
+       "median_width": 0.098,
+       "mean_upper": 0.137
+      },
+      "q": {
+       "truth": 0.0,
+       "mean": 0.024,
+       "bias": 0.024,
+       "coverage": 0.66,
+       "median_width": 0.063,
+       "mean_upper": 0.067
+      }
+     },
+     "replicates": 100
+    }
+   },
+   "triple": [
+    "A3 TT[FIRST-FIT]",
+    "C1 FIRST-FIT (stated rule)",
+    "exact"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "C1 FIRST-FIT (stated rule)",
+      "D DPLL (first solution)"
+     ],
+     "separating_items": 42
+    },
+    {
+     "pair": [
+      "A3 TT[FIRST-FIT]",
+      "C1 FIRST-FIT (stated rule)"
+     ],
+     "separating_items": 80
+    },
+    {
+     "pair": [
+      "A3 TT[FIRST-FIT]",
+      "D DPLL (first solution)"
+     ],
+     "separating_items": 80
+    },
+    {
+     "pair": [
+      "A3 TT[exact]",
+      "exact"
+     ],
+     "separating_items": 80
+    },
+    {
+     "pair": [
+      "B1 DROP-CONSTRAINT(last 3)",
+      "C2 DSATUR (stated rule)"
+     ],
+     "separating_items": 100
+    },
+    {
+     "pair": [
+      "C2 DSATUR (stated rule)",
+      "D DPLL (first solution)"
+     ],
+     "separating_items": 100
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "A3 TT[FIRST-FIT]",
+      "A3 TT[exact]",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "C1 FIRST-FIT (stated rule)",
+      "C2 DSATUR (stated rule)",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ],
+     "rank": 8,
+     "deficiency": 0,
+     "sigma_ratio": 0.21677384129886954,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "A3 TT[FIRST-FIT]",
+      "A3 TT[exact]",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "C1 FIRST-FIT (stated rule)",
+      "C2 DSATUR (stated rule)",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "A3 TT[FIRST-FIT]",
+      "A3 TT[exact]",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "C1 FIRST-FIT (stated rule)",
+      "C2 DSATUR (stated rule)",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ],
+     "rank": 8,
+     "deficiency": 0,
+     "sigma_ratio": 0.2658020750247975,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "A3 TT[FIRST-FIT]",
+      "A3 TT[exact]",
+      "B1 DROP-CONSTRAINT(last 3)",
+      "C1 FIRST-FIT (stated rule)",
+      "C2 DSATUR (stated rule)",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 168.4
+  },
+  {
+   "unit": "AH_E5/SAT",
+   "n_items": 200,
+   "n_clusters": 40,
+   "n_cells": 5,
+   "items_per_cell": 40.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "A3 TT[exact]"
+    ],
+    [
+     "C0 POLARITY"
+    ],
+    [
+     "C1 GREEDY"
+    ],
+    [
+     "D DPLL (first solution)"
+    ],
+    [
+     "exact"
+    ]
+   ],
+   "folded_into_q": [],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.001,
+     "worst_bias_quantity": "A3 TT[exact]",
+     "min_coverage": 0.91,
+     "worst_coverage_quantity": "C0 POLARITY",
+     "median_width": 0.111,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "A3 TT[exact]": {
+       "truth": 0.1,
+       "mean": 0.099,
+       "bias": -0.001,
+       "coverage": 0.92,
+       "median_width": 0.08,
+       "mean_upper": 0.14
+      },
+      "C0 POLARITY": {
+       "truth": 0.6,
+       "mean": 0.601,
+       "bias": 0.001,
+       "coverage": 0.91,
+       "median_width": 0.127,
+       "mean_upper": 0.663
+      },
+      "C1 GREEDY": {
+       "truth": 0.3,
+       "mean": 0.3,
+       "bias": 0.0,
+       "coverage": 0.91,
+       "median_width": 0.119,
+       "mean_upper": 0.362
+      }
+     },
+     "replicates": 100
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.031,
+     "worst_bias_quantity": "C0 POLARITY",
+     "min_coverage": 0.8,
+     "worst_coverage_quantity": "C0 POLARITY",
+     "median_width": 0.115,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "A3 TT[exact]": {
+       "truth": 0.1,
+       "mean": 0.094,
+       "bias": -0.006,
+       "coverage": 0.94,
+       "median_width": 0.081,
+       "mean_upper": 0.135
+      },
+      "C0 POLARITY": {
+       "truth": 0.6,
+       "mean": 0.569,
+       "bias": -0.031,
+       "coverage": 0.8,
+       "median_width": 0.137,
+       "mean_upper": 0.635
+      },
+      "C1 GREEDY": {
+       "truth": 0.3,
+       "mean": 0.294,
+       "bias": -0.006,
+       "coverage": 0.93,
+       "median_width": 0.121,
+       "mean_upper": 0.355
+      },
+      "D DPLL (first solution)": {
+       "truth": 0.0,
+       "mean": 0.022,
+       "bias": 0.022,
+       "coverage": 0.73,
+       "median_width": 0.056,
+       "mean_upper": 0.055
+      },
+      "q": {
+       "truth": 0.0,
+       "mean": 0.021,
+       "bias": 0.021,
+       "coverage": 0.58,
+       "median_width": 0.049,
+       "mean_upper": 0.052
+      }
+     },
+     "replicates": 100
+    }
+   },
+   "triple": [
+    "C0 POLARITY",
+    "C1 GREEDY",
+    "A3 TT[exact]"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "A3 TT[exact]",
+      "exact"
+     ],
+     "separating_items": 120
+    },
+    {
+     "pair": [
+      "C1 GREEDY",
+      "D DPLL (first solution)"
+     ],
+     "separating_items": 195
+    },
+    {
+     "pair": [
+      "C0 POLARITY",
+      "C1 GREEDY"
+     ],
+     "separating_items": 198
+    },
+    {
+     "pair": [
+      "A3 TT[exact]",
+      "C0 POLARITY"
+     ],
+     "separating_items": 200
+    },
+    {
+     "pair": [
+      "A3 TT[exact]",
+      "C1 GREEDY"
+     ],
+     "separating_items": 200
+    },
+    {
+     "pair": [
+      "A3 TT[exact]",
+      "D DPLL (first solution)"
+     ],
+     "separating_items": 200
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ],
+     "rank": 6,
+     "deficiency": 0,
+     "sigma_ratio": 0.48199936950385996,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ],
+     "rank": 6,
+     "deficiency": 0,
+     "sigma_ratio": 0.5367024661300408,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 230.6
+  },
+  {
+   "unit": "C_E1/3-SAT",
+   "n_items": 240,
+   "n_clusters": 40,
+   "n_cells": 6,
+   "items_per_cell": 40.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "DPLL-INDEX (D, T first)"
+    ],
+    [
+     "DPLL-MENTION (D, T first)"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "GREEDY-INDEX"
+    ],
+    [
+     "GREEDY-MENTION"
+    ],
+    [
+     "GREEDY-OUT (AR)"
+    ],
+    [
+     "GUC-DET (C2)"
+    ],
+    [
+     "POLARITY (C0)"
+    ],
+    [
+     "RO-GREEDY (C3)"
+    ],
+    [
+     "UC-DET (C2)"
+    ]
+   ],
+   "folded_into_q": [
+    "RANDOM (H)"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.003,
+     "worst_bias_quantity": "DPLL-MENTION (D, T first)",
+     "min_coverage": 0.9,
+     "worst_coverage_quantity": "DPLL-INDEX (D, T first)",
+     "median_width": 0.113,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "DPLL-INDEX (D, T first)": {
+       "truth": 0.6,
+       "mean": 0.598,
+       "bias": -0.002,
+       "coverage": 0.9,
+       "median_width": 0.128,
+       "mean_upper": 0.661
+      },
+      "DPLL-MENTION (D, T first)": {
+       "truth": 0.3,
+       "mean": 0.303,
+       "bias": 0.003,
+       "coverage": 0.9,
+       "median_width": 0.12,
+       "mean_upper": 0.365
+      },
+      "EXACT": {
+       "truth": 0.1,
+       "mean": 0.097,
+       "bias": -0.003,
+       "coverage": 0.9,
+       "median_width": 0.072,
+       "mean_upper": 0.134
+      }
+     },
+     "replicates": 100
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.039,
+     "worst_bias_quantity": "DPLL-INDEX (D, T first)",
+     "min_coverage": 0.72,
+     "worst_coverage_quantity": "DPLL-INDEX (D, T first)",
+     "median_width": 0.114,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "DPLL-INDEX (D, T first)": {
+       "truth": 0.6,
+       "mean": 0.561,
+       "bias": -0.039,
+       "coverage": 0.72,
+       "median_width": 0.138,
+       "mean_upper": 0.621
+      },
+      "DPLL-MENTION (D, T first)": {
+       "truth": 0.3,
+       "mean": 0.283,
+       "bias": -0.017,
+       "coverage": 0.79,
+       "median_width": 0.121,
+       "mean_upper": 0.341
+      },
+      "EXACT": {
+       "truth": 0.1,
+       "mean": 0.096,
+       "bias": -0.004,
+       "coverage": 0.93,
+       "median_width": 0.071,
+       "mean_upper": 0.131
+      },
+      "POLARITY (C0)": {
+       "truth": 0.0,
+       "mean": 0.011,
+       "bias": 0.011,
+       "coverage": 0.69,
+       "median_width": 0.029,
+       "mean_upper": 0.03
+      },
+      "q": {
+       "truth": 0.0,
+       "mean": 0.014,
+       "bias": 0.014,
+       "coverage": 0.8,
+       "median_width": 0.043,
+       "mean_upper": 0.04
+      }
+     },
+     "replicates": 100
+    }
+   },
+   "triple": [
+    "DPLL-INDEX (D, T first)",
+    "DPLL-MENTION (D, T first)",
+    "EXACT"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "GREEDY-MENTION",
+      "GREEDY-OUT (AR)"
+     ],
+     "separating_items": 118
+    },
+    {
+     "pair": [
+      "DPLL-MENTION (D, T first)",
+      "UC-DET (C2)"
+     ],
+     "separating_items": 148
+    },
+    {
+     "pair": [
+      "GREEDY-INDEX",
+      "GREEDY-OUT (AR)"
+     ],
+     "separating_items": 160
+    },
+    {
+     "pair": [
+      "GUC-DET (C2)",
+      "UC-DET (C2)"
+     ],
+     "separating_items": 186
+    },
+    {
+     "pair": [
+      "DPLL-INDEX (D, T first)",
+      "DPLL-MENTION (D, T first)"
+     ],
+     "separating_items": 189
+    },
+    {
+     "pair": [
+      "GREEDY-INDEX",
+      "GREEDY-MENTION"
+     ],
+     "separating_items": 200
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "DPLL-INDEX (D, T first)",
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX",
+      "GREEDY-MENTION",
+      "GREEDY-OUT (AR)",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "UC-DET (C2)",
+      "q"
+     ],
+     "rank": 11,
+     "deficiency": 0,
+     "sigma_ratio": 0.39853121746336967,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DPLL-INDEX (D, T first)",
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX",
+      "GREEDY-MENTION",
+      "GREEDY-OUT (AR)",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "UC-DET (C2)",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "DPLL-INDEX (D, T first)",
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX",
+      "GREEDY-MENTION",
+      "GREEDY-OUT (AR)",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "UC-DET (C2)",
+      "q"
+     ],
+     "rank": 11,
+     "deficiency": 0,
+     "sigma_ratio": 0.4261381978776934,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DPLL-INDEX (D, T first)",
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX",
+      "GREEDY-MENTION",
+      "GREEDY-OUT (AR)",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "UC-DET (C2)",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 266.7
+  },
+  {
+   "unit": "C_E1/colouring",
+   "n_items": 240,
+   "n_clusters": 40,
+   "n_cells": 6,
+   "items_per_cell": 40.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "DPLL-LABEL (D)"
+    ],
+    [
+     "DPLL-LIST (D)"
+    ],
+    [
+     "DSATUR"
+    ],
+    [
+     "DSATUR-LABEL"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "FF-LABEL"
+    ],
+    [
+     "FF-LIST",
+     "GREEDY+REPAIR-LIST (C->F)"
+    ],
+    [
+     "FF-OUT (AR)"
+    ],
+    [
+     "LF"
+    ],
+    [
+     "LOCAL-2-ID (E)"
+    ],
+    [
+     "NOISY-EXACT"
+    ],
+    [
+     "RO-FF (C3)"
+    ]
+   ],
+   "folded_into_q": [
+    "RANDOM (H)"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.006,
+     "worst_bias_quantity": "DPLL-LABEL (D)",
+     "min_coverage": 0.88,
+     "worst_coverage_quantity": "DPLL-LABEL (D)",
+     "median_width": 0.138,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "DPLL-LABEL (D)": {
+       "truth": 0.3,
+       "mean": 0.306,
+       "bias": 0.006,
+       "coverage": 0.88,
+       "median_width": 0.148,
+       "mean_upper": 0.383
+      },
+      "DSATUR": {
+       "truth": 0.1,
+       "mean": 0.099,
+       "bias": -0.001,
+       "coverage": 0.94,
+       "median_width": 0.071,
+       "mean_upper": 0.135
+      },
+      "FF-LABEL": {
+       "truth": 0.6,
+       "mean": 0.595,
+       "bias": -0.005,
+       "coverage": 0.9,
+       "median_width": 0.159,
+       "mean_upper": 0.671
+      }
+     },
+     "replicates": 100
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.052,
+     "worst_bias_quantity": "FF-LABEL",
+     "min_coverage": 0.68,
+     "worst_coverage_quantity": "FF-LABEL",
+     "median_width": 0.137,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "DPLL-LABEL (D)": {
+       "truth": 0.3,
+       "mean": 0.285,
+       "bias": -0.015,
+       "coverage": 0.86,
+       "median_width": 0.145,
+       "mean_upper": 0.357
+      },
+      "DSATUR": {
+       "truth": 0.1,
+       "mean": 0.096,
+       "bias": -0.004,
+       "coverage": 0.87,
+       "median_width": 0.081,
+       "mean_upper": 0.136
+      },
+      "FF-LABEL": {
+       "truth": 0.6,
+       "mean": 0.548,
+       "bias": -0.052,
+       "coverage": 0.68,
+       "median_width": 0.158,
+       "mean_upper": 0.617
+      },
+      "LF": {
+       "truth": 0.0,
+       "mean": 0.014,
+       "bias": 0.014,
+       "coverage": 0.71,
+       "median_width": 0.032,
+       "mean_upper": 0.034
+      },
+      "LOCAL-2-ID (E)": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 0.59,
+       "median_width": 0.029,
+       "mean_upper": 0.032
+      },
+      "q": {
+       "truth": 0.0,
+       "mean": 0.013,
+       "bias": 0.013,
+       "coverage": 0.56,
+       "median_width": 0.029,
+       "mean_upper": 0.032
+      }
+     },
+     "replicates": 100
+    }
+   },
+   "triple": [
+    "FF-LABEL",
+    "DPLL-LABEL (D)",
+    "DSATUR"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "DSATUR",
+      "DSATUR-LABEL"
+     ],
+     "separating_items": 87
+    },
+    {
+     "pair": [
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "FF-OUT (AR)"
+     ],
+     "separating_items": 120
+    },
+    {
+     "pair": [
+      "DPLL-LABEL (D)",
+      "FF-LABEL"
+     ],
+     "separating_items": 123
+    },
+    {
+     "pair": [
+      "DPLL-LIST (D)",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+     ],
+     "separating_items": 136
+    },
+    {
+     "pair": [
+      "FF-LABEL",
+      "FF-OUT (AR)"
+     ],
+     "separating_items": 160
+    },
+    {
+     "pair": [
+      "DSATUR",
+      "LF"
+     ],
+     "separating_items": 181
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "DPLL-LABEL (D)",
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "FF-OUT (AR)",
+      "LF",
+      "LOCAL-2-ID (E)",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ],
+     "rank": 13,
+     "deficiency": 0,
+     "sigma_ratio": 0.09592772404987507,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DPLL-LABEL (D)",
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "FF-OUT (AR)",
+      "LF",
+      "LOCAL-2-ID (E)",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "DPLL-LABEL (D)",
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "FF-OUT (AR)",
+      "LF",
+      "LOCAL-2-ID (E)",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ],
+     "rank": 13,
+     "deficiency": 0,
+     "sigma_ratio": 0.009668315654872525,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DPLL-LABEL (D)",
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "FF-OUT (AR)",
+      "LF",
+      "LOCAL-2-ID (E)",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 369.1
+  },
+  {
+   "unit": "C_E2/3-SAT",
+   "n_items": 400,
+   "n_clusters": 80,
+   "n_cells": 10,
+   "items_per_cell": 40.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "DPLL-MENTION (D, T first)"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "GREEDY-INDEX",
+     "GREEDY-MENTION"
+    ],
+    [
+     "GUC-DET (C2)"
+    ],
+    [
+     "POLARITY (C0)"
+    ],
+    [
+     "RO-GREEDY (C3)"
+    ],
+    [
+     "SC-DET (C2)"
+    ],
+    [
+     "UC-DET (C2)"
+    ]
+   ],
+   "folded_into_q": [
+    "RANDOM (H)"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.001,
+     "worst_bias_quantity": "SC-DET (C2)",
+     "min_coverage": 0.94,
+     "worst_coverage_quantity": "GUC-DET (C2)",
+     "median_width": 0.174,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "GUC-DET (C2)": {
+       "truth": 0.6,
+       "mean": 0.6,
+       "bias": 0.0,
+       "coverage": 0.94,
+       "median_width": 0.198,
+       "mean_upper": 0.699
+      },
+      "POLARITY (C0)": {
+       "truth": 0.1,
+       "mean": 0.101,
+       "bias": 0.001,
+       "coverage": 0.95,
+       "median_width": 0.055,
+       "mean_upper": 0.129
+      },
+      "SC-DET (C2)": {
+       "truth": 0.3,
+       "mean": 0.299,
+       "bias": -0.001,
+       "coverage": 0.94,
+       "median_width": 0.203,
+       "mean_upper": 0.401
+      }
+     },
+     "replicates": 100
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.036,
+     "worst_bias_quantity": "GUC-DET (C2)",
+     "min_coverage": 0.85,
+     "worst_coverage_quantity": "GUC-DET (C2)",
+     "median_width": 0.194,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "DPLL-MENTION (D, T first)": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 0.79,
+       "median_width": 0.036,
+       "mean_upper": 0.038
+      },
+      "GUC-DET (C2)": {
+       "truth": 0.6,
+       "mean": 0.564,
+       "bias": -0.036,
+       "coverage": 0.85,
+       "median_width": 0.227,
+       "mean_upper": 0.669
+      },
+      "POLARITY (C0)": {
+       "truth": 0.1,
+       "mean": 0.11,
+       "bias": 0.01,
+       "coverage": 0.92,
+       "median_width": 0.069,
+       "mean_upper": 0.146
+      },
+      "SC-DET (C2)": {
+       "truth": 0.3,
+       "mean": 0.273,
+       "bias": -0.027,
+       "coverage": 0.86,
+       "median_width": 0.218,
+       "mean_upper": 0.379
+      },
+      "q": {
+       "truth": 0.0,
+       "mean": 0.023,
+       "bias": 0.023,
+       "coverage": 0.75,
+       "median_width": 0.063,
+       "mean_upper": 0.074
+      }
+     },
+     "replicates": 100
+    }
+   },
+   "triple": [
+    "GUC-DET (C2)",
+    "SC-DET (C2)",
+    "POLARITY (C0)"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "GUC-DET (C2)",
+      "SC-DET (C2)"
+     ],
+     "separating_items": 67
+    },
+    {
+     "pair": [
+      "SC-DET (C2)",
+      "UC-DET (C2)"
+     ],
+     "separating_items": 117
+    },
+    {
+     "pair": [
+      "GREEDY-INDEX = GREEDY-MENTION",
+      "SC-DET (C2)"
+     ],
+     "separating_items": 129
+    },
+    {
+     "pair": [
+      "GREEDY-INDEX = GREEDY-MENTION",
+      "GUC-DET (C2)"
+     ],
+     "separating_items": 134
+    },
+    {
+     "pair": [
+      "GUC-DET (C2)",
+      "UC-DET (C2)"
+     ],
+     "separating_items": 136
+    },
+    {
+     "pair": [
+      "GREEDY-INDEX = GREEDY-MENTION",
+      "UC-DET (C2)"
+     ],
+     "separating_items": 154
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX = GREEDY-MENTION",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "SC-DET (C2)",
+      "UC-DET (C2)",
+      "q"
+     ],
+     "rank": 9,
+     "deficiency": 0,
+     "sigma_ratio": 0.21988827857424967,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX = GREEDY-MENTION",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "SC-DET (C2)",
+      "UC-DET (C2)",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX = GREEDY-MENTION",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "SC-DET (C2)",
+      "UC-DET (C2)",
+      "q"
+     ],
+     "rank": 9,
+     "deficiency": 0,
+     "sigma_ratio": 0.1984860237869194,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DPLL-MENTION (D, T first)",
+      "EXACT",
+      "GREEDY-INDEX = GREEDY-MENTION",
+      "GUC-DET (C2)",
+      "POLARITY (C0)",
+      "RO-GREEDY (C3)",
+      "SC-DET (C2)",
+      "UC-DET (C2)",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 580.5
+  },
+  {
+   "unit": "C_E2/colouring",
+   "n_items": 600,
+   "n_clusters": 120,
+   "n_cells": 15,
+   "items_per_cell": 40.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "DPLL-LIST (D)"
+    ],
+    [
+     "DSATUR"
+    ],
+    [
+     "DSATUR-LABEL"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "FF-LABEL"
+    ],
+    [
+     "FF-LIST",
+     "GREEDY+REPAIR-LIST (C->F)"
+    ],
+    [
+     "LF"
+    ],
+    [
+     "NOISY-EXACT"
+    ],
+    [
+     "RO-FF (C3)"
+    ]
+   ],
+   "folded_into_q": [
+    "RANDOM (H)"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.001,
+     "worst_bias_quantity": "FF-LABEL",
+     "min_coverage": 0.9,
+     "worst_coverage_quantity": "FF-LABEL",
+     "median_width": 0.07,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "DSATUR-LABEL": {
+       "truth": 0.3,
+       "mean": 0.299,
+       "bias": -0.001,
+       "coverage": 0.92,
+       "median_width": 0.073,
+       "mean_upper": 0.337
+      },
+      "EXACT": {
+       "truth": 0.1,
+       "mean": 0.099,
+       "bias": -0.001,
+       "coverage": 0.93,
+       "median_width": 0.051,
+       "mean_upper": 0.125
+      },
+      "FF-LABEL": {
+       "truth": 0.6,
+       "mean": 0.601,
+       "bias": 0.001,
+       "coverage": 0.9,
+       "median_width": 0.075,
+       "mean_upper": 0.638
+      }
+     },
+     "replicates": 100
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.025,
+     "worst_bias_quantity": "FF-LABEL",
+     "min_coverage": 0.75,
+     "worst_coverage_quantity": "FF-LABEL",
+     "median_width": 0.084,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "DSATUR-LABEL": {
+       "truth": 0.3,
+       "mean": 0.288,
+       "bias": -0.012,
+       "coverage": 0.88,
+       "median_width": 0.08,
+       "mean_upper": 0.324
+      },
+      "EXACT": {
+       "truth": 0.1,
+       "mean": 0.081,
+       "bias": -0.019,
+       "coverage": 0.81,
+       "median_width": 0.082,
+       "mean_upper": 0.114
+      },
+      "FF-LABEL": {
+       "truth": 0.6,
+       "mean": 0.575,
+       "bias": -0.025,
+       "coverage": 0.75,
+       "median_width": 0.091,
+       "mean_upper": 0.613
+      },
+      "NOISY-EXACT": {
+       "truth": 0.0,
+       "mean": 0.018,
+       "bias": 0.018,
+       "coverage": 0.92,
+       "median_width": 0.075,
+       "mean_upper": 0.073
+      }
+     },
+     "replicates": 100
+    }
+   },
+   "triple": [
+    "FF-LABEL",
+    "DSATUR-LABEL",
+    "EXACT"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "DSATUR",
+      "DSATUR-LABEL"
+     ],
+     "separating_items": 310
+    },
+    {
+     "pair": [
+      "DPLL-LIST (D)",
+      "DSATUR-LABEL"
+     ],
+     "separating_items": 479
+    },
+    {
+     "pair": [
+      "DPLL-LIST (D)",
+      "DSATUR"
+     ],
+     "separating_items": 493
+    },
+    {
+     "pair": [
+      "DPLL-LIST (D)",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+     ],
+     "separating_items": 495
+    },
+    {
+     "pair": [
+      "DSATUR",
+      "LF"
+     ],
+     "separating_items": 507
+    },
+    {
+     "pair": [
+      "DSATUR-LABEL",
+      "LF"
+     ],
+     "separating_items": 522
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "LF",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ],
+     "rank": 10,
+     "deficiency": 0,
+     "sigma_ratio": 0.13470771874065623,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "LF",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "LF",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ],
+     "rank": 10,
+     "deficiency": 0,
+     "sigma_ratio": 0.012742649032900634,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "LF",
+      "NOISY-EXACT",
+      "RO-FF (C3)",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 1575.2
+  },
+  {
+   "unit": "C_E2/knapsack",
+   "n_items": 600,
+   "n_clusters": 120,
+   "n_cells": 15,
+   "items_per_cell": 40.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "DIFF"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "INPUT-FIT"
+    ],
+    [
+     "LARGEST-FIT"
+    ],
+    [
+     "RATIO+BEST-SINGLE",
+     "RATIO-PREFIX"
+    ],
+    [
+     "RATIO-SKIP"
+    ],
+    [
+     "VALUE"
+    ]
+   ],
+   "folded_into_q": [],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.002,
+     "worst_bias_quantity": "EXACT",
+     "min_coverage": 0.9,
+     "worst_coverage_quantity": "EXACT",
+     "median_width": 0.112,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "DIFF": {
+       "truth": 0.6,
+       "mean": 0.601,
+       "bias": 0.001,
+       "coverage": 0.95,
+       "median_width": 0.121,
+       "mean_upper": 0.662
+      },
+      "EXACT": {
+       "truth": 0.1,
+       "mean": 0.098,
+       "bias": -0.002,
+       "coverage": 0.9,
+       "median_width": 0.056,
+       "mean_upper": 0.127
+      },
+      "RATIO-SKIP": {
+       "truth": 0.3,
+       "mean": 0.298,
+       "bias": -0.002,
+       "coverage": 0.9,
+       "median_width": 0.12,
+       "mean_upper": 0.358
+      }
+     },
+     "replicates": 100
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.027,
+     "worst_bias_quantity": "DIFF",
+     "min_coverage": 0.78,
+     "worst_coverage_quantity": "DIFF",
+     "median_width": 0.12,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "DIFF": {
+       "truth": 0.6,
+       "mean": 0.573,
+       "bias": -0.027,
+       "coverage": 0.78,
+       "median_width": 0.134,
+       "mean_upper": 0.632
+      },
+      "EXACT": {
+       "truth": 0.1,
+       "mean": 0.094,
+       "bias": -0.006,
+       "coverage": 0.85,
+       "median_width": 0.056,
+       "mean_upper": 0.121
+      },
+      "RATIO-SKIP": {
+       "truth": 0.3,
+       "mean": 0.287,
+       "bias": -0.013,
+       "coverage": 0.9,
+       "median_width": 0.125,
+       "mean_upper": 0.348
+      }
+     },
+     "replicates": 100
+    }
+   },
+   "triple": [
+    "DIFF",
+    "RATIO-SKIP",
+    "EXACT"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "DIFF",
+      "RATIO-SKIP"
+     ],
+     "separating_items": 219
+    },
+    {
+     "pair": [
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP"
+     ],
+     "separating_items": 353
+    },
+    {
+     "pair": [
+      "DIFF",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX"
+     ],
+     "separating_items": 443
+    },
+    {
+     "pair": [
+      "DIFF",
+      "VALUE"
+     ],
+     "separating_items": 566
+    },
+    {
+     "pair": [
+      "RATIO-SKIP",
+      "VALUE"
+     ],
+     "separating_items": 571
+    },
+    {
+     "pair": [
+      "DIFF",
+      "INPUT-FIT"
+     ],
+     "separating_items": 573
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE",
+      "q"
+     ],
+     "rank": 8,
+     "deficiency": 0,
+     "sigma_ratio": 0.3291469692824844,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE",
+      "q"
+     ],
+     "rank": 8,
+     "deficiency": 0,
+     "sigma_ratio": 0.3848822526457504,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 639.6
+  },
+  {
+   "unit": "C_E5/3-SAT (partial assignment given)",
+   "n_items": 120,
+   "n_clusters": 40,
+   "n_cells": 3,
+   "items_per_cell": 40.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "DPLL from state (D)"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "GREEDY-MENTION from state (C1)"
+    ],
+    [
+     "GREEDY-MENTION-ABORT from state (C1)"
+    ],
+    [
+     "GUC-DET from state (C2)",
+     "SC-DET from state (C2)"
+    ],
+    [
+     "POLARITY (C0, ignores state)"
+    ],
+    [
+     "UC-DET from state (C2)"
+    ]
+   ],
+   "folded_into_q": [
+    "RANDOM (H)"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.002,
+     "worst_bias_quantity": "GREEDY-MENTION from state (C1)",
+     "min_coverage": 0.92,
+     "worst_coverage_quantity": "GREEDY-MENTION from state (C1)",
+     "median_width": 0.176,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "GREEDY-MENTION from state (C1)": {
+       "truth": 0.6,
+       "mean": 0.598,
+       "bias": -0.002,
+       "coverage": 0.92,
+       "median_width": 0.195,
+       "mean_upper": 0.694
+      },
+      "GREEDY-MENTION-ABORT from state (C1)": {
+       "truth": 0.3,
+       "mean": 0.3,
+       "bias": 0.0,
+       "coverage": 0.93,
+       "median_width": 0.194,
+       "mean_upper": 0.395
+      },
+      "POLARITY (C0, ignores state)": {
+       "truth": 0.1,
+       "mean": 0.1,
+       "bias": -0.0,
+       "coverage": 0.93,
+       "median_width": 0.1,
+       "mean_upper": 0.153
+      }
+     },
+     "replicates": 100
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.053,
+     "worst_bias_quantity": "GREEDY-MENTION from state (C1)",
+     "min_coverage": 0.8,
+     "worst_coverage_quantity": "GREEDY-MENTION from state (C1)",
+     "median_width": 0.184,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "GREEDY-MENTION from state (C1)": {
+       "truth": 0.6,
+       "mean": 0.547,
+       "bias": -0.053,
+       "coverage": 0.8,
+       "median_width": 0.205,
+       "mean_upper": 0.649
+      },
+      "GREEDY-MENTION-ABORT from state (C1)": {
+       "truth": 0.3,
+       "mean": 0.267,
+       "bias": -0.033,
+       "coverage": 0.87,
+       "median_width": 0.202,
+       "mean_upper": 0.368
+      },
+      "GUC-DET from state (C2) = SC-DET from state (C2)": {
+       "truth": 0.0,
+       "mean": 0.013,
+       "bias": 0.013,
+       "coverage": 0.98,
+       "median_width": 0.045,
+       "mean_upper": 0.047
+      },
+      "POLARITY (C0, ignores state)": {
+       "truth": 0.1,
+       "mean": 0.117,
+       "bias": 0.017,
+       "coverage": 0.88,
+       "median_width": 0.108,
+       "mean_upper": 0.173
+      },
+      "q": {
+       "truth": 0.0,
+       "mean": 0.041,
+       "bias": 0.041,
+       "coverage": 0.66,
+       "median_width": 0.084,
+       "mean_upper": 0.092
+      }
+     },
+     "replicates": 100
+    }
+   },
+   "triple": [
+    "GREEDY-MENTION from state (C1)",
+    "GREEDY-MENTION-ABORT from state (C1)",
+    "POLARITY (C0, ignores state)"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "DPLL from state (D)",
+      "UC-DET from state (C2)"
+     ],
+     "separating_items": 12
+    },
+    {
+     "pair": [
+      "DPLL from state (D)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)"
+     ],
+     "separating_items": 38
+    },
+    {
+     "pair": [
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "UC-DET from state (C2)"
+     ],
+     "separating_items": 38
+    },
+    {
+     "pair": [
+      "DPLL from state (D)",
+      "GREEDY-MENTION-ABORT from state (C1)"
+     ],
+     "separating_items": 68
+    },
+    {
+     "pair": [
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)"
+     ],
+     "separating_items": 68
+    },
+    {
+     "pair": [
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "UC-DET from state (C2)"
+     ],
+     "separating_items": 74
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)",
+      "q"
+     ],
+     "rank": 8,
+     "deficiency": 0,
+     "sigma_ratio": 0.1461365324791302,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)",
+      "q"
+     ],
+     "rank": 8,
+     "deficiency": 0,
+     "sigma_ratio": 0.16547499992742362,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 131.5
+  }
+ ]
+}

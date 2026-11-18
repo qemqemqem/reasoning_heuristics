@@ -1,14 +1,17 @@
 # Recovery: positive controls for the identification engine
 
-*The Stage 0 gate (SCOPE §4 item 5; DESIGN §5 rule 12): before any LLM data is analysed, fake models with planted mixtures must be recovered with |bias| ≤ 0.05, 95% coverage ≥ 0.9 and median interval width ≤ 0.2. Results: [data/recovery/](../data/recovery/). These numbers come from the item sets committed on 2026-11-17. The zoo, validator and generator fixes (#13, #14) will change the items, so rerun the commands below on the regenerated sets; these numbers will then be superseded.*
+*The Stage 0 gate (SCOPE §4 item 5; DESIGN §5 rule 12): before any LLM data is analysed, fake models with planted mixtures must be recovered with |bias| ≤ 0.05, 95% coverage ≥ 0.9 and median interval width ≤ 0.2. Results are in [data/recovery/](../data/recovery/): `dev.json`, `pc10.json`, `pc20.json`, `pc40.json` and `coverage_pc40.json`.*
+
+> **Pre-regeneration items.** Every number on this page comes from the item sets as they were on main at 89ac750, before the zoo, validator and generator fixes (#13, #14) and the regenerated sets (#16). The 10/20/40-per-cell sets were generated from that code. Each result file records the code SHA and the sha256 of every item file it read. The regenerated sets supersede these numbers; rerun the commands below on them.
 
 ## Bottom line
 
 - **No unit passes the gate at the committed dev size (5 items per cell).** The units are small (10–270 items, 5–30 clusters), so intervals are wide and coverage is poor almost everywhere.
+- **Where it passes:** the table at the end gives, per unit, the size at which the mixture passes and the null scenarios' verdicts. The mixture and both nulls pass together only on C E2 colouring (10 per cell), A/H E5 SAT (20) and A/H E5 entailment (40).
 - **On witness channels, 9 of the 12 units with a planted triple reach bias ≤ 0.05 and width ≤ 0.2 for the 60/30/10 mixture somewhere between 5 and 40 items per cell** (table below).
   - **Coverage is the gate that binds.** The percentile cluster bootstrap covers about 0.77–0.93 per weight at those sizes.
-  - The mixture passes all three gates at 40 per cell on A/H E5 entailment and SAT and C E1 SAT; at 20 per cell on C E2 knapsack (it misses the coverage gate at 40); and at 10 per cell on C E2 colouring (it misses at 20 and 40).
-  - The 100-replicate coverage check below says whether the misses at 40 per cell are noise from 30 replicates or real under-coverage.
+  - In the 30-replicate sweep the mixture first passes all three gates at 10 per cell on C E2 colouring, at 20 on A/H E5 SAT and C E2 knapsack, and at 40 on A/H E5 entailment and C E1 SAT.
+  - **With 100 replicates at 40 per cell, six of eight witness units pass all three gates**: A/H E5 SAT, C E1 SAT, C E2 SAT / colouring / knapsack, and C E5 SAT with a given state. A/H E5 colouring misses, with EXACT at 0.84 ± 0.04, and so does C E1 colouring (DPLL-LABEL 0.88 ± 0.03). The 30-replicate coverage misses were mostly noise.
 - **Eight of the 23 units have linear dependencies, so their unexplained mass can't be identified on these items.**
   - On every two-valued channel q = ½ always-positive + ½ always-negative. That covers all six A/H decision units, B4/C4 E2 and C E5 entailment.
   - B4/C4 E2 also has dependencies among noise models, and one among procedures that matters for H6.
@@ -290,7 +293,20 @@ The sweep reruns `mix`, `null_q` and `null_always` on dev-tier item sets generat
   - C E5 colouring (k = 3) does not improve (a near-tie);
   - the decision-channel units, B4/C4 E1 and C E3 fail for reasons that more items do not fix (below).
 
-**Coverage with 100 replicates.** (Running.)
+**Coverage with 100 replicates.** Thirty replicates can't tell a calibrated interval from a slightly short one. So the 60/30/10 mixture was rerun at 40 items per cell, with 100 replicates and 100 bootstrap draws, on the eight witness units whose bias and width already passed there (`coverage_pc40.json`):
+
+| Unit | all three gates | coverage of each planted weight (± binomial SE) | max \|bias\| | median width |
+|---|---|---|---|---|
+| AH_E5/COL | fail | A3 TT[FIRST-FIT] (0.6): 0.99 ± 0.01; C1 FIRST-FIT (stated rule) (0.3): 0.92 ± 0.03; exact (0.1): 0.84 ± 0.04 | 0.019 | 0.185 |
+| AH_E5/SAT | PASS | C0 POLARITY (0.6): 0.91 ± 0.03; C1 GREEDY (0.3): 0.91 ± 0.03; A3 TT[exact] (0.1): 0.92 ± 0.03 | 0.001 | 0.111 |
+| C_E1/3-SAT | PASS | DPLL-INDEX (D, T first) (0.6): 0.90 ± 0.03; DPLL-MENTION (D, T first) (0.3): 0.90 ± 0.03; EXACT (0.1): 0.90 ± 0.03 | 0.003 | 0.113 |
+| C_E1/colouring | fail | FF-LABEL (0.6): 0.90 ± 0.03; DPLL-LABEL (D) (0.3): 0.88 ± 0.03; DSATUR (0.1): 0.94 ± 0.02 | 0.006 | 0.138 |
+| C_E2/3-SAT | PASS | GUC-DET (C2) (0.6): 0.94 ± 0.02; SC-DET (C2) (0.3): 0.94 ± 0.02; POLARITY (C0) (0.1): 0.95 ± 0.02 | 0.001 | 0.174 |
+| C_E2/colouring | PASS | FF-LABEL (0.6): 0.90 ± 0.03; DSATUR-LABEL (0.3): 0.92 ± 0.03; EXACT (0.1): 0.93 ± 0.03 | 0.001 | 0.070 |
+| C_E2/knapsack | PASS | DIFF (0.6): 0.95 ± 0.02; RATIO-SKIP (0.3): 0.90 ± 0.03; EXACT (0.1): 0.90 ± 0.03 | 0.002 | 0.112 |
+| C_E5/3-SAT (partial assignment given) | PASS | GREEDY-MENTION from state (C1) (0.6): 0.92 ± 0.03; GREEDY-MENTION-ABORT from state (C1) (0.3): 0.93 ± 0.03; POLARITY (C0, ignores state) (0.1): 0.93 ± 0.03 | 0.002 | 0.176 |
+
+Six of the eight pass all three gates. The misses are the 0.1 EXACT weight on A/H E5 colouring (0.84) and C E1 colouring's 0.3 DPLL-LABEL weight (0.88). At 40 items per cell, then, the percentile cluster bootstrap covers close to nominal on the witness units, slightly short for some weights. The 30-replicate misses in the sweep were mostly binomial noise. A principled alternative (BCa) is to be compared against it on the regenerated sets.
 
 ## Misspecification: the uniform slip model on near-miss data
 
@@ -441,3 +457,36 @@ A dependency means no amount of data on these items separates the members involv
 - **Design fixes** for the not-testable units: see Limitations.
 - **The hierarchical cross-model fit** (DESIGN §3 O3) and a **fitted token model** for censoring.
 - **Off-zoo detection.** The unexplained mass does not flag a missing strategy (above), so posterior-predictive checks per cell are needed.
+
+## Where the gates pass (pre-regeneration items)
+
+For each unit: the smallest size (items per cell; 5 = dev, then 10, 20 and 40) at which the 60/30/10 mixture passes all three gates, and the two null scenarios at that size, or at 40 if the mixture never passes.
+
+- **Not reached by 40**: the trend is toward passing, but 40 items per cell was not enough.
+- **Fails by design**: more items won't fix it.
+- `single` and `feature` were run at dev size only, where they fail on every unit. They have not been checked at the larger sizes.
+
+| Unit | Mixture passes all three gates at | null q | null ALWAYS |
+|---|---|---|---|
+| A/H E1 SAT, COL, ENT; A/H E2 SAT, COL, ENT | **fails by design**: q isn't identified on a two-valued channel (q = ½ always-positive + ½ always-negative), and the noise models are near-mixtures of the procedures; the mixture fails at every size | not testable | not testable |
+| A/H E5 colouring | not reached by 40: the 0.1 weight's coverage is 0.84 at 40 (100 replicates); bias and width pass | pass | pass |
+| A/H E5 entailment | **40** | pass | pass |
+| A/H E5 knapsack | no mixture test: fewer than three members on every item | pass at 40 | pass |
+| A/H E5 SAT | **20** (40 confirmed with 100 replicates) | pass | pass |
+| B4/C4 E1 | **fails by design**: NOISY-EXACT is nearly the EXACT group (σ_min/σ_max = 0.0004), and every MC item has answer C | fail | fail |
+| B4/C4 E2 | **fails by design**: five linear dependencies, one of them among procedures (H6); the identified mixture covers only 0.27–0.33 | not testable | not testable |
+| C E1 SAT | **40** (100 replicates) | pass | fail: always-UNSAT goes to RO-GREEDY |
+| C E1 colouring | not reached by 40: coverage 0.88 ± 0.03 at 40 (100 replicates); bias and width pass from 20 | pass | fail: one colour goes to LOCAL-2-ID |
+| C E2 SAT | **40** (100 replicates) | pass | fail: always-UNSAT goes to RO-GREEDY |
+| C E2 colouring | **10** (40 confirmed with 100 replicates) | pass | pass |
+| C E2 knapsack | **20** (40 confirmed with 100 replicates) | fail: coverage 0.67–0.87 | pass |
+| C E3 | **fails by design**: FF-LIST (= DPLL-LIST) leaks 0.14–0.31 to the LOCAL-t proxies at every size | fail | fail |
+| C E5 SAT | not reached by 40: width 0.23 | pass | fail |
+| C E5 SAT with a given state | **40** (100 replicates) | pass | fail |
+| C E5 colouring (k = 3) | **fails by design** at these sizes: FF-3-EDGE-MENTION-ABORT vs PHANTOM-ADJACENT is a near-tie, and widths stay at 0.4 | fail | pass |
+| C E5 colouring with a given state | not reached by 40: bias 0.07, width 0.24 | fail | pass |
+| C E5 entailment | **fails by design**: q and NOISY-EXACT are combinations of other members, and EXACT answers NO on every item | not testable | not testable |
+
+On these items, the mixture and both null scenarios pass together only on **C E2 colouring (10), A/H E5 SAT (20) and A/H E5 entailment (40)**.
+- C E1 SAT, C E2 SAT and C E5 SAT with a given state recover the mixture at 40, but they credit a constant responder to a member (RO-GREEDY stores 0.5 on UNSAT).
+- C E2 knapsack's `null_q` intervals under-cover.
