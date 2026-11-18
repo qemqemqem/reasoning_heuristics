@@ -8,7 +8,7 @@ Descriptive summary, written by `python -m reasoning_heuristics.evals.score`. No
 - **Items:** 1270 (data/items/dev/AH_E1_dev_s1.jsonl.gz, data/items/dev/AH_E2_dev_s1.jsonl.gz, data/items/dev/AH_E5_dev_s1.jsonl.gz, data/items/dev/AH_E8_dev_s1.jsonl.gz, data/items/dev/B4C4_E1_dev_s1.jsonl.gz, data/items/dev/B4C4_E2_dev_s1.jsonl.gz, data/items/dev/C_E1_dev_s1.jsonl.gz, data/items/dev/C_E2_dev_s1.jsonl.gz, data/items/dev/C_E3_dev_s1.jsonl.gz, data/items/dev/C_E5_dev_s1.jsonl.gz); skipped {'excluded_eval': 60, 'unsupported': 0, 'not_included': 0}.
 - **Status:** complete; 1270 responses, 0 failed calls, 0 from cache.
 - **Spend:** $0.1710 API-reported over 1 invocation(s) (last cap $3.00; dry-run estimate $1.35, worst case $5.85).
-- **Code:** git `802e453b03cea85774978ff8e7041986423ebba9`; scorer `scorer-1.5.0` at `12095bc719ce00f4d3ff50c8e7f73dc16c37054a`.
+- **Code:** git `802e453b03cea85774978ff8e7041986423ebba9`; scorer `scorer-1.5.1` at `34f2a739e3b2b71721f4ec75aa792469f382b395`.
 
 ## Response categories
 

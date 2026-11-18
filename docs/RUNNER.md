@@ -244,7 +244,7 @@ Endpoint listings and 62 tiny calls ("What is 17 + 25?") over the SCOPE §1 mode
 
 ## First live runs (smoke, 2026-11-18)
 
-Three acceptance runs, each on all 254 smoke items except A/H E8, on the pinned endpoints. They used the items as committed before the generator fixes of 2026-11-18. To re-score them, use `score --items-at-run-sha`. Each run's own `REPORT.md` has the details; all are scored with scorer-1.5.0 against the items at their recorded SHA.
+Three acceptance runs, each on all 254 smoke items except A/H E8, on the pinned endpoints. They used the items as committed before the generator fixes of 2026-11-18. To re-score them, use `score --items-at-run-sha`. Each run's own `REPORT.md` has the details; all are scored with scorer-1.5.1 against the items at their recorded SHA.
 
 | Run | Model, condition | Provider served | Responses | ok | Truncated | Other categories | Correct of ok | API cost | Wall time |
 |---|---|---|---|---|---|---|---|---|---|

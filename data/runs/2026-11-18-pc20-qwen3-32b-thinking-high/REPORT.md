@@ -8,7 +8,7 @@ Descriptive summary, written by `python -m reasoning_heuristics.evals.score`. No
 - **Items:** 1380 (data/items/pc20/C_E2_dev_s1.jsonl.gz, data/items/pc20/AH_E5_dev_s1.jsonl.gz, data/items/pc20/C_E1_dev_s1.jsonl.gz); skipped {'excluded_eval': 0, 'unsupported': 0, 'not_included': 0}.
 - **Status:** complete; 1380 responses, 0 failed calls, 85 from cache.
 - **Spend:** $3.5636 API-reported over 2 invocation(s) (last cap $4.44; dry-run estimate $2.46, worst case $10.19).
-- **Code:** git `62d8345a6eec0691e8eb0c36f085239c09d1f46e`; scorer `scorer-1.5.0` at `62d8345a6eec0691e8eb0c36f085239c09d1f46e`.
+- **Code:** git `62d8345a6eec0691e8eb0c36f085239c09d1f46e`; scorer `scorer-1.5.1` at `34f2a739e3b2b71721f4ec75aa792469f382b395`.
 
 ## Response categories
 
@@ -18,8 +18,8 @@ Correct is among `ok` responses only; the other categories are never counted as 
 |---|---|---|---|---|---|---|---|
 | A/H | E5 | 340 | 333 | 2 | 0 | 5 | 239/333 (72%) |
 | C | E1 | 240 | 236 | 1 | 1 | 2 | 179/236 (76%) |
-| C | E2 | 800 | 775 | 18 | 0 | 7 | 427/775 (55%) |
-| **All** | | **1380** | **1344** | **21** | **1** | **14** | **845/1344 (63%)** |
+| C | E2 | 800 | 778 | 15 | 0 | 7 | 429/778 (55%) |
+| **All** | | **1380** | **1347** | **18** | **1** | **14** | **847/1347 (63%)** |
 
 ## Tokens per response
 
@@ -51,7 +51,8 @@ API-reported. Completion tokens include reasoning tokens. Truncated responses co
 | `no_answer_marker` | 48 |
 | `fenced_answer_no_marker` | 20 |
 | `order_differs_from_requested` | 11 |
-| `answer_blocks_disagree` | 3 |
+| `answer_blocks_disagree` | 5 |
+| `answer_after_lead_in` | 3 |
 | `extra_text_in_block` | 2 |
 | `repeated_item` | 1 |
 
@@ -72,11 +73,8 @@ API-reported. Completion tokens include reasoning tokens. Truncated responses co
 | `C-E2-df6c957c1f-SAT_GREEDY-vs-POLARITY_D(POLARITY_GREEDY)` | parse_fail | no answer block |
 | `C-E2-4ee55ab373-KNAP_RATIO-vs-VALUE_PLACEBO` | parse_fail | no answer block |
 | `C-E2-7b3eb86931-KNAP_RATIO-vs-DIFF_D(RATIO_DIFF)` | parse_fail | no answer block |
-| `C-E2-e394bcdbc2-KNAP_RATIO-vs-DIFF_G-ONLY` | parse_fail | no item names: 'The selected items in alphabetical order are:' |
 | `C-E2-1d976cddea-KNAP_RATIO-vs-DIFF_D(DIFF_RATIO)` | parse_fail | no answer block |
-| `C-E2-87110f5f03-KNAP_RATIO-vs-DIFF_D(DIFF_RATIO)` | parse_fail | no item names: 'The items that should be selected to maximize the total value without exceeding the weight limit are:' |
 | `C-E2-916a1826d0-KNAP_PREFIX-vs-RATIO_D(PREFIX_RATIO)` | parse_fail | no answer block |
-| `C-E2-e36a305251-KNAP_PREFIX-vs-RATIO_D(PREFIX_RATIO)` | parse_fail | no item names: 'The chosen items, listed in alphabetical order, are:' |
 | `AH-E5-075fde5b6a-ENT-ENT_T` | parse_fail | unrecognised fact(s): ['¬G'] |
 | `AH-E5-be7b466562-ENT-ENT_I+R` | parse_fail | unrecognised fact(s): ['¬P'] |
 | `C-E1-df910b4194-COL_c5-ANS-FREE` | parse_fail | no answer block |
