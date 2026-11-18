@@ -15,8 +15,13 @@ Readings of the doc, where it is ambiguous (also in docs/GENERATORS.md):
   a is not B / None), N cells have two incomparable entailed options (b is D, and the
   disjunction), so "the strongest entailed option" is undefined there; N cells are YN only.
   That gives 16 YN + 12 MC = 28 cells per frame.
-- MC display order is the canonical order above; the doc's Latin-square rotation is "across
-  samples", i.e. a runner concern, so it is not baked into items.
+- MC display order is a Latin square across frames: frame j of a set at level T shows the four
+  options rotated by r = (j + index of T in M, U, V) mod 4 (None of these stays last), so within
+  every MC cell the correct letter cycles through A-D (balanced to +-1) and letter position is
+  not confounded with correctness. All cells of one set share r, so the O and P contrasts are
+  not confounded with it either. Ground truth and every prediction are computed on the rotated
+  task; `params.mc_rotation` and `params.mc_correct_letter` record it. (The doc's A2 POSITION
+  member, a fixed-letter answer, is not in the zoo yet.)
 - U and V premises are rendered as in the library ("The cup is green.", "Either the box is
   red, or the cup is green."). The doc's "padded with a neutral clause" is not applied (the
   library does not, and no neutral clause is specified); prompt token counts are recorded
@@ -33,9 +38,10 @@ from typing import Any
 from reasoning_heuristics import tokens
 from reasoning_heuristics.counterfactual import surface
 from reasoning_heuristics.generators import b4_common as B
-from reasoning_heuristics.generators.common import GenStats, make_item, set_hash
+from reasoning_heuristics.generators.common import GenStats, content_hash, make_item, set_hash
 from reasoning_heuristics.hashing import sha
 from reasoning_heuristics.heuristics.base import run
+from reasoning_heuristics.heuristics.entailment import mc_letter
 from reasoning_heuristics.heuristics.tasks import EntailmentTask, load_task
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.seeds import TIERS, base_seed, rng_for
@@ -58,7 +64,9 @@ def cells(params: dict[str, Any]) -> list[str]:
     return out
 
 
-def build_task(frame: B.Frame, T: str, P: int, O: str, fmt: str) -> EntailmentTask:
+def build_task(frame: B.Frame, T: str, P: int, O: str, fmt: str, rotation: int = 0) -> EntailmentTask:
+    """`rotation` shifts the MC options cyclically (option i of the canonical order is shown at
+    position (i - rotation) mod 4)."""
     L = F.lit
     aA, aB, bC, bD, cE = frame.atom(0, 0), frame.atom(0, 1), frame.atom(1, 2), frame.atom(1, 3), frame.atom(2, 4)
     d1, d2 = F.conj(L(aA), L(aB)), F.conj(L(bC), L(bD))
@@ -68,7 +76,14 @@ def build_task(frame: B.Frame, T: str, P: int, O: str, fmt: str) -> EntailmentTa
     if fmt == "YN":
         return EntailmentTask(premises, L(bD) if T == "N" else L(aB), "YN")
     options = (L(aB), L(bD), F.disj(L(aB), F.conj(L(bC), L(bD))), L(aB, False))
-    return EntailmentTask(premises, None, "MC", options)
+    r = rotation % len(options)
+    return EntailmentTask(premises, None, "MC", options[r:] + options[:r])
+
+
+def correct_option(frame: B.Frame) -> F.Formula:
+    """The strongest entailed MC option on every M, U and V cell: a is B, or (b is C and b is D)."""
+    L = F.lit
+    return F.disj(L(frame.atom(0, 1)), F.conj(L(frame.atom(1, 2)), L(frame.atom(1, 3))))
 
 
 def generate(tier: str, seed: int, per_cell: int | None = None, themes: list[str] | None = None,
@@ -90,15 +105,19 @@ def generate(tier: str, seed: int, per_cell: int | None = None, themes: list[str
             stats.reject("antonym pair on one subject")
             continue
         frame_items = []
+        frame_index = stats.accepted
         for T in "MNUV":
+            rotation = (frame_index + MC_T.index(T)) % 4 if T in MC_T else 0
             base_task = build_task(frame, T, 1, "DC", "YN")
             pair = sha({"premises": B.premise_multiset(base_task), "T": T, "frame": frame.to_json()})
+            base_hash = content_hash(base_task)  # the T1·DC YN item
             set_id = f"{set_hash(bseed, T)}-{T}"
             for fmt in (("YN", "MC") if T in MC_T else ("YN",)):
                 for P in (1, 2):
                     for O in ("DC", "CD"):
-                        task = build_task(frame, T, P, O, fmt)
+                        task = build_task(frame, T, P, O, fmt, rotation)
                         cell = f"{T}{P}·{O}" + ("·MC" if fmt == "MC" else "")
+                        mc = {"mc_rotation": rotation, "mc_correct_letter": mc_letter(task, task.options.index(correct_option(frame)))} if fmt == "MC" else {}
                         gt = truth(task)
                         prompt = B.render_prompt(task, repeat_prompt=repeat_prompt)
                         frame_items.append(make_item(
@@ -106,9 +125,9 @@ def generate(tier: str, seed: int, per_cell: int | None = None, themes: list[str
                             framing=theme, prompt=prompt, answer_format=B.YN_ANSWER if fmt == "YN" else B.MC_ANSWER,
                             task=task, ground_truth=gt, specs=B.members(fmt, with_conditionals=False),
                             channel=B.channel(fmt), seed=bseed, tier=tier, generator=__name__,
-                            base_hash=pair, source_hash=None if (P, O, fmt) == (1, "DC", "YN") else pair,
+                            base_hash=base_hash, source_hash=None if (P, O, fmt) == (1, "DC", "YN") else base_hash,
                             pair_id=pair,
-                            params={"T": T, "P": P, "O": O, "F": fmt, "frame": frame.to_json(),
+                            params={"T": T, "P": P, "O": O, "F": fmt, "frame": frame.to_json(), **mc,
                                     "prompt_tokens": tokens.count(prompt), "tokenizer_proxy": tokens.PROXY_NAME,
                                     "repeat_prompt": repeat_prompt},
                             notes="Disjunction gadget. Every member recomputed on this cell from the structured form; "
@@ -134,7 +153,12 @@ def check_set(items: list) -> list[str]:
     if len(multisets) != 1:
         errs.append("O/P/F variants do not share the premise multiset")
     for it in items:
-        if it.ground_truth["answer"] != (EXPECTED_G[T] if it.params["F"] == "YN" else "C"):
+        if it.params["F"] == "MC":
+            t = tasks[it.cell]
+            want = mc_letter(t, t.options.index(correct_option(B.Frame(**it.params["frame"]))))
+        else:
+            want = EXPECTED_G[T]
+        if it.ground_truth["answer"] != want or it.params.get("mc_correct_letter", want) != want:
             errs.append(f"{it.cell}: ground truth {it.ground_truth['answer']} differs from the design")
         t = tasks[it.cell]
         if it.params["F"] == "YN":

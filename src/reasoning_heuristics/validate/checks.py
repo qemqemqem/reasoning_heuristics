@@ -100,11 +100,32 @@ def check_item(item: Item) -> list[Failure]:
             fail("predictions", f"{label}: stored distribution differs from recomputed")
         if not _close(to_jsonable(pred.trace_features), rec.get("trace_features", {})):
             fail("predictions", f"{label}: stored trace features differ from recomputed")
-    keys = {answer_key(task.domain, r["answer"]) for r in item.predictions.values()
-            if r["answer"] is not None and not r.get("trace_features", {}).get("set_valued")}
-    if len(keys) < 2:
-        fail("discriminates", f"only {len(keys)} distinct member answer(s)")
+    why = discriminates(item)
+    if why is not None:
+        fail("discriminates", why)
     return out
+
+
+def discriminates(item: Item) -> str | None:
+    """None if the item can tell members apart, else the reason it cannot.
+
+    Judged on the item's scoring channel, not on raw answers: the members' outcome-class
+    probabilities are rebuilt from the stored predictions and the serialised channel
+    (`extra.channel_spec`), and at least two members must differ. The stored likelihood table
+    must also be non-degenerate: some outcome row separates two members by >= 0.01 log10 units."""
+    from reasoning_heuristics.generators.common import item_channel, likelihood_table
+
+    try:
+        lt = likelihood_table(item.predictions, item_channel(item))
+    except (ValueError, KeyError) as exc:
+        return f"no likelihood table on the scoring channel: {exc}"
+    rows = {tuple(round(p[k], 9) for k in lt.keys) for p in lt.probs.values()}
+    if len(rows) < 2:
+        return f"all {len(lt.probs)} members predict the same outcome distribution on the scoring channel"
+    spread = max((max(r.values()) - min(r.values()) for r in item.disconfirms.values() if r), default=0.0)
+    if spread < 0.01:
+        return "the stored likelihood table is degenerate (no outcome separates two members)"
+    return None
 
 
 # --- leakage ------------------------------------------------------------------------------------

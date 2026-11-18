@@ -149,13 +149,15 @@ def build(only: list[tuple[str, str]] | None, seed: int, reuse: bool, dev_per_ce
             rpath = path.with_suffix(".report.json")
             if reuse and rpath.exists():
                 reports[tier] = json.loads(rpath.read_text())
+                # the committed form is the .jsonl.gz (the .jsonl is gitignored); test batches stay uncompressed
+                reports[tier]["items_list"] = read_jsonl(path if tier == "test" else path.with_name(path.name + ".gz"))
             else:
                 print(f"generating {vertical} {eval_id} {tier} ...", flush=True)
                 reports[tier] = generate_and_validate(mod.VERTICAL, mod.EVAL_ID, tier, seed, per, {}, ITEMS,
                                                       validate=(tier != "test"))
-            reports[tier]["items_list"] = read_jsonl(path)
-            if tier != "test":
-                compress(path)
+                reports[tier]["items_list"] = read_jsonl(path)
+                if tier != "test":
+                    compress(path)
         smoke, dev, test = (reports[t]["items_list"] for t in ("smoke", "dev", "test"))
         leak = check_leakage(dev + smoke + test, lexicon_partitioned=mod.LEXICON_PARTITIONED)
         overlap = {it.base_hash for it in smoke} & {it.base_hash for it in dev}

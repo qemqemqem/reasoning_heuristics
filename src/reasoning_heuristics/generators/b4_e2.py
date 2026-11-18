@@ -34,7 +34,7 @@ from typing import Any
 from reasoning_heuristics import tokens
 from reasoning_heuristics.counterfactual import surface
 from reasoning_heuristics.generators import b4_common as B
-from reasoning_heuristics.generators.common import GenStats, make_item, set_hash
+from reasoning_heuristics.generators.common import GenStats, content_hash, make_item, set_hash
 from reasoning_heuristics.hashing import sha
 from reasoning_heuristics.heuristics.tasks import EntailmentTask, load_task
 from reasoning_heuristics.problems.entailment import formula as F
@@ -99,6 +99,7 @@ def generate(tier: str, seed: int, per_cell: int | None = None, themes: list[str
                 for inference in INFERENCES:
                     pair = sha({"premises": B.premise_multiset(build_task(frame, form, inference, "cf")),
                                 "frame": frame.to_json(), "form": form, "inference": inference})
+                    base_hash = content_hash(build_task(frame, form, inference, "cf"))  # the cf item
                     for order in ORDERS:
                         task = build_task(frame, form, inference, order)
                         cell = f"{form}·{inference}·{order}" + ("·instr" if instr else "")
@@ -108,7 +109,7 @@ def generate(tier: str, seed: int, per_cell: int | None = None, themes: list[str
                             vertical=VERTICAL, eval_id=EVAL_ID, set_id=set_id, cell=cell, domain="entailment",
                             framing=theme, prompt=prompt, answer_format=B.YN_ANSWER, task=task, ground_truth=gt,
                             specs=specs(instr), channel=B.channel("YN"), seed=bseed, tier=tier, generator=__name__,
-                            base_hash=pair, source_hash=None if order == "cf" else pair, pair_id=pair,
+                            base_hash=base_hash, source_hash=None if order == "cf" else base_hash, pair_id=pair,
                             params={"form": form, "inference": inference, "O": order, "instruction": instr,
                                     "note": note, "note_style": note_style, "frame": frame.to_json(),
                                     "prompt_tokens": tokens.count(prompt), "tokenizer_proxy": tokens.PROXY_NAME,

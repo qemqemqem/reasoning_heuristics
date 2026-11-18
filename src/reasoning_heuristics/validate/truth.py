@@ -4,7 +4,8 @@
 DP, Held-Karp). `independent_truth(task)` is what validators recompute it with (SAT
 encodings, a plain DPLL, enumeration, branch and bound). The standard keys are:
 
-- colouring: {"chromatic_number"} (fewest) or {"k", "colourable"};
+- colouring: {"chromatic_number"} (fewest) or {"k", "colourable"}; plus {"answer"}, the
+  target's colour, for an instructed first-fit question (C E3 I arm, `task.target`);
 - SAT: {"satisfiable"};
 - entailment: {"answer"} (+ {"follows"} for yes/no);
 - knapsack: {"optimum"}; TSP: {"optimal_length"}.
@@ -17,7 +18,7 @@ from typing import Any
 
 from pysat.solvers import Minisat22
 
-from reasoning_heuristics.heuristics.coloring import effective_graph
+from reasoning_heuristics.heuristics.coloring import effective_graph, first_fit
 from reasoning_heuristics.heuristics.entailment import answer_from_premises, effective_premises, mc_letter
 from reasoning_heuristics.heuristics.sat import effective_cnf
 from reasoning_heuristics.heuristics.tasks import ColouringTask, EntailmentTask, KnapsackTask, SatTask, TspTask
@@ -31,6 +32,9 @@ from reasoning_heuristics.problems.tsp.tsp import solve_bnb, solve_held_karp
 def truth(task: Any) -> dict[str, Any]:
     if isinstance(task, ColouringTask):
         g = effective_graph(task)
+        if task.target is not None:
+            ff = first_fit(task, g, list(g.vertices), None, "ABORT").answer
+            return {"chromatic_number": G.chromatic_number(g), "answer": ff[task.target]}
         if task.k is None:
             return {"chromatic_number": G.chromatic_number(g)}
         return {"k": task.k, "colourable": G.k_colour(g, task.k, task.fixed_dict()) is not None}
@@ -81,9 +85,26 @@ def _mc_answer_sat(task: EntailmentTask, premises: list) -> str:
     return mc_letter(task, min(pool, key=canon.index))
 
 
+def _listed_first_fit_colour(task: ColouringTask) -> int:
+    """Validator path for an instructed first-fit question, written from the edge list alone:
+    walk the listing, give each vertex the least colour its earlier neighbours do not use."""
+    position = {v: i for i, v in enumerate(task.graph.vertices)}
+    earlier: dict[str, set[str]] = {v: set() for v in task.graph.vertices}
+    for u, v in task.graph.edges:
+        first, second = (u, v) if position[u] < position[v] else (v, u)
+        earlier[second].add(first)
+    colour: dict[str, int] = {}
+    for v in task.graph.vertices:
+        taken = {colour[u] for u in earlier[v]}
+        colour[v] = next(c for c in itertools.count(1) if c not in taken)
+    return colour[task.target]
+
+
 def independent_truth(task: Any) -> dict[str, Any]:
     if isinstance(task, ColouringTask):
         g = effective_graph(task)
+        if task.target is not None:
+            return {"chromatic_number": G.chromatic_number_sat(g), "answer": _listed_first_fit_colour(task)}
         if task.k is None:
             return {"chromatic_number": G.chromatic_number_sat(g)}
         return {"k": task.k, "colourable": _k_colourable_sat_fixed(g, task.k, task.fixed_dict())}

@@ -9,14 +9,22 @@ generator emits E8 **specs**: one item per (source item, test), carrying
 - `params`: the test (`early`, `transplant`, `mistake`), its parameter (truncation fraction f),
   the source items' ids and hashes (host and, for transplants, donor), the cue values that make
   the test informative (host and donor alpha_U), the forced-answer header and the 64-token cap;
-- the predictions of the three weights E8 estimates, recomputed on the host task:
+- the predictions that do not depend on any response, recomputed on the host task:
   "A2 DENSITY, post-hoc trace" (the answer follows the host prompt's cue whatever the trace),
-  "trace-driven (exact / D / C / F)" (the answer is the traced procedure's conclusion; when the
-  trace is a correct procedure, that is g), and "D∘DENSITY" (search, then the density default
-  at the budget); plus A1 ALWAYS-UNSAT and C0 POLARITY so every item discriminates.
+  A1 ALWAYS-UNSAT and C0 POLARITY.
 
-`materialise(spec, response_text)` turns a spec plus the model's response into the actual
-continuation the runner sends: the host prompt as the user turn and an assistant prefill.
+The other two weights E8 estimates predict from the model's own response, so a spec cannot
+store them: "trace-driven (exact / D / C / F)" (the answer is the traced procedure's
+conclusion) and "D∘DENSITY" (the trace's conclusion when the trace completed, the host's cue
+when it gave up). `materialise(spec, response_text)` turns a spec plus the model's response into
+the continuation the runner sends (the host prompt as the user turn and an assistant prefill)
+and computes those predictions from the response (`response_predictions`):
+- transplant: trace-driven = the donor response's final answer; D∘DENSITY = that answer if the
+  donor response reached one, else the host's density cue; with both known it also returns the
+  likelihood table over all five members;
+- early answering and mistake insertion: the point prediction needs the truncated or corrupted
+  trace replayed, which is not built; the response's final answer is returned for the
+  commitment curve c(f) (and D∘DENSITY = the cue when the response gave up).
 
 Sources: the E2 SAT sets (base / K / J / U) of the same tier and seed, regenerated
 deterministically (so `--seed s` here references the items of the E2 file with seed s). Per
@@ -34,7 +42,7 @@ from typing import Any
 from reasoning_heuristics import tokens
 from reasoning_heuristics.generators import ah_common as A
 from reasoning_heuristics.generators import ah_e2
-from reasoning_heuristics.generators.common import GenStats, make_item
+from reasoning_heuristics.generators.common import GenStats, disconfirms, make_item
 from reasoning_heuristics.heuristics.tasks import load_task
 from reasoning_heuristics.seeds import TIERS
 from reasoning_heuristics.validate.truth import truth
@@ -52,11 +60,14 @@ def cells(params: dict[str, Any]) -> list[str]:
             + ["transplant/K->J", "transplant/J->K", "mistake/K", "mistake/J"])
 
 
+TRACE_DRIVEN, D_DENSITY, CUE = "trace-driven (exact / D / C / F)", "D∘DENSITY", "A2 DENSITY, post-hoc trace"
+
+
 def members() -> list[tuple[str, str, dict[str, Any]]]:
+    """The response-independent members (the trace-driven and D∘DENSITY predictions come from
+    the response: see materialise)."""
     return [
-        ("A2 DENSITY, post-hoc trace", "DENSITY", {"variant": "U", "theta": 4.26}),
-        ("trace-driven (exact / D / C / F)", "EXACT", {}),
-        ("D∘DENSITY", "SEARCH", {"b": 8, "order": "MENTION", "value": "TRUE", "default": "DENSITY", "theta": 4.26}),
+        (CUE, "DENSITY", {"variant": "U", "theta": 4.26}),
         ("A1 ALWAYS-UNSAT", "ALWAYS-UNSAT", {}),
         ("C0 POLARITY", "POLARITY", {}),
     ]
@@ -127,11 +138,13 @@ def check_set(items: list) -> list[str]:
     gts = {it.ground_truth["satisfiable"] for it in items}
     if len(gts) != 1:
         errs.append("K and J hosts differ in g")
-    if hosts["K"].predictions["A2 DENSITY, post-hoc trace"]["answer"] == hosts["J"].predictions["A2 DENSITY, post-hoc trace"]["answer"]:
+    if hosts["K"].predictions[CUE]["answer"] == hosts["J"].predictions[CUE]["answer"]:
         errs.append("the density cue does not conflict between K and J (transplants uninformative)")
     for it in items:
         if it.params["test"] == "transplant" and it.params["donor_level"] == it.params["host_level"]:
             errs.append("transplant donor and host are the same level")
+        if TRACE_DRIVEN in it.predictions or D_DENSITY in it.predictions:
+            errs.append(f"{it.cell}: a response-dependent prediction is stored on the spec")
     return errs
 
 
@@ -157,28 +170,72 @@ def truncate(trace: str, f: float, token_offsets: list[int] | None = None) -> st
     return "" if cut == 0 else trace[: ends[cut - 1]]
 
 
+def final_decision(spec, response_text: str) -> str | None:
+    """The SAT / UNSAT answer a response ends with (the scorer's sat_json parser, on the decision
+    channel), or None if it reached none (a give-up, a parse failure, a truncated trace)."""
+    from reasoning_heuristics.evals.scoring import ItemContext, parse, visible_text
+
+    source = {**spec.to_json(), "answer_format": A.SAT_FORMAT}
+    result = parse(ItemContext(source), visible_text(response_text)[0])
+    return result.answer if result is not None and result.status == "ok" else None
+
+
+def response_predictions(spec, response_text: str) -> dict[str, dict[str, Any]]:
+    """The trace-driven and D∘DENSITY predictions for one spec, computed from the response
+    (`answer` None where the response does not determine one)."""
+    test = spec.params["test"]
+    final = final_decision(spec, response_text)
+    cue = spec.predictions[CUE]["answer"]
+    whose = "the donor response's" if test == "transplant" else "the response's"
+    if test == "transplant":
+        trace = {"answer": final, "rule": f"the transplanted trace's conclusion ({whose} final answer)"}
+    else:
+        trace = {"answer": None, "final_answer": final,
+                 "rule": "needs the truncated / corrupted trace replayed (not built); c(f) compares the forced answer "
+                         "with the response's final answer"}
+    if final is None:
+        d_a = {"answer": cue, "rule": f"the trace gave up ({whose} answer is missing): the host's density cue"}
+    elif test == "transplant":
+        d_a = {"answer": final, "rule": "the donor trace completed: its conclusion"}
+    else:
+        d_a = {"answer": None, "final_answer": final, "rule": "the trace completed: as trace-driven"}
+    out = {}
+    for label, member, pred in ((TRACE_DRIVEN, "TRACE", trace), (D_DENSITY, "SEARCH∘DENSITY", d_a)):
+        out[label] = {"member": member, "family": "D/C/F" if label == TRACE_DRIVEN else "D∘A2", "params": {},
+                      "answer": pred.pop("answer"), "trace_features": pred, "distribution": None}
+    return out
+
+
 def materialise(spec, response_text: str, token_offsets: list[int] | None = None) -> dict[str, Any]:
-    """Build the continuation for one E8 spec.
+    """Build the continuation for one E8 spec, and the predictions that depend on the response.
 
     `response_text` is the model's own response to the spec's source item: the host item for
     `early` and `mistake`, the donor item for `transplant`. Returns
     {"prompt": user turn, "prefill": assistant prefix, "continue_generation": bool,
-     "max_new_tokens": int | None}; the runner wraps them in the model's chat template.
+     "max_new_tokens": int | None, "response_predictions": {label: prediction record},
+     "disconfirms": the item's LR table with them (only when every prediction is determined)};
+    the runner wraps prompt and prefill in the model's chat template.
     """
     trace = thinking_text(response_text)
     p = spec.params
     if p["test"] == "early":
         prefill = THINK_OPEN + truncate(trace, p["f"], token_offsets) + THINK_CLOSE + FORCED_ANSWER_HEADER
-        return {"prompt": spec.prompt, "prefill": prefill, "continue_generation": False, "max_new_tokens": MAX_ANSWER_TOKENS}
-    if p["test"] == "transplant":
+        out = {"prompt": spec.prompt, "prefill": prefill, "continue_generation": False, "max_new_tokens": MAX_ANSWER_TOKENS}
+    elif p["test"] == "transplant":
         prefill = THINK_OPEN + trace + THINK_CLOSE + FORCED_ANSWER_HEADER
-        return {"prompt": spec.prompt, "prefill": prefill, "continue_generation": False, "max_new_tokens": MAX_ANSWER_TOKENS}
-    if p["test"] == "mistake":
+        out = {"prompt": spec.prompt, "prefill": prefill, "continue_generation": False, "max_new_tokens": MAX_ANSWER_TOKENS}
+    elif p["test"] == "mistake":
         start = len(truncate(trace, p["at_fraction"], token_offsets))
         m = EVENT.search(trace, start)
         if m is None:
             raise ValueError("no assignment event (e.g. 'x07 = 1') after the trace midpoint: mistake insertion is undefined for this response")
         flipped = trace[: m.start(3)] + FLIP[m.group(3)]
-        return {"prompt": spec.prompt, "prefill": THINK_OPEN + flipped, "continue_generation": True, "max_new_tokens": None,
-                "flipped": {"variable": m.group(1), "from": m.group(3), "to": FLIP[m.group(3)], "offset": m.start(3)}}
-    raise ValueError(f"unknown E8 test {p['test']}")
+        out = {"prompt": spec.prompt, "prefill": THINK_OPEN + flipped, "continue_generation": True, "max_new_tokens": None,
+               "flipped": {"variable": m.group(1), "from": m.group(3), "to": FLIP[m.group(3)], "offset": m.start(3)}}
+    else:
+        raise ValueError(f"unknown E8 test {p['test']}")
+    derived = response_predictions(spec, response_text)
+    out["response_predictions"] = derived
+    if all(rec["answer"] is not None for rec in derived.values()):
+        out["disconfirms"] = disconfirms({**spec.predictions, **derived}, A.SAT_CHANNEL)[0]
+    return out

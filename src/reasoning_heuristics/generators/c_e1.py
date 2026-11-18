@@ -43,8 +43,7 @@ from reasoning_heuristics import tokens
 from reasoning_heuristics.counterfactual import surface
 from reasoning_heuristics.counterfactual.reorder import permutation, reorder_clauses
 from reasoning_heuristics.generators import c_common as CC
-from reasoning_heuristics.generators.common import GenStats, make_item, set_hash
-from reasoning_heuristics.hashing import sha
+from reasoning_heuristics.generators.common import GenStats, content_hash, make_item, set_hash
 from reasoning_heuristics.heuristics.base import run
 from reasoning_heuristics.heuristics.tasks import ColouringTask, SatTask, load_task
 from reasoning_heuristics.problems.coloring import graph as G
@@ -57,6 +56,19 @@ from reasoning_heuristics.validate.truth import truth
 VERTICAL, EVAL_ID = "C", "E1"
 LEXICON_PARTITIONED = False
 COPIES = ["c1-NAT", "c2-RELABEL", "c3-ANS-LABEL", "c4-ANS-RAND", "c5-ANS-FREE", "c6-RELIST"]
+# The §2.8 selection filters, recorded on every item (params.filters) so analyses can condition on
+# them. Those marked "selects on <member>" select on a named member's behaviour (a design question:
+# SCOPE §6 rule 6 says never select on one heuristic's errors).
+COL_FILTERS = ["chromatic number in {3, 4}", ">= min_optimal optimal partitions (and <= max_partitions)",
+               "Grundy fraction among optimal partitions <= max_grundy",
+               "FF partitions for listing, label, random and re-listed orders pairwise distinct",
+               "LF and DSATUR distinct from all four FF partitions",
+               "FF uses chi + 1 colours in at least one of the four orders (selects on FF's suboptimality)"]
+SAT_FILTERS = ["satisfiable", ">= min_solutions solutions",
+               "GREEDY-MENTION, GREEDY-INDEX and GREEDY on the re-listed copy all reach a satisfying assignment "
+               "(selects on GREEDY's success)",
+               "those three assignments pairwise Hamming >= min_hamming", "POLARITY distinct from all three",
+               "UC-DET distinct from GREEDY-MENTION on c2 or c6"]
 
 
 def cells(params: dict[str, Any]) -> list[str]:
@@ -178,7 +190,7 @@ def generate_col(tier: str, seed: int, per_cell: int, params: dict[str, Any], st
         if info is None:
             continue
         set_items = []
-        base_hash = sha(c["c2"].content_key())
+        base_hash = content_hash(ColouringTask(c["c2"], None, (), tuple(c["copies"]["c2-RELABEL"][1])))  # the c2 item
         sid = set_hash(bseed, "COL")
         for copy, (g, order, struct) in c["copies"].items():
             task = ColouringTask(g, None, (), tuple(order) if order is not None else None)
@@ -189,10 +201,11 @@ def generate_col(tier: str, seed: int, per_cell: int, params: dict[str, Any], st
             set_items.append(make_item(
                 vertical=VERTICAL, eval_id=EVAL_ID, set_id=sid, cell=f"COL/{copy}", domain="colouring",
                 framing="textbook", prompt=prompt, answer_format=CC.COLOUR_FEWEST_FORMAT, task=task,
-                ground_truth=gt, specs=col_members(copy), channel=CC.colouring_channel(g, info["chi"], info["n_optimal"]),
+                ground_truth=gt, specs=col_members(copy), channel=CC.colouring_channel(task, info["chi"], info["n_optimal"]),
                 seed=bseed, tier=tier, generator=__name__, base_hash=base_hash,
                 source_hash=None if copy == "c2-RELABEL" else base_hash, pair_id=f"E1-COL-{sid}",
                 params={"n": n, "m": g.m, "copy": copy, "structure": struct, "ff_fingerprints": info["fingerprints"],
+                        "filters": COL_FILTERS,
                         "ff_colours_by_order": info["ff_colours"], "serialisation": params["serialisation"],
                         "repeat_prompt": params["repeat_prompt"], "prompt_tokens": tokens.count(prompt),
                         "tokenizer_proxy": tokens.PROXY_NAME},
@@ -309,7 +322,7 @@ def generate_sat(tier: str, seed: int, per_cell: int, params: dict[str, Any], st
         if info is None:
             continue
         set_items = []
-        base_hash = sha(c["c2"].content_key())
+        base_hash = content_hash(SatTask(c["c2"], (), tuple(c["copies"]["c2-RELABEL"][1])))  # the c2 item
         sid = set_hash(bseed, "SAT")
         for copy, (cnf, order, struct) in c["copies"].items():
             task = SatTask(cnf, (), tuple(order) if order is not None else None)
@@ -320,10 +333,10 @@ def generate_sat(tier: str, seed: int, per_cell: int, params: dict[str, Any], st
             set_items.append(make_item(
                 vertical=VERTICAL, eval_id=EVAL_ID, set_id=sid, cell=f"SAT/{copy}", domain="3-SAT",
                 framing="textbook", prompt=prompt, answer_format=CC.SAT_FORMAT, task=task, ground_truth=gt,
-                specs=sat_members(copy), channel=CC.sat_channel(cnf, info["n_solutions"]), seed=bseed, tier=tier,
+                specs=sat_members(copy), channel=CC.sat_channel(task, info["n_solutions"]), seed=bseed, tier=tier,
                 generator=__name__, base_hash=base_hash, source_hash=None if copy == "c2-RELABEL" else base_hash,
                 pair_id=f"E1-SAT-{sid}",
-                params={"n": n, "m": cnf.m, "alpha": alpha, "copy": copy, "structure": struct,
+                params={"n": n, "m": cnf.m, "alpha": alpha, "copy": copy, "structure": struct, "filters": SAT_FILTERS,
                         "clause_order_c6": c["clause_order"] if copy == "c6-RELIST" else None,
                         "repeat_prompt": params["repeat_prompt"], "prompt_tokens": tokens.count(prompt),
                         "tokenizer_proxy": tokens.PROXY_NAME},

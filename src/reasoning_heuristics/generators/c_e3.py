@@ -23,23 +23,46 @@ Arms: U-LIST (3-colouring, answer in listing order), U-REV (answer in reversed o
 I (instructed first-fit: "what colour does t get?"). The U readout is the bit "the
 target shares a colour with the first-listed vertex" (always colour 1 under FF).
 
+Depth, two ways. `target_depth` d counts gate layers (the cell label; the critical swap is
+d levels below the target). LOCAL-t-LIST counts rounds: it colours a vertex in the round
+equal to its first-fit dependency depth (1 + the depth of its deepest earlier-listed
+neighbour), and gives it the default colour 1 otherwise. The inputs take a round, and an
+input listed after its pendant ("False") a second, so the target's first-fit depth is
+D = d + 2 (d + 1 when every input in its cone is "True"). Gadgets are kept only if D = d + 2
+in all three versions (filter `target_ff_depth = d + 2`, recorded in params), so LOCAL-t-LIST
+reaches the target iff t >= D and the doc's recovery gate "d* for LOCAL-t-LIST = t" holds with
+depth measured as `target_ff_depth` (in gate layers, d* = t - 2). The listed proxies are
+LOCAL-(D-1) (one round short: the default colour) and LOCAL-D (= FF-LIST on the target).
+
 Balancing: within each depth the BASE target value alternates True / False, so
-P(FF target = colour 1) = 0.5 up to parity. The proxy audit (LOCAL-t-LIST for t < d with
-both leftover defaults, the target's degree, position and earlier-neighbour parity, all
-constant here) is reported in the stats and enforced at |acc - 0.5| <= 0.05 + 1/N_d.
+P(FF target = colour 1) = 0.5 up to parity. The proxy audit covers every proxy whose horizon
+stops short of the target: LOCAL-t-LIST for t < D with leftovers coloured 1, and t < D - 1
+with leftovers given their smallest free colour (that default reaches the target one round
+early, since the target's only earlier neighbours are its inputs); the target's degree,
+position and earlier-neighbour parity are constant here. Accuracies are reported in the
+stats and enforced at |acc - 0.5| <= 0.05 + 1/N_d.
+
+Likelihoods. U arms score the bit (same / different; an IMPOSSIBLE answer is class other).
+EXACT is set-valued over the proper 3-colourings; its share of "same" is counted exactly
+(variable elimination; the counts are the same for all versions of a triple). The I arm
+scores the colour number; the instructed procedure *is* FF-LIST, so EXACT (an optimal
+colouring with arbitrary colour names) is not listed there. The I arm's question (the
+listing order and the target) is part of its task and content hash.
 
 Readings of the doc (also in docs/GENERATORS.md):
 - Size: W = 3, D_max = 8 gives n = 67, m = 113 (the doc quotes 68 / 114; its construction
   has one more vertex and edge than the one described, which we could not identify).
   D_max > 11 needs more than 90 vertices, so labels become three-digit (still equal width).
 - E3-SAT (gated on E1-SAT showing GREEDY weight) and E3-NN are not built.
-- NOISY-FF-ε is not in the zoo; RO-FF and RANDOM are left out of these items (their bit
-  probabilities need a channel-aware Monte Carlo); EXACT is order-free and set-valued, so
-  it carries no likelihood on the bit channel.
+- NOISY-FF-ε is not in the zoo; RO-FF is left out of these items (its bit probabilities need a
+  channel-aware Monte Carlo). RANDOM (H) is listed: its channel probabilities are exact.
+- Lineage: BASE/U-LIST is the set's base; BASE/U-REV and BASE/I are derived from it, and each
+  CRITICAL / PLACEBO item from the BASE item of the same arm.
 """
 
 from __future__ import annotations
 
+import itertools
 from typing import Any
 
 import networkx as nx
@@ -48,8 +71,8 @@ from reasoning_heuristics import tokens
 from reasoning_heuristics.counterfactual import surface
 from reasoning_heuristics.counterfactual.reorder import permutation
 from reasoning_heuristics.generators import c_common as CC
-from reasoning_heuristics.generators.common import Channel, GenStats, make_item, set_hash
-from reasoning_heuristics.hashing import sha
+from reasoning_heuristics.generators.common import (OTHER, Channel, GenStats, SetSpec, content_hash, make_item,
+                                                     set_hash, target_bit_channel, target_colour_channel)
 from reasoning_heuristics.heuristics.base import run
 from reasoning_heuristics.heuristics.tasks import ColouringTask, load_task
 from reasoning_heuristics.problems.coloring.graph import Graph
@@ -151,38 +174,121 @@ def i_prompt(g: Graph, target: str) -> str:
             f"What colour does {target} get?\nAfter the line ANSWER:, write only the colour number of {target}.")
 
 
-def members(arm: str, d: int) -> list:
+def members(arm: str, D: int) -> list:
+    """D = the target's first-fit dependency depth (= d + 2 on every item)."""
     k = None if arm == "I" else 3
     specs = [
         ("FF-LIST (C1 seq)", "FF", {"order": "LIST", "k": k}),
         ("DSATUR (C2, label ties)", "DSATUR", {"tie": "LABEL", "k": k}),
         ("LF (C1 static, label ties)", "LF", {"tie": "LABEL", "k": k}),
-        (f"LOCAL-{d}-LIST (const proxy)", "LOCAL-t", {"t": d, "ids": "LIST", "default": "one"}),
-        (f"LOCAL-{d + 3}-LIST (const proxy)", "LOCAL-t", {"t": d + 3, "ids": "LIST", "default": "one"}),
+        (f"LOCAL-{D - 1}-LIST (const proxy, one round short)", "LOCAL-t", {"t": D - 1, "ids": "LIST", "default": "one"}),
+        (f"LOCAL-{D}-LIST (const proxy, reaches the target)", "LOCAL-t", {"t": D, "ids": "LIST", "default": "one"}),
         ("DPLL-LIST (D, k=3)", "SEARCH", {"order": "LIST"}),
-        ("EXACT", "EXACT", {}),
     ]
     if arm != "I":
         specs.insert(1, ("FF-OUT (AR, answer order)", "FF", {"order": "OUT", "k": 3}))
+        specs.append(("EXACT", "EXACT", {}))
     else:
         specs.append(("ANSWER-1 (A1 default; = LOCAL-0)", "LOCAL-t", {"t": 0, "ids": "LIST", "default": "one"}))
+    specs.append(("RANDOM (H)", "RANDOM", {}))
     return specs
 
 
-def bit_channel(target: str, ref: str) -> Channel:
-    def key(a: Any) -> str | None:
-        if not isinstance(a, dict):
-            return None
-        return "same" if a[target] == a[ref] else "different"
-
-    return Channel("target-bit", key)
-
-
-def colour_channel(target: str) -> Channel:
-    return Channel("target-colour", lambda a: str(a[target]) if isinstance(a, dict) else None)
+def random_spec(arm: str, n: int) -> SetSpec:
+    """RANDOM (H) is uniform over the colourings with colours 1..k (k = 3 on the U arms, k = n
+    on the fewest-colours I arm), so on the channel: the target matches the reference with
+    probability 1/3, or the target's colour is uniform on 1..n."""
+    if arm == "I":
+        return SetSpec("fill", {}, n, f"uniform over the {n}^{n} colourings with colours 1..{n}: the target's colour "
+                       f"is uniform on 1..{n}", class_counts={"1": 1, "2": 1, "3": 1, OTHER: n - 3})
+    return SetSpec("fill", {}, 3, "uniform over the 3^n colourings with colours 1..3: the target shares the reference "
+                   "vertex's colour with probability 1/3", class_counts={"same": 1, "different": 2})
 
 
-def make_triple(gadget: dict[str, Any], rng, tier: str, bseed: int, triple: int, params: dict[str, Any]) -> list:
+def bit_channel(target: str, ref: str, set_valued: dict | None = None) -> Channel:
+    """The U-arm readout: does the target share the reference vertex's colour? (common.target_bit_channel)"""
+    return target_bit_channel(target, ref, set_valued)
+
+
+def colour_channel(target: str, set_valued: dict | None = None) -> Channel:
+    """The I-arm readout: the target's colour number (common.target_colour_channel)."""
+    return target_colour_channel(target, set_valued)
+
+
+def count_colourings(g: Graph, k: int, same: tuple[str, str] | None = None) -> int:
+    """Exact number of proper colourings with colours 1..k, by variable elimination in
+    min-degree order (the gadgets have small treewidth). `same=(a, b)` counts only the
+    colourings with c(a) = c(b)."""
+    rep = {v: v for v in g.vertices}
+    if same is not None:
+        rep[same[1]] = same[0]
+    edges = set()
+    for u, v in g.edges:
+        u, v = rep[u], rep[v]
+        if u == v:
+            return 0
+        edges.add((min(u, v), max(u, v)))
+    neq = {(x, y): 1 for x in range(k) for y in range(k) if x != y}
+    factors: list[tuple[tuple[str, ...], dict]] = [((u, v), neq) for u, v in sorted(edges)]
+    adj: dict[str, set[str]] = {v: set() for v in set(rep.values())}
+    for u, v in edges:
+        adj[u].add(v)
+        adj[v].add(u)
+    total = 1
+    while adj:
+        v = min(adj, key=lambda x: (len(adj[x]), x))
+        mine = [f for f in factors if v in f[0]]
+        factors = [f for f in factors if v not in f[0]]
+        scope = sorted({x for f in mine for x in f[0]} - {v})
+        new = {}
+        for assign in itertools.product(range(k), repeat=len(scope)):
+            a = dict(zip(scope, assign))
+            s = 0
+            for c in range(k):
+                a[v] = c
+                prod = 1
+                for vars_, tab in mine:
+                    prod *= tab.get(tuple(a[x] for x in vars_), 0)
+                    if not prod:
+                        break
+                s += prod
+            if s:
+                new[assign] = s
+        if scope:
+            factors.append((tuple(scope), new))
+        else:
+            total *= new.get((), 0)
+        for x in scope:
+            adj[x] |= set(scope) - {x}
+            adj[x].discard(v)
+        del adj[v]
+    return total
+
+
+def exact_bit_spec(g: Graph, target: str, ref: str) -> SetSpec:
+    """EXACT on the bit channel: uniform over the proper 3-colourings (as partitions; every one
+    uses all 3 colours, because of the triangles, so each is 3! labelled colourings)."""
+    n_all, n_same = count_colourings(g, 3), count_colourings(g, 3, (target, ref))
+    if n_all % 6 or n_same % 6:
+        raise ValueError("a proper 3-colouring of the gadget uses fewer than 3 colours")
+    return SetSpec("colouring", {"graph": "stated", "colours": 3}, n_all // 6, "proper 3-colouring",
+                   class_counts={"same": n_same // 6, "different": (n_all - n_same) // 6})
+
+
+def ff_depth(g: Graph, v: str) -> int:
+    """First-fit dependency depth in listing order: 1 + the depth of the deepest earlier-listed
+    neighbour. LOCAL-t-LIST colours v (with FF's colour) iff t >= this."""
+    depth: dict[str, int] = {}
+    for x in g.vertices:
+        depth[x] = 1 + max((depth[u] for u in g.adj[x] if g.position[u] < g.position[x]), default=0)
+        if x == v:
+            return depth[x]
+    raise KeyError(v)
+
+
+def make_triple(gadget: dict[str, Any], rng, tier: str, bseed: int, triple: int, params: dict[str, Any]) -> list | None:
+    """The nine items of one gadget, or None if the target's first-fit depth is not d + 2 in
+    every version (the depth-accounting filter)."""
     d = gadget["depth"]
     names = gadget["listing"]
     labels = CC.labels_for(len(names), "v", rng)
@@ -204,58 +310,79 @@ def make_triple(gadget: dict[str, Any], rng, tier: str, bseed: int, triple: int,
         "PLACEBO": swap_pair(names, plac, gadget["pendant"][plac]),
     }
     edges = tuple((lab[u], lab[v]) for u, v in gadget["edges"])
-    graph_nx = nx.Graph(list(edges))
+    graphs = {version: Graph(tuple(lab[v] for v in order), edges) for version, order in listings.items()}
     target, ref_v = lab["T"], lab[names[0]]
+    D = d + 2
+    if any(ff_depth(g, target) != D for g in graphs.values()):
+        return None
+    graph_nx = nx.Graph(list(edges))
     circuit = {"gates": [[lab[g], lab[a], lab[b]] for g, (a, b) in gadget["gates"].items()],  # topological order
                "input_pairs": [[lab[x], lab[gadget["pendant"][x]]] for x in gadget["inputs"]]}
-    base_graph = Graph(tuple(lab[v] for v in names), edges)
-    base_hash = sha(base_graph.content_key())
+    exact = exact_bit_spec(graphs["BASE"], target, ref_v)  # one labelled graph: the same for every version
     sid = set_hash(bseed, d, triple)
+
+    def u_task(g: Graph, arm: str) -> ColouringTask:
+        listing = list(g.vertices)
+        return ColouringTask(g, 3, (), tuple(listing if arm == "U-LIST" else listing[::-1]))
+
+    def i_task(g: Graph) -> ColouringTask:
+        return ColouringTask(g, None, (), tuple(g.vertices), target=target)
+
+    base_hash = content_hash(u_task(graphs["BASE"], "U-LIST"))
+    base_of_arm = {"U-LIST": base_hash, "U-REV": content_hash(u_task(graphs["BASE"], "U-REV")),
+                   "I": content_hash(i_task(graphs["BASE"]))}
     items = []
-    for version, order in listings.items():
-        g = Graph(tuple(lab[v] for v in order), edges)
+    for version, g in graphs.items():
         swapped = {"BASE": None, "CRITICAL": crit, "PLACEBO": plac}[version]
         dist = None
         if swapped and nx.has_path(graph_nx, lab[swapped], target):
             dist = nx.shortest_path_length(graph_nx, lab[swapped], target)
         for arm in ARMS:
-            listing = list(g.vertices)
             if arm == "I":
-                task = ColouringTask(g, None, (), tuple(listing))
+                task = i_task(g)
                 prompt = i_prompt(g, target)
-                ff = run("coloring", "FF", task, {"order": "LIST"}).answer
-                gt = {**truth(task), "answer": ff[target], "check": "unique: first-fit colour of the target in listing order"}
-                channel, fmt = colour_channel(target), f"After the line ANSWER:, only the colour number of {target}"
+                gt = {**truth(task), "check": "unique: first-fit colour of the target in listing order"}
+                channel = colour_channel(target, {"RANDOM (H)": random_spec(arm, g.n)})
+                fmt = f"After the line ANSWER:, only the colour number of {target}"
             else:
-                order_out = listing if arm == "U-LIST" else listing[::-1]
-                task = ColouringTask(g, 3, (), tuple(order_out))
-                prompt = u_prompt(g, order_out, params["repeat_prompt"])
+                task = u_task(g, arm)
+                prompt = u_prompt(g, list(task.answer_order), params["repeat_prompt"])
                 gt = {**truth(task), "readout": f"bit = {target} has the same colour as {ref_v} (first-listed vertex)",
                       "check": "any proper 3-colouring is correct; the bit is a fingerprint, not a correctness criterion"}
-                channel, fmt = bit_channel(target, ref_v), CC.COLOUR_K_FORMAT
+                channel = bit_channel(target, ref_v, {"EXACT": exact, "RANDOM (H)": random_spec(arm, g.n)})
+                fmt = CC.COLOUR_K_FORMAT
+            if version == "BASE":
+                source = None if arm == "U-LIST" else base_hash
+            else:
+                source = base_of_arm[arm]
             items.append(make_item(
                 vertical=VERTICAL, eval_id=EVAL_ID, set_id=sid, cell=f"d={d}/{version}/{arm}", domain="colouring (gadget)",
                 framing="textbook", prompt=prompt, answer_format=fmt, task=task, ground_truth=gt,
-                specs=members(arm, d), channel=channel, seed=bseed, tier=tier, generator=__name__,
-                base_hash=base_hash, source_hash=None if version == "BASE" else base_hash, pair_id=f"E3-{sid}",
-                params={"width": params["width"], "D_max": params["D_max"], "target_depth": d, "n": g.n, "m": g.m,
-                        "version": version, "arm": arm, "target": target, "reference_vertex": ref_v,
+                specs=members(arm, D), channel=channel, seed=bseed, tier=tier, generator=__name__,
+                base_hash=base_hash, source_hash=source, pair_id=f"E3-{sid}",
+                params={"width": params["width"], "D_max": params["D_max"], "target_depth": d, "target_ff_depth": D,
+                        "n": g.n, "m": g.m, "version": version, "arm": arm, "target": target, "reference_vertex": ref_v,
                         "swap": None if swapped is None else {"input": lab[swapped], "pendant": lab[gadget["pendant"][swapped]],
                                                               "kind": "critical (in the target's cone)" if version == "CRITICAL" else "placebo (circuit B)"},
                         "swap_to_target_distance": dist, "base_target_true": vals["T"], "circuit": circuit,
+                        "filters": ["target_ff_depth = target_depth + 2 in every version",
+                                    "at least one A input is sensitive for the target"],
                         "prompt_tokens": tokens.count(prompt), "tokenizer_proxy": tokens.PROXY_NAME,
                         "repeat_prompt": params["repeat_prompt"]},
                 notes="All three versions are the identical labelled graph; only two adjacent vertices swap places "
                       "in the listing, so ground truth, chromatic number and every order-invariant member are unchanged.",
-                cell_note=f"Depth {d}, version {version}, arm {arm}.",
+                cell_note=f"Depth {d} (first-fit depth {D}), version {version}, arm {arm}.",
             ))
     return items
 
 
-def proxy_bits(task: ColouringTask, target: str, ref: str, d: int) -> dict[str, bool]:
+def proxy_bits(task: ColouringTask, target: str, ref: str, D: int) -> dict[str, bool]:
+    """The bit of every LOCAL-t-LIST proxy whose horizon stops short of the target (first-fit
+    depth D): t < D with leftovers coloured 1, t < D - 1 with leftovers given their smallest
+    free colour (that default reaches the target one round early)."""
     out = {}
-    for t in range(1, d):
-        for default in ("one", "free"):
+    for default, horizon in (("one", D), ("free", D - 1)):
+        for t in range(1, horizon):
             col = run("coloring", "LOCAL-t", task, {"t": t, "ids": "LIST", "default": default}).answer
             out[f"LOCAL-{t}-LIST/{default}"] = col[target] == col[ref]
     return out
@@ -288,7 +415,8 @@ def generate(tier: str, seed: int, per_cell: int | None = None, **params) -> tup
             if triple is None:
                 continue
             base_u = next(it for it in triple if it.params["version"] == "BASE" and it.params["arm"] == "U-LIST")
-            bits = proxy_bits(load_task(base_u.instance), base_u.params["target"], base_u.params["reference_vertex"], d)
+            bits = proxy_bits(load_task(base_u.instance), base_u.params["target"], base_u.params["reference_vertex"],
+                              base_u.params["target_ff_depth"])
             for k, b in bits.items():
                 proxy_hits[k] = proxy_hits.get(k, 0) + (b == vals["T"])
             truths.append(vals["T"])
@@ -297,7 +425,7 @@ def generate(tier: str, seed: int, per_cell: int | None = None, **params) -> tup
             stats.accepted += 1
         N = len(truths)
         acc = {k: v / N for k, v in proxy_hits.items()}
-        audit[f"d={d}"] = {"N": N, "P(target colour 1)": sum(truths) / N, "proxy_accuracy": acc}
+        audit[f"d={d}"] = {"N": N, "target_ff_depth": d + 2, "P(target colour 1)": sum(truths) / N, "proxy_accuracy": acc}
         if N >= 2:
             tol = 0.05 + 1 / N
             bad = {k: a for k, a in acc.items() if abs(a - 0.5) > tol}
@@ -323,6 +451,9 @@ def make_triple_or_none(gadget, rng, tier, bseed, triple, p, stats):
         stats.reject("no A input is sensitive for the target")
         return None
     items = make_triple(gadget, rng, tier, bseed, triple, p)
+    if items is None:
+        stats.reject("target's first-fit depth is not d + 2 in every version")
+        return None
     problems = check_set(items)
     if problems:
         stats.reject("set invariant failed: " + problems[0][:60])
@@ -367,6 +498,12 @@ def check_set(items: list) -> list[str]:
         bits[v] = ff[target] == ff[ref]
         if by[(v, "I")].ground_truth["answer"] != ff[target]:
             errs.append(f"{v}: the instructed answer is not FF's target colour")
+    if any(tasks[(v, "I")].target != target for v in VERSIONS):
+        errs.append("an I-arm task does not carry the asked target")
+    if len({by[(v, "I")].content_hash for v in VERSIONS}) != len(VERSIONS):
+        errs.append("I-arm versions with different questions share a content hash")
+    if any(ff_depth(graphs[(v, "U-LIST")], target) != p0["target_ff_depth"] for v in VERSIONS):
+        errs.append("the target's first-fit depth differs from params.target_ff_depth")
     if bits and bits.get("BASE") == bits.get("CRITICAL"):
         errs.append("the critical swap does not flip the target under FF-LIST")
     if bits and bits.get("BASE") != bits.get("PLACEBO"):

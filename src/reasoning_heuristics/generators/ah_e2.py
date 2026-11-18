@@ -57,7 +57,7 @@ import numpy as np
 
 from reasoning_heuristics import tokens
 from reasoning_heuristics.generators import ah_common as A
-from reasoning_heuristics.generators.common import GenStats, make_item, set_hash
+from reasoning_heuristics.generators.common import GenStats, content_hash, make_item, set_hash
 from reasoning_heuristics.hashing import sha
 from reasoning_heuristics.heuristics.base import run
 from reasoning_heuristics.heuristics.entailment import atmosphere_of, cat_lits, freq_score, is_categorical, mood_of
@@ -434,7 +434,7 @@ def _ent_items(rng, made, bseed, tier, atom_range, prem_range, tries, etr_max_at
         return None, "no premise set with a matched 8-tuple"
     prem, chosen, atoms, atm = found
     set_id = f"{set_hash(bseed, 'ENT')}-ENT"
-    base_hash = sha({"premises": sorted((F.canonical(p) for p in prem), key=repr)})
+    base_hash = content_hash(EntailmentTask(prem, None, "OPEN"))  # the premise set, never shown alone (GENERATORS.md)
     items = []
     with_etr = len(F.atoms_of(prem)) <= etr_max_atoms
     for name in ENT_CELLS:
