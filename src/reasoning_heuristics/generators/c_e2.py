@@ -38,6 +38,10 @@ Readings of the doc (also in docs/GENERATORS.md):
   {1/2, 1, 2}). The knapsack tie psychophysics set (E2-KT), E2-TSP, and the POLARITY vs
   JW/MOMS mixed 2+3-SAT contrast are not built; UC vs GUC/SC is not a focal contrast
   (GUC/SC are still predicted on every SAT item).
+- SAT items list the A1 constant give-up, ALWAYS-UNSAT, as C E5 does. Without it a model that
+  answers UNSAT on every item is read as RO-GREEDY (C3), whose distribution puts 0.74-1.0 on
+  UNSAT here (docs/RECOVERY.md, `null_always`). COL is a fewest-colours task, whose format
+  offers no IMPOSSIBLE answer, and KNAP has no give-up token, so neither lists one.
 """
 
 from __future__ import annotations
@@ -161,7 +165,7 @@ def item_members(domain: str) -> list:
                 ("UC-DET (C2)", "UC", {}), ("GUC-DET (C2)", "GUC", {}), ("SC-DET (C2)", "SC", {}),
                 ("POLARITY (C0)", "POLARITY", {}), ("DPLL-MENTION (D, T first)", "SEARCH", {"order": "MENTION"}),
                 ("RO-GREEDY (C3)", "RO-GREEDY", {"seed": 0}), ("EXACT", "EXACT", {}),
-                ("RANDOM (H)", "RANDOM", {})]
+                ("RANDOM (H)", "RANDOM", {}), ("ALWAYS-UNSAT (A1 give-up)", "ALWAYS-UNSAT", {})]
     return [(n, n, {}) for n in ("INPUT-FIT", "RATIO-SKIP", "RATIO-PREFIX", "VALUE", "LARGEST-FIT", "DIFF",
                                  "RATIO+BEST-SINGLE", "EXACT")]
 

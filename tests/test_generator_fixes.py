@@ -9,7 +9,7 @@ from functools import lru_cache
 import numpy as np
 import pytest
 
-from reasoning_heuristics.generators import ah_e2, ah_e5, ah_e8, b4_e1, b4_e2, c_e1, c_e3, c_e5
+from reasoning_heuristics.generators import ah_e2, ah_e5, ah_e8, b4_e1, b4_e2, c_e1, c_e2, c_e3, c_e5
 from reasoning_heuristics.generators.common import EPS, decision_channel, make_item
 from reasoning_heuristics.heuristics.base import run
 from reasoning_heuristics.heuristics.tasks import ColouringTask, SatTask, load_task
@@ -229,6 +229,19 @@ def test_c_e5_lists_a_give_up_member():
         assert len(give_up) == 1, it.item_id
         if it.cell.startswith("COL/STUCK"):
             assert it.disconfirms["answer = IMPOSSIBLE"][give_up[0]] == 0.0
+
+
+def test_c_e1_e2_sat_items_list_a_give_up_member():
+    # Without it, recovery read a model that answers UNSAT everywhere as RO-GREEDY (RECOVERY.md, null_always).
+    e2_sat, _ = c_e2.generate("smoke", 3, domains=["SAT"], n_sat=14)
+    items = c_e1_sat() + tuple(e2_sat)
+    assert {it.domain for it in items} == {"3-SAT"} and len(items) == 6 + 10
+    for it in items:
+        give_up = [lbl for lbl in it.predictions if "A1 give-up" in lbl]
+        assert give_up == ["ALWAYS-UNSAT (A1 give-up)"], it.item_id
+        pred = it.predictions[give_up[0]]
+        assert (pred["member"], pred["answer"]) == ("ALWAYS-UNSAT", "UNSAT"), it.item_id
+        assert it.disconfirms["answer = UNSAT"][give_up[0]] == 0.0, it.item_id
 
 
 def test_selection_filters_are_recorded():
