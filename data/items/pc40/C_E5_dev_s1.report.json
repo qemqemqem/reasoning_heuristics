@@ -1,0 +1,57 @@
+{
+ "vertical": "C",
+ "eval_id": "E5",
+ "tier": "dev",
+ "seed": 1,
+ "per_cell": 40,
+ "params": {},
+ "cells": [
+  "COL/STUCK/vA/eA",
+  "COL/STUCK/vB/eA",
+  "COL/STUCK/vA/eB",
+  "COL/STUCK/vB/eB",
+  "COL/CONTROL/vA/eA",
+  "SAT/DEAD",
+  "SAT/DEAD-PERM",
+  "SAT/CONTROL",
+  "STATE/SAT/s1",
+  "STATE/SAT/s2",
+  "STATE/SAT/s3",
+  "STATE/COL/s1",
+  "STATE/COL/s3",
+  "ENT/FAIL/ORDER-A",
+  "ENT/FAIL/ORDER-B",
+  "ENT/MATCHED/ORDER-A",
+  "ENT/MATCHED/ORDER-B"
+ ],
+ "generation": {
+  "attempts": 1177,
+  "accepted": 200,
+  "rejections": {
+   "COL: FF-3-LIST not stuck in the middle third": 91,
+   "COL: no matched control found": 36,
+   "COL: not exactly 3-chromatic": 252,
+   "ENT: ETR agrees with GREEDY-CM (keeping the differ share >= 1/2)": 41,
+   "ENT: GREEDY-CM pattern not needed": 271,
+   "ENT: inconsistent premises or the conclusion follows": 19,
+   "SAT: GREEDY and UC do not both dead-end": 19,
+   "SAT: no matched control found": 1,
+   "STATE-COL: not 3-colourable": 156,
+   "STATE-COL: not every state reachable": 2,
+   "STATE-SAT: not every state reachable": 49
+  },
+  "ent": {
+   "pairs": 80,
+   "pairs_where_ETR_differs_from_GREEDY_CM": 44
+  }
+ },
+ "path": "data/items/pc40/C_E5_dev_s1.jsonl",
+ "validation": {
+  "items": 680,
+  "sets": 200,
+  "items_passed": 680,
+  "pass_rate": 1.0,
+  "failures": [],
+  "lineage_known_gaps": {}
+ }
+}
