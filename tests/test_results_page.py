@@ -60,3 +60,20 @@ def test_a_fit_reads_as_use_only_below_the_cap_and_inside_every_range():
 
     unchecked = _fit(mod, 0.29, (0.7, 0.0, 0.0), inside, with_check=False)  # no check run: not "use"
     assert unchecked.n_outside is None and unchecked.nearness
+
+    shape = _fit(mod, 0.29, (0.7, 0.0, 0.0), inside)  # every statistic inside, but the distance profile misfits
+    shape.rec["distance_check"] = {"p_value": 0.01}
+    assert shape.n_checks == 4 and shape.n_outside == 1 and not shape.reproduces and shape.nearness
+    shape.rec["distance_check"] = {"p_value": 0.2}
+    assert shape.n_outside == 0 and shape.reproduces and not shape.nearness
+
+
+def test_condition_pairs_cover_effort_as_well_as_thinking():
+    mod = _page_module()
+    runs = [{"run_id": f"r-{c}", "model": "openai/gpt-oss-20b", "condition": c, "item_set": "dev", "label": f"gpt-oss-20b {c}"}
+            for c in ("thinking-high", "thinking-low")]
+    runs += [{"run_id": f"q-{c}", "model": "qwen/qwen3-32b", "condition": c, "item_set": "dev", "label": f"Qwen3-32B {c}"}
+             for c in ("direct", "thinking-high")]
+    d = mod.Data({"runs": runs, "settings": {"eps_max": 0.5}, "gated_units": {}, "fits": {}})
+    think, _ = mod.comparison_pairs(d)
+    assert [(a["condition"], b["condition"]) for a, b, _ in think] == [("thinking-low", "thinking-high"), ("direct", "thinking-high")]
