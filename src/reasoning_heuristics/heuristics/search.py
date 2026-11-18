@@ -225,34 +225,37 @@ def search_colouring(task: ColouringTask, k: int, params: dict[str, Any]) -> tup
     fixed = task.fixed_dict()
     State = tuple[dict[str, int], dict[str, set[int]]]
 
-    def propagate(col: dict[str, int], dom: dict[str, set[int]]) -> tuple[dict[str, int], dict[str, set[int]], bool]:
-        """Forward checking to a fixpoint: a singleton domain assigns its vertex and removes its
-        colour from the neighbours' domains; an empty domain is a conflict."""
-        changed = True
-        while changed:
-            changed = False
-            for v in g.vertices:
-                if v in col:
-                    continue
-                if not dom[v]:
-                    return col, dom, True
-                if len(dom[v]) == 1:
-                    (c,) = dom[v]
-                    col[v] = c
-                    trace["propagations"] += 1
-                    for u in g.adj[v]:
-                        if u not in col:
-                            dom[u].discard(c)
-                    changed = True
+    def colour(col: dict[str, int], dom: dict[str, set[int]], v: str, c: int, queue: list[str]) -> None:
+        """Assign v = c and remove c from its uncoloured neighbours' domains (`dom` holds the
+        uncoloured vertices only); neighbours whose domain shrank are queued for checking."""
+        col[v] = c
+        del dom[v]
+        for u in g.adj[v]:
+            if u in dom and c in dom[u]:
+                dom[u].discard(c)
+                queue.append(u)
+
+    def propagate(col: dict[str, int], dom: dict[str, set[int]], queue: list[str]):
+        """Forward checking to a fixpoint: a singleton domain assigns its vertex, an empty domain is
+        a conflict. Only vertices whose domain shrank are re-checked; the fixpoint (and whether
+        a conflict is reached) does not depend on the order."""
+        while queue:
+            v = queue.pop()
+            if v not in dom:
+                continue
+            if not dom[v]:
+                return col, dom, True
+            if len(dom[v]) == 1:
+                (c,) = dom[v]
+                colour(col, dom, v, c, queue)
+                trace["propagations"] += 1
         return col, dom, False
 
     def assign(state: State, v: str, c: int):
         col, dom = dict(state[0]), {x: set(d) for x, d in state[1].items()}
-        col[v] = c
-        for u in g.adj[v]:
-            if u not in col:
-                dom[u].discard(c)
-        return propagate(col, dom)
+        queue: list[str] = []
+        colour(col, dom, v, c, queue)
+        return propagate(col, dom, queue)
 
     def pick(col: dict[str, int], dom: dict[str, set[int]]) -> str:
         if static is not None:
@@ -268,7 +271,7 @@ def search_colouring(task: ColouringTask, k: int, params: dict[str, Any]) -> tup
     if any(u in fixed and v in fixed and fixed[u] == fixed[v] for u, v in g.edges):
         col, dom, conflict = col0, dom0, True
     else:
-        col, dom, conflict = propagate(col0, dom0)
+        col, dom, conflict = propagate(col0, dom0, list(reversed(g.vertices)))
     best = dict(fixed) if conflict else col  # A*: the last conflict-free state
     trail: list[tuple[str, list[int], State]] = []  # (vertex, colours still to try, state before)
     while True:
