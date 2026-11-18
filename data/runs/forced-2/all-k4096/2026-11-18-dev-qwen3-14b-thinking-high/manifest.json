@@ -1,0 +1,247 @@
+{
+  "run_id": "forced-2/all-k4096/2026-11-18-dev-qwen3-14b-thinking-high",
+  "status": "complete",
+  "started_at": "2026-11-18T23:09:56Z",
+  "model_requested": "qwen/qwen3-14b",
+  "source": {
+    "run_id": "2026-11-18-dev-qwen3-14b-thinking-high",
+    "raw_sha256": "45ef934fd510a71f20bf20d2c36c633c5a41150b5da467a9e97302c724d9c981",
+    "condition": "thinking-high",
+    "git": {
+      "sha": "62d8345a6eec0691e8eb0c36f085239c09d1f46e",
+      "dirty": false,
+      "branch": "dev-runs-2026-11-18"
+    },
+    "provider_routing": {
+      "order": [
+        "deepinfra/fp8/flex"
+      ],
+      "allow_fallbacks": false,
+      "require_parameters": true,
+      "quantizations": [
+        "fp8"
+      ]
+    }
+  },
+  "forced": {
+    "template": "force-2",
+    "endpoint": "https://openrouter.ai/api/v1/completions",
+    "max_tokens": 4096,
+    "select": "all",
+    "logit_bias": null,
+    "budget": {
+      "truncate_at": 4096
+    },
+    "tokenizer": {
+      "name": "Qwen/Qwen3-32B/tokenizer.json",
+      "revision": "9216db5781bf21249d130ec9da846c4624c16137",
+      "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+    }
+  },
+  "condition": {
+    "name": "forced",
+    "label": "thinking-high-forced-k4096",
+    "effort": "high",
+    "max_tokens": 4096,
+    "system_prompt": null,
+    "reasoning": null,
+    "sampling": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20
+    },
+    "template": "force-2"
+  },
+  "provider_routing": {
+    "order": [
+      "deepinfra/fp8/flex"
+    ],
+    "allow_fallbacks": false,
+    "require_parameters": true,
+    "quantizations": [
+      "fp8"
+    ]
+  },
+  "price": {
+    "prompt": 0.096,
+    "completion": 0.192,
+    "source": "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
+  },
+  "context_length": 40960,
+  "routing_notes": "the source pin, DeepInfra fp8 flex, which passes raw prompts through (42 prompt tokens raw, 51 as a chat message; data/runs/probes/2026-11-18-forced-answer, batch 11)",
+  "model_notes": "Hybrid thinking checkpoint. No bf16 endpoint exists on OpenRouter (DeepInfra fp8 tiers and NextBit int4), so fp8 is pinned. deepinfra/fp8 (standard tier) caps completions at 16,384, so the flex tier is pinned. reasoning {enabled: false} is honoured (0 reasoning tokens); /no_think leaves an empty think block.",
+  "raw_check": {
+    "passed": true,
+    "routing": {
+      "order": [
+        "deepinfra/fp8/flex"
+      ],
+      "allow_fallbacks": false,
+      "require_parameters": true,
+      "quantizations": [
+        "fp8"
+      ]
+    },
+    "prompt": "<|im_start|>user\nIs 17 a prime number? Answer with one word, YES or NO.<|im_end|>\n<|im_start|>assistant\n<think>\n17 has no divisors other than 1 and itself.\n\nConsidering the limited time by the user, I have to give the solution based on the thinking directly now.\n</think>\n\n",
+    "max_tokens": 8,
+    "temperature": 0,
+    "checked_at": "2026-11-18T23:09:51Z",
+    "completions": {
+      "provider": "DeepInfra",
+      "prompt_tokens": 63,
+      "completion_tokens": 2,
+      "text": "YES",
+      "reasoning": null,
+      "finish_reason": "stop",
+      "cost_usd": 6.432e-06,
+      "generation_id": "gen-1795043391-mrV82fxfPRvQ2eiaAk0s"
+    },
+    "chat": {
+      "provider": "DeepInfra",
+      "prompt_tokens": 72,
+      "completion_tokens": 8,
+      "text": null,
+      "reasoning": "\nOkay, let's see. The",
+      "finish_reason": "length",
+      "cost_usd": 8.448e-06,
+      "generation_id": "gen-1795043395-InauU8cr207ZtvooTa4G"
+    },
+    "cost_usd": 1.488e-05
+  },
+  "tokenizer": {
+    "name": "Qwen/Qwen3-32B/tokenizer.json",
+    "library": "tokenizers",
+    "version": "0.23.3",
+    "revision": "9216db5781bf21249d130ec9da846c4624c16137",
+    "file": "https://huggingface.co/Qwen/Qwen3-32B/resolve/9216db5781bf21249d130ec9da846c4624c16137/tokenizer.json",
+    "sha256": "aeb13307a71acd8fe81861d94ad54ab689df773318809eed3cbe794b4492dae4"
+  },
+  "tokens": {
+    "traces": 115,
+    "trace_tokens": 1247428,
+    "vs_reasoning_tokens": {
+      "traces": 115,
+      "trace_tokens": 1247428,
+      "provider_tokens": 834882,
+      "ratio": 1.4941
+    },
+    "vs_completion_tokens_without_answer": {
+      "traces": 1,
+      "trace_tokens": 32768,
+      "provider_tokens": 32768,
+      "ratio": 1.0
+    }
+  },
+  "items": {
+    "files": {
+      "data/items/dev/AH_E1_dev_s1.jsonl.gz": "fa35e1822bb7efe6ac8d084ba4980251455001aa3e3e0e572135643740ce6800",
+      "data/items/dev/AH_E2_dev_s1.jsonl.gz": "bb0789337ed83654006a00d2a5e5d3bd11a352563a74c78a081167dd2eded400",
+      "data/items/dev/AH_E5_dev_s1.jsonl.gz": "f1d564f97c03be1acc1ea30be855405491ccb99e54425326f0b9c48765146e96",
+      "data/items/dev/AH_E8_dev_s1.jsonl.gz": "f9bf218cd603da959a2a5cf4b880e94191b7664c7bbb8e970fe9693933a31702",
+      "data/items/dev/B4C4_E1_dev_s1.jsonl.gz": "4cee1ba3813a8cb1480bac511d888f3cb88eff4488c90b8f3d7ade4c0d090103",
+      "data/items/dev/B4C4_E2_dev_s1.jsonl.gz": "80ea78120cf5e1aa8d15dabcabbdf4f7172ee5facfedb2620ee026c700ef5e26",
+      "data/items/dev/C_E1_dev_s1.jsonl.gz": "209c7e207cc4765b77ea3f8556ece02c8b0f087cbf313e25b34b4e22b22edc13",
+      "data/items/dev/C_E2_dev_s1.jsonl.gz": "62bb0495cd0aee96c8f0c98080234ebc6fc203ca52633f2e0630015001c7d839",
+      "data/items/dev/C_E3_dev_s1.jsonl.gz": "22453a622e973d1cfe1d9019212d09951009edea552186aed63f3ce338099f7f",
+      "data/items/dev/C_E5_dev_s1.jsonl.gz": "4bcbfc03f5444cdc8f589e6ffa60a4ba4b0de9942454a51816df8d4bb1ed35b3"
+    },
+    "n_items": 115,
+    "skipped": {
+      "no_trace": 0,
+      "no_content": 0,
+      "no_room": 0
+    },
+    "per_unit": 5,
+    "limit": null,
+    "samples": 1,
+    "allow_item_drift": true,
+    "items_ref": null
+  },
+  "estimate": {
+    "calls": 82,
+    "prompt_tokens": 422980,
+    "cost_usd": 0.0406,
+    "worst_case_usd": 0.1051,
+    "assumptions": "prompt tokens: each sent record's source prompt tokens plus its cut trace's tokens (by the model's tokenizer); cost_usd is the prompt alone (every call answers at once), worst_case_usd has every call at its max_tokens",
+    "within_budget": 33
+  },
+  "cap_usd": 0.2,
+  "cap_requested_usd": 0.2,
+  "budget_tag": "sweep-2026-11-18",
+  "budget_usd": 3.0,
+  "budget_spent_before_usd": 0.326181,
+  "git": {
+    "sha": "2c27e2b27f86f29699b08001a77d758bc9e977f4",
+    "dirty": false,
+    "branch": "sweep-runs-2-2026-11-18"
+  },
+  "versions": {
+    "python": "3.12.12",
+    "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "reasoning_heuristics": "0.1.0",
+    "scorer": "scorer-1.5.2",
+    "tokenizer_proxy": "regex-digit-split-v1",
+    "python-sat": "1.9.dev22",
+    "pyetr": "1.0.0",
+    "numpy": "2.5.5",
+    "networkx": "3.7",
+    "jsonschema": "4.26.0"
+  },
+  "client": {
+    "timeout_s": 1800.0,
+    "max_attempts": 6,
+    "concurrency": 4
+  },
+  "notes": "budget sweep, per-unit 5",
+  "resumed_from": 0,
+  "counts": {
+    "candidates": 1270,
+    "selected": 115,
+    "units": 23,
+    "samples": 1,
+    "within_budget": 33,
+    "sent": 82,
+    "calls": 82,
+    "skipped_no_trace": 0,
+    "skipped_no_content": 0,
+    "skipped_no_room": 0,
+    "max_tokens_lowered": 0,
+    "responses": 82,
+    "answered": 80,
+    "parsed": 80,
+    "still_reasoning": 2,
+    "renewed_reasoning": 0,
+    "natural_ok": 81,
+    "same_as_natural": 22
+  },
+  "stop_reason": null,
+  "finished_at": "2026-11-18T23:14:12Z",
+  "wall_s": 256.4,
+  "models_returned": [
+    "qwen/qwen3-14b"
+  ],
+  "providers_served": {
+    "DeepInfra": 82
+  },
+  "responses": 82,
+  "failed_calls": 0,
+  "cache_hits": 0,
+  "spend": {
+    "cap_usd": 0.2,
+    "spent_usd": 0.045254,
+    "calls": 84,
+    "refused_reservations": 0,
+    "calls_without_reported_cost": 0,
+    "failed_attempt_cost_usd": 0.0,
+    "failed_attempts_charged": 0,
+    "safety_factor": 1.25,
+    "price": {
+      "prompt": 0.096,
+      "completion": 0.192,
+      "source": "OpenRouter endpoint listing, 2026-11-17 (data/runs/probes/2026-11-17)"
+    }
+  },
+  "charged_usd": 0.045254,
+  "charged_usd_all_invocations": 0.045254,
+  "api_reported_cost_usd_all_responses": 0.04524
+}
