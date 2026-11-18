@@ -9,3 +9,5 @@ One row per live run or probe batch. Costs are API-reported (`usage.cost`, summe
 | 2026-11-18 | 2026-11-18-smoke-qwen3-32b-thinking-high | qwen/qwen3-32b | thinking-high | 254 | 0.494084 | runner-agent | acceptance run (b) status=complete |
 | 2026-11-18 | 2026-11-18-smoke-gpt-oss-20b-thinking-high | openai/gpt-oss-20b | thinking-high | 188 | 0.377519 | runner-agent | acceptance run (a) status=stopped |
 | 2026-11-18 | 2026-11-18-smoke-gpt-oss-20b-thinking-high | openai/gpt-oss-20b | thinking-high | 66 | 0.238390 | runner-agent | acceptance run (a), resumed after IncompleteRead status=complete; Items corrected by hand from 254 to the 66 new responses (this process started before the ledger fix) |
+| 2026-11-18 | 2026-11-18-dev-qwen3-32b-direct | qwen/qwen3-32b | direct | 1270 | 0.098578 | dev-2026-11-18 | status=complete |
+| 2026-11-18 | 2026-11-18-dev-qwen3-14b-direct | qwen/qwen3-14b | direct | 1270 | 0.126604 | dev-2026-11-18 | status=complete |
