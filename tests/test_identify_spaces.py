@@ -45,8 +45,11 @@ def test_partition_kernels_are_pmfs(n, k, specials):
             total = sum(slip_prob(space, y, a, rho) for y in keys)
             assert abs(total - 1) < 1e-9, (a, rho, total)
             assert slip_prob(space, a, a, rho) >= 0
-    for s in specials:
-        assert abs(sum(slip_prob(space, y, s, 0.3) for y in keys) - 1) < 1e-9
+    for s in specials:  # a special token has no near misses
+        with pytest.raises(ValueError):
+            space.slip(keys[0], s)
+        with pytest.raises(ValueError):
+            space.sample_slip(s, 0.3, rng)
 
 
 @pytest.mark.parametrize("codec,specials", [(_SatCodec([f"x{i}" for i in range(1, 6)]), ("UNSAT",)),
@@ -56,9 +59,13 @@ def test_bit_kernels_are_pmfs(codec, specials):
     keys = [space.encode(np.array(bits, dtype=bool)) for bits in itertools.product((False, True), repeat=space.n)]
     keys += list(specials)
     assert abs(sum(math.exp(space.log_q(y)) for y in keys) - 1) < 1e-9
-    for a in keys[:5] + keys[-3:]:
+    structured = keys[: len(keys) - len(specials)]
+    for a in structured[:5] + structured[-3:]:
         for rho in (0.05, 0.5):
             assert abs(sum(slip_prob(space, y, a, rho) for y in keys) - 1) < 1e-9
+    for s in specials:
+        with pytest.raises(ValueError):
+            space.slip(keys[0], s)
 
 
 def test_finite_space():

@@ -1,10 +1,64 @@
 # Recovery: positive controls for the identification engine
 
-*The Stage 0 gate (SCOPE §4 item 5; DESIGN §5 rule 12): before any LLM data is analysed, fake models with planted mixtures must be recovered with |bias| ≤ 0.05, 95% coverage ≥ 0.9 and median interval width ≤ 0.2. Results are in [data/recovery/](../data/recovery/): `dev.json`, `pc10.json`, `pc20.json`, `pc40.json` and `coverage_pc40.json`.*
+*The Stage 0 gate (SCOPE §4 item 5; DESIGN §5 rule 12): before any LLM data is analysed, fake models with planted mixtures must be recovered with |bias| ≤ 0.05, 95% coverage ≥ 0.9 and median interval width ≤ 0.2. Results on the regenerated items are in [data/recovery/](../data/recovery/) (`dev.json`, `pc10.json`, `pc20.json`, `pc40.json`). The pre-regeneration results are in [data/recovery/pre-regeneration/](../data/recovery/pre-regeneration/).*
 
-> **Pre-regeneration items.** Every number on this page comes from the item sets as they were on main at 89ac750, before the zoo, validator and generator fixes (#13, #14) and the regenerated sets (#16). The 10/20/40-per-cell sets were generated from that code. Each result file records the code SHA and the sha256 of every item file it read. The regenerated sets supersede these numbers; rerun the commands below on them.
+> **Status: in progress.** The next section covers the candidate units on the regenerated items. Everything from "Bottom line" down still describes the **pre-regeneration items** (main 89ac750, before #13, #14 and #16), whose result files now live in `data/recovery/pre-regeneration/`. This page will be rebuilt for the regenerated items once the sweep of the other units finishes.
 
-## Bottom line
+## Regenerated items: candidate units
+
+**Items.**
+
+- Dev size (5 items per cell): `data/items/dev` as on main after #22. On C E1 and C E2, the SAT items list `ALWAYS-UNSAT (A1 give-up)`.
+- 20 per cell: `data/items/pc20` (#21, #22).
+- 10 and 40 per cell: generated into scratch with `python -m reasoning_heuristics.generate --vertical V --eval E --tier dev --seed 1 --per-cell N`, using main's generator code. For C E1 and C E2 that means after #22.
+
+At 20 per cell, the C E2 colouring and knapsack results and all A/H E5 results were computed on scratch copies whose items are identical to `data/items/pc20`. Each result file records the sha256 of every item file it read.
+
+**Engine changes in this round**
+
+- **Special-token predictions do not slip** (`likelihood.py`).
+  - A deterministic prediction of UNSAT, IMPOSSIBLE or X used to slip to "q without that token". On a channel with one special token, q gives that token ½. So at ε = 0.5 (the cap), a member predicting the token on every item (ALWAYS-UNSAT, ALWAYS-IMPOSSIBLE) was identical to q, and pure noise put 0.36–0.41 on ALWAYS-UNSAT.
+  - A special token has no near misses, so such a prediction now gives the token with probability 1 at any ε.
+  - The change touches only units where some member predicts a special token on a witness channel: A/H E5 colouring and entailment, C E1 and C E2 SAT, and the four C E5 witness units. Those units were rerun.
+  - Elsewhere the code path is unchanged. A/H E5 SAT, rerun as a control, reproduces its results exactly.
+- **BCa intervals** (bias-corrected and accelerated; Efron 1987) are reported next to the percentile cluster-bootstrap intervals, on the same fits. The acceleration comes from a leave-one-cluster-out jackknife.
+  - Both methods are reported throughout, against the same gates.
+  - Neither method nor any gate was tuned.
+- **`recovery run --units`** now takes a `;`-separated list, because unit names contain commas. A name that matches no unit stops the run. Before this fix, "C E5 colouring with a given state" was silently skipped.
+
+**Where the candidate units pass**
+
+The table uses the 60/30/10 mixture: 100 replicates at 10, 20 and 40 per cell, and 40 replicates at dev size (5). A size passes when all three gates pass. A size marked *pending* is still running.
+
+| Unit | mixture, percentile intervals | mixture, BCa intervals | null q | null ALWAYS |
+|---|---|---|---|---|
+| C E2 colouring | 20 and 40 (min coverage 0.92, 0.90) | 5, 10, 20 (0.90–0.93); 40 misses (0.89) | pass at every size | pass at every size |
+| C E2 knapsack | 20 and 40 (0.92, 0.91) | 20 and 40 (0.92, 0.90) | fails coverage at 10, 20 and 40 (0.81, 0.73, 0.52; bias ≤ 0.01) | pass at every size |
+| A/H E5 SAT | 20 and 40 (0.90, 0.91) | none (0.88 at 20, 0.89 at 40) | pass | pass |
+| C E5 SAT with a given state | 40 (0.94; GUC-DET and SC-DET from state are tied there, see below) | 40 (0.93) | pass at 40, fails below | pass |
+| C E1 SAT (after #22) | none at 5 or 20 (0.86 on ALWAYS-UNSAT at 20); 10 and 40 *pending* | 20 (0.92) | fails at 5 and 20 (coverage 0.78 at 20) | pass at 5 and 20 |
+| C E2 SAT (after #22) | none at 5 or 20 (width 0.28 at 20); 10 and 40 *pending* | none at 5 or 20 | fails at 5 and 20 (coverage 0.89 at 20) | pass at 5 and 20 |
+| A/H E5 entailment | none at 5–40 (0.81 at 20 and 0.87 at 40, on B4 FIRST) | none at 5–40 (0.88 at 20 and at 40) | pass | pass |
+
+**Why they fail**
+
+- **Coverage at the margin.** On A/H E5 SAT, C E2 colouring and C E2 knapsack, the smallest per-weight coverage sits at 0.88–0.93 from 20 per cell on. That is within the Monte Carlo error of a minimum over three weights (SE about 0.03 at 100 replicates).
+  - The methods differ by case. BCa helps a small, skewed weight: ALWAYS-UNSAT on C E1 SAT goes from 0.86 to 0.92, and B4 FIRST on A/H E5 entailment from 0.81 to 0.88.
+  - BCa is no better on A/H E5 SAT, and worse at the q = 1 boundary: C E2 knapsack null q goes from 0.73 to 0.62 at 20 per cell.
+- **Null q at the boundary.** The truth, q = 1, sits on the edge of the simplex.
+  - Whenever more than 97.5% of the bootstrap refits give some member a sliver of weight, the percentile interval ends just below 1 and counts as a miss.
+  - More items make that more likely, so knapsack's coverage falls from 0.81 to 0.52 between 10 and 40 per cell, with |bias| ≤ 0.01 throughout. Running EM 20 times longer leaves fewer bootstrap refits at exactly 1, not more; checked on C E1 SAT at 20 per cell.
+  - This is the known failure of bootstrap intervals at a boundary. A boundary-aware interval (profile likelihood with the χ̄² limit) would be the principled alternative, and it isn't implemented.
+- **ALWAYS-UNSAT and q** are told apart only by how often the answer is UNSAT: always, against q's ½.
+  - Under pure noise, ALWAYS-UNSAT takes the excess UNSAT share. That is about 0.4/√N of the weight for N items: 0.07 at dev size on C E1, 0.03 at 20 per cell.
+  - This holds on every SAT unit that lists ALWAYS-UNSAT. The bias shrinks with N; the boundary miss above does not.
+- **Near-ties, by the design of the items.**
+  - On C E5 SAT with a given state, GUC-DET from state and SC-DET from state differ on 1 of the 60 items at 20 per cell. Every fit puts the pair's weight on one or the other (coverage 0.01–0.03).
+  - The same pair is tied on every item at 10 and at 40 per cell. It then forms one group, and the triple moves to GREEDY-MENTION / GREEDY-MENTION-ABORT from state. So the pass at 40 does not include the GUC/SC split: on those items only the pair's sum is identified, and the fit reports it as one group.
+  - On C E2 SAT, the C2 procedures answer UNSAT on 90–96% of the dev items, so ALWAYS-UNSAT is GUC-DET's nearest competitor: 27 separating items of 200 at 20 per cell. The planted pair's intervals stay 0.33 wide.
+- **Null ALWAYS now passes on C E1 and C E2 SAT.** The constant-UNSAT responder goes to ALWAYS-UNSAT, not RO-GREEDY.
+
+## Bottom line (pre-regeneration items)
 
 - **No unit passes the gate at the committed dev size (5 items per cell).** The units are small (10–270 items, 5–30 clusters), so intervals are wide and coverage is poor almost everywhere.
 - **Where it passes:** the table at the end gives, per unit, the size at which the mixture passes and the null scenarios' verdicts. The mixture and both nulls pass together only on C E2 colouring (10 per cell), A/H E5 SAT (20) and A/H E5 entailment (40).
@@ -42,6 +96,7 @@ python -m reasoning_heuristics.identify.recovery report data/recovery/dev.json d
   - the sha256 of every item file it read;
   - the planted triple and the identifiability analysis of every unit.
 - `merge` folds a rerun of some units into a result file and keeps both provenances. That's how the units whose planted triple changed when the rule began avoiding dependent members were rerun.
+- `--units` takes unit names separated by `;`, since names contain commas. A name that matches no unit stops the run.
 - Workers are processes, so set `OMP_NUM_THREADS=1`.
 
 **Larger item sets for the sweep** are generated into a scratch directory, never into `data/items`. Generation is deterministic in code, tier, seed and parameters:
@@ -49,7 +104,7 @@ python -m reasoning_heuristics.identify.recovery report data/recovery/dev.json d
 ```bash
 python -m reasoning_heuristics.generate --vertical V --eval E --tier dev --seed 1 --per-cell N --out-dir DIR
 python -m reasoning_heuristics.identify.recovery run --items DIR/dev --label pcN --scenarios mix,null_q,null_always \
-    --reps 30 --boot 60 --workers 4 --out data/recovery/pcN.json
+    --reps 100 --boot 100 --workers 4 --out data/recovery/pcN.json
 ```
 
 ## What is tested
@@ -60,6 +115,7 @@ python -m reasoning_heuristics.identify.recovery run --items DIR/dev --label pcN
 - **Near-miss slips** are the pre-registered noise model.
   - A deterministic or set-valued member gives its answer with probability 1 − ε. Otherwise D ~ truncated geometric(ρ) positions change: variables flipped, items or literals toggled, vertices recoloured up to renaming, or another decision or option.
   - The kernel is an exact pmf over the answer space. ε and ρ are estimated.
+  - A prediction that is a special token (UNSAT, IMPOSSIBLE, X) does not slip: it has no near misses.
   - Distributional members are complete noise models and are used as stored.
 - **q, "none of the above"**, is a uniformly random answer. With probability ½ it is a special token instead (UNSAT, IMPOSSIBLE) where the channel has one.
   - **C E3's bit channel is {same, different, IMPOSSIBLE}**, with q uniform over the three: the U-arm format admits IMPOSSIBLE, and FF-OUT and LF predict it on every U-REV item.
@@ -69,7 +125,7 @@ python -m reasoning_heuristics.identify.recovery run --items DIR/dev --label pcN
   - Every member of a dependency is reported as not identified, with the range of values consistent with the fit (π ≥ 0) and the identified combinations.
   - On finite channels a slip is a mixture with q, so ε is held at 0 there and π_0 includes slips.
 - **Availability:** a member with no prediction on an item drops out there, and the other weights are renormalised (a Luce choice model).
-- **95% intervals** come from a cluster bootstrap that resamples items sharing a base or a counterfactual set together.
+- **95% intervals** come from a cluster bootstrap that resamples items sharing a base or a counterfactual set together. The percentile interval is the primary one. The BCa interval, with acceleration from a leave-one-cluster-out jackknife, is reported next to it on the same fits.
 
 **The fake models** (`identify/fake.py`) answer the real items through the same likelihood model the fit uses. For the misspecification check they use the other model.
 
@@ -293,7 +349,7 @@ The sweep reruns `mix`, `null_q` and `null_always` on dev-tier item sets generat
   - C E5 colouring (k = 3) does not improve (a near-tie);
   - the decision-channel units, B4/C4 E1 and C E3 fail for reasons that more items do not fix (below).
 
-**Coverage with 100 replicates.** Thirty replicates can't tell a calibrated interval from a slightly short one. So the 60/30/10 mixture was rerun at 40 items per cell, with 100 replicates and 100 bootstrap draws, on the eight witness units whose bias and width already passed there (`coverage_pc40.json`):
+**Coverage with 100 replicates.** Thirty replicates can't tell a calibrated interval from a slightly short one. So the 60/30/10 mixture was rerun at 40 items per cell, with 100 replicates and 100 bootstrap draws, on the eight witness units whose bias and width already passed there (`pre-regeneration/coverage_pc40.json`):
 
 | Unit | all three gates | coverage of each planted weight (± binomial SE) | max \|bias\| | median width |
 |---|---|---|---|---|
