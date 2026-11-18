@@ -46,9 +46,27 @@ Qwen3 (batch 05, DeepInfra, its stop sentence before `</think>`) answered 5 of 5
 - **DeepInfra Qwen3 rejects logprobs.** With `require_parameters: true`, a request asking for them fails with "No endpoints found … Filter by Parameters".
 - **No Qwen3 provider gives logprobs at a usable context.** Tenstorrent (Qwen3-32B) has logprobs, but its context is 20k.
 
+## Batch 13: an answer-format header (force-2 plus a header)
+
+On a provider that passes raw prompts through, does a header at the start of the forced answer help? `probe_header.py` re-sends committed force-2 requests with the header appended to the prompt: `ANSWER:` for C and B4/C4 items, `{"` for A/H JSON items. It does this for two sets: every non-ok answer of the dev cut passes (provider-empty replies excluded), and 20 finished traces per model as an f = 1 control. In all: 125 calls, $0.095, run on 2026-11-18.
+
+Only calls that got a response are counted below. DeepInfra rate-limited gpt-oss-20b (HTTP 429 after 4 attempts) on 16 of its 23 failure calls and 10 of its 20 controls.
+
+| Model | Failures now ok | Controls ok and the model's own answer |
+|---|---|---|
+| gpt-oss-20b | 7 of 7 | 10 of 10 |
+| gpt-oss-120b | 5 of 14 | 17 of 20: on 3 A/H items it wrote nothing after `{"` |
+| Qwen3-32B | 3 of 4 | 18 of 20 (20 ok), as without the header |
+| Qwen3-14B | 1 of 3 | 18 of 20 (20 ok), as without the header |
+
+**Conclusion:**
+- **The header is mixed, so force-2 stays without one.** It rescues some format failures, but it makes a new failure on gpt-oss-120b's JSON items, an empty answer.
+- **Qwen3's runaway digit strings** already start in the required format, so no header can help them.
+- **The remaining non-ok forced answers are reported by kind** (declines, partial answers, format slips, runaways) rather than forced into a format.
+
 ## All batches
 
-The scripts are the final versions: `probe_chat.py` (01–02), `probe_raw.py` (03–09; its `WRAP` and `PREFIX` switches select 04, 06 and 07), `probe_logit.py` (10), `probe_wrap.py` (11, reconstructed from two inline runs) and `probe_force2.py` (12). Every file holds the full request and response of each call.
+The scripts are the final versions: `probe_chat.py` (01–02), `probe_raw.py` (03–09; its `WRAP` and `PREFIX` switches select 04, 06 and 07), `probe_logit.py` (10), `probe_wrap.py` (11, reconstructed from two inline runs), `probe_force2.py` (12) and `probe_header.py` (13). Every file holds the full request and response of each call.
 
 | File | Endpoint, model, provider | What was sent | Calls | Valid as forcing? |
 |---|---|---|---|---|
@@ -60,6 +78,7 @@ The scripts are the final versions: `probe_chat.py` (01–02), `probe_raw.py` (0
 | 10 | raw, all four models | a one-word question, with and without the end tokens banned, logprobs requested | 6 | parameter check |
 | 11 | raw and chat, 9 provider endpoints | the same text both ways: prompt_tokens compared | 18 | wrapping check |
 | 12 | raw, gpt-oss-20b, DeepInfra bf16 | force-1's prompt: 8 cut traces plain and banned, 8 finished traces banned | 24 | yes |
+| 13 | raw, all four models, DeepInfra | force-2 requests plus an answer header: every non-ok cut answer and 20 controls per model | 125 | yes (see above) |
 
 **Batch sizes.** These are 1–24 calls each, one sample per item: enough to choose a method, not to estimate rates. Acceptance tests at scale come with force-2 (docs/RUNNER.md).
 
