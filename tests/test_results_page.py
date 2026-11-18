@@ -77,3 +77,15 @@ def test_condition_pairs_cover_effort_as_well_as_thinking():
     d = mod.Data({"runs": runs, "settings": {"eps_max": 0.5}, "gated_units": {}, "fits": {}})
     think, _ = mod.comparison_pairs(d)
     assert [(a["condition"], b["condition"]) for a, b, _ in think] == [("thinking-low", "thinking-high"), ("direct", "thinking-high")]
+
+
+def test_textbook_section_shows_each_framing():
+    mod = _page_module()
+    runs = [{"run_id": "r", "model": "openai/gpt-oss-120b", "condition": "thinking-low", "item_set": "pc20",
+             "label": "gpt-oss-120b thinking-low"}]
+    bf = {"I": {"n": 20, "ok": 20, "correct": 0, "textbook": 16, "textbook_wrong": 16},
+          "I+R": {"n": 20, "ok": 20, "correct": 16, "textbook": 3, "textbook_wrong": 3}}
+    d = mod.Data({"runs": runs, "settings": {"eps_max": 0.5}, "gated_units": {}, "fits": {},
+                  "unit_items": {"pc20": {"AH_E5/ENT": 80}}, "descriptive": {"r": {"AH_E5/ENT": {"by_framing": bf}}}})
+    html = mod.section_textbook(d)
+    assert "0 · 16 / 20" in html and "16 · 3 / 20" in html and html.count('<td class="n">–</td>') == 3

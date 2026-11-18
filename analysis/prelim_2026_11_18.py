@@ -130,7 +130,8 @@ SCHEMA = {
     "skipped_runs": "directories matching the run patterns that have no scored records yet (in progress)",
     "descriptive": "run_id -> unit -> categories, ok, correct, accuracy_of_ok, valid / valid_defined, members_matched and "
                    "sets_matched ([{members, answers, share_of_ok}], members matching the same answers merged), "
-                   "wrong_member_match, special_answers, token medians, truncated_by_cell",
+                   "wrong_member_match, special_answers, token medians, truncated_by_cell; A/H E5 units also by_framing "
+                   "(T, N, I, I+R, P -> n, ok, correct, textbook = ok answers equal to an A3 TT member's, textbook_wrong)",
     "fits": "unit -> run_id -> fit_unit's report (fit.weights: pi with percentile lo/hi, or 'not identified' with a range; "
             "eps, rho with intervals; identifiability; diagnostics; excluded; error_agreement and weight_lift with "
             "permutation baselines) plus bca ({group: [lo, hi]}), ea_counts, q_exact_chance_log10_max, near, reach, lumps, "
@@ -337,7 +338,27 @@ def describe(run: dict[str, Any], item_set: dict[str, Any]) -> dict[str, Any]:
             "pre_answer_over_20": sum(1 for r in recs if (r.get("pre_answer_tokens") or 0) > 20),
             "scorer_git_sha": sorted({r["scorer_git_sha"] for r in recs}),
         }
+        if name.startswith("AH_E5/"):
+            out[name]["by_framing"] = by_framing(recs)
     return out
+
+
+def by_framing(recs: list[dict[str, Any]]) -> dict[str, dict[str, int]]:
+    """A/H E5 per framing (the cell after the slash: T, N, I, I+R, P): responses, ok answers, correct ones (under the
+    stated rule), and ok answers equal to a textbook-transfer member's answer (A3 TT...: the textbook problem's answer).
+    Under T and N the textbook answer is the correct one; under I and I+R the two are disjoint by construction."""
+    out: dict[str, Counter] = defaultdict(Counter)
+    for r in recs:
+        c = out[r["cell"].split("/", 1)[1]]
+        c["n"] += 1
+        if r["category"] != "ok":
+            continue
+        tt = any(m.startswith("A3") for m in r.get("members_matched") or [])
+        c["ok"] += 1
+        c["correct"] += bool(r["correct"])
+        c["textbook"] += tt
+        c["textbook_wrong"] += tt and r["correct"] is False
+    return {f: {k: c[k] for k in ("n", "ok", "correct", "textbook", "textbook_wrong")} for f, c in sorted(out.items())}
 
 
 # =============================================================================================

@@ -451,7 +451,9 @@ def section_header(d: Data) -> str:
     nav = ('<nav class="toc" aria-label="Sections"><a href="#findings">Findings</a><a href="#runs">Runs</a>'
            '<a href="#accuracy">Accuracy</a><a href="#weights">Weights</a><a href="#ppc">Predictive check</a>'
            '<a href="#ea">Error agreement</a><a href="#distance">Distance</a><a href="#compare">Comparisons</a>'
-           '<a href="#descriptive">Not fitted</a><a href="#limits">Limits</a><a href="#reproduce">Reproduce</a></nav>')
+           + ('<a href="#textbook">Textbook transfer</a>' if any(
+               "by_framing" in x for units in d.r["descriptive"].values() for x in units.values()) else "")
+           + '<a href="#descriptive">Not fitted</a><a href="#limits">Limits</a><a href="#reproduce">Reproduce</a></nav>')
     return (f'<header><p class="kicker">Heuristics Under Hardness · results page</p>'
             f'<h1>Which heuristics do LLMs use on NP-hard problems? Preliminary results</h1>{banner}'
             f'<div id="verdict">{hero}{lead}{board}</div>{nav}</header>')
@@ -956,6 +958,46 @@ def section_compare(d: Data) -> str:
     return "".join(out)
 
 
+FRAMINGS = (("T", "textbook rule"), ("N", "neutral preamble"), ("I", "inverted rule"),
+            ("I+R", "inverted, rule restated"), ("P", "half the constraints inverted"))
+
+
+def section_textbook(d: Data) -> str:
+    """A/H E5 by framing: correct and textbook answers per run and domain (descriptive)."""
+    blocks = []
+    for s in d.sets:
+        units = [u for u in d.units_of(s) if u.startswith("AH_E5/")]
+        rows = []
+        for unit in units:
+            for m in d.runs_of(s):
+                bf = (d.r["descriptive"].get(m["run_id"], {}).get(unit) or {}).get("by_framing")
+                if not bf:
+                    continue
+                cells = [e(unit.split("/", 1)[1]), e(m["label"])]
+                for fr, _ in FRAMINGS:
+                    c = bf.get(fr)
+                    cells.append(num(f"{c['correct']} · {c['textbook']} / {c['ok']}") if c and c["ok"] else '<td class="n">–</td>')
+                rows.append(cells)
+        if rows:
+            head = "<tr><th>Domain</th><th>Run</th>" + "".join(
+                f'<th class="n">{e(fr)}<br><span class="sub">{e(name)}</span></th>' for fr, name in FRAMINGS) + "</tr>"
+            blocks.append(f"<h3>{e(set_label(s))}</h3>" + table([], rows, "tt", head))
+    if not blocks:
+        return ""
+    return ('<section id="textbook"><h2>Textbook transfer under rule inversion (A/H E5)</h2>'
+            "<p>A/H E5 asks whether a model, given a familiar problem with an inverted rule, answers <em>the textbook "
+            "problem</em> instead. Each base instance appears in up to five framings: T (the textbook rule), N (a neutral "
+            "preamble of the same length), I (a preamble that inverts the rule), I+R (I plus the rule restated just before "
+            "the question) and P (SAT only: half the constraints inverted). Each cell reads <strong>correct · textbook / "
+            "ok</strong>: answers correct under the stated rule, and answers equal to the textbook problem's answer (an A3 TT "
+            "member's), out of the ok answers. Under T and N the textbook answer is the correct one, so the two counts mostly "
+            "coincide; under I and I+R they are disjoint by construction, so a textbook answer there is the textbook-transfer "
+            "error.</p>"
+            '<p class="plain"><strong>Counts, not weights.</strong> One sample per item and about 20 items per framing; the '
+            "recovery gates pass for none of these units at 20 per cell except SAT (see Limits).</p>"
+            + "".join(blocks) + "</section>")
+
+
 def section_descriptive(d: Data) -> str:
     out = ['<section id="descriptive"><h2>Descriptive patterns on the units that are not fitted</h2>'
            '<p class="plain"><strong>Counts, not weights.</strong> On these units the recovery gates do not pass at the run\'s '
@@ -1264,8 +1306,8 @@ def render(results: dict[str, Any], findings_html: str) -> str:
     d = Data(results)
     body = "".join([
         section_header(d), section_findings(findings_html), section_runs(d), section_accuracy(d), section_weights(d),
-        section_ppc(d), section_ea(d), section_distance(d), section_compare(d), section_descriptive(d), section_limits(d),
-        section_reproduce(d),
+        section_ppc(d), section_ea(d), section_distance(d), section_compare(d), section_textbook(d), section_descriptive(d),
+        section_limits(d), section_reproduce(d),
     ])
     return ("<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n"
             '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
