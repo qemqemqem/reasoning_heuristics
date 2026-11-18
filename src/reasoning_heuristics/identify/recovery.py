@@ -4,6 +4,8 @@ fitted, and the estimates are compared with the planted weights.
     python -m reasoning_heuristics.identify.recovery run --items data/items/dev --out data/recovery/dev.json
     python -m reasoning_heuristics.identify.recovery run --items <dir with larger sets> --label pc20 --scenarios mix,null_q
     python -m reasoning_heuristics.identify.recovery table data/recovery/dev.json [more.json ...]
+    python -m reasoning_heuristics.identify.recovery report data/recovery/dev.json [sweep.json ...]
+    python -m reasoning_heuristics.identify.recovery merge data/recovery/dev.json rerun.json
 
 `run` fits every scenario of `fake.py` on every fit unit (eval x domain) of the item sets it is
 given and writes one JSON file, with the git SHA and the sha256 of every item file it read;
@@ -625,13 +627,28 @@ def report(dev_path: str, sweep_paths: list[str]) -> str:
     return "\n\n".join(f"<!-- {k} -->\n{v}" for k, v in sections.items())
 
 
+def merge(base_path: str, patch_path: str) -> None:
+    """Replace the units of `base` that `patch` also has (a rerun of some units, e.g. after a rule
+    change), keeping both runs' provenance."""
+    base = json.loads(Path(base_path).read_text())
+    patch = json.loads(Path(patch_path).read_text())
+    names = {u["unit"] for u in patch["units"]}
+    base["units"] = sorted([u for u in base["units"] if u["unit"] not in names] + patch["units"], key=lambda u: u["unit"])
+    base.setdefault("merged", []).append({"units": sorted(names), "provenance": patch["provenance"],
+                                           "command": patch.get("command"), "generated": patch.get("generated")})
+    Path(base_path).write_text(json.dumps(base, indent=1, ensure_ascii=False))
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
-    if not argv or argv[0] not in ("run", "table", "report"):
+    if not argv or argv[0] not in ("run", "table", "report", "merge"):
         print(__doc__)
         return 2
     if argv[0] == "run":
         return run(argv[1:])
+    if argv[0] == "merge":
+        merge(argv[1], argv[2])
+        return 0
     if argv[0] == "report":
         print(report(argv[1], argv[2:]))
         return 0
