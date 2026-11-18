@@ -29,7 +29,7 @@ from typing import Any, Callable
 from reasoning_heuristics.evals import cost as C
 from reasoning_heuristics.evals import ledger
 from reasoning_heuristics.evals.cache import ResponseCache, cache_key, prompt_hash
-from reasoning_heuristics.evals.client import KEY_ENV, CallResult, FatalAPIError, MissingKeyError, OpenRouterClient
+from reasoning_heuristics.evals.client import KEY_ENV, CallResult, FatalAPIError, MissingKeyError, OpenRouterClient, usable
 from reasoning_heuristics.evals.manifest import (REPO, file_hashes, git_info, item_files, load_items, utc_now, versions,
                                                  write_json)
 from reasoning_heuristics.evals.models import Condition, ModelConfig, Pricing, condition, get_model, request_body
@@ -72,7 +72,7 @@ def read_raw(out: Path) -> list[dict[str, Any]]:
     latest: dict[tuple[str, int], dict[str, Any]] = {}
     for r in recs:  # a later successful record replaces an earlier failed one
         k = (r["item_id"], r.get("sample", 0))
-        if k not in latest or (latest[k].get("response") is None and r.get("response") is not None):
+        if k not in latest or (not usable(latest[k].get("response")) and usable(r.get("response"))):
             latest[k] = r
     return list(latest.values())
 
@@ -134,7 +134,7 @@ class Runner:
                     break
                 body, key = job["body"], job["key"]
                 cached = self.cache.get(key) if self.cache else None
-                if cached is not None and cached.get("response") is not None:
+                if cached is not None and usable(cached.get("response")):
                     self.cache_hits += 1
                     self._append(self._record(job, body, key, response=cached["response"], error=None, errors=[],
                                               attempts=0, status=200, latency_s=0.0, from_cache=True,
@@ -306,7 +306,7 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
     guard = C.CostGuard(cap, price, cond.max_tokens)
     out.mkdir(parents=True, exist_ok=True)
     previous = read_raw(out)
-    done = {(r["item_id"], r.get("sample", 0)) for r in previous if r.get("response") is not None}
+    done = {(r["item_id"], r.get("sample", 0)) for r in previous if usable(r.get("response"))}
     jobs = build_jobs(items, cfg, cond, provider, a.samples, a.seed, done)
     manifest: dict[str, Any] = {
         "run_id": run_id, "status": "running", "started_at": utc_now(), "model_requested": cfg.slug,

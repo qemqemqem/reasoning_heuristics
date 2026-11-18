@@ -46,7 +46,7 @@ python -m reasoning_heuristics.evals.probe --model qwen/qwen3-32b --out data/run
 - **Resuming.** Re-running into the same `--out` sends only the (item, sample) pairs that have no response yet. The manifest keeps every earlier invocation (git SHA, times, status, spend) under `previous_invocations` and the total charge in `charged_usd_all_invocations`. It refuses a resume with a different condition or item set.
 - **Re-scoring after the items change.** `score` refuses a run whose item files no longer hash to its manifest. `--items-at-run-sha` reads each file with `git show <run's SHA>:<path>` and checks it against the manifest's SHA-256 (`--items-ref <ref>` picks another ref). PRs merge with merge commits, so a run made at a pushed branch commit stays re-scorable after the merge.
 - **The cache** (`data/cache/openrouter/`, gitignored) means an identical request is never paid for twice, across runs. Repeat samples are separate keys. The permanent copy is each run's `raw.jsonl.gz`; `ResponseCache.import_runs` rebuilds a cache from those.
-- **Concurrency** defaults to 8. Timeouts are 30 minutes per request. Retries: 6 attempts with exponential backoff and jitter (honouring `Retry-After`). They cover network errors (including a dropped connection or a body cut short), 408/409/425/429/5xx, and errors inside a 200 body. 400/401/402/403/404/413/422 stop the run at once.
+- **Concurrency** defaults to 8. Timeouts are 30 minutes per request. Retries: 6 attempts with exponential backoff and jitter (honouring `Retry-After`). They cover network errors (including a dropped connection or a body cut short), 408/409/425/429/5xx, errors inside a 200 body, and an empty reply with no `usage` record (a provider failure, not an answer: 9 of 284 forced gpt-oss-120b calls on DeepInfra, 2026-11-18). 400/401/402/403/404/413/422 stop the run at once. A stored response the client would now retry does not count as done: a resume sends it again, and the response cache does not serve it (`usable` in evals/client.py).
 - **E8 is skipped** (`--exclude-eval E8`; the loader also refuses E8 specs). See [E8](#e8-continuations-and-prefill) below.
 
 ## Conditions
@@ -476,11 +476,11 @@ The manifest records both routings: `source.provider_routing` (the source run's)
 - **Forcing reproduces the model's own answers.** gpt-oss gives the natural answer every time. Qwen3's misses on "same answer" are mostly a different but equally correct colouring or assignment; Qwen3-32B has 2 genuinely wrong forced answers and 2 unparsed ones in 136.
 - **No forced call went back to reasoning.**
 - **Where cut traces fall short of 95%:**
-  - **Provider-empty replies:** 9 of gpt-oss-120b's 284 came back empty, with no usage record, from DeepInfra. That is a provider failure, not an answer; without them gpt-oss-120b parses 94.9%. The runner does not yet retry these.
+  - **Provider-empty replies:** 9 of gpt-oss-120b's 284 came back empty, with no usage record, from DeepInfra. That is a provider failure, not an answer; without them gpt-oss-120b parses 94.9%. The client now retries these (#42), and a resume sends them again.
   - **Runaway digit strings:** all 7 of Qwen3's unfinished answers are A/H SAT JSON whose assignment string never closes. They start `{"satisfiable": true, "assignment": "1010…`, then repeat 0s or 1s until max_tokens.
   - **Answers outside the required format:** for example "**Answer:** The formula is satisfiable … `1110…`" where A/H wants JSON; variables renamed a, b, c…; invented knapsack items.
   - **Declines and partial answers:** "I do not have enough information to …", or colourings missing 1–24 vertices.
-- **Next fixes, not yet made:** retry provider-empty replies, and test an answer-format header at the start of the forced answer (`ANSWER:` for C and B4/C4, the JSON's opening for A/H) on a provider that honours raw prompts.
+- **Next fixes:** provider-empty replies are retried since #42. Still to do: test an answer-format header at the start of the forced answer (`ANSWER:` for C and B4/C4, the JSON's opening for A/H) on a provider that honours raw prompts.
 
 **How they are kept apart.** The source run's files are never written. Its truncated records stay `truncated` (censored), and a forced answer never replaces one: it was written under a second budget the source condition did not have. Forced answers are analysed as their own stratum (`forced: true`, condition `…-forced`). The analysis reads only `data/runs/2026-11-18-{dev,pc20,pc40}-*` (`RUN_PATTERNS`), which `data/runs/forced/` and `data/runs/forced-2/` do not match.
 

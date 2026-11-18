@@ -70,7 +70,7 @@ from typing import Any, Callable
 from reasoning_heuristics.evals import cost as C
 from reasoning_heuristics.evals import ledger
 from reasoning_heuristics.evals.cache import ResponseCache, cache_key
-from reasoning_heuristics.evals.client import API_BASE, KEY_ENV, CallResult, FatalAPIError, OpenRouterClient
+from reasoning_heuristics.evals.client import API_BASE, KEY_ENV, CallResult, FatalAPIError, OpenRouterClient, usable
 from reasoning_heuristics.evals.manifest import REPO, git_info, sha256_file, utc_now, versions, write_json
 from reasoning_heuristics.evals.models import ModelConfig, Pricing, get_model, pin
 from reasoning_heuristics.evals.report import forced_outcomes
@@ -365,7 +365,7 @@ class ForcedRunner(Runner):
 def _from_cache(cache: ResponseCache | None, key: str) -> bool:
     """Whether the Runner will answer this call from the cache (its own test), so that nothing is sent."""
     entry = cache.get(key) if cache is not None else None
-    return entry is not None and entry.get("response") is not None
+    return entry is not None and usable(entry.get("response"))
 
 
 def parse_args(argv: list[str] | None) -> argparse.Namespace:
@@ -490,7 +490,7 @@ def main(argv: list[str] | None = None, client: OpenRouterClient | None = None) 
                             or old.get("provider_routing") != route.provider):
         raise SystemExit(f"{out}: resuming with a different template, max_tokens, select, logit_bias, routing or source "
                          "raw file than the pass was started with")
-    done = {(r["item_id"], r.get("sample", 0)) for r in read_raw(out) if r.get("response") is not None}
+    done = {(r["item_id"], r.get("sample", 0)) for r in read_raw(out) if usable(r.get("response"))}
     per_source = src_manifest.get("samples_per_item") or 1
     jobs, want = [], set()
     for r, body in zip(picked, bodies):

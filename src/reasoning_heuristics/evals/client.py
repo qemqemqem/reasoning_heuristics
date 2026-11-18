@@ -118,7 +118,23 @@ def _retryable_body(data: dict[str, Any]) -> str | None:
     ch = choices[0]
     if ch.get("finish_reason") == "error" or isinstance(ch.get("error"), dict):
         return f"choice error: {json.dumps(ch.get('error'))[:200]}"
+    if not data.get("usage") and not _visible_output(ch):
+        # every real response carries usage (see the module docstring); an empty reply without it is a provider
+        # failure, not an answer (9 of 284 forced gpt-oss-120b calls on DeepInfra, 2026-11-18)
+        return "empty reply without usage"
     return None
+
+
+def _visible_output(choice: dict[str, Any]) -> bool:
+    """Whether a choice carries any output: content, a text completion's text, or reasoning."""
+    msg = choice.get("message") or {}
+    return any((v or "").strip() for v in (msg.get("content"), msg.get("reasoning"), choice.get("text"), choice.get("reasoning")))
+
+
+def usable(response: dict[str, Any] | None) -> bool:
+    """A stored response that counts as done: present, and not one the client would now retry (an error carried in a
+    200, no choices, an empty reply without usage). Resumes and the response cache re-send anything else."""
+    return response is not None and _retryable_body(response) is None
 
 
 class OpenRouterClient:

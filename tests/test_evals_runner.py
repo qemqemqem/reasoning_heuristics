@@ -14,7 +14,7 @@ from evals_helpers import ITEMS, api_response
 from reasoning_heuristics.evals import cost as C
 from reasoning_heuristics.evals import ledger
 from reasoning_heuristics.evals.cache import ResponseCache, cache_key
-from reasoning_heuristics.evals.client import FatalAPIError, HttpResponse, MissingKeyError, OpenRouterClient
+from reasoning_heuristics.evals.client import FatalAPIError, HttpResponse, MissingKeyError, OpenRouterClient, usable
 from reasoning_heuristics.evals.models import BUDGET_NOTICE, DIRECT_SYSTEM_PROMPT, Pricing, condition, get_model, request_body
 from reasoning_heuristics.evals.run import main as run_main
 from reasoning_heuristics.evals.score import main as score_main
@@ -469,3 +469,67 @@ def test_the_budget_notice_variant():
     assert "16,384 tokens" in condition(cfg, "thinking", "high", 16384, budget_notice=True).prompt_suffix
     with pytest.raises(ValueError):
         condition(get_model("qwen/qwen3-32b"), "direct", None, budget_notice=True)
+
+
+# --- empty replies without usage (a provider failure, not an answer) -----------------------------------------------
+
+EMPTY_REPLY = {"id": "gen-empty", "choices": [{"index": 0, "finish_reason": "stop", "message": {"role": "assistant", "content": ""}}]}
+
+
+class EmptyFirst(FakeTransport):
+    """The first `n` POSTs come back as an empty reply with no usage, as DeepInfra's gpt-oss-120b endpoint sent 9 of
+    284 forced calls on 2026-11-18."""
+
+    def __init__(self, n: int = 1, **kw):
+        super().__init__(**kw)
+        self.empty = n
+
+    def __call__(self, method, url, headers, body, timeout):
+        if method == "POST" and self.empty:
+            self.empty -= 1
+            self.calls.append(json.loads(body))
+            return HttpResponse(200, json.dumps(EMPTY_REPLY).encode())
+        return super().__call__(method, url, headers, body, timeout)
+
+
+def test_an_empty_reply_without_usage_is_retried(key):
+    res = client(EmptyFirst()).chat({"model": "m", "messages": [{"role": "user", "content": "q"}]})
+    assert res.ok and res.attempts == 2 and "empty reply without usage" in res.errors[0]
+
+
+def test_a_reply_without_usage_but_with_output_is_kept(key):
+    class NoUsage(FakeTransport):
+        def __call__(self, method, url, headers, body, timeout):
+            if method == "POST":
+                self.calls.append(json.loads(body))
+                return HttpResponse(200, json.dumps({"choices": [{"finish_reason": "stop", "message": {"content": "ANSWER: YES"}}]}).encode())
+            return super().__call__(method, url, headers, body, timeout)
+
+    res = client(NoUsage()).chat({"model": "m", "messages": [{"role": "user", "content": "q"}]})
+    assert res.ok and res.attempts == 1
+
+
+def test_usable():
+    assert usable(api_response("ANSWER: YES")) and not usable(None) and not usable(EMPTY_REPLY)
+    assert usable({"choices": [{"finish_reason": "stop", "message": {"content": "x"}}]})  # output, no usage: kept
+    assert usable({"choices": [{"finish_reason": "length", "message": {"content": None, "reasoning": "hm"}}]})
+    assert not usable({"choices": []}) and not usable({"error": {"code": 502}})
+
+
+def test_a_resume_resends_a_stored_empty_reply_and_the_cache_does_not_serve_it(tmp_path, key):
+    """Records written before the client retried empty replies: the resume and the cache must not count them done."""
+    t = FakeTransport()
+    run(tmp_path, t, limit=3)
+    raw_path = tmp_path / "run1" / "raw.jsonl.gz"
+    recs = read_gz(raw_path)
+    recs[0]["response"] = EMPTY_REPLY
+    with gzip.open(raw_path, "wt", encoding="utf-8") as fh:
+        fh.writelines(json.dumps(r) + "\n" for r in recs)
+    cache = ResponseCache(tmp_path / "cache")
+    cache.put(recs[0]["cache_key"], {"request": recs[0]["request"], "response": EMPTY_REPLY, "sample": 0, "source": "old"})
+    sent = len(t.calls)
+    run(tmp_path, t, limit=3)
+    assert len(t.calls) == sent + 1  # only the emptied item is sent again, and not served from the cache
+    again = read_gz(raw_path)
+    assert len(again) == 3 and all(usable(r["response"]) for r in again)
+    assert usable(cache.get(recs[0]["cache_key"])["response"])
