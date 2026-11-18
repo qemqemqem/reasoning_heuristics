@@ -160,6 +160,30 @@ def test_menu_condition_count_is_true_for_any_clause_width():
     assert "Each guest has a request that is met if at least one of its three conditions holds." in three
 
 
+def test_answer_lines_use_placeholders_that_name_no_variable():
+    # A model answered "x=T, x=T, ..." to "`x=T` / `x=F`": the placeholder read as a variable name.
+    from reasoning_heuristics.problems.coloring.render import render_edge_list, render_neighbours
+    from reasoning_heuristics.problems.sat.render import render_c
+
+    cnf = S.CNF(("x15", "x18", "x21"), ((1, -2), (2, 3)))
+    ordered = render_c(cnf, ["x18", "x15", "x21"]).splitlines()[-1]
+    assert ordered == ("After the line ANSWER:, write UNSAT, or one `<variable>=T` or `<variable>=F` per variable, "
+                       "comma-separated, in this order: x18, x15, x21.")
+    free = render_c(cnf, None).splitlines()[-1]
+    assert free.endswith("one `<variable>=T` or `<variable>=F` per variable, comma-separated, in any order you like.")
+    for line in (ordered, free):  # no real name as the example: it could anchor that variable's value
+        assert "`x=" not in line and not any(f"{v}=" in line for v in cnf.var_names)
+    assert render_c(cnf, ["x15", "x18", "x21"], style="library").splitlines()[-1] == (
+        "After the line ANSWER:, write UNSAT or the values as `x=T` / `x=F`, comma-separated, in this order: x15, x18, x21.")
+    g = G.Graph(("v1", "v2"), (("v1", "v2"),))
+    k_line = render_neighbours(g, "k", ["v2", "v1"], 3).splitlines()[-1]
+    assert k_line == "After the line ANSWER:, write IMPOSSIBLE or one line `<vertex>: <colour>` per vertex, in this order: v2, v1."
+    assert render_edge_list(g, "fewest", None).splitlines()[-1] == (
+        "After the line ANSWER:, write one line `<vertex>: <colour>` per vertex, in any order you like.")
+    assert render_neighbours(g, "fewest", ["v1", "v2"], style="library").splitlines()[-1] == (
+        "After the line ANSWER:, write one line `vertex: colour` per vertex, in this order: v1, v2.")
+
+
 # --- V6: solver edge cases -----------------------------------------------------------------------------
 
 
