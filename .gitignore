@@ -6,3 +6,5 @@ __pycache__/
 data/library/*.jsonl
 data/items/test/
 data/items/**/*.jsonl
+keys.env
+.env

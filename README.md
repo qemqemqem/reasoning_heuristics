@@ -7,7 +7,7 @@ Many reasoning tasks are NP-hard or coNP-hard in general, and language models an
 - looking for the same heuristics inside open-weight models;
 - situating them in RASP-L.
 
-Start with the design document, [docs/DESIGN.md](docs/DESIGN.md). The literature review behind it is [docs/LITERATURE.md](docs/LITERATURE.md), and [docs/PAPER_SKELETON.md](docs/PAPER_SKELETON.md) sketches the paper we expect to write.
+For where the work stands now, see [docs/STATUS.md](docs/STATUS.md). Start with the design document, [docs/DESIGN.md](docs/DESIGN.md). The literature review behind it is [docs/LITERATURE.md](docs/LITERATURE.md), and [docs/PAPER_SKELETON.md](docs/PAPER_SKELETON.md) sketches the paper we expect to write.
 
 The per-heuristic eval designs and example question libraries are in [docs/verticals/](docs/verticals/) and [data/examples/](data/examples/). The Phase 1 scope and costs are in [docs/SCOPE.md](docs/SCOPE.md).
 
