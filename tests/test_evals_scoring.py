@@ -231,6 +231,9 @@ def test_positional_values_in_the_requested_order():
         assert rec["category"] == "ok" and rec["parsed"] == {v: want[v] for v in load_task(sat["instance"]).cnf.var_names}
         assert "positional_values" in rec["flags"]
     assert "placeholder_names" in score_text(sat, "ANSWER: " + ", ".join(f"x={b}" for b in bits))["flags"]
+    trailing = score_text(sat, "ANSWER: " + ", ".join(f"x={b}" for b in bits) +
+                          "\n\n---\n\nThis assignment ensures that every clause evaluates to true.")  # seen live
+    assert trailing["category"] == "ok" and "extra_text_in_block" in trailing["flags"]
     short = score_text(sat, "ANSWER: " + ", ".join(bits[:-1]))
     assert short["category"] == "parse_fail" and "without names" in short["parse_detail"]
     free = next(it for it in runnable(committed_items("smoke")) if answer_format(it).kind == "ans_sat"

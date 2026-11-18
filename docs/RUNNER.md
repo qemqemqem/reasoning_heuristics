@@ -112,7 +112,7 @@ Deterministic, no LLM (DESIGN §5 rule 4), and it reads the item's structured `i
 - **No marker at all:** a reply that is nothing but an answer in the format is parsed (flag `no_answer_marker`, since 1.1.0). This matters in the direct condition. Any other text without a marker is a parse failure.
 - **The reasoning channel is never parsed for the answer.** A finished reply whose answer appears only there is flagged `answer_only_in_reasoning` and stays a parse failure.
 
-**Versions so far.** 1.0.0 was the first. 1.1.0 parses marker-less bare answers. 1.1.1 stops `answer_only_in_reasoning` on truncated replies, whose reasoning often just quotes the format. 1.2.0 unwraps LaTeX. 1.3.0 reads C SAT and colouring values given without their names, or with the format's own placeholder (`x=T, x=F, …`), in the requested order. It does so only when the item states an order and the count is exact (flags `positional_values`, `placeholder_names`). Each version came from the smoke runs below.
+**Versions so far.** 1.0.0 was the first. 1.1.0 parses marker-less bare answers. 1.1.1 stops `answer_only_in_reasoning` on truncated replies, whose reasoning often just quotes the format. 1.2.0 unwraps LaTeX. 1.3.0 reads C SAT and colouring values given without their names, or with the format's own placeholder (`x=T, x=F, …`), in the requested order. It does so only when the item states an order and the count is exact (flags `positional_values`, `placeholder_names`). 1.3.1 tolerates commentary after such a run of values. Each version came from the smoke runs below.
 
 | Answer format (items) | Parsed into |
 |---|---|

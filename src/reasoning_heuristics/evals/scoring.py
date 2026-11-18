@@ -61,12 +61,13 @@ from reasoning_heuristics.problems.coloring import graph as G
 from reasoning_heuristics.problems.entailment import formula as F
 from reasoning_heuristics.problems.sat import cnf as S
 
-SCORER_VERSION = "scorer-1.3.0"
+SCORER_VERSION = "scorer-1.3.1"
 # 1.1.0: a reply that is nothing but the answer, without the ANSWER: marker, is parsed (flag no_answer_marker).
 # 1.1.1: answer_only_in_reasoning is not set on truncated replies (their reasoning often quotes the format).
 # 1.2.0: LaTeX answer decoration (\\boxed{..}, \\text{..}, $$ ... $$) is unwrapped before the ANSWER: formats are parsed.
 # 1.3.0: C SAT / colouring values given without their names (or with the format's placeholder, `x=T`) are read in
 #        the requested order when the count is exact (flags positional_values, placeholder_names).
+# 1.3.1: commentary after such a run of values (e.g. "---" and a sentence) is tolerated (flag extra_text_in_block).
 
 CATEGORIES = ("ok", "parse_fail", "refusal", "declared_impossible", "partial", "truncated", "api_error")
 
@@ -589,12 +590,19 @@ def _positional(ctx: ItemContext, block: str, value_rx: str, convert, what: str)
     item = rf"(?:{ph}\s*[:=]\s*)?({value_rx})"
     line_rx = re.compile(rf"(?i)^(?:{item}(?:\s*[,;]\s*|\s+|$))+$")
     lines = [ln.strip().rstrip(".") for ln in block.splitlines() if ln.strip()]
-    if not lines or not all(line_rx.match(ln) for ln in lines):
+    head: list[str] = []  # the leading run of value lines; anything after it is commentary
+    for ln in lines:
+        if not line_rx.match(ln):
+            break
+        head.append(ln)
+    if not head:
         return None
-    vals = [m.group(1) for ln in lines for m in re.finditer(rf"(?i)(?<![\w]){item}(?![\w])", ln)]
+    vals = [m.group(1) for ln in head for m in re.finditer(rf"(?i)(?<![\w]){item}(?![\w])", ln)]
     if len(vals) != len(order):
         return Parse("parse_fail", detail=f"{len(vals)} values without names for {len(order)} {what}s")
-    flags = ["positional_values"] + (["placeholder_names"] if re.search(rf"(?i)\b{ph}\s*[:=]", block) else [])
+    flags = ["positional_values"] + (["placeholder_names"] if re.search(rf"(?i)\b{ph}\s*[:=]", "\n".join(head)) else [])
+    if len(head) < len(lines):
+        flags.append("extra_text_in_block")
     return _complete_or_partial(ctx, {n: convert(v) for n, v in zip(order, vals)}, flags, what)
 
 
