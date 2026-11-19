@@ -1,0 +1,7120 @@
+{
+ "candidates": {
+  "K": {
+   "eps": "shared",
+   "eps_max": 0.5,
+   "kernel": "free",
+   "q": "uniform"
+  },
+  "KE": {
+   "eps": "shared",
+   "eps_max": 1.0,
+   "kernel": "free",
+   "q": "uniform"
+  },
+  "KEQ": {
+   "eps": "shared",
+   "eps_max": 1.0,
+   "kernel": "free",
+   "q": "strata"
+  },
+  "KEQ-h": {
+   "eps": "member",
+   "eps_max": 1.0,
+   "kernel": "free",
+   "q": "strata"
+  },
+  "M0": {
+   "eps": "shared",
+   "eps_max": 0.5,
+   "kernel": "geometric",
+   "q": "uniform"
+  },
+  "SEQ": {
+   "eps": "shared",
+   "eps_max": 1.0,
+   "kernel": "swap",
+   "q": "strata"
+  }
+ },
+ "command": "analysis/noise_model_eval.py diagnose --workers 3 --out analysis/out/noise_model/diagnosis.json",
+ "git": {
+  "dirty_src": false,
+  "sha": "b4a278790ca0764198bc9ad63bc74a77216d19bf"
+ },
+ "seconds": 168,
+ "units": {
+  "AH_E5/SAT": {
+   "2026-11-18-pc20-gpt-oss-120b-thinking-low": {
+    "answers": {
+     "correct": 7,
+     "exact_member": 7,
+     "n": 99,
+     "near_wrong_adds_drops": {
+      "0,1": 5,
+      "0,2": 6,
+      "0,3": 6,
+      "1,0": 1,
+      "1,1": 4,
+      "1,2": 4,
+      "2,0": 2,
+      "2,1": 5,
+      "3,0": 3
+     },
+     "special": 16,
+     "wrong": 92,
+     "wrong_exact_member": 0,
+     "wrong_nonexact_distance": {
+      "1": 6,
+      "2": 12,
+      "3": 18,
+      "4": 15,
+      "5": 16,
+      "6": 4,
+      ">6": 5
+     },
+     "wrong_set_fraction": {
+      "0.0": 4,
+      "0.1": 2,
+      "0.2": 4,
+      "0.3": 9,
+      "0.4": 13,
+      "0.5": 11,
+      "0.6": 16,
+      "0.7": 8,
+      "0.8": 6,
+      "0.9": 2,
+      "1.0": 1
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.112,
+       0.183,
+       0.284,
+       0.191,
+       0.23,
+       0.0
+      ],
+      "loglik": -810.013881,
+      "mass": {
+       "exact": 0.069233,
+       "noise": 0.930767,
+       "nonslipping_members": 0.0,
+       "q": 0.57921,
+       "slip": 0.351557
+      },
+      "n_params": 11,
+      "pi0": 0.57921,
+      "top": [
+       [
+        0.299,
+        "exact"
+       ],
+       [
+        0.102,
+        "C0 POLARITY"
+       ],
+       [
+        0.02,
+        "A3 TT[exact]"
+       ],
+       [
+        0.0,
+        "D DPLL (first solution)"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.899032,
+      "kernel": [
+       0.0,
+       0.079,
+       0.13,
+       0.207,
+       0.183,
+       0.262,
+       0.138
+      ],
+      "loglik": -793.854002,
+      "mass": {
+       "exact": 0.062905,
+       "noise": 0.937095,
+       "nonslipping_members": 0.0,
+       "q": 0.376981,
+       "slip": 0.560114
+      },
+      "n_params": 11,
+      "pi0": 0.376982,
+      "top": [
+       [
+        0.353,
+        "exact"
+       ],
+       [
+        0.142,
+        "C0 POLARITY"
+       ],
+       [
+        0.075,
+        "A3 TT[exact]"
+       ],
+       [
+        0.053,
+        "C1 GREEDY"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.853534,
+      "kernel": [
+       0.0,
+       0.097,
+       0.169,
+       0.196,
+       0.22,
+       0.185,
+       0.132
+      ],
+      "loglik": -750.954642,
+      "mass": {
+       "exact": 0.062297,
+       "noise": 0.937703,
+       "nonslipping_members": 0.0,
+       "q": 0.574668,
+       "slip": 0.363035
+      },
+      "n_params": 40,
+      "pi0": 0.574668,
+      "tau": 0.281234,
+      "top": [
+       [
+        0.284,
+        "exact"
+       ],
+       [
+        0.113,
+        "C0 POLARITY"
+       ],
+       [
+        0.028,
+        "A3 TT[exact]"
+       ],
+       [
+        0.0,
+        "D DPLL (first solution)"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.858113,
+      "eps_by_group": {
+       "A3 TT[exact]": 1.0,
+       "C0 POLARITY": 1.0,
+       "C1 GREEDY": 1.0,
+       "D DPLL (first solution)": 1.0,
+       "exact": 0.734
+      },
+      "kernel": [
+       0.0,
+       0.084,
+       0.162,
+       0.183,
+       0.23,
+       0.223,
+       0.116
+      ],
+      "loglik": -747.872921,
+      "mass": {
+       "exact": 0.065268,
+       "noise": 0.934732,
+       "nonslipping_members": 0.0,
+       "q": 0.539988,
+       "slip": 0.394744
+      },
+      "n_params": 44,
+      "pi0": 0.54,
+      "tau": 0.299289,
+      "top": [
+       [
+        0.246,
+        "exact"
+       ],
+       [
+        0.143,
+        "C0 POLARITY"
+       ],
+       [
+        0.057,
+        "A3 TT[exact]"
+       ],
+       [
+        0.015,
+        "C1 GREEDY"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.213,
+       0.192,
+       0.173,
+       0.156,
+       0.14,
+       0.126
+      ],
+      "loglik": -811.500743,
+      "mass": {
+       "exact": 0.068804,
+       "noise": 0.931196,
+       "nonslipping_members": 0.0,
+       "q": 0.59872,
+       "slip": 0.332476
+      },
+      "n_params": 7,
+      "pi0": 0.59872,
+      "top": [
+       [
+        0.304,
+        "exact"
+       ],
+       [
+        0.088,
+        "C0 POLARITY"
+       ],
+       [
+        0.009,
+        "A3 TT[exact]"
+       ],
+       [
+        0.0,
+        "D DPLL (first solution)"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 0.894658,
+      "kernel": [
+       0.0,
+       0.056,
+       0.065,
+       0.102,
+       0.055,
+       0.141,
+       0.0,
+       0.022,
+       0.062,
+       0.063,
+       0.0,
+       0.0,
+       0.0,
+       0.025,
+       0.015,
+       0.142,
+       0.0,
+       0.068,
+       0.0,
+       0.022,
+       0.154,
+       0.009,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -739.490411,
+      "mass": {
+       "exact": 0.053976,
+       "noise": 0.946024,
+       "nonslipping_members": 0.0,
+       "q": 0.487608,
+       "slip": 0.458416
+      },
+      "n_params": 61,
+      "pi0": 0.487607,
+      "tau": 0.331447,
+      "top": [
+       [
+        0.342,
+        "exact"
+       ],
+       [
+        0.117,
+        "C0 POLARITY"
+       ],
+       [
+        0.053,
+        "C1 GREEDY"
+       ],
+       [
+        0.0,
+        "D DPLL (first solution)"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc20-gpt-oss-20b-thinking-low": {
+    "answers": {
+     "correct": 0,
+     "exact_member": 0,
+     "n": 97,
+     "near_wrong_adds_drops": {
+      "0,1": 2,
+      "0,2": 3,
+      "0,3": 8,
+      "1,0": 4,
+      "1,1": 2,
+      "1,2": 5,
+      "2,0": 2,
+      "2,1": 2,
+      "3,0": 2
+     },
+     "special": 26,
+     "wrong": 97,
+     "wrong_exact_member": 0,
+     "wrong_nonexact_distance": {
+      "1": 6,
+      "2": 7,
+      "3": 17,
+      "4": 15,
+      "5": 10,
+      "6": 11,
+      ">6": 5
+     },
+     "wrong_set_fraction": {
+      "0.0": 13,
+      "0.1": 5,
+      "0.2": 6,
+      "0.3": 5,
+      "0.4": 7,
+      "0.5": 8,
+      "0.6": 14,
+      "0.7": 5,
+      "0.8": 3,
+      "0.9": 3,
+      "1.0": 2
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.188,
+       0.0,
+       0.812,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -741.166933,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.84567,
+       "slip": 0.15433
+      },
+      "n_params": 11,
+      "pi0": 0.84567,
+      "top": [
+       [
+        0.054,
+        "C1 GREEDY"
+       ],
+       [
+        0.046,
+        "exact"
+       ],
+       [
+        0.031,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.023,
+        "A3 TT[exact]"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 1.0,
+      "kernel": [
+       0.0,
+       0.103,
+       0.09,
+       0.129,
+       0.51,
+       0.0,
+       0.168
+      ],
+      "loglik": -722.750596,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.635718,
+       "slip": 0.364282
+      },
+      "n_params": 11,
+      "pi0": 0.635718,
+      "top": [
+       [
+        0.234,
+        "C0 POLARITY"
+       ],
+       [
+        0.084,
+        "exact"
+       ],
+       [
+        0.025,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.021,
+        "A3 TT[exact]"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 1.0,
+      "kernel": [
+       0.0,
+       0.096,
+       0.0,
+       0.423,
+       0.0,
+       0.481,
+       0.0
+      ],
+      "loglik": -581.177526,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.755504,
+       "slip": 0.244496
+      },
+      "n_params": 40,
+      "pi0": 0.755505,
+      "tau": 0.354784,
+      "top": [
+       [
+        0.144,
+        "C1 GREEDY"
+       ],
+       [
+        0.058,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.032,
+        "A3 TT[exact]"
+       ],
+       [
+        0.01,
+        "exact"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 1.0,
+      "eps_by_group": {
+       "A3 TT[exact]": 1.0,
+       "C0 POLARITY": 1.0,
+       "C1 GREEDY": 1.0,
+       "D DPLL (first solution)": 1.0,
+       "exact": 1.0
+      },
+      "kernel": [
+       0.0,
+       0.096,
+       0.0,
+       0.423,
+       0.0,
+       0.481,
+       0.0
+      ],
+      "loglik": -581.177526,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.755504,
+       "slip": 0.244496
+      },
+      "n_params": 44,
+      "pi0": 0.755505,
+      "tau": 0.354784,
+      "top": [
+       [
+        0.144,
+        "C1 GREEDY"
+       ],
+       [
+        0.058,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.032,
+        "A3 TT[exact]"
+       ],
+       [
+        0.01,
+        "exact"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.34,
+       0.238,
+       0.167,
+       0.117,
+       0.082,
+       0.057
+      ],
+      "loglik": -744.105329,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.86941,
+       "slip": 0.13059
+      },
+      "n_params": 7,
+      "pi0": 0.86941,
+      "top": [
+       [
+        0.052,
+        "C0 POLARITY"
+       ],
+       [
+        0.049,
+        "exact"
+       ],
+       [
+        0.03,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.0,
+        "C1 GREEDY"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 1.0,
+      "kernel": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.056,
+       0.0,
+       0.0,
+       0.1,
+       0.084,
+       0.045,
+       0.259,
+       0.0,
+       0.0,
+       0.0,
+       0.058,
+       0.0,
+       0.108,
+       0.0,
+       0.0,
+       0.05,
+       0.0,
+       0.114,
+       0.093,
+       0.0,
+       0.0,
+       0.0,
+       0.033,
+       0.0
+      ],
+      "loglik": -572.059539,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.674331,
+       "slip": 0.325669
+      },
+      "n_params": 61,
+      "pi0": 0.674332,
+      "tau": 0.397492,
+      "top": [
+       [
+        0.181,
+        "C0 POLARITY"
+       ],
+       [
+        0.113,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.032,
+        "A3 TT[exact]"
+       ],
+       [
+        0.0,
+        "exact"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc20-qwen3-14b-direct": {
+    "answers": {
+     "correct": 0,
+     "exact_member": 0,
+     "n": 100,
+     "near_wrong_adds_drops": {
+      "0,2": 3,
+      "0,3": 2,
+      "1,0": 2,
+      "1,1": 2,
+      "1,2": 3,
+      "2,0": 3,
+      "2,1": 5,
+      "3,0": 2
+     },
+     "special": 0,
+     "wrong": 100,
+     "wrong_exact_member": 0,
+     "wrong_nonexact_distance": {
+      "1": 2,
+      "2": 8,
+      "3": 12,
+      "4": 18,
+      "5": 23,
+      "6": 17,
+      ">6": 20
+     },
+     "wrong_set_fraction": {
+      "0.0": 18,
+      "0.5": 52,
+      "0.6": 5,
+      "0.7": 8,
+      "0.8": 11,
+      "1.0": 6
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.0,
+       0.236,
+       0.0,
+       0.764,
+       0.0,
+       0.0
+      ],
+      "loglik": -1036.434443,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.910226,
+       "slip": 0.089774
+      },
+      "n_params": 11,
+      "pi0": 0.910226,
+      "top": [
+       [
+        0.067,
+        "C0 POLARITY"
+       ],
+       [
+        0.017,
+        "exact"
+       ],
+       [
+        0.005,
+        "C1 GREEDY"
+       ],
+       [
+        0.0,
+        "D DPLL (first solution)"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 1.0,
+      "kernel": [
+       0.0,
+       0.0,
+       0.074,
+       0.097,
+       0.115,
+       0.372,
+       0.343
+      ],
+      "loglik": -1017.825218,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.466739,
+       "slip": 0.533261
+      },
+      "n_params": 11,
+      "pi0": 0.466739,
+      "top": [
+       [
+        0.209,
+        "A3 TT[exact]"
+       ],
+       [
+        0.194,
+        "exact"
+       ],
+       [
+        0.091,
+        "C0 POLARITY"
+       ],
+       [
+        0.037,
+        "C1 GREEDY"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 1.0,
+      "kernel": [
+       0.0,
+       0.0,
+       1.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -703.503259,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.989974,
+       "slip": 0.010026
+      },
+      "n_params": 40,
+      "pi0": 0.989974,
+      "tau": 0.0,
+      "top": [
+       [
+        0.01,
+        "C0 POLARITY"
+       ],
+       [
+        0.0,
+        "exact"
+       ],
+       [
+        0.0,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.0,
+        "C1 GREEDY"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 1.0,
+      "eps_by_group": {
+       "A3 TT[exact]": 1.0,
+       "C0 POLARITY": 1.0,
+       "C1 GREEDY": 1.0,
+       "D DPLL (first solution)": 1.0,
+       "exact": 1.0
+      },
+      "kernel": [
+       0.0,
+       0.0,
+       1.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -703.503259,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.989974,
+       "slip": 0.010026
+      },
+      "n_params": 44,
+      "pi0": 0.989974,
+      "tau": 0.0,
+      "top": [
+       [
+        0.01,
+        "C0 POLARITY"
+       ],
+       [
+        0.0,
+        "exact"
+       ],
+       [
+        0.0,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.0,
+        "C1 GREEDY"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.213,
+       0.192,
+       0.173,
+       0.156,
+       0.14,
+       0.126
+      ],
+      "loglik": -1039.241986,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.967665,
+       "slip": 0.032335
+      },
+      "n_params": 7,
+      "pi0": 0.967665,
+      "top": [
+       [
+        0.017,
+        "C0 POLARITY"
+       ],
+       [
+        0.015,
+        "exact"
+       ],
+       [
+        0.0,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.0,
+        "C1 GREEDY"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 1.0,
+      "kernel": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.29,
+       0.247,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.463,
+       0.0,
+       0.0
+      ],
+      "loglik": -699.119678,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.959544,
+       "slip": 0.040456
+      },
+      "n_params": 61,
+      "pi0": 0.959544,
+      "tau": 0.0,
+      "top": [
+       [
+        0.04,
+        "C0 POLARITY"
+       ],
+       [
+        0.0,
+        "exact"
+       ],
+       [
+        0.0,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.0,
+        "C1 GREEDY"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc20-qwen3-14b-thinking-high": {
+    "answers": {
+     "correct": 22,
+     "exact_member": 26,
+     "n": 95,
+     "near_wrong_adds_drops": {
+      "0,1": 6,
+      "0,2": 2,
+      "0,3": 2,
+      "1,0": 2,
+      "1,1": 6,
+      "1,2": 4,
+      "2,1": 1,
+      "3,0": 1
+     },
+     "special": 17,
+     "wrong": 73,
+     "wrong_exact_member": 4,
+     "wrong_nonexact_distance": {
+      "1": 8,
+      "2": 8,
+      "3": 8,
+      "4": 11,
+      "5": 12,
+      "6": 4,
+      ">6": 1
+     },
+     "wrong_set_fraction": {
+      "0.1": 3,
+      "0.2": 7,
+      "0.3": 2,
+      "0.4": 12,
+      "0.5": 12,
+      "0.6": 13,
+      "0.7": 5,
+      "0.8": 2
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.211,
+       0.153,
+       0.068,
+       0.016,
+       0.314,
+       0.238
+      ],
+      "loglik": -615.513609,
+      "mass": {
+       "exact": 0.266461,
+       "noise": 0.733539,
+       "nonslipping_members": 0.0,
+       "q": 0.358416,
+       "slip": 0.375123
+      },
+      "n_params": 11,
+      "pi0": 0.358415,
+      "top": [
+       [
+        0.315,
+        "A3 TT[exact]"
+       ],
+       [
+        0.299,
+        "exact"
+       ],
+       [
+        0.028,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.0,
+        "C1 GREEDY"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.608971,
+      "kernel": [
+       0.0,
+       0.201,
+       0.143,
+       0.065,
+       0.03,
+       0.312,
+       0.25
+      ],
+      "loglik": -614.341452,
+      "mass": {
+       "exact": 0.263207,
+       "noise": 0.736793,
+       "nonslipping_members": 0.0,
+       "q": 0.326883,
+       "slip": 0.40991
+      },
+      "n_params": 11,
+      "pi0": 0.326885,
+      "top": [
+       [
+        0.329,
+        "A3 TT[exact]"
+       ],
+       [
+        0.311,
+        "exact"
+       ],
+       [
+        0.033,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.0,
+        "C1 GREEDY"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.564259,
+      "kernel": [
+       0.0,
+       0.226,
+       0.177,
+       0.069,
+       0.0,
+       0.348,
+       0.18
+      ],
+      "loglik": -595.921421,
+      "mass": {
+       "exact": 0.263468,
+       "noise": 0.736532,
+       "nonslipping_members": 0.0,
+       "q": 0.395358,
+       "slip": 0.341175
+      },
+      "n_params": 40,
+      "pi0": 0.395358,
+      "tau": 0.452622,
+      "top": [
+       [
+        0.312,
+        "A3 TT[exact]"
+       ],
+       [
+        0.255,
+        "exact"
+       ],
+       [
+        0.039,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.0,
+        "C1 GREEDY"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.571203,
+      "eps_by_group": {
+       "A3 TT[exact]": 0.657,
+       "C0 POLARITY": 1.0,
+       "C1 GREEDY": 1.0,
+       "D DPLL (first solution)": 1.0,
+       "exact": 0.0
+      },
+      "kernel": [
+       0.0,
+       0.216,
+       0.179,
+       0.114,
+       0.0,
+       0.28,
+       0.211
+      ],
+      "loglik": -592.544881,
+      "mass": {
+       "exact": 0.26233,
+       "noise": 0.73767,
+       "nonslipping_members": 0.0,
+       "q": 0.388219,
+       "slip": 0.349451
+      },
+      "n_params": 44,
+      "pi0": 0.388219,
+      "tau": 0.460945,
+      "top": [
+       [
+        0.304,
+        "A3 TT[exact]"
+       ],
+       [
+        0.158,
+        "exact"
+       ],
+       [
+        0.15,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.0,
+        "C1 GREEDY"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.213,
+       0.192,
+       0.173,
+       0.156,
+       0.14,
+       0.126
+      ],
+      "loglik": -618.890106,
+      "mass": {
+       "exact": 0.265791,
+       "noise": 0.734209,
+       "nonslipping_members": 0.0,
+       "q": 0.394207,
+       "slip": 0.340003
+      },
+      "n_params": 7,
+      "pi0": 0.394207,
+      "top": [
+       [
+        0.297,
+        "exact"
+       ],
+       [
+        0.27,
+        "A3 TT[exact]"
+       ],
+       [
+        0.039,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.0,
+        "C1 GREEDY"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 0.580404,
+      "kernel": [
+       0.0,
+       0.176,
+       0.035,
+       0.035,
+       0.0,
+       0.0,
+       0.0,
+       0.064,
+       0.136,
+       0.04,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.005,
+       0.0,
+       0.052,
+       0.153,
+       0.0,
+       0.0,
+       0.156,
+       0.148,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -590.651548,
+      "mass": {
+       "exact": 0.261443,
+       "noise": 0.738557,
+       "nonslipping_members": 0.0,
+       "q": 0.376918,
+       "slip": 0.361639
+      },
+      "n_params": 61,
+      "pi0": 0.376918,
+      "tau": 0.474765,
+      "top": [
+       [
+        0.364,
+        "A3 TT[exact]"
+       ],
+       [
+        0.226,
+        "exact"
+       ],
+       [
+        0.033,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.0,
+        "C1 GREEDY"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc20-qwen3-32b-direct": {
+    "answers": {
+     "correct": 0,
+     "exact_member": 0,
+     "n": 95,
+     "near_wrong_adds_drops": {
+      "0,2": 1,
+      "0,3": 1,
+      "1,0": 3,
+      "1,1": 1,
+      "1,2": 8,
+      "2,0": 6,
+      "2,1": 2,
+      "3,0": 1
+     },
+     "special": 3,
+     "wrong": 95,
+     "wrong_exact_member": 0,
+     "wrong_nonexact_distance": {
+      "1": 3,
+      "2": 8,
+      "3": 12,
+      "4": 16,
+      "5": 22,
+      "6": 8,
+      ">6": 23
+     },
+     "wrong_set_fraction": {
+      "0.3": 2,
+      "0.4": 6,
+      "0.5": 45,
+      "0.6": 22,
+      "0.7": 6,
+      "0.8": 5,
+      "0.9": 3,
+      "1.0": 3
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.0,
+       0.411,
+       0.3,
+       0.0,
+       0.289,
+       0.0
+      ],
+      "loglik": -960.96903,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.897279,
+       "slip": 0.102721
+      },
+      "n_params": 11,
+      "pi0": 0.897285,
+      "top": [
+       [
+        0.042,
+        "C0 POLARITY"
+       ],
+       [
+        0.035,
+        "exact"
+       ],
+       [
+        0.026,
+        "A3 TT[exact]"
+       ],
+       [
+        0.0,
+        "D DPLL (first solution)"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 1.0,
+      "kernel": [
+       0.0,
+       0.0,
+       0.101,
+       0.14,
+       0.056,
+       0.487,
+       0.216
+      ],
+      "loglik": -941.312546,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.526262,
+       "slip": 0.473738
+      },
+      "n_params": 11,
+      "pi0": 0.526262,
+      "top": [
+       [
+        0.193,
+        "exact"
+       ],
+       [
+        0.147,
+        "A3 TT[exact]"
+       ],
+       [
+        0.134,
+        "C0 POLARITY"
+       ],
+       [
+        0.0,
+        "D DPLL (first solution)"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 1.0,
+      "kernel": [
+       0.0,
+       0.0,
+       1.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -848.299499,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.986773,
+       "slip": 0.013227
+      },
+      "n_params": 40,
+      "pi0": 0.986773,
+      "tau": 0.032002,
+      "top": [
+       [
+        0.013,
+        "C0 POLARITY"
+       ],
+       [
+        0.0,
+        "exact"
+       ],
+       [
+        0.0,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.0,
+        "C1 GREEDY"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 1.0,
+      "eps_by_group": {
+       "A3 TT[exact]": 1.0,
+       "C0 POLARITY": 1.0,
+       "C1 GREEDY": 1.0,
+       "D DPLL (first solution)": 1.0,
+       "exact": 1.0
+      },
+      "kernel": [
+       0.0,
+       0.0,
+       1.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -848.299499,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.986773,
+       "slip": 0.013227
+      },
+      "n_params": 44,
+      "pi0": 0.986773,
+      "tau": 0.032002,
+      "top": [
+       [
+        0.013,
+        "C0 POLARITY"
+       ],
+       [
+        0.0,
+        "exact"
+       ],
+       [
+        0.0,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.0,
+        "C1 GREEDY"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.213,
+       0.192,
+       0.173,
+       0.156,
+       0.14,
+       0.126
+      ],
+      "loglik": -963.041238,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.941979,
+       "slip": 0.058021
+      },
+      "n_params": 7,
+      "pi0": 0.941978,
+      "top": [
+       [
+        0.024,
+        "exact"
+       ],
+       [
+        0.024,
+        "C0 POLARITY"
+       ],
+       [
+        0.009,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.0,
+        "C1 GREEDY"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 1.0,
+      "kernel": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.164,
+       0.0,
+       0.259,
+       0.064,
+       0.0,
+       0.0,
+       0.0,
+       0.119,
+       0.223,
+       0.0,
+       0.0,
+       0.172,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -846.749349,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.896948,
+       "slip": 0.103052
+      },
+      "n_params": 61,
+      "pi0": 0.896948,
+      "tau": 0.035207,
+      "top": [
+       [
+        0.103,
+        "exact"
+       ],
+       [
+        0.0,
+        "D DPLL (first solution)"
+       ],
+       [
+        0.0,
+        "C1 GREEDY"
+       ],
+       [
+        0.0,
+        "C0 POLARITY"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc20-qwen3-32b-thinking-high": {
+    "answers": {
+     "correct": 20,
+     "exact_member": 25,
+     "n": 95,
+     "near_wrong_adds_drops": {
+      "0,1": 5,
+      "0,2": 3,
+      "0,3": 1,
+      "1,0": 4,
+      "1,1": 4,
+      "1,2": 3,
+      "2,0": 2,
+      "2,1": 6,
+      "3,0": 1
+     },
+     "special": 9,
+     "wrong": 75,
+     "wrong_exact_member": 5,
+     "wrong_nonexact_distance": {
+      "1": 9,
+      "2": 9,
+      "3": 11,
+      "4": 15,
+      "5": 10,
+      "6": 5,
+      ">6": 2
+     },
+     "wrong_set_fraction": {
+      "0.0": 1,
+      "0.2": 8,
+      "0.3": 5,
+      "0.4": 14,
+      "0.5": 8,
+      "0.6": 20,
+      "0.7": 5,
+      "0.8": 5
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.178,
+       0.148,
+       0.129,
+       0.07,
+       0.22,
+       0.255
+      ],
+      "loglik": -712.328653,
+      "mass": {
+       "exact": 0.257647,
+       "noise": 0.742353,
+       "nonslipping_members": 0.0,
+       "q": 0.294724,
+       "slip": 0.447629
+      },
+      "n_params": 11,
+      "pi0": 0.294724,
+      "top": [
+       [
+        0.354,
+        "exact"
+       ],
+       [
+        0.252,
+        "A3 TT[exact]"
+       ],
+       [
+        0.079,
+        "C1 GREEDY"
+       ],
+       [
+        0.021,
+        "D DPLL (first solution)"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.670958,
+      "kernel": [
+       0.0,
+       0.16,
+       0.137,
+       0.118,
+       0.088,
+       0.233,
+       0.263
+      ],
+      "loglik": -709.055897,
+      "mass": {
+       "exact": 0.253332,
+       "noise": 0.746668,
+       "nonslipping_members": 0.0,
+       "q": 0.230089,
+       "slip": 0.516579
+      },
+      "n_params": 11,
+      "pi0": 0.230091,
+      "top": [
+       [
+        0.374,
+        "exact"
+       ],
+       [
+        0.267,
+        "A3 TT[exact]"
+       ],
+       [
+        0.092,
+        "C1 GREEDY"
+       ],
+       [
+        0.023,
+        "D DPLL (first solution)"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.582913,
+      "kernel": [
+       0.0,
+       0.242,
+       0.171,
+       0.128,
+       0.048,
+       0.158,
+       0.253
+      ],
+      "loglik": -692.438568,
+      "mass": {
+       "exact": 0.253459,
+       "noise": 0.746541,
+       "nonslipping_members": 0.0,
+       "q": 0.392308,
+       "slip": 0.354233
+      },
+      "n_params": 40,
+      "pi0": 0.39231,
+      "tau": 0.241485,
+      "top": [
+       [
+        0.305,
+        "exact"
+       ],
+       [
+        0.221,
+        "A3 TT[exact]"
+       ],
+       [
+        0.064,
+        "C1 GREEDY"
+       ],
+       [
+        0.017,
+        "D DPLL (first solution)"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.604987,
+      "eps_by_group": {
+       "A3 TT[exact]": 0.572,
+       "C0 POLARITY": 1.0,
+       "C1 GREEDY": 1.0,
+       "D DPLL (first solution)": 0.0,
+       "exact": 0.485
+      },
+      "kernel": [
+       0.0,
+       0.204,
+       0.181,
+       0.136,
+       0.148,
+       0.121,
+       0.208
+      ],
+      "loglik": -687.377804,
+      "mass": {
+       "exact": 0.256282,
+       "noise": 0.743718,
+       "nonslipping_members": 0.0,
+       "q": 0.351206,
+       "slip": 0.392512
+      },
+      "n_params": 44,
+      "pi0": 0.351207,
+      "tau": 0.269746,
+      "top": [
+       [
+        0.29,
+        "exact"
+       ],
+       [
+        0.22,
+        "A3 TT[exact]"
+       ],
+       [
+        0.104,
+        "C1 GREEDY"
+       ],
+       [
+        0.022,
+        "C0 POLARITY"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.213,
+       0.192,
+       0.173,
+       0.156,
+       0.14,
+       0.126
+      ],
+      "loglik": -714.137509,
+      "mass": {
+       "exact": 0.256489,
+       "noise": 0.743511,
+       "nonslipping_members": 0.0,
+       "q": 0.33562,
+       "slip": 0.407892
+      },
+      "n_params": 7,
+      "pi0": 0.33562,
+      "top": [
+       [
+        0.33,
+        "exact"
+       ],
+       [
+        0.241,
+        "A3 TT[exact]"
+       ],
+       [
+        0.082,
+        "C1 GREEDY"
+       ],
+       [
+        0.011,
+        "D DPLL (first solution)"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 0.526966,
+      "kernel": [
+       0.0,
+       0.175,
+       0.06,
+       0.0,
+       0.0,
+       0.066,
+       0.0,
+       0.131,
+       0.054,
+       0.0,
+       0.0,
+       0.0,
+       0.054,
+       0.049,
+       0.135,
+       0.035,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.022,
+       0.219,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -687.460734,
+      "mass": {
+       "exact": 0.253742,
+       "noise": 0.746258,
+       "nonslipping_members": 0.0,
+       "q": 0.463581,
+       "slip": 0.282677
+      },
+      "n_params": 61,
+      "pi0": 0.463587,
+      "tau": 0.204356,
+      "top": [
+       [
+        0.296,
+        "exact"
+       ],
+       [
+        0.206,
+        "A3 TT[exact]"
+       ],
+       [
+        0.027,
+        "C1 GREEDY"
+       ],
+       [
+        0.008,
+        "D DPLL (first solution)"
+       ]
+      ]
+     }
+    }
+   }
+  },
+  "C_E2/colouring": {
+   "2026-11-18-pc20-gpt-oss-120b-thinking-low": {
+    "answers": {
+     "correct": 63,
+     "exact_member": 127,
+     "member_blocks_share": {
+      "3": 0.272,
+      "4": 0.622,
+      "5": 0.103,
+      "6": 0.003
+     },
+     "n": 300,
+     "special": 0,
+     "wrong": 237,
+     "wrong_blocks": {
+      "3": 4,
+      "4": 180,
+      "5": 48,
+      "6": 5
+     },
+     "wrong_exact_member": 64,
+     "wrong_nonexact_distance": {
+      "1": 13,
+      "2": 30,
+      "3": 40,
+      "4": 35,
+      "5": 30,
+      "6": 21,
+      ">6": 4
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.412051,
+      "kernel": [
+       0.0,
+       0.147,
+       0.152,
+       0.216,
+       0.142,
+       0.096,
+       0.248
+      ],
+      "loglik": -2373.904759,
+      "mass": {
+       "exact": 0.338968,
+       "noise": 0.254206,
+       "nonslipping_members": 0.406825,
+       "q": 0.016648,
+       "slip": 0.237559
+      },
+      "n_params": 15,
+      "pi0": 0.016648,
+      "top": [
+       [
+        0.407,
+        "RO-FF (C3)"
+       ],
+       [
+        0.39,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.066,
+        "EXACT"
+       ],
+       [
+        0.059,
+        "DPLL-LIST (D)"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.412051,
+      "kernel": [
+       0.0,
+       0.147,
+       0.152,
+       0.216,
+       0.142,
+       0.096,
+       0.248
+      ],
+      "loglik": -2373.904759,
+      "mass": {
+       "exact": 0.338968,
+       "noise": 0.254206,
+       "nonslipping_members": 0.406825,
+       "q": 0.016648,
+       "slip": 0.237559
+      },
+      "n_params": 15,
+      "pi0": 0.016648,
+      "top": [
+       [
+        0.407,
+        "RO-FF (C3)"
+       ],
+       [
+        0.39,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.066,
+        "EXACT"
+       ],
+       [
+        0.059,
+        "DPLL-LIST (D)"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.409295,
+      "kernel": [
+       0.0,
+       0.149,
+       0.153,
+       0.218,
+       0.144,
+       0.096,
+       0.239
+      ],
+      "loglik": -2326.8272,
+      "mass": {
+       "exact": 0.338807,
+       "noise": 0.254262,
+       "nonslipping_members": 0.406931,
+       "q": 0.019505,
+       "slip": 0.234757
+      },
+      "n_params": 30,
+      "pi0": 0.019505,
+      "tau": 0.0,
+      "top": [
+       [
+        0.407,
+        "RO-FF (C3)"
+       ],
+       [
+        0.389,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.064,
+        "EXACT"
+       ],
+       [
+        0.06,
+        "DPLL-LIST (D)"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.411879,
+      "eps_by_group": {
+       "DPLL-LIST (D)": 0.332,
+       "DSATUR": 1.0,
+       "DSATUR-LABEL": 1.0,
+       "EXACT": 0.623,
+       "FF-LABEL": 1.0,
+       "FF-LIST = GREEDY+REPAIR-LIST (C->F)": 0.279,
+       "LF": 1.0,
+       "NOISY-EXACT": 0.1,
+       "RO-FF (C3)": 0.1
+      },
+      "kernel": [
+       0.0,
+       0.148,
+       0.157,
+       0.229,
+       0.133,
+       0.1,
+       0.233
+      ],
+      "loglik": -2305.063497,
+      "mass": {
+       "exact": 0.336194,
+       "noise": 0.254196,
+       "nonslipping_members": 0.40961,
+       "q": 0.018749,
+       "slip": 0.235447
+      },
+      "n_params": 36,
+      "pi0": 0.018749,
+      "tau": 0.0,
+      "top": [
+       [
+        0.41,
+        "RO-FF (C3)"
+       ],
+       [
+        0.383,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.065,
+        "EXACT"
+       ],
+       [
+        0.053,
+        "DPLL-LIST (D)"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.413319,
+      "kernel": [
+       0.0,
+       0.213,
+       0.192,
+       0.173,
+       0.156,
+       0.14,
+       0.126
+      ],
+      "loglik": -2377.806816,
+      "mass": {
+       "exact": 0.338637,
+       "noise": 0.255219,
+       "nonslipping_members": 0.406144,
+       "q": 0.016648,
+       "slip": 0.238571
+      },
+      "n_params": 11,
+      "pi0": 0.016648,
+      "top": [
+       [
+        0.406,
+        "RO-FF (C3)"
+       ],
+       [
+        0.389,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.067,
+        "EXACT"
+       ],
+       [
+        0.059,
+        "DPLL-LIST (D)"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc20-gpt-oss-20b-thinking-low": {
+    "answers": {
+     "correct": 43,
+     "exact_member": 84,
+     "member_blocks_share": {
+      "3": 0.273,
+      "4": 0.621,
+      "5": 0.103,
+      "6": 0.003
+     },
+     "n": 299,
+     "special": 0,
+     "wrong": 256,
+     "wrong_blocks": {
+      "3": 1,
+      "4": 173,
+      "5": 70,
+      "6": 12
+     },
+     "wrong_exact_member": 41,
+     "wrong_nonexact_distance": {
+      "1": 28,
+      "2": 31,
+      "3": 26,
+      "4": 40,
+      "5": 46,
+      "6": 19,
+      ">6": 25
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.198,
+       0.117,
+       0.084,
+       0.125,
+       0.273,
+       0.204
+      ],
+      "loglik": -3695.515855,
+      "mass": {
+       "exact": 0.221858,
+       "noise": 0.50273,
+       "nonslipping_members": 0.275412,
+       "q": 0.086944,
+       "slip": 0.415786
+      },
+      "n_params": 15,
+      "pi0": 0.086944,
+      "top": [
+       [
+        0.347,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.275,
+        "RO-FF (C3)"
+       ],
+       [
+        0.148,
+        "EXACT"
+       ],
+       [
+        0.039,
+        "DSATUR-LABEL"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.661797,
+      "kernel": [
+       0.0,
+       0.201,
+       0.119,
+       0.083,
+       0.125,
+       0.271,
+       0.202
+      ],
+      "loglik": -3686.147087,
+      "mass": {
+       "exact": 0.214105,
+       "noise": 0.504824,
+       "nonslipping_members": 0.281072,
+       "q": 0.085863,
+       "slip": 0.418961
+      },
+      "n_params": 15,
+      "pi0": 0.085863,
+      "top": [
+       [
+        0.348,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.277,
+        "RO-FF (C3)"
+       ],
+       [
+        0.141,
+        "EXACT"
+       ],
+       [
+        0.04,
+        "DSATUR-LABEL"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.650763,
+      "kernel": [
+       0.0,
+       0.209,
+       0.124,
+       0.087,
+       0.128,
+       0.28,
+       0.172
+      ],
+      "loglik": -3431.236621,
+      "mass": {
+       "exact": 0.216253,
+       "noise": 0.506216,
+       "nonslipping_members": 0.277531,
+       "q": 0.103253,
+       "slip": 0.402963
+      },
+      "n_params": 30,
+      "pi0": 0.103253,
+      "tau": 0.0,
+      "top": [
+       [
+        0.346,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.278,
+        "RO-FF (C3)"
+       ],
+       [
+        0.13,
+        "EXACT"
+       ],
+       [
+        0.04,
+        "DSATUR-LABEL"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.652082,
+      "eps_by_group": {
+       "DPLL-LIST (D)": 1.0,
+       "DSATUR": 0.0,
+       "DSATUR-LABEL": 0.931,
+       "EXACT": 0.539,
+       "FF-LABEL": 1.0,
+       "FF-LIST = GREEDY+REPAIR-LIST (C->F)": 0.544,
+       "LF": 0.92,
+       "NOISY-EXACT": 0.1,
+       "RO-FF (C3)": 0.1
+      },
+      "kernel": [
+       0.0,
+       0.205,
+       0.124,
+       0.086,
+       0.131,
+       0.289,
+       0.165
+      ],
+      "loglik": -3418.464652,
+      "mass": {
+       "exact": 0.214422,
+       "noise": 0.504741,
+       "nonslipping_members": 0.280837,
+       "q": 0.102864,
+       "slip": 0.401877
+      },
+      "n_params": 36,
+      "pi0": 0.102864,
+      "tau": 0.0,
+      "top": [
+       [
+        0.34,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.281,
+        "RO-FF (C3)"
+       ],
+       [
+        0.117,
+        "EXACT"
+       ],
+       [
+        0.042,
+        "DSATUR-LABEL"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.213,
+       0.192,
+       0.173,
+       0.156,
+       0.14,
+       0.126
+      ],
+      "loglik": -3707.62933,
+      "mass": {
+       "exact": 0.221084,
+       "noise": 0.504196,
+       "nonslipping_members": 0.274719,
+       "q": 0.086945,
+       "slip": 0.417252
+      },
+      "n_params": 11,
+      "pi0": 0.086945,
+      "top": [
+       [
+        0.346,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.275,
+        "RO-FF (C3)"
+       ],
+       [
+        0.15,
+        "EXACT"
+       ],
+       [
+        0.04,
+        "DSATUR-LABEL"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc20-qwen3-14b-direct": {
+    "answers": {
+     "correct": 0,
+     "exact_member": 0,
+     "member_blocks_share": {
+      "3": 0.272,
+      "4": 0.622,
+      "5": 0.103,
+      "6": 0.003
+     },
+     "n": 300,
+     "special": 0,
+     "wrong": 300,
+     "wrong_blocks": {
+      "10": 5,
+      "11": 4,
+      "13": 7,
+      "14": 6,
+      "15": 8,
+      "16": 42,
+      "3": 5,
+      "4": 81,
+      "5": 34,
+      "6": 63,
+      "7": 36,
+      "8": 6,
+      "9": 3
+     },
+     "wrong_exact_member": 0,
+     "wrong_nonexact_distance": {
+      "1": 1,
+      "2": 1,
+      "3": 7,
+      "4": 8,
+      "5": 14,
+      "6": 38,
+      ">6": 231
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.016,
+       0.0,
+       0.0,
+       0.0,
+       0.051,
+       0.934
+      ],
+      "loglik": -7374.254079,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.80411,
+       "slip": 0.19589
+      },
+      "n_params": 15,
+      "pi0": 0.80411,
+      "top": [
+       [
+        0.137,
+        "EXACT"
+       ],
+       [
+        0.026,
+        "LF"
+       ],
+       [
+        0.024,
+        "FF-LABEL"
+       ],
+       [
+        0.01,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 1.0,
+      "kernel": [
+       0.0,
+       0.016,
+       0.0,
+       0.0,
+       0.0,
+       0.05,
+       0.934
+      ],
+      "loglik": -7333.481385,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.803766,
+       "slip": 0.196234
+      },
+      "n_params": 15,
+      "pi0": 0.803766,
+      "top": [
+       [
+        0.137,
+        "EXACT"
+       ],
+       [
+        0.026,
+        "LF"
+       ],
+       [
+        0.024,
+        "FF-LABEL"
+       ],
+       [
+        0.01,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 1.0,
+      "kernel": [
+       0.0,
+       0.06,
+       0.0,
+       0.094,
+       0.0,
+       0.0,
+       0.847
+      ],
+      "loglik": -5610.376778,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.953021,
+       "slip": 0.046979
+      },
+      "n_params": 30,
+      "pi0": 0.953021,
+      "tau": 0.0,
+      "top": [
+       [
+        0.027,
+        "EXACT"
+       ],
+       [
+        0.01,
+        "DPLL-LIST (D)"
+       ],
+       [
+        0.006,
+        "FF-LABEL"
+       ],
+       [
+        0.004,
+        "DSATUR-LABEL"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 1.0,
+      "eps_by_group": {
+       "DPLL-LIST (D)": 1.0,
+       "DSATUR": 1.0,
+       "DSATUR-LABEL": 1.0,
+       "EXACT": 1.0,
+       "FF-LABEL": 1.0,
+       "FF-LIST = GREEDY+REPAIR-LIST (C->F)": 1.0,
+       "LF": 1.0,
+       "NOISY-EXACT": 0.1,
+       "RO-FF (C3)": 0.1
+      },
+      "kernel": [
+       0.0,
+       0.06,
+       0.0,
+       0.094,
+       0.0,
+       0.0,
+       0.847
+      ],
+      "loglik": -5610.376776,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.953026,
+       "slip": 0.046974
+      },
+      "n_params": 36,
+      "pi0": 0.953025,
+      "tau": 0.0,
+      "top": [
+       [
+        0.027,
+        "EXACT"
+       ],
+       [
+        0.01,
+        "DPLL-LIST (D)"
+       ],
+       [
+        0.006,
+        "FF-LABEL"
+       ],
+       [
+        0.004,
+        "DSATUR-LABEL"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.213,
+       0.192,
+       0.173,
+       0.156,
+       0.14,
+       0.126
+      ],
+      "loglik": -7447.410028,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.805836,
+       "slip": 0.194164
+      },
+      "n_params": 11,
+      "pi0": 0.805836,
+      "top": [
+       [
+        0.137,
+        "EXACT"
+       ],
+       [
+        0.024,
+        "LF"
+       ],
+       [
+        0.021,
+        "FF-LABEL"
+       ],
+       [
+        0.007,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc20-qwen3-14b-thinking-high": {
+    "answers": {
+     "correct": 98,
+     "exact_member": 209,
+     "member_blocks_share": {
+      "3": 0.273,
+      "4": 0.62,
+      "5": 0.104,
+      "6": 0.003
+     },
+     "n": 299,
+     "special": 0,
+     "wrong": 201,
+     "wrong_blocks": {
+      "3": 1,
+      "4": 185,
+      "5": 14,
+      "6": 1
+     },
+     "wrong_exact_member": 111,
+     "wrong_nonexact_distance": {
+      "1": 6,
+      "2": 21,
+      "3": 17,
+      "4": 23,
+      "5": 13,
+      "6": 9,
+      ">6": 1
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.128515,
+      "kernel": [
+       0.0,
+       0.267,
+       0.088,
+       0.164,
+       0.252,
+       0.173,
+       0.056
+      ],
+      "loglik": -1352.51415,
+      "mass": {
+       "exact": 0.567214,
+       "noise": 0.083645,
+       "nonslipping_members": 0.349142,
+       "q": 0.0,
+       "slip": 0.083645
+      },
+      "n_params": 15,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.464,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.349,
+        "RO-FF (C3)"
+       ],
+       [
+        0.077,
+        "LF"
+       ],
+       [
+        0.051,
+        "DPLL-LIST (D)"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.128515,
+      "kernel": [
+       0.0,
+       0.267,
+       0.088,
+       0.164,
+       0.252,
+       0.173,
+       0.056
+      ],
+      "loglik": -1352.51415,
+      "mass": {
+       "exact": 0.567214,
+       "noise": 0.083645,
+       "nonslipping_members": 0.349142,
+       "q": 0.0,
+       "slip": 0.083645
+      },
+      "n_params": 15,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.464,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.349,
+        "RO-FF (C3)"
+       ],
+       [
+        0.077,
+        "LF"
+       ],
+       [
+        0.051,
+        "DPLL-LIST (D)"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.128515,
+      "kernel": [
+       0.0,
+       0.267,
+       0.088,
+       0.164,
+       0.252,
+       0.173,
+       0.056
+      ],
+      "loglik": -1352.51415,
+      "mass": {
+       "exact": 0.567214,
+       "noise": 0.083645,
+       "nonslipping_members": 0.349142,
+       "q": 0.0,
+       "slip": 0.083645
+      },
+      "n_params": 30,
+      "pi0": 0.0,
+      "tau": 0.0,
+      "top": [
+       [
+        0.464,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.349,
+        "RO-FF (C3)"
+       ],
+       [
+        0.077,
+        "LF"
+       ],
+       [
+        0.051,
+        "DPLL-LIST (D)"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.128973,
+      "eps_by_group": {
+       "DPLL-LIST (D)": 0.0,
+       "DSATUR": 0.0,
+       "DSATUR-LABEL": 0.272,
+       "EXACT": 0.371,
+       "FF-LABEL": 1.0,
+       "FF-LIST = GREEDY+REPAIR-LIST (C->F)": 0.109,
+       "LF": 0.233,
+       "NOISY-EXACT": 0.1,
+       "RO-FF (C3)": 0.1
+      },
+      "kernel": [
+       0.0,
+       0.268,
+       0.096,
+       0.182,
+       0.229,
+       0.171,
+       0.054
+      ],
+      "loglik": -1347.828679,
+      "mass": {
+       "exact": 0.565802,
+       "noise": 0.083778,
+       "nonslipping_members": 0.350419,
+       "q": 0.0,
+       "slip": 0.083778
+      },
+      "n_params": 36,
+      "pi0": 0.0,
+      "tau": 0.0,
+      "top": [
+       [
+        0.461,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.35,
+        "RO-FF (C3)"
+       ],
+       [
+        0.078,
+        "LF"
+       ],
+       [
+        0.052,
+        "DPLL-LIST (D)"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.128475,
+      "kernel": [
+       0.0,
+       0.213,
+       0.192,
+       0.173,
+       0.156,
+       0.14,
+       0.126
+      ],
+      "loglik": -1354.27071,
+      "mass": {
+       "exact": 0.567409,
+       "noise": 0.083644,
+       "nonslipping_members": 0.348946,
+       "q": 0.0,
+       "slip": 0.083644
+      },
+      "n_params": 11,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.464,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.349,
+        "RO-FF (C3)"
+       ],
+       [
+        0.078,
+        "LF"
+       ],
+       [
+        0.051,
+        "DPLL-LIST (D)"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc20-qwen3-32b-direct": {
+    "answers": {
+     "correct": 0,
+     "exact_member": 0,
+     "member_blocks_share": {
+      "3": 0.272,
+      "4": 0.622,
+      "5": 0.103,
+      "6": 0.003
+     },
+     "n": 300,
+     "special": 0,
+     "wrong": 300,
+     "wrong_blocks": {
+      "2": 1,
+      "3": 202,
+      "4": 89,
+      "5": 2,
+      "6": 4,
+      "7": 1,
+      "8": 1
+     },
+     "wrong_exact_member": 0,
+     "wrong_nonexact_distance": {
+      "1": 1,
+      "2": 8,
+      "3": 24,
+      "4": 49,
+      "5": 51,
+      "6": 68,
+      ">6": 99
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.0,
+       0.008,
+       0.084,
+       0.129,
+       0.12,
+       0.658
+      ],
+      "loglik": -7487.89922,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.333334,
+       "slip": 0.666666
+      },
+      "n_params": 15,
+      "pi0": 0.333334,
+      "top": [
+       [
+        0.402,
+        "EXACT"
+       ],
+       [
+        0.106,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.054,
+        "LF"
+       ],
+       [
+        0.044,
+        "FF-LABEL"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 1.0,
+      "kernel": [
+       0.0,
+       0.0,
+       0.008,
+       0.084,
+       0.129,
+       0.12,
+       0.658
+      ],
+      "loglik": -7349.269899,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.333334,
+       "slip": 0.666666
+      },
+      "n_params": 15,
+      "pi0": 0.333334,
+      "top": [
+       [
+        0.402,
+        "EXACT"
+       ],
+       [
+        0.106,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.054,
+        "LF"
+       ],
+       [
+        0.044,
+        "FF-LABEL"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 1.0,
+      "kernel": [
+       0.0,
+       0.0,
+       0.034,
+       0.338,
+       0.239,
+       0.19,
+       0.199
+      ],
+      "loglik": -5210.941142,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.82932,
+       "slip": 0.17068
+      },
+      "n_params": 30,
+      "pi0": 0.829321,
+      "tau": 0.0,
+      "top": [
+       [
+        0.092,
+        "EXACT"
+       ],
+       [
+        0.029,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.02,
+        "DSATUR"
+       ],
+       [
+        0.015,
+        "DPLL-LIST (D)"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 1.0,
+      "eps_by_group": {
+       "DPLL-LIST (D)": 1.0,
+       "DSATUR": 1.0,
+       "DSATUR-LABEL": 1.0,
+       "EXACT": 1.0,
+       "FF-LABEL": 1.0,
+       "FF-LIST = GREEDY+REPAIR-LIST (C->F)": 1.0,
+       "LF": 1.0,
+       "NOISY-EXACT": 0.1,
+       "RO-FF (C3)": 0.1
+      },
+      "kernel": [
+       0.0,
+       0.0,
+       0.034,
+       0.338,
+       0.239,
+       0.19,
+       0.199
+      ],
+      "loglik": -5210.941142,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.82932,
+       "slip": 0.17068
+      },
+      "n_params": 36,
+      "pi0": 0.829321,
+      "tau": 0.0,
+      "top": [
+       [
+        0.092,
+        "EXACT"
+       ],
+       [
+        0.029,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.02,
+        "DSATUR"
+       ],
+       [
+        0.015,
+        "DPLL-LIST (D)"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.213,
+       0.192,
+       0.173,
+       0.156,
+       0.14,
+       0.126
+      ],
+      "loglik": -7642.167702,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.333337,
+       "slip": 0.666663
+      },
+      "n_params": 11,
+      "pi0": 0.333337,
+      "top": [
+       [
+        0.405,
+        "EXACT"
+       ],
+       [
+        0.104,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.053,
+        "LF"
+       ],
+       [
+        0.044,
+        "FF-LABEL"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc20-qwen3-32b-thinking-high": {
+    "answers": {
+     "correct": 106,
+     "exact_member": 206,
+     "member_blocks_share": {
+      "3": 0.275,
+      "4": 0.619,
+      "5": 0.103,
+      "6": 0.003
+     },
+     "n": 290,
+     "special": 0,
+     "wrong": 184,
+     "wrong_blocks": {
+      "3": 2,
+      "4": 170,
+      "5": 12
+     },
+     "wrong_exact_member": 100,
+     "wrong_nonexact_distance": {
+      "1": 12,
+      "2": 14,
+      "3": 25,
+      "4": 17,
+      "5": 12,
+      "6": 4
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.146242,
+      "kernel": [
+       0.0,
+       0.306,
+       0.221,
+       0.164,
+       0.166,
+       0.142,
+       0.0
+      ],
+      "loglik": -1332.215953,
+      "mass": {
+       "exact": 0.59633,
+       "noise": 0.102147,
+       "nonslipping_members": 0.301523,
+       "q": 0.0,
+       "slip": 0.102147
+      },
+      "n_params": 15,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.373,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.302,
+        "RO-FF (C3)"
+       ],
+       [
+        0.118,
+        "DPLL-LIST (D)"
+       ],
+       [
+        0.088,
+        "LF"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.146242,
+      "kernel": [
+       0.0,
+       0.306,
+       0.221,
+       0.164,
+       0.166,
+       0.142,
+       0.0
+      ],
+      "loglik": -1332.215953,
+      "mass": {
+       "exact": 0.59633,
+       "noise": 0.102147,
+       "nonslipping_members": 0.301523,
+       "q": 0.0,
+       "slip": 0.102147
+      },
+      "n_params": 15,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.373,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.302,
+        "RO-FF (C3)"
+       ],
+       [
+        0.118,
+        "DPLL-LIST (D)"
+       ],
+       [
+        0.088,
+        "LF"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.146242,
+      "kernel": [
+       0.0,
+       0.306,
+       0.221,
+       0.164,
+       0.166,
+       0.142,
+       0.0
+      ],
+      "loglik": -1332.215952,
+      "mass": {
+       "exact": 0.59633,
+       "noise": 0.102147,
+       "nonslipping_members": 0.301523,
+       "q": 0.0,
+       "slip": 0.102147
+      },
+      "n_params": 30,
+      "pi0": 0.0,
+      "tau": 0.0,
+      "top": [
+       [
+        0.373,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.302,
+        "RO-FF (C3)"
+       ],
+       [
+        0.118,
+        "DPLL-LIST (D)"
+       ],
+       [
+        0.088,
+        "LF"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.146256,
+      "eps_by_group": {
+       "DPLL-LIST (D)": 0.158,
+       "DSATUR": 0.395,
+       "DSATUR-LABEL": 0.521,
+       "EXACT": 0.191,
+       "FF-LABEL": 1.0,
+       "FF-LIST = GREEDY+REPAIR-LIST (C->F)": 0.116,
+       "LF": 0.055,
+       "NOISY-EXACT": 0.1,
+       "RO-FF (C3)": 0.1
+      },
+      "kernel": [
+       0.0,
+       0.303,
+       0.221,
+       0.166,
+       0.181,
+       0.13,
+       0.0
+      ],
+      "loglik": -1328.372193,
+      "mass": {
+       "exact": 0.595091,
+       "noise": 0.101946,
+       "nonslipping_members": 0.302963,
+       "q": 0.0,
+       "slip": 0.101946
+      },
+      "n_params": 36,
+      "pi0": 0.0,
+      "tau": 0.0,
+      "top": [
+       [
+        0.371,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.303,
+        "RO-FF (C3)"
+       ],
+       [
+        0.118,
+        "DPLL-LIST (D)"
+       ],
+       [
+        0.091,
+        "LF"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.146329,
+      "kernel": [
+       0.0,
+       0.325,
+       0.234,
+       0.169,
+       0.121,
+       0.087,
+       0.063
+      ],
+      "loglik": -1334.045914,
+      "mass": {
+       "exact": 0.596412,
+       "noise": 0.102232,
+       "nonslipping_members": 0.301356,
+       "q": 0.0,
+       "slip": 0.102232
+      },
+      "n_params": 11,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.373,
+        "FF-LIST = GREEDY+REPAIR-LIST (C->F)"
+       ],
+       [
+        0.301,
+        "RO-FF (C3)"
+       ],
+       [
+        0.117,
+        "DPLL-LIST (D)"
+       ],
+       [
+        0.089,
+        "LF"
+       ]
+      ]
+     }
+    }
+   }
+  },
+  "C_E2/knapsack": {
+   "2026-11-18-pc20-gpt-oss-120b-thinking-low": {
+    "answers": {
+     "correct": 212,
+     "exact_member": 262,
+     "n": 300,
+     "near_wrong_adds_drops": {
+      "0,1": 2,
+      "1,0": 5,
+      "1,1": 21,
+      "1,2": 2,
+      "2,0": 1,
+      "2,1": 7
+     },
+     "special": 0,
+     "wrong": 88,
+     "wrong_exact_member": 50,
+     "wrong_nonexact_distance": {
+      "1": 7,
+      "2": 22,
+      "3": 9
+     },
+     "wrong_set_fraction": {
+      "0.4": 7,
+      "0.5": 39,
+      "0.6": 40,
+      "0.7": 2
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.128016,
+      "kernel": [
+       0.0,
+       0.045,
+       0.577,
+       0.378,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -466.862989,
+      "mass": {
+       "exact": 0.871984,
+       "noise": 0.128016,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.128016
+      },
+      "n_params": 13,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.724,
+        "EXACT"
+       ],
+       [
+        0.17,
+        "RATIO-SKIP"
+       ],
+       [
+        0.057,
+        "VALUE"
+       ],
+       [
+        0.049,
+        "DIFF"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.128016,
+      "kernel": [
+       0.0,
+       0.045,
+       0.577,
+       0.378,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -466.862989,
+      "mass": {
+       "exact": 0.871984,
+       "noise": 0.128016,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.128016
+      },
+      "n_params": 13,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.724,
+        "EXACT"
+       ],
+       [
+        0.17,
+        "RATIO-SKIP"
+       ],
+       [
+        0.057,
+        "VALUE"
+       ],
+       [
+        0.049,
+        "DIFF"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.121303,
+      "kernel": [
+       0.0,
+       0.049,
+       0.607,
+       0.344,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -466.452758,
+      "mass": {
+       "exact": 0.871968,
+       "noise": 0.128032,
+       "nonslipping_members": 0.0,
+       "q": 0.007658,
+       "slip": 0.120374
+      },
+      "n_params": 23,
+      "pi0": 0.007658,
+      "tau": 0.0,
+      "top": [
+       [
+        0.723,
+        "EXACT"
+       ],
+       [
+        0.169,
+        "RATIO-SKIP"
+       ],
+       [
+        0.052,
+        "VALUE"
+       ],
+       [
+        0.048,
+        "DIFF"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.12933,
+      "eps_by_group": {
+       "DIFF": 0.0,
+       "EXACT": 0.06,
+       "INPUT-FIT": 1.0,
+       "LARGEST-FIT": 1.0,
+       "RATIO+BEST-SINGLE = RATIO-PREFIX": 1.0,
+       "RATIO-SKIP": 0.0,
+       "VALUE": 0.0
+      },
+      "kernel": [
+       0.0,
+       0.146,
+       0.535,
+       0.319,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -456.162714,
+      "mass": {
+       "exact": 0.87067,
+       "noise": 0.12933,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.12933
+      },
+      "n_params": 29,
+      "pi0": 0.0,
+      "tau": 0.0,
+      "top": [
+       [
+        0.694,
+        "EXACT"
+       ],
+       [
+        0.135,
+        "RATIO-SKIP"
+       ],
+       [
+        0.088,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.044,
+        "VALUE"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.127286,
+      "kernel": [
+       0.0,
+       0.34,
+       0.238,
+       0.167,
+       0.117,
+       0.082,
+       0.057
+      ],
+      "loglik": -487.767917,
+      "mass": {
+       "exact": 0.872714,
+       "noise": 0.127286,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.127286
+      },
+      "n_params": 9,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.739,
+        "EXACT"
+       ],
+       [
+        0.163,
+        "RATIO-SKIP"
+       ],
+       [
+        0.05,
+        "VALUE"
+       ],
+       [
+        0.048,
+        "DIFF"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 0.123186,
+      "kernel": [
+       0.0,
+       0.05,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.625,
+       0.086,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.24,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -449.853419,
+      "mass": {
+       "exact": 0.870971,
+       "noise": 0.129029,
+       "nonslipping_members": 0.0,
+       "q": 0.006663,
+       "slip": 0.122365
+      },
+      "n_params": 44,
+      "pi0": 0.006663,
+      "tau": 0.0,
+      "top": [
+       [
+        0.723,
+        "EXACT"
+       ],
+       [
+        0.168,
+        "RATIO-SKIP"
+       ],
+       [
+        0.056,
+        "VALUE"
+       ],
+       [
+        0.047,
+        "DIFF"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc20-gpt-oss-20b-thinking-low": {
+    "answers": {
+     "correct": 158,
+     "exact_member": 215,
+     "n": 300,
+     "near_wrong_adds_drops": {
+      "0,1": 16,
+      "1,0": 13,
+      "1,1": 44,
+      "1,2": 4,
+      "2,0": 1,
+      "2,1": 6
+     },
+     "special": 0,
+     "wrong": 142,
+     "wrong_exact_member": 57,
+     "wrong_nonexact_distance": {
+      "1": 29,
+      "2": 45,
+      "3": 10,
+      "4": 1
+     },
+     "wrong_set_fraction": {
+      "0.3": 1,
+      "0.4": 15,
+      "0.5": 74,
+      "0.6": 50,
+      "0.7": 2
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.287754,
+      "kernel": [
+       0.0,
+       0.191,
+       0.467,
+       0.3,
+       0.042,
+       0.0,
+       0.0
+      ],
+      "loglik": -801.278219,
+      "mass": {
+       "exact": 0.712246,
+       "noise": 0.287754,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.287754
+      },
+      "n_params": 13,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.616,
+        "EXACT"
+       ],
+       [
+        0.152,
+        "RATIO-SKIP"
+       ],
+       [
+        0.119,
+        "VALUE"
+       ],
+       [
+        0.093,
+        "DIFF"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.287754,
+      "kernel": [
+       0.0,
+       0.191,
+       0.467,
+       0.3,
+       0.042,
+       0.0,
+       0.0
+      ],
+      "loglik": -801.278219,
+      "mass": {
+       "exact": 0.712246,
+       "noise": 0.287754,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.287754
+      },
+      "n_params": 13,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.616,
+        "EXACT"
+       ],
+       [
+        0.152,
+        "RATIO-SKIP"
+       ],
+       [
+        0.119,
+        "VALUE"
+       ],
+       [
+        0.093,
+        "DIFF"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.270687,
+      "kernel": [
+       0.0,
+       0.206,
+       0.503,
+       0.291,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -799.373216,
+      "mass": {
+       "exact": 0.712005,
+       "noise": 0.287995,
+       "nonslipping_members": 0.0,
+       "q": 0.023732,
+       "slip": 0.264263
+      },
+      "n_params": 23,
+      "pi0": 0.023732,
+      "tau": 0.0,
+      "top": [
+       [
+        0.606,
+        "EXACT"
+       ],
+       [
+        0.152,
+        "RATIO-SKIP"
+       ],
+       [
+        0.113,
+        "VALUE"
+       ],
+       [
+        0.089,
+        "DIFF"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.286512,
+      "eps_by_group": {
+       "DIFF": 0.275,
+       "EXACT": 0.037,
+       "INPUT-FIT": 0.953,
+       "LARGEST-FIT": 1.0,
+       "RATIO+BEST-SINGLE = RATIO-PREFIX": 0.977,
+       "RATIO-SKIP": 0.35,
+       "VALUE": 0.187
+      },
+      "kernel": [
+       0.0,
+       0.251,
+       0.574,
+       0.175,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -774.236588,
+      "mass": {
+       "exact": 0.705795,
+       "noise": 0.294205,
+       "nonslipping_members": 0.0,
+       "q": 0.010782,
+       "slip": 0.283423
+      },
+      "n_params": 29,
+      "pi0": 0.010782,
+      "tau": 0.0,
+      "top": [
+       [
+        0.488,
+        "EXACT"
+       ],
+       [
+        0.174,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.134,
+        "RATIO-SKIP"
+       ],
+       [
+        0.102,
+        "VALUE"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.286653,
+      "kernel": [
+       0.0,
+       0.42,
+       0.252,
+       0.151,
+       0.091,
+       0.054,
+       0.033
+      ],
+      "loglik": -822.079654,
+      "mass": {
+       "exact": 0.713347,
+       "noise": 0.286653,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.286653
+      },
+      "n_params": 9,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.616,
+        "EXACT"
+       ],
+       [
+        0.136,
+        "RATIO-SKIP"
+       ],
+       [
+        0.115,
+        "VALUE"
+       ],
+       [
+        0.096,
+        "DIFF"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 0.290582,
+      "kernel": [
+       0.0,
+       0.161,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.033,
+       0.499,
+       0.125,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.132,
+       0.05,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -770.520335,
+      "mass": {
+       "exact": 0.709418,
+       "noise": 0.290582,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.290582
+      },
+      "n_params": 44,
+      "pi0": 0.0,
+      "tau": 0.0,
+      "top": [
+       [
+        0.606,
+        "EXACT"
+       ],
+       [
+        0.159,
+        "RATIO-SKIP"
+       ],
+       [
+        0.121,
+        "VALUE"
+       ],
+       [
+        0.096,
+        "DIFF"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc20-qwen3-14b-direct": {
+    "answers": {
+     "correct": 11,
+     "exact_member": 47,
+     "n": 300,
+     "near_wrong_adds_drops": {
+      "0,1": 60,
+      "0,2": 5,
+      "0,3": 1,
+      "1,0": 56,
+      "1,1": 48,
+      "1,2": 22,
+      "2,0": 20,
+      "2,1": 27,
+      "3,0": 1
+     },
+     "special": 0,
+     "wrong": 289,
+     "wrong_exact_member": 36,
+     "wrong_nonexact_distance": {
+      "1": 116,
+      "2": 73,
+      "3": 51,
+      "4": 13
+     },
+     "wrong_set_fraction": {
+      "0.3": 12,
+      "0.4": 62,
+      "0.5": 97,
+      "0.6": 74,
+      "0.7": 42,
+      "0.8": 2
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.413,
+       0.271,
+       0.239,
+       0.077,
+       0.0,
+       0.0
+      ],
+      "loglik": -1613.522821,
+      "mass": {
+       "exact": 0.153042,
+       "noise": 0.846958,
+       "nonslipping_members": 0.0,
+       "q": 0.023079,
+       "slip": 0.823879
+      },
+      "n_params": 13,
+      "pi0": 0.023088,
+      "top": [
+       [
+        0.261,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.228,
+        "VALUE"
+       ],
+       [
+        0.185,
+        "EXACT"
+       ],
+       [
+        0.158,
+        "RATIO-SKIP"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.86139,
+      "kernel": [
+       0.0,
+       0.407,
+       0.267,
+       0.234,
+       0.092,
+       0.0,
+       0.0
+      ],
+      "loglik": -1531.336916,
+      "mass": {
+       "exact": 0.13861,
+       "noise": 0.86139,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.86139
+      },
+      "n_params": 13,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.284,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.24,
+        "VALUE"
+       ],
+       [
+        0.19,
+        "EXACT"
+       ],
+       [
+        0.151,
+        "RATIO-SKIP"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.86139,
+      "kernel": [
+       0.0,
+       0.407,
+       0.267,
+       0.234,
+       0.092,
+       0.0,
+       0.0
+      ],
+      "loglik": -1531.336916,
+      "mass": {
+       "exact": 0.13861,
+       "noise": 0.86139,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.86139
+      },
+      "n_params": 23,
+      "pi0": 0.0,
+      "tau": 0.0,
+      "top": [
+       [
+        0.284,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.24,
+        "VALUE"
+       ],
+       [
+        0.19,
+        "EXACT"
+       ],
+       [
+        0.151,
+        "RATIO-SKIP"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.862651,
+      "eps_by_group": {
+       "DIFF": 0.631,
+       "EXACT": 1.0,
+       "INPUT-FIT": 1.0,
+       "LARGEST-FIT": 1.0,
+       "RATIO+BEST-SINGLE = RATIO-PREFIX": 0.95,
+       "RATIO-SKIP": 0.61,
+       "VALUE": 0.89
+      },
+      "kernel": [
+       0.0,
+       0.406,
+       0.271,
+       0.232,
+       0.091,
+       0.0,
+       0.0
+      ],
+      "loglik": -1521.701186,
+      "mass": {
+       "exact": 0.137349,
+       "noise": 0.862651,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.862651
+      },
+      "n_params": 29,
+      "pi0": 0.0,
+      "tau": 0.0,
+      "top": [
+       [
+        0.282,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.249,
+        "VALUE"
+       ],
+       [
+        0.218,
+        "EXACT"
+       ],
+       [
+        0.149,
+        "RATIO-SKIP"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.526,
+       0.253,
+       0.121,
+       0.058,
+       0.028,
+       0.013
+      ],
+      "loglik": -1627.375438,
+      "mass": {
+       "exact": 0.152428,
+       "noise": 0.847572,
+       "nonslipping_members": 0.0,
+       "q": 0.092792,
+       "slip": 0.75478
+      },
+      "n_params": 9,
+      "pi0": 0.092793,
+      "top": [
+       [
+        0.261,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.195,
+        "VALUE"
+       ],
+       [
+        0.168,
+        "EXACT"
+       ],
+       [
+        0.145,
+        "RATIO-SKIP"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 0.861881,
+      "kernel": [
+       0.0,
+       0.206,
+       0.009,
+       0.011,
+       0.0,
+       0.0,
+       0.0,
+       0.196,
+       0.201,
+       0.098,
+       0.014,
+       0.0,
+       0.0,
+       0.062,
+       0.125,
+       0.045,
+       0.0,
+       0.0,
+       0.0,
+       0.034,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -1522.84926,
+      "mass": {
+       "exact": 0.138119,
+       "noise": 0.861881,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.861881
+      },
+      "n_params": 44,
+      "pi0": 0.0,
+      "tau": 0.0,
+      "top": [
+       [
+        0.287,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.23,
+        "VALUE"
+       ],
+       [
+        0.198,
+        "EXACT"
+       ],
+       [
+        0.149,
+        "RATIO-SKIP"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc20-qwen3-14b-thinking-high": {
+    "answers": {
+     "correct": 270,
+     "exact_member": 274,
+     "n": 278,
+     "near_wrong_adds_drops": {
+      "1,0": 1,
+      "1,2": 1,
+      "2,1": 2
+     },
+     "special": 0,
+     "wrong": 8,
+     "wrong_exact_member": 4,
+     "wrong_nonexact_distance": {
+      "1": 1,
+      "3": 3
+     },
+     "wrong_set_fraction": {
+      "0.4": 1,
+      "0.5": 5,
+      "0.6": 2
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.014435,
+      "kernel": [
+       0.0,
+       0.0,
+       0.252,
+       0.0,
+       0.0,
+       0.249,
+       0.498
+      ],
+      "loglik": -67.441736,
+      "mass": {
+       "exact": 0.985565,
+       "noise": 0.014435,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.014435
+      },
+      "n_params": 13,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.982,
+        "EXACT"
+       ],
+       [
+        0.013,
+        "DIFF"
+       ],
+       [
+        0.005,
+        "VALUE"
+       ],
+       [
+        0.0,
+        "RATIO-SKIP"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.014435,
+      "kernel": [
+       0.0,
+       0.0,
+       0.252,
+       0.0,
+       0.0,
+       0.249,
+       0.498
+      ],
+      "loglik": -67.441736,
+      "mass": {
+       "exact": 0.985565,
+       "noise": 0.014435,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.014435
+      },
+      "n_params": 13,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.982,
+        "EXACT"
+       ],
+       [
+        0.013,
+        "DIFF"
+       ],
+       [
+        0.005,
+        "VALUE"
+       ],
+       [
+        0.0,
+        "RATIO-SKIP"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.002089,
+      "kernel": [
+       0.0,
+       0.0,
+       0.999,
+       0.0,
+       0.0,
+       0.0,
+       0.001
+      ],
+      "loglik": -67.167226,
+      "mass": {
+       "exact": 0.985522,
+       "noise": 0.014478,
+       "nonslipping_members": 0.0,
+       "q": 0.012414,
+       "slip": 0.002063
+      },
+      "n_params": 23,
+      "pi0": 0.012414,
+      "tau": 0.0,
+      "top": [
+       [
+        0.97,
+        "EXACT"
+       ],
+       [
+        0.013,
+        "DIFF"
+       ],
+       [
+        0.005,
+        "VALUE"
+       ],
+       [
+        0.0,
+        "RATIO-SKIP"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.014589,
+      "eps_by_group": {
+       "DIFF": 0.0,
+       "EXACT": 0.0,
+       "INPUT-FIT": 0.0,
+       "LARGEST-FIT": 1.0,
+       "RATIO+BEST-SINGLE = RATIO-PREFIX": 1.0,
+       "RATIO-SKIP": 0.0,
+       "VALUE": 0.0
+      },
+      "kernel": [
+       0.0,
+       0.253,
+       0.0,
+       0.747,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -62.070056,
+      "mass": {
+       "exact": 0.985411,
+       "noise": 0.014589,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.014589
+      },
+      "n_params": 29,
+      "pi0": 0.0,
+      "tau": 0.0,
+      "top": [
+       [
+        0.968,
+        "EXACT"
+       ],
+       [
+        0.015,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.013,
+        "DIFF"
+       ],
+       [
+        0.005,
+        "VALUE"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.01444,
+      "kernel": [
+       0.0,
+       0.213,
+       0.192,
+       0.173,
+       0.156,
+       0.14,
+       0.126
+      ],
+      "loglik": -70.933565,
+      "mass": {
+       "exact": 0.98556,
+       "noise": 0.01444,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.01444
+      },
+      "n_params": 9,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.982,
+        "EXACT"
+       ],
+       [
+        0.013,
+        "DIFF"
+       ],
+       [
+        0.005,
+        "VALUE"
+       ],
+       [
+        0.0,
+        "RATIO-SKIP"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 0.014474,
+      "kernel": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.254,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.249,
+       0.497,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -64.43502,
+      "mass": {
+       "exact": 0.985526,
+       "noise": 0.014474,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.014474
+      },
+      "n_params": 44,
+      "pi0": 0.0,
+      "tau": 0.0,
+      "top": [
+       [
+        0.982,
+        "EXACT"
+       ],
+       [
+        0.013,
+        "DIFF"
+       ],
+       [
+        0.005,
+        "VALUE"
+       ],
+       [
+        0.0,
+        "RATIO-SKIP"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc20-qwen3-32b-direct": {
+    "answers": {
+     "correct": 1,
+     "exact_member": 24,
+     "n": 300,
+     "near_wrong_adds_drops": {
+      "0,1": 86,
+      "0,2": 73,
+      "0,3": 9,
+      "1,0": 12,
+      "1,1": 43,
+      "1,2": 30,
+      "2,0": 4,
+      "2,1": 5
+     },
+     "special": 0,
+     "wrong": 299,
+     "wrong_exact_member": 23,
+     "wrong_nonexact_distance": {
+      "1": 98,
+      "2": 120,
+      "3": 44,
+      "4": 10,
+      "5": 4
+     },
+     "wrong_set_fraction": {
+      "0.2": 2,
+      "0.3": 58,
+      "0.4": 148,
+      "0.5": 82,
+      "0.6": 6,
+      "0.7": 2,
+      "0.8": 1
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.348,
+       0.425,
+       0.227,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -1699.861131,
+      "mass": {
+       "exact": 0.076387,
+       "noise": 0.923613,
+       "nonslipping_members": 0.0,
+       "q": 0.121098,
+       "slip": 0.802515
+      },
+      "n_params": 13,
+      "pi0": 0.121098,
+      "top": [
+       [
+        0.54,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.16,
+        "DIFF"
+       ],
+       [
+        0.09,
+        "EXACT"
+       ],
+       [
+        0.089,
+        "VALUE"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.946195,
+      "kernel": [
+       0.0,
+       0.323,
+       0.362,
+       0.233,
+       0.052,
+       0.03,
+       0.0
+      ],
+      "loglik": -1576.062732,
+      "mass": {
+       "exact": 0.053805,
+       "noise": 0.946195,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.946195
+      },
+      "n_params": 13,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.647,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.123,
+        "DIFF"
+       ],
+       [
+        0.116,
+        "VALUE"
+       ],
+       [
+        0.114,
+        "EXACT"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.940411,
+      "kernel": [
+       0.0,
+       0.354,
+       0.395,
+       0.235,
+       0.016,
+       0.0,
+       0.0
+      ],
+      "loglik": -1569.151921,
+      "mass": {
+       "exact": 0.054011,
+       "noise": 0.945989,
+       "nonslipping_members": 0.0,
+       "q": 0.093605,
+       "slip": 0.852384
+      },
+      "n_params": 23,
+      "pi0": 0.093605,
+      "tau": 0.0,
+      "top": [
+       [
+        0.589,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.119,
+        "DIFF"
+       ],
+       [
+        0.103,
+        "EXACT"
+       ],
+       [
+        0.095,
+        "VALUE"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.938425,
+      "eps_by_group": {
+       "DIFF": 0.861,
+       "EXACT": 1.0,
+       "INPUT-FIT": 1.0,
+       "LARGEST-FIT": 1.0,
+       "RATIO+BEST-SINGLE = RATIO-PREFIX": 0.93,
+       "RATIO-SKIP": 0.998,
+       "VALUE": 1.0
+      },
+      "kernel": [
+       0.0,
+       0.351,
+       0.397,
+       0.235,
+       0.016,
+       0.0,
+       0.0
+      ],
+      "loglik": -1565.71483,
+      "mass": {
+       "exact": 0.055892,
+       "noise": 0.944108,
+       "nonslipping_members": 0.0,
+       "q": 0.092289,
+       "slip": 0.851819
+      },
+      "n_params": 29,
+      "pi0": 0.092289,
+      "tau": 0.0,
+      "top": [
+       [
+        0.583,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.118,
+        "EXACT"
+       ],
+       [
+        0.109,
+        "DIFF"
+       ],
+       [
+        0.097,
+        "VALUE"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.49,
+       0.255,
+       0.132,
+       0.069,
+       0.036,
+       0.019
+      ],
+      "loglik": -1728.670504,
+      "mass": {
+       "exact": 0.075032,
+       "noise": 0.924968,
+       "nonslipping_members": 0.0,
+       "q": 0.101951,
+       "slip": 0.823017
+      },
+      "n_params": 9,
+      "pi0": 0.101951,
+      "top": [
+       [
+        0.586,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.147,
+        "DIFF"
+       ],
+       [
+        0.085,
+        "EXACT"
+       ],
+       [
+        0.08,
+        "VALUE"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 0.936816,
+      "kernel": [
+       0.0,
+       0.273,
+       0.263,
+       0.031,
+       0.0,
+       0.0,
+       0.0,
+       0.016,
+       0.156,
+       0.148,
+       0.038,
+       0.0,
+       0.0,
+       0.0,
+       0.03,
+       0.007,
+       0.037,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -1489.587061,
+      "mass": {
+       "exact": 0.062711,
+       "noise": 0.937289,
+       "nonslipping_members": 0.0,
+       "q": 0.007492,
+       "slip": 0.929798
+      },
+      "n_params": 44,
+      "pi0": 0.007492,
+      "tau": 0.0,
+      "top": [
+       [
+        0.456,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.29,
+        "DIFF"
+       ],
+       [
+        0.172,
+        "EXACT"
+       ],
+       [
+        0.075,
+        "VALUE"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc20-qwen3-32b-thinking-high": {
+    "answers": {
+     "correct": 286,
+     "exact_member": 289,
+     "n": 296,
+     "near_wrong_adds_drops": {
+      "0,1": 2,
+      "1,0": 2,
+      "1,1": 2,
+      "2,1": 1
+     },
+     "special": 0,
+     "wrong": 10,
+     "wrong_exact_member": 3,
+     "wrong_nonexact_distance": {
+      "1": 4,
+      "2": 2,
+      "3": 1
+     },
+     "wrong_set_fraction": {
+      "0.4": 1,
+      "0.5": 5,
+      "0.6": 3,
+      "0.7": 1
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.023721,
+      "kernel": [
+       0.0,
+       0.446,
+       0.0,
+       0.146,
+       0.269,
+       0.0,
+       0.139
+      ],
+      "loglik": -89.113906,
+      "mass": {
+       "exact": 0.976279,
+       "noise": 0.023721,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.023721
+      },
+      "n_params": 13,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.987,
+        "EXACT"
+       ],
+       [
+        0.005,
+        "VALUE"
+       ],
+       [
+        0.004,
+        "DIFF"
+       ],
+       [
+        0.003,
+        "INPUT-FIT"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.023721,
+      "kernel": [
+       0.0,
+       0.446,
+       0.0,
+       0.146,
+       0.269,
+       0.0,
+       0.139
+      ],
+      "loglik": -89.113906,
+      "mass": {
+       "exact": 0.976279,
+       "noise": 0.023721,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.023721
+      },
+      "n_params": 13,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.987,
+        "EXACT"
+       ],
+       [
+        0.005,
+        "VALUE"
+       ],
+       [
+        0.004,
+        "DIFF"
+       ],
+       [
+        0.003,
+        "INPUT-FIT"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.018698,
+      "kernel": [
+       0.0,
+       0.573,
+       0.0,
+       0.186,
+       0.241,
+       0.0,
+       0.0
+      ],
+      "loglik": -88.765907,
+      "mass": {
+       "exact": 0.976271,
+       "noise": 0.023729,
+       "nonslipping_members": 0.0,
+       "q": 0.005126,
+       "slip": 0.018602
+      },
+      "n_params": 23,
+      "pi0": 0.005126,
+      "tau": 0.0,
+      "top": [
+       [
+        0.982,
+        "EXACT"
+       ],
+       [
+        0.005,
+        "VALUE"
+       ],
+       [
+        0.005,
+        "DIFF"
+       ],
+       [
+        0.003,
+        "INPUT-FIT"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.02456,
+      "eps_by_group": {
+       "DIFF": 1.0,
+       "EXACT": 0.008,
+       "INPUT-FIT": 0.0,
+       "LARGEST-FIT": 1.0,
+       "RATIO+BEST-SINGLE = RATIO-PREFIX": 1.0,
+       "RATIO-SKIP": 0.0,
+       "VALUE": 0.0
+      },
+      "kernel": [
+       0.0,
+       0.534,
+       0.262,
+       0.204,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -85.96364,
+      "mass": {
+       "exact": 0.97544,
+       "noise": 0.02456,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.02456
+      },
+      "n_params": 29,
+      "pi0": 0.0,
+      "tau": 0.0,
+      "top": [
+       [
+        0.971,
+        "EXACT"
+       ],
+       [
+        0.013,
+        "RATIO+BEST-SINGLE = RATIO-PREFIX"
+       ],
+       [
+        0.005,
+        "VALUE"
+       ],
+       [
+        0.004,
+        "RATIO-SKIP"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.011251,
+      "kernel": [
+       0.0,
+       0.98,
+       0.02,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -91.697138,
+      "mass": {
+       "exact": 0.97631,
+       "noise": 0.02369,
+       "nonslipping_members": 0.0,
+       "q": 0.012581,
+       "slip": 0.011109
+      },
+      "n_params": 9,
+      "pi0": 0.012581,
+      "top": [
+       [
+        0.974,
+        "EXACT"
+       ],
+       [
+        0.005,
+        "VALUE"
+       ],
+       [
+        0.005,
+        "DIFF"
+       ],
+       [
+        0.003,
+        "INPUT-FIT"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 0.023773,
+      "kernel": [
+       0.0,
+       0.284,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.142,
+       0.0,
+       0.143,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.291,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.14,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -86.113868,
+      "mass": {
+       "exact": 0.976227,
+       "noise": 0.023773,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.023773
+      },
+      "n_params": 44,
+      "pi0": 0.0,
+      "tau": 0.0,
+      "top": [
+       [
+        0.987,
+        "EXACT"
+       ],
+       [
+        0.005,
+        "VALUE"
+       ],
+       [
+        0.005,
+        "RATIO-SKIP"
+       ],
+       [
+        0.003,
+        "INPUT-FIT"
+       ]
+      ]
+     }
+    }
+   }
+  },
+  "C_E5/3-SAT (partial assignment given)": {
+   "2026-11-18-pc40-gpt-oss-120b-thinking-low": {
+    "answers": {
+     "correct": 79,
+     "exact_member": 81,
+     "n": 120,
+     "near_wrong_adds_drops": {
+      "0,1": 9,
+      "0,2": 6,
+      "0,3": 1,
+      "1,0": 5,
+      "1,1": 4,
+      "3,0": 3
+     },
+     "special": 30,
+     "wrong": 41,
+     "wrong_exact_member": 2,
+     "wrong_nonexact_distance": {
+      "1": 14,
+      "2": 10,
+      "3": 4,
+      "4": 5,
+      "5": 3,
+      "6": 3
+     },
+     "wrong_set_fraction": {
+      "0.2": 3,
+      "0.3": 12,
+      "0.4": 6,
+      "0.5": 11,
+      "0.6": 3,
+      "0.7": 3,
+      "0.8": 1
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.45299,
+      "kernel": [
+       0.0,
+       0.314,
+       0.284,
+       0.117,
+       0.114,
+       0.087,
+       0.085
+      ],
+      "loglik": -548.665932,
+      "mass": {
+       "exact": 0.54701,
+       "noise": 0.45299,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.45299
+      },
+      "n_params": 14,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.843,
+        "EXACT"
+       ],
+       [
+        0.068,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.055,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.028,
+        "GREEDY-MENTION-ABORT from state (C1)"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.45299,
+      "kernel": [
+       0.0,
+       0.314,
+       0.284,
+       0.117,
+       0.114,
+       0.087,
+       0.085
+      ],
+      "loglik": -548.665932,
+      "mass": {
+       "exact": 0.54701,
+       "noise": 0.45299,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.45299
+      },
+      "n_params": 14,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.843,
+        "EXACT"
+       ],
+       [
+        0.068,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.055,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.028,
+        "GREEDY-MENTION-ABORT from state (C1)"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.404824,
+      "kernel": [
+       0.0,
+       0.381,
+       0.348,
+       0.14,
+       0.132,
+       0.0,
+       0.0
+      ],
+      "loglik": -542.280294,
+      "mass": {
+       "exact": 0.55933,
+       "noise": 0.44067,
+       "nonslipping_members": 0.0,
+       "q": 0.060228,
+       "slip": 0.380442
+      },
+      "n_params": 34,
+      "pi0": 0.060228,
+      "tau": 0.0,
+      "top": [
+       [
+        0.841,
+        "EXACT"
+       ],
+       [
+        0.033,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.031,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.03,
+        "GREEDY-MENTION-ABORT from state (C1)"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.389464,
+      "eps_by_group": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.1,
+       "DPLL from state (D)": 1.0,
+       "EXACT": 0.337,
+       "GREEDY-MENTION from state (C1)": 1.0,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.0,
+       "GUC-DET from state (C2) = SC-DET from state (C2)": 1.0,
+       "POLARITY (C0, ignores state)": 1.0,
+       "UC-DET from state (C2)": 1.0
+      },
+      "kernel": [
+       0.0,
+       0.351,
+       0.325,
+       0.139,
+       0.127,
+       0.058,
+       0.0
+      ],
+      "loglik": -535.007356,
+      "mass": {
+       "exact": 0.584352,
+       "noise": 0.415648,
+       "nonslipping_members": 0.0,
+       "q": 0.042888,
+       "slip": 0.372761
+      },
+      "n_params": 40,
+      "pi0": 0.042887,
+      "tau": 0.0,
+      "top": [
+       [
+        0.83,
+        "EXACT"
+       ],
+       [
+        0.044,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.037,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.034,
+        "GREEDY-MENTION-ABORT from state (C1)"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.453294,
+      "kernel": [
+       0.0,
+       0.325,
+       0.234,
+       0.169,
+       0.121,
+       0.087,
+       0.063
+      ],
+      "loglik": -549.148584,
+      "mass": {
+       "exact": 0.546706,
+       "noise": 0.453294,
+       "nonslipping_members": 0.0,
+       "q": 0.0,
+       "slip": 0.453294
+      },
+      "n_params": 10,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.843,
+        "EXACT"
+       ],
+       [
+        0.068,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.057,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.028,
+        "GREEDY-MENTION-ABORT from state (C1)"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 0.431706,
+      "kernel": [
+       0.0,
+       0.215,
+       0.255,
+       0.033,
+       0.0,
+       0.027,
+       0.0,
+       0.118,
+       0.126,
+       0.0,
+       0.014,
+       0.01,
+       0.0,
+       0.0,
+       0.0,
+       0.021,
+       0.0,
+       0.0,
+       0.086,
+       0.029,
+       0.01,
+       0.0,
+       0.056,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -523.570215,
+      "mass": {
+       "exact": 0.543739,
+       "noise": 0.456261,
+       "nonslipping_members": 0.0,
+       "q": 0.043205,
+       "slip": 0.413056
+      },
+      "n_params": 55,
+      "pi0": 0.043208,
+      "tau": 0.0,
+      "top": [
+       [
+        0.841,
+        "EXACT"
+       ],
+       [
+        0.049,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.03,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.027,
+        "GREEDY-MENTION-ABORT from state (C1)"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc40-gpt-oss-20b-thinking-low": {
+    "answers": {
+     "correct": 52,
+     "exact_member": 72,
+     "n": 120,
+     "near_wrong_adds_drops": {
+      "0,1": 3,
+      "0,2": 5,
+      "0,3": 1,
+      "1,0": 7,
+      "1,1": 3,
+      "1,2": 7,
+      "2,0": 3,
+      "2,1": 2
+     },
+     "special": 51,
+     "wrong": 68,
+     "wrong_exact_member": 20,
+     "wrong_nonexact_distance": {
+      "1": 10,
+      "2": 11,
+      "3": 10,
+      "4": 6,
+      "5": 7,
+      "6": 1,
+      ">6": 3
+     },
+     "wrong_set_fraction": {
+      "0.2": 4,
+      "0.3": 16,
+      "0.4": 7,
+      "0.5": 12,
+      "0.6": 6,
+      "0.7": 2,
+      "0.8": 1
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.178,
+       0.22,
+       0.247,
+       0.161,
+       0.195,
+       0.0
+      ],
+      "loglik": -635.973517,
+      "mass": {
+       "exact": 0.263469,
+       "noise": 0.538017,
+       "nonslipping_members": 0.198515,
+       "q": 0.081215,
+       "slip": 0.456802
+      },
+      "n_params": 14,
+      "pi0": 0.081215,
+      "top": [
+       [
+        0.599,
+        "EXACT"
+       ],
+       [
+        0.199,
+        "ALWAYS-UNSAT (A1 give-up)"
+       ],
+       [
+        0.071,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.036,
+        "GREEDY-MENTION from state (C1)"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.693095,
+      "kernel": [
+       0.0,
+       0.191,
+       0.213,
+       0.241,
+       0.158,
+       0.197,
+       0.0
+      ],
+      "loglik": -631.408244,
+      "mass": {
+       "exact": 0.221737,
+       "noise": 0.577217,
+       "nonslipping_members": 0.201045,
+       "q": 0.076458,
+       "slip": 0.500759
+      },
+      "n_params": 14,
+      "pi0": 0.076458,
+      "top": [
+       [
+        0.599,
+        "EXACT"
+       ],
+       [
+        0.201,
+        "ALWAYS-UNSAT (A1 give-up)"
+       ],
+       [
+        0.072,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.038,
+        "GREEDY-MENTION from state (C1)"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.660084,
+      "kernel": [
+       0.0,
+       0.214,
+       0.252,
+       0.287,
+       0.184,
+       0.063,
+       0.0
+      ],
+      "loglik": -620.691264,
+      "mass": {
+       "exact": 0.229401,
+       "noise": 0.532794,
+       "nonslipping_members": 0.237805,
+       "q": 0.087319,
+       "slip": 0.445475
+      },
+      "n_params": 34,
+      "pi0": 0.087319,
+      "tau": 0.0,
+      "top": [
+       [
+        0.609,
+        "EXACT"
+       ],
+       [
+        0.238,
+        "ALWAYS-UNSAT (A1 give-up)"
+       ],
+       [
+        0.049,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.017,
+        "DPLL from state (D)"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.655533,
+      "eps_by_group": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.1,
+       "DPLL from state (D)": 0.0,
+       "EXACT": 0.613,
+       "GREEDY-MENTION from state (C1)": 1.0,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.0,
+       "GUC-DET from state (C2) = SC-DET from state (C2)": 1.0,
+       "POLARITY (C0, ignores state)": 1.0,
+       "UC-DET from state (C2)": 1.0
+      },
+      "kernel": [
+       0.0,
+       0.2,
+       0.229,
+       0.25,
+       0.184,
+       0.138,
+       0.0
+      ],
+      "loglik": -616.558966,
+      "mass": {
+       "exact": 0.24155,
+       "noise": 0.518132,
+       "nonslipping_members": 0.240317,
+       "q": 0.058453,
+       "slip": 0.45968
+      },
+      "n_params": 40,
+      "pi0": 0.058453,
+      "tau": 0.0,
+      "top": [
+       [
+        0.589,
+        "EXACT"
+       ],
+       [
+        0.24,
+        "ALWAYS-UNSAT (A1 give-up)"
+       ],
+       [
+        0.081,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.018,
+        "GREEDY-MENTION from state (C1)"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.247,
+       0.207,
+       0.174,
+       0.146,
+       0.123,
+       0.103
+      ],
+      "loglik": -639.235559,
+      "mass": {
+       "exact": 0.262351,
+       "noise": 0.535238,
+       "nonslipping_members": 0.202411,
+       "q": 0.072179,
+       "slip": 0.463059
+      },
+      "n_params": 10,
+      "pi0": 0.072179,
+      "top": [
+       [
+        0.608,
+        "EXACT"
+       ],
+       [
+        0.202,
+        "ALWAYS-UNSAT (A1 give-up)"
+       ],
+       [
+        0.062,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.044,
+        "GREEDY-MENTION from state (C1)"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 0.698541,
+      "kernel": [
+       0.0,
+       0.057,
+       0.117,
+       0.03,
+       0.0,
+       0.022,
+       0.0,
+       0.14,
+       0.014,
+       0.171,
+       0.023,
+       0.117,
+       0.0,
+       0.046,
+       0.074,
+       0.054,
+       0.017,
+       0.043,
+       0.0,
+       0.031,
+       0.0,
+       0.0,
+       0.044,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -609.046217,
+      "mass": {
+       "exact": 0.219858,
+       "noise": 0.540884,
+       "nonslipping_members": 0.239259,
+       "q": 0.031429,
+       "slip": 0.509455
+      },
+      "n_params": 55,
+      "pi0": 0.031428,
+      "tau": 0.0,
+      "top": [
+       [
+        0.592,
+        "EXACT"
+       ],
+       [
+        0.239,
+        "ALWAYS-UNSAT (A1 give-up)"
+       ],
+       [
+        0.064,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.053,
+        "GREEDY-MENTION from state (C1)"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc40-qwen3-14b-direct": {
+    "answers": {
+     "correct": 1,
+     "exact_member": 1,
+     "n": 120,
+     "near_wrong_adds_drops": {
+      "0,1": 1,
+      "1,0": 2,
+      "1,1": 2,
+      "2,0": 14,
+      "2,1": 1,
+      "3,0": 23
+     },
+     "special": 0,
+     "wrong": 119,
+     "wrong_exact_member": 0,
+     "wrong_nonexact_distance": {
+      "1": 3,
+      "2": 16,
+      "3": 24,
+      "4": 22,
+      "5": 25,
+      "6": 24,
+      ">6": 5
+     },
+     "wrong_set_fraction": {
+      "0.5": 1,
+      "0.6": 15,
+      "0.7": 67,
+      "0.8": 34,
+      "0.9": 2
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.016,
+       0.126,
+       0.2,
+       0.195,
+       0.215,
+       0.248
+      ],
+      "loglik": -1411.249783,
+      "mass": {
+       "exact": 0.008309,
+       "noise": 0.991691,
+       "nonslipping_members": 0.0,
+       "q": 0.079055,
+       "slip": 0.912636
+      },
+      "n_params": 14,
+      "pi0": 0.079055,
+      "top": [
+       [
+        0.491,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.294,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.127,
+        "DPLL from state (D)"
+       ],
+       [
+        0.009,
+        "GUC-DET from state (C2) = SC-DET from state (C2)"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.994284,
+      "kernel": [
+       0.0,
+       0.015,
+       0.126,
+       0.197,
+       0.189,
+       0.211,
+       0.262
+      ],
+      "loglik": -1339.534799,
+      "mass": {
+       "exact": 0.00536,
+       "noise": 0.99464,
+       "nonslipping_members": 0.0,
+       "q": 0.062279,
+       "slip": 0.932361
+      },
+      "n_params": 14,
+      "pi0": 0.062279,
+      "top": [
+       [
+        0.495,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.297,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.12,
+        "DPLL from state (D)"
+       ],
+       [
+        0.018,
+        "EXACT"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.997504,
+      "kernel": [
+       0.0,
+       0.022,
+       0.17,
+       0.273,
+       0.206,
+       0.179,
+       0.15
+      ],
+      "loglik": -1293.447254,
+      "mass": {
+       "exact": 0.001678,
+       "noise": 0.998322,
+       "nonslipping_members": 0.0,
+       "q": 0.327907,
+       "slip": 0.670416
+      },
+      "n_params": 34,
+      "pi0": 0.327907,
+      "tau": 0.0,
+      "top": [
+       [
+        0.431,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.198,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.044,
+        "DPLL from state (D)"
+       ],
+       [
+        0.0,
+        "UC-DET from state (C2)"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.988205,
+      "eps_by_group": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.1,
+       "DPLL from state (D)": 0.899,
+       "EXACT": 1.0,
+       "GREEDY-MENTION from state (C1)": 1.0,
+       "GREEDY-MENTION-ABORT from state (C1)": 1.0,
+       "GUC-DET from state (C2) = SC-DET from state (C2)": 1.0,
+       "POLARITY (C0, ignores state)": 1.0,
+       "UC-DET from state (C2)": 0.0
+      },
+      "kernel": [
+       0.0,
+       0.022,
+       0.161,
+       0.276,
+       0.208,
+       0.182,
+       0.151
+      ],
+      "loglik": -1291.425206,
+      "mass": {
+       "exact": 0.007924,
+       "noise": 0.992076,
+       "nonslipping_members": 0.0,
+       "q": 0.328151,
+       "slip": 0.663925
+      },
+      "n_params": 40,
+      "pi0": 0.32815,
+      "tau": 0.0,
+      "top": [
+       [
+        0.427,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.2,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.041,
+        "DPLL from state (D)"
+       ],
+       [
+        0.004,
+        "UC-DET from state (C2)"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.213,
+       0.192,
+       0.173,
+       0.156,
+       0.14,
+       0.126
+      ],
+      "loglik": -1435.478524,
+      "mass": {
+       "exact": 0.008303,
+       "noise": 0.991697,
+       "nonslipping_members": 0.0,
+       "q": 0.090797,
+       "slip": 0.9009
+      },
+      "n_params": 10,
+      "pi0": 0.090797,
+      "top": [
+       [
+        0.483,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.278,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.144,
+        "DPLL from state (D)"
+       ],
+       [
+        0.004,
+        "GUC-DET from state (C2) = SC-DET from state (C2)"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 1.0,
+      "kernel": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.012,
+       0.005,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.113,
+       0.009,
+       0.008,
+       0.0,
+       0.011,
+       0.194,
+       0.0,
+       0.0,
+       0.0,
+       0.123,
+       0.01,
+       0.009,
+       0.211,
+       0.073,
+       0.224
+      ],
+      "loglik": -1034.302176,
+      "mass": {
+       "exact": 0.0,
+       "noise": 1.0,
+       "nonslipping_members": 0.0,
+       "q": 0.056069,
+       "slip": 0.943931
+      },
+      "n_params": 55,
+      "pi0": 0.056069,
+      "tau": 0.0,
+      "top": [
+       [
+        0.5,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.299,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.085,
+        "EXACT"
+       ],
+       [
+        0.06,
+        "DPLL from state (D)"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc40-qwen3-14b-thinking-high": {
+    "answers": {
+     "correct": 104,
+     "exact_member": 106,
+     "n": 118,
+     "near_wrong_adds_drops": {
+      "0,1": 3,
+      "1,0": 3,
+      "1,1": 3,
+      "2,1": 1
+     },
+     "special": 41,
+     "wrong": 14,
+     "wrong_exact_member": 2,
+     "wrong_nonexact_distance": {
+      "1": 6,
+      "2": 3,
+      "3": 1,
+      "4": 2
+     },
+     "wrong_set_fraction": {
+      "0.1": 1,
+      "0.2": 3,
+      "0.3": 1,
+      "0.4": 4,
+      "0.5": 2,
+      "0.6": 1
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.164023,
+      "kernel": [
+       0.0,
+       0.45,
+       0.268,
+       0.06,
+       0.134,
+       0.088,
+       0.0
+      ],
+      "loglik": -267.083751,
+      "mass": {
+       "exact": 0.822673,
+       "noise": 0.161413,
+       "nonslipping_members": 0.015914,
+       "q": 0.0,
+       "slip": 0.161413
+      },
+      "n_params": 14,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.928,
+        "EXACT"
+       ],
+       [
+        0.047,
+        "UC-DET from state (C2)"
+       ],
+       [
+        0.016,
+        "ALWAYS-UNSAT (A1 give-up)"
+       ],
+       [
+        0.009,
+        "GREEDY-MENTION from state (C1)"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.164023,
+      "kernel": [
+       0.0,
+       0.45,
+       0.268,
+       0.06,
+       0.134,
+       0.088,
+       0.0
+      ],
+      "loglik": -267.083751,
+      "mass": {
+       "exact": 0.822673,
+       "noise": 0.161413,
+       "nonslipping_members": 0.015914,
+       "q": 0.0,
+       "slip": 0.161413
+      },
+      "n_params": 14,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.928,
+        "EXACT"
+       ],
+       [
+        0.047,
+        "UC-DET from state (C2)"
+       ],
+       [
+        0.016,
+        "ALWAYS-UNSAT (A1 give-up)"
+       ],
+       [
+        0.009,
+        "GREEDY-MENTION from state (C1)"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.137363,
+      "kernel": [
+       0.0,
+       0.564,
+       0.283,
+       0.153,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -264.583885,
+      "mass": {
+       "exact": 0.831434,
+       "noise": 0.152584,
+       "nonslipping_members": 0.015982,
+       "q": 0.02019,
+       "slip": 0.132394
+      },
+      "n_params": 34,
+      "pi0": 0.02019,
+      "tau": 0.0,
+      "top": [
+       [
+        0.916,
+        "EXACT"
+       ],
+       [
+        0.048,
+        "UC-DET from state (C2)"
+       ],
+       [
+        0.016,
+        "ALWAYS-UNSAT (A1 give-up)"
+       ],
+       [
+        0.0,
+        "POLARITY (C0, ignores state)"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.143187,
+      "eps_by_group": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.1,
+       "DPLL from state (D)": 0.0,
+       "EXACT": 0.144,
+       "GREEDY-MENTION from state (C1)": 1.0,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.0,
+       "GUC-DET from state (C2) = SC-DET from state (C2)": 0.0,
+       "POLARITY (C0, ignores state)": 1.0,
+       "UC-DET from state (C2)": 0.0
+      },
+      "kernel": [
+       0.0,
+       0.508,
+       0.272,
+       0.072,
+       0.148,
+       0.0,
+       0.0
+      ],
+      "loglik": -263.709719,
+      "mass": {
+       "exact": 0.833688,
+       "noise": 0.150746,
+       "nonslipping_members": 0.015566,
+       "q": 0.011423,
+       "slip": 0.139323
+      },
+      "n_params": 40,
+      "pi0": 0.011423,
+      "tau": 0.0,
+      "top": [
+       [
+        0.908,
+        "EXACT"
+       ],
+       [
+        0.056,
+        "UC-DET from state (C2)"
+       ],
+       [
+        0.016,
+        "ALWAYS-UNSAT (A1 give-up)"
+       ],
+       [
+        0.009,
+        "GREEDY-MENTION from state (C1)"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.163787,
+      "kernel": [
+       0.0,
+       0.437,
+       0.253,
+       0.147,
+       0.085,
+       0.049,
+       0.029
+      ],
+      "loglik": -267.364189,
+      "mass": {
+       "exact": 0.822889,
+       "noise": 0.161178,
+       "nonslipping_members": 0.015933,
+       "q": 0.0,
+       "slip": 0.161178
+      },
+      "n_params": 10,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.928,
+        "EXACT"
+       ],
+       [
+        0.047,
+        "UC-DET from state (C2)"
+       ],
+       [
+        0.016,
+        "ALWAYS-UNSAT (A1 give-up)"
+       ],
+       [
+        0.009,
+        "GREEDY-MENTION from state (C1)"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 0.155487,
+      "kernel": [
+       0.0,
+       0.458,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.32,
+       0.0,
+       0.0,
+       0.133,
+       0.0,
+       0.0,
+       0.088,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -257.974004,
+      "mass": {
+       "exact": 0.823809,
+       "noise": 0.1603,
+       "nonslipping_members": 0.015891,
+       "q": 0.008625,
+       "slip": 0.151675
+      },
+      "n_params": 55,
+      "pi0": 0.008625,
+      "tau": 0.0,
+      "top": [
+       [
+        0.928,
+        "EXACT"
+       ],
+       [
+        0.048,
+        "UC-DET from state (C2)"
+       ],
+       [
+        0.016,
+        "ALWAYS-UNSAT (A1 give-up)"
+       ],
+       [
+        0.0,
+        "POLARITY (C0, ignores state)"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc40-qwen3-32b-direct": {
+    "answers": {
+     "correct": 5,
+     "exact_member": 13,
+     "n": 120,
+     "near_wrong_adds_drops": {
+      "0,1": 3,
+      "0,2": 2,
+      "0,3": 1,
+      "1,0": 7,
+      "1,1": 6,
+      "1,2": 3,
+      "2,0": 8,
+      "2,1": 8,
+      "3,0": 16
+     },
+     "special": 9,
+     "wrong": 115,
+     "wrong_exact_member": 8,
+     "wrong_nonexact_distance": {
+      "1": 10,
+      "2": 16,
+      "3": 28,
+      "4": 24,
+      "5": 14,
+      "6": 8,
+      ">6": 7
+     },
+     "wrong_set_fraction": {
+      "0.1": 1,
+      "0.3": 1,
+      "0.4": 3,
+      "0.5": 26,
+      "0.6": 44,
+      "0.7": 29,
+      "0.8": 6
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.071,
+       0.136,
+       0.286,
+       0.227,
+       0.177,
+       0.103
+      ],
+      "loglik": -1226.438282,
+      "mass": {
+       "exact": 0.050916,
+       "noise": 0.949084,
+       "nonslipping_members": 0.0,
+       "q": 0.119493,
+       "slip": 0.829591
+      },
+      "n_params": 14,
+      "pi0": 0.119493,
+      "top": [
+       [
+        0.575,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.118,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.099,
+        "DPLL from state (D)"
+       ],
+       [
+        0.088,
+        "GUC-DET from state (C2) = SC-DET from state (C2)"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.961669,
+      "kernel": [
+       0.0,
+       0.07,
+       0.135,
+       0.283,
+       0.223,
+       0.176,
+       0.112
+      ],
+      "loglik": -1172.424239,
+      "mass": {
+       "exact": 0.034235,
+       "noise": 0.965765,
+       "nonslipping_members": 0.0,
+       "q": 0.106854,
+       "slip": 0.858912
+      },
+      "n_params": 14,
+      "pi0": 0.106854,
+      "top": [
+       [
+        0.576,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.125,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.101,
+        "DPLL from state (D)"
+       ],
+       [
+        0.092,
+        "GUC-DET from state (C2) = SC-DET from state (C2)"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.960837,
+      "kernel": [
+       0.0,
+       0.072,
+       0.138,
+       0.289,
+       0.228,
+       0.18,
+       0.093
+      ],
+      "loglik": -1160.933771,
+      "mass": {
+       "exact": 0.034417,
+       "noise": 0.930906,
+       "nonslipping_members": 0.034677,
+       "q": 0.086519,
+       "slip": 0.844386
+      },
+      "n_params": 34,
+      "pi0": 0.086519,
+      "tau": 0.0,
+      "top": [
+       [
+        0.565,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.121,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.102,
+        "DPLL from state (D)"
+       ],
+       [
+        0.091,
+        "GUC-DET from state (C2) = SC-DET from state (C2)"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.958984,
+      "eps_by_group": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.1,
+       "DPLL from state (D)": 1.0,
+       "EXACT": 1.0,
+       "GREEDY-MENTION from state (C1)": 1.0,
+       "GREEDY-MENTION-ABORT from state (C1)": 1.0,
+       "GUC-DET from state (C2) = SC-DET from state (C2)": 0.882,
+       "POLARITY (C0, ignores state)": 0.956,
+       "UC-DET from state (C2)": 0.392
+      },
+      "kernel": [
+       0.0,
+       0.072,
+       0.138,
+       0.289,
+       0.228,
+       0.18,
+       0.093
+      ],
+      "loglik": -1160.193475,
+      "mass": {
+       "exact": 0.03606,
+       "noise": 0.929363,
+       "nonslipping_members": 0.034577,
+       "q": 0.086252,
+       "slip": 0.84311
+      },
+      "n_params": 40,
+      "pi0": 0.086252,
+      "tau": 0.0,
+      "top": [
+       [
+        0.563,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.125,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.097,
+        "DPLL from state (D)"
+       ],
+       [
+        0.094,
+        "GUC-DET from state (C2) = SC-DET from state (C2)"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.5,
+      "kernel": [
+       0.0,
+       0.213,
+       0.192,
+       0.173,
+       0.156,
+       0.14,
+       0.126
+      ],
+      "loglik": -1237.620283,
+      "mass": {
+       "exact": 0.051158,
+       "noise": 0.948842,
+       "nonslipping_members": 0.0,
+       "q": 0.11783,
+       "slip": 0.831012
+      },
+      "n_params": 10,
+      "pi0": 0.11783,
+      "top": [
+       [
+        0.567,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.116,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.11,
+        "DPLL from state (D)"
+       ],
+       [
+        0.088,
+        "GUC-DET from state (C2) = SC-DET from state (C2)"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 0.962311,
+      "kernel": [
+       0.0,
+       0.029,
+       0.029,
+       0.009,
+       0.0,
+       0.0,
+       0.01,
+       0.034,
+       0.031,
+       0.052,
+       0.019,
+       0.0,
+       0.0,
+       0.079,
+       0.048,
+       0.011,
+       0.02,
+       0.0,
+       0.164,
+       0.12,
+       0.044,
+       0.0,
+       0.091,
+       0.065,
+       0.016,
+       0.061,
+       0.036,
+       0.033
+      ],
+      "loglik": -1116.910888,
+      "mass": {
+       "exact": 0.033564,
+       "noise": 0.930412,
+       "nonslipping_members": 0.036023,
+       "q": 0.073419,
+       "slip": 0.856993
+      },
+      "n_params": 55,
+      "pi0": 0.073419,
+      "tau": 0.0,
+      "top": [
+       [
+        0.6,
+        "POLARITY (C0, ignores state)"
+       ],
+       [
+        0.115,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.077,
+        "GUC-DET from state (C2) = SC-DET from state (C2)"
+       ],
+       [
+        0.052,
+        "DPLL from state (D)"
+       ]
+      ]
+     }
+    }
+   },
+   "2026-11-18-pc40-qwen3-32b-thinking-high": {
+    "answers": {
+     "correct": 93,
+     "exact_member": 94,
+     "n": 117,
+     "near_wrong_adds_drops": {
+      "0,1": 3,
+      "0,3": 1,
+      "1,0": 6,
+      "1,1": 4,
+      "1,2": 1,
+      "2,0": 2,
+      "3,0": 1
+     },
+     "special": 36,
+     "wrong": 24,
+     "wrong_exact_member": 1,
+     "wrong_nonexact_distance": {
+      "1": 9,
+      "2": 6,
+      "3": 3,
+      "4": 3,
+      "5": 1,
+      "6": 1
+     },
+     "wrong_set_fraction": {
+      "0.2": 2,
+      "0.3": 5,
+      "0.4": 7,
+      "0.5": 2,
+      "0.6": 5,
+      "0.7": 2
+     }
+    },
+    "ladder": {
+     "K": {
+      "eps": 0.296338,
+      "kernel": [
+       0.0,
+       0.357,
+       0.225,
+       0.186,
+       0.133,
+       0.038,
+       0.06
+      ],
+      "loglik": -377.761634,
+      "mass": {
+       "exact": 0.694855,
+       "noise": 0.29263,
+       "nonslipping_members": 0.012515,
+       "q": 0.0,
+       "slip": 0.29263
+      },
+      "n_params": 14,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.893,
+        "EXACT"
+       ],
+       [
+        0.038,
+        "DPLL from state (D)"
+       ],
+       [
+        0.033,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.024,
+        "POLARITY (C0, ignores state)"
+       ]
+      ]
+     },
+     "KE": {
+      "eps": 0.296338,
+      "kernel": [
+       0.0,
+       0.357,
+       0.225,
+       0.186,
+       0.133,
+       0.038,
+       0.06
+      ],
+      "loglik": -377.761634,
+      "mass": {
+       "exact": 0.694855,
+       "noise": 0.29263,
+       "nonslipping_members": 0.012515,
+       "q": 0.0,
+       "slip": 0.29263
+      },
+      "n_params": 14,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.893,
+        "EXACT"
+       ],
+       [
+        0.038,
+        "DPLL from state (D)"
+       ],
+       [
+        0.033,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.024,
+        "POLARITY (C0, ignores state)"
+       ]
+      ]
+     },
+     "KEQ": {
+      "eps": 0.296338,
+      "kernel": [
+       0.0,
+       0.357,
+       0.225,
+       0.186,
+       0.133,
+       0.038,
+       0.06
+      ],
+      "loglik": -377.761635,
+      "mass": {
+       "exact": 0.694855,
+       "noise": 0.29263,
+       "nonslipping_members": 0.012515,
+       "q": 0.0,
+       "slip": 0.29263
+      },
+      "n_params": 34,
+      "pi0": 0.0,
+      "tau": 0.0,
+      "top": [
+       [
+        0.893,
+        "EXACT"
+       ],
+       [
+        0.038,
+        "DPLL from state (D)"
+       ],
+       [
+        0.033,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.024,
+        "POLARITY (C0, ignores state)"
+       ]
+      ]
+     },
+     "KEQ-h": {
+      "eps": 0.271361,
+      "eps_by_group": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.1,
+       "DPLL from state (D)": 0.137,
+       "EXACT": 0.221,
+       "GREEDY-MENTION from state (C1)": 1.0,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.002,
+       "GUC-DET from state (C2) = SC-DET from state (C2)": 0.962,
+       "POLARITY (C0, ignores state)": 1.0,
+       "UC-DET from state (C2)": 0.0
+      },
+      "kernel": [
+       0.0,
+       0.345,
+       0.265,
+       0.159,
+       0.131,
+       0.036,
+       0.064
+      ],
+      "loglik": -368.776987,
+      "mass": {
+       "exact": 0.719469,
+       "noise": 0.267946,
+       "nonslipping_members": 0.012584,
+       "q": 0.0,
+       "slip": 0.267946
+      },
+      "n_params": 40,
+      "pi0": 0.0,
+      "tau": 0.0,
+      "top": [
+       [
+        0.886,
+        "EXACT"
+       ],
+       [
+        0.042,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.034,
+        "DPLL from state (D)"
+       ],
+       [
+        0.026,
+        "POLARITY (C0, ignores state)"
+       ]
+      ]
+     },
+     "M0": {
+      "eps": 0.296365,
+      "kernel": [
+       0.0,
+       0.355,
+       0.241,
+       0.164,
+       0.112,
+       0.076,
+       0.052
+      ],
+      "loglik": -377.907215,
+      "mass": {
+       "exact": 0.694824,
+       "noise": 0.292653,
+       "nonslipping_members": 0.012522,
+       "q": 0.0,
+       "slip": 0.292653
+      },
+      "n_params": 10,
+      "pi0": 0.0,
+      "top": [
+       [
+        0.892,
+        "EXACT"
+       ],
+       [
+        0.038,
+        "DPLL from state (D)"
+       ],
+       [
+        0.035,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.023,
+        "POLARITY (C0, ignores state)"
+       ]
+      ]
+     },
+     "SEQ": {
+      "eps": 0.286113,
+      "kernel": [
+       0.0,
+       0.141,
+       0.0,
+       0.048,
+       0.0,
+       0.0,
+       0.0,
+       0.225,
+       0.194,
+       0.055,
+       0.045,
+       0.0,
+       0.0,
+       0.086,
+       0.0,
+       0.053,
+       0.0,
+       0.0,
+       0.0,
+       0.064,
+       0.0,
+       0.089,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "loglik": -374.799528,
+      "mass": {
+       "exact": 0.698812,
+       "noise": 0.288649,
+       "nonslipping_members": 0.012539,
+       "q": 0.008578,
+       "slip": 0.280071
+      },
+      "n_params": 55,
+      "pi0": 0.008578,
+      "tau": 0.0,
+      "top": [
+       [
+        0.889,
+        "EXACT"
+       ],
+       [
+        0.038,
+        "DPLL from state (D)"
+       ],
+       [
+        0.036,
+        "GREEDY-MENTION from state (C1)"
+       ],
+       [
+        0.016,
+        "POLARITY (C0, ignores state)"
+       ]
+      ]
+     }
+    }
+   }
+  }
+ }
+}

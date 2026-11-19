@@ -1,6 +1,8 @@
 """The tables of docs/NOISE_MODEL.md, from analysis/out/noise_model/ and the committed analysis.
 
-    python analysis/noise_model_tables.py [analysis/out/noise_model]
+    python analysis/noise_model_tables.py [analysis/out/noise_model]               # print every table
+    python analysis/noise_model_tables.py --write-doc                             # splice them into the doc
+    python analysis/noise_model_tables.py --check                                 # do the doc's tables match?
 
 M0 (the pre-registered model) is read from analysis/out/prelim_2026_11_18.json and
 data/recovery/pc{20,40}.json, which this evaluation does not recompute; every other candidate from
@@ -33,9 +35,17 @@ Q = "unexplained (q)"
 
 
 def run_label(rid: str) -> str:
-    m = rid.split("-", 4)[-1]
-    return (m.replace("qwen3-", "Qwen3-").replace("gpt-oss-", "gpt-oss-").replace("-thinking-high", " thinking")
-            .replace("-thinking-low", " low").replace("-direct", " direct").replace("b ", "B ").replace("Qwen3-14B", "Qwen3-14B"))
+    """'2026-11-18-pc20-qwen3-14b-thinking-high' -> 'Qwen3-14B thinking'; gpt-oss runs are 'low effort'."""
+    rest = rid.split("-", 4)[-1]
+    for cond, name in (("-thinking-high", "thinking"), ("-thinking-low", "low effort"), ("-direct", "direct")):
+        if rest.endswith(cond):
+            model = rest[: -len(cond)]
+            break
+    else:
+        return rest
+    if model.startswith("qwen3-"):
+        model = "Qwen3-" + model[6:].upper()
+    return f"{model} {name}"
 
 
 def md(header: list[str], rows: list[list[Any]]) -> str:
@@ -232,6 +242,7 @@ def table_summary(data: dict[str, Any]) -> str:
         ppc = sum(1 for x in reps if x.get("ppc", {}).get("pass"))
         cap = sum(1 for x in reps if x["fit"].get("eps_at_cap"))
         ppc_free = sum(1 for x in reps if x.get("ppc", {}).get("pass") and not x["fit"].get("eps_at_cap"))
+        refit = all(x.get("recovery", {}).get("refitted", True) for x in reps)
         rec = sum(1 for x in reps if x.get("recovery", {}).get("pass"))
         rec_b = sum(1 for x in reps if x.get("recovery", {}).get("bca", {}).get("pass"))
         s0p, s0t, _ = stage0_counts(data["stage0"].get(c, {}))
@@ -239,7 +250,7 @@ def table_summary(data: dict[str, Any]) -> str:
         mass = [x["mass"] for x in reps if "mass" in x] or [data["diag"]["units"][u][r]["ladder"][c]["mass"]
                                                              for u, r in tg if data["diag"] and c in data["diag"]["units"][u][r]["ladder"]]
         noise = [m["noise"] for m in mass]
-        rows.append([c, n, f"{ppc}", f"{ppc_free}", f"{cap}", f"{rec} / {rec_b}", f"{s0p} / {s0t}" if s0t else "–",
+        rows.append([c, n, f"{ppc}", f"{ppc_free}", f"{cap}", f"{rec} / {rec_b}" if refit else "not run", f"{s0p} / {s0t}" if s0t else "–",
                      f"{np.median(qm):.2f} ({min(qm):.2f}–{max(qm):.2f})",
                      f"{np.median(noise):.2f} ({min(noise):.2f}–{max(noise):.2f})" if noise else "–"])
     return md(["Model", "Fits", "Pass every predictive check", "… with ε below its cap", "ε at its cap", "Recovery at the estimate passes (percentile / BCa)",
@@ -313,6 +324,47 @@ def table_noise_params(data: dict[str, Any], c: str) -> str:
     return md(["Unit", "Run", "ε [95%]", "kernel g₁…g₆", "τ", "π₀", "answers: exact", "slip", "q"], rows)
 
 
+def tables(data: dict[str, Any]) -> dict[str, str]:
+    """Every generated table of docs/NOISE_MODEL.md, by marker name."""
+    out = {"summary": table_summary(data), "ppc": table_ppc(data), "stage0": table_stage0(data),
+           "weights": table_weights(data, [c for c in ORDER if c in data["fits"]])}
+    if data["diag"]:
+        out.update(profiles=table_profiles(data), answers=table_answers(data), ladder=table_ladder(data))
+    for c in ORDER[1:]:
+        if c in data["fits"]:
+            out[f"params-{c}"] = table_noise_params(data, c)
+    return out
+
+
+def splice(doc: str, tabs: dict[str, str]) -> str:
+    """Replace the text between <!-- BEGIN nm:NAME --> and <!-- END nm:NAME --> with table NAME."""
+    import re
+
+    def sub(m: "re.Match[str]") -> str:
+        name = m.group(1)
+        if name not in tabs:
+            raise KeyError(f"no table {name!r} for the doc")
+        return f"<!-- BEGIN nm:{name} -->\n{tabs[name]}\n<!-- END nm:{name} -->"
+
+    return re.sub(r"<!-- BEGIN nm:([\w-]+) -->.*?<!-- END nm:\1 -->", sub, doc, flags=re.S)
+
+
+def write_doc(d: Path | str | None = None, check: bool = False) -> int:
+    d = Path(d) if d else REPO / "analysis" / "out" / "noise_model"
+    doc_path = REPO / "docs" / "NOISE_MODEL.md"
+    doc = doc_path.read_text()
+    new = splice(doc, tables(load(d)))
+    if check:
+        if new != doc:
+            print("docs/NOISE_MODEL.md's tables differ from the results; rerun without --check", file=sys.stderr)
+            return 1
+        print("NOISE_MODEL.md tables up to date")
+        return 0
+    doc_path.write_text(new)
+    print(f"wrote the tables of {doc_path}")
+    return 0
+
+
 def main(d: Path | str | None = None) -> int:
     d = Path(d) if d else REPO / "analysis" / "out" / "noise_model"
     data = load(d)
@@ -330,4 +382,7 @@ def main(d: Path | str | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1] if len(sys.argv) > 1 else None))
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if "--write-doc" in sys.argv or "--check" in sys.argv:
+        raise SystemExit(write_doc(args[0] if args else None, check="--check" in sys.argv))
+    raise SystemExit(main(args[0] if args else None))

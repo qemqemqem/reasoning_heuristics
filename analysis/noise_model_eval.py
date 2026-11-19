@@ -202,6 +202,9 @@ def recovery_job(args: tuple) -> dict[str, Any]:
     for _ in range(reps):
         sim = [ob for ob in simulate(um, sc, rng) if keep.get(ob.item)]
         T = um.tensors(sim)
+        if n_boot == 0:  # predictive checks only: no refit
+            out.append({"reach": P.reach_stats(um, sim, T), "near": P.near_shares(um, sim)})
+            continue
         res = fit(T, n_boot=n_boot, rng=rng, jackknife=True)
         blo, bhi = bca_interval(res.boot, res.pi, res.jack)
         out.append({"pi": res.pi.tolist(), "lo": res.lo.tolist(), "hi": res.hi.tolist(), "bca_lo": blo.tolist(),
@@ -209,6 +212,16 @@ def recovery_job(args: tuple) -> dict[str, Any]:
                     "near": P.near_shares(um, sim)})
     return {"unit": name, "run_id": run_id, "chunk": chunk, "truth": truth.tolist(),
             "labels": [g.name for g in um.columns] + [UNEXPLAINED], "replicates": out}
+
+
+def checks_only(chunks: list[dict[str, Any]], observed_near: dict[str, Any]) -> dict[str, Any]:
+    """The predictive checks' summary from fake data sets that were not refitted (`--recovery-boot 0`)."""
+    reps = [r for c in sorted(chunks, key=lambda c: c["chunk"]) for r in c["replicates"]]
+    return {"replicates": len(reps), "refitted": False,
+            "distance_check": P.distance_check(observed_near, np.array([r["near"] for r in reps])),
+            "simulated": {k: {"mean": float(np.mean([r["reach"][k] for r in reps])),
+                              "p05_p95": [float(np.percentile([r["reach"][k] for r in reps], p)) for p in (5, 95)]}
+                          for k in CHECKS}}
 
 
 def ppc_verdict(rep: dict[str, Any], rec: dict[str, Any]) -> dict[str, Any]:
@@ -256,7 +269,8 @@ def cmd_fits(a: argparse.Namespace) -> int:
     out: dict[str, dict[str, Any]] = defaultdict(dict)
     for (n, r), rep in by.items():
         if (n, r) in grouped:
-            rec = P.summarise_recovery(grouped[(n, r)], rep["near"])
+            rec = (P.summarise_recovery(grouped[(n, r)], rep["near"]) if a.recovery_boot
+                   else checks_only(grouped[(n, r)], rep["near"]))
             rep["recovery"] = rec
             rep["ppc"] = ppc_verdict(rep, rec)
         out[n][r] = rep
@@ -415,7 +429,8 @@ def main(argv: list[str] | None = None) -> int:
     f.add_argument("--runs-root", type=Path, default=REPO / "data" / "runs")
     f.add_argument("--n-boot", type=int, default=2000)
     f.add_argument("--recovery-reps", type=int, default=100)
-    f.add_argument("--recovery-boot", type=int, default=200)
+    f.add_argument("--recovery-boot", type=int, default=200,
+                   help="bootstrap draws per refit of a fake data set; 0: no refits, the predictive checks only")
     f.add_argument("--workers", type=int, default=3)
     f.add_argument("--only", default=None, help="';'-separated substrings of 'unit run_id' to keep (for timing)")
     f.add_argument("--out", type=Path, required=True)
