@@ -1,0 +1,210 @@
+{
+ "description": "The budget notice against its base run; see the docstring of analysis/budget_notice.py",
+ "pairs": [
+  {
+   "base_run": "2026-11-18-dev-gpt-oss-20b-thinking-high",
+   "forced_passes": true,
+   "notice_records": 320,
+   "notice_run": "2026-11-18-budget-dev-gpt-oss-20b-thinking-high",
+   "paired": 320,
+   "rows": [
+    {
+     "base": {
+      "correct": 117,
+      "correct_forced": 218,
+      "median_tokens": 32768.0,
+      "truncated": 197,
+      "wrong": 5
+     },
+     "correct_flips": [
+      26,
+      28
+     ],
+     "mcnemar_p_correct": 0.8919,
+     "mcnemar_p_truncation": 1.0,
+     "n": 320,
+     "notice": {
+      "correct": 115,
+      "correct_forced": 222,
+      "median_tokens": 32768.0,
+      "truncated": 198,
+      "wrong": 6
+     },
+     "truncation_flips": [
+      26,
+      25
+     ],
+     "unit": "all units"
+    },
+    {
+     "base": {
+      "correct": 10,
+      "correct_forced": 33,
+      "median_tokens": 32768.0,
+      "truncated": 29,
+      "wrong": 1
+     },
+     "correct_flips": [
+      4,
+      5
+     ],
+     "mcnemar_p_correct": 1.0,
+     "mcnemar_p_truncation": 0.7539,
+     "n": 40,
+     "notice": {
+      "correct": 9,
+      "correct_forced": 33,
+      "median_tokens": 32768.0,
+      "truncated": 31,
+      "wrong": 0
+     },
+     "truncation_flips": [
+      6,
+      4
+     ],
+     "unit": "A/H coloring"
+    },
+    {
+     "base": {
+      "correct": 40,
+      "correct_forced": 40,
+      "median_tokens": 4505.0,
+      "truncated": 0,
+      "wrong": 0
+     },
+     "correct_flips": [
+      0,
+      1
+     ],
+     "mcnemar_p_correct": 1.0,
+     "mcnemar_p_truncation": 1.0,
+     "n": 40,
+     "notice": {
+      "correct": 39,
+      "correct_forced": 39,
+      "median_tokens": 5069.5,
+      "truncated": 0,
+      "wrong": 0
+     },
+     "truncation_flips": [
+      0,
+      0
+     ],
+     "unit": "A/H entailment"
+    },
+    {
+     "base": {
+      "correct": 1,
+      "correct_forced": 17,
+      "median_tokens": 32768.0,
+      "truncated": 39,
+      "wrong": 0
+     },
+     "correct_flips": [
+      0,
+      1
+     ],
+     "mcnemar_p_correct": 1.0,
+     "mcnemar_p_truncation": 1.0,
+     "n": 40,
+     "notice": {
+      "correct": 0,
+      "correct_forced": 16,
+      "median_tokens": 32768.0,
+      "truncated": 40,
+      "wrong": 0
+     },
+     "truncation_flips": [
+      1,
+      0
+     ],
+     "unit": "A/H sat"
+    },
+    {
+     "base": {
+      "correct": 52,
+      "correct_forced": 60,
+      "median_tokens": 21210,
+      "truncated": 18,
+      "wrong": 4
+     },
+     "correct_flips": [
+      11,
+      12
+     ],
+     "mcnemar_p_correct": 1.0,
+     "mcnemar_p_truncation": 1.0,
+     "n": 75,
+     "notice": {
+      "correct": 51,
+      "correct_forced": 59,
+      "median_tokens": 22360,
+      "truncated": 18,
+      "wrong": 6
+     },
+     "truncation_flips": [
+      10,
+      10
+     ],
+     "unit": "C coloring"
+    },
+    {
+     "base": {
+      "correct": 6,
+      "correct_forced": 56,
+      "median_tokens": 32768,
+      "truncated": 69,
+      "wrong": 0
+     },
+     "correct_flips": [
+      7,
+      5
+     ],
+     "mcnemar_p_correct": 0.7744,
+     "mcnemar_p_truncation": 0.7744,
+     "n": 75,
+     "notice": {
+      "correct": 8,
+      "correct_forced": 61,
+      "median_tokens": 32768,
+      "truncated": 67,
+      "wrong": 0
+     },
+     "truncation_flips": [
+      5,
+      7
+     ],
+     "unit": "C knapsack"
+    },
+    {
+     "base": {
+      "correct": 8,
+      "correct_forced": 12,
+      "median_tokens": 32768.0,
+      "truncated": 42,
+      "wrong": 0
+     },
+     "correct_flips": [
+      4,
+      4
+     ],
+     "mcnemar_p_correct": 1.0,
+     "mcnemar_p_truncation": 1.0,
+     "n": 50,
+     "notice": {
+      "correct": 8,
+      "correct_forced": 14,
+      "median_tokens": 32768.0,
+      "truncated": 42,
+      "wrong": 0
+     },
+     "truncation_flips": [
+      4,
+      4
+     ],
+     "unit": "C sat"
+    }
+   ]
+  }
+ ]
+}
