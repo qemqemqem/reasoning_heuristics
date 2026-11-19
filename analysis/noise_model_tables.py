@@ -259,9 +259,10 @@ def table_summary(data: dict[str, Any]) -> str:
 
 def table_ppc(data: dict[str, Any]) -> str:
     rows = []
+    cands = [c for c in ORDER if c in data["fits"]]
     for u, r in targets(data["fits"]):
         cells = []
-        for c in ORDER:
+        for c in cands:
             f = data["fits"].get(c, {}).get(u, {}).get(r)
             if f is None or "ppc" not in f:
                 cells.append("–")
@@ -270,17 +271,17 @@ def table_ppc(data: dict[str, Any]) -> str:
             cap = " (ε cap)" if f["fit"].get("eps_at_cap") else ""
             cells.append(mark + cap)
         rows.append([SHORT[u], run_label(r)] + cells)
-    return md(["Unit", "Run"] + [c for c in ORDER if c in data["fits"]], rows)
+    return md(["Unit", "Run"] + cands, rows)
 
 
 def table_stage0(data: dict[str, Any]) -> str:
     rows = []
+    cands = [c for c in ORDER if c in data["stage0"]]
     for size, units in STAGE0_UNITS.items():
         for u in units:
-            cells = [stage0_cell(data["stage0"][c][size], u) if c in data["stage0"] and size in data["stage0"][c] else "–"
-                     for c in ORDER]
+            cells = [stage0_cell(data["stage0"][c][size], u) if size in data["stage0"][c] else "–" for c in cands]
             rows.append([SHORT[u], size] + cells)
-    return md(["Unit", "Items per cell"] + [f"{c}: mix, null q, null always" for c in ORDER], rows)
+    return md(["Unit", "Items per cell"] + [f"{c}: mix, null q, null always" for c in cands], rows)
 
 
 KEY_WEIGHTS = [("C_E2/colouring", "FF-LIST", "FF-LIST (C1, list order)"), ("C_E2/colouring", "RO-FF", "RO-FF (C3)"),
