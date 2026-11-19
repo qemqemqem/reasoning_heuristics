@@ -533,3 +533,53 @@ def test_a_resume_resends_a_stored_empty_reply_and_the_cache_does_not_serve_it(t
     again = read_gz(raw_path)
     assert len(again) == 3 and all(usable(r["response"]) for r in again)
     assert usable(cache.get(recs[0]["cache_key"])["response"])
+
+
+ACCOUNT = "user_2abcDEF345ghiJKL678mnoPQR9"  # an OpenRouter account id, as error bodies carry it (made up)
+
+
+class AccountInErrors(FakeTransport):
+    """Fails with bodies that carry the account id, the way OpenRouter's errors do, then answers."""
+
+    def __init__(self, statuses: list[int]):
+        super().__init__()
+        self.statuses = list(statuses)
+
+    def __call__(self, method, url, headers, body, timeout):
+        if self.statuses:
+            self.calls.append({})
+            status = self.statuses.pop(0)
+            err = {"error": {"message": "Provider returned error", "code": status,
+                             "metadata": {"raw": "upstream timeout", "provider_name": "P", "is_byok": False}},
+                   "user_id": ACCOUNT}
+            return HttpResponse(200 if status == 200 else status, json.dumps(err).encode())
+        return super().__call__(method, url, headers, body, timeout)
+
+
+def test_the_account_id_is_redacted_from_retried_errors(key):
+    res = client(AccountInErrors([504, 200])).chat({"model": "m", "messages": [{"role": "user", "content": "q"}]})
+    assert res.ok and len(res.errors) == 2
+    assert all(ACCOUNT not in e and ACCOUNT[:8] not in e for e in res.errors)
+    assert "user_[redacted]" in res.errors[0]
+
+
+def test_the_account_id_is_redacted_from_fatal_errors(key):
+    with pytest.raises(FatalAPIError) as exc:
+        client(AccountInErrors([402])).chat({"model": "m", "messages": [{"role": "user", "content": "q"}]})
+    assert ACCOUNT not in str(exc.value) and ACCOUNT[:8] not in str(exc.value) and "402" in str(exc.value)
+
+
+def test_the_account_id_is_redacted_from_exhausted_retries(key):
+    res = OpenRouterClient(AccountInErrors([503] * 3), max_attempts=3, sleep=lambda s: None).chat(
+        {"model": "m", "messages": [{"role": "user", "content": "q"}]})
+    assert not res.ok and ACCOUNT[:8] not in res.error and all(ACCOUNT[:8] not in e for e in res.errors)
+
+
+@pytest.mark.parametrize("text", [
+    f'{{"user_id":"{ACCOUNT}"}}', f'{{"user_id": "{ACCOUNT}"}}', f"account {ACCOUNT} over its limit",
+    f'{{"user_id":"{ACCOUNT}"}}'[:24],  # cut mid-id by a length limit: the stub must go too
+])
+def test_redact_removes_account_ids(text):
+    from reasoning_heuristics.evals.client import redact
+    out = redact(text)
+    assert ACCOUNT[:8] not in out and "user_2a" not in out

@@ -30,6 +30,7 @@ import http.client
 import json
 import os
 import random
+import re
 import time
 import urllib.error
 import urllib.request
@@ -84,6 +85,17 @@ class MissingKeyError(RuntimeError):
     pass
 
 
+_ACCOUNT_FIELD = re.compile(r'("user_id"\s*:\s*")[^"]*("?)')
+_ACCOUNT_ID = re.compile(r"\buser_[A-Za-z0-9]{8,}")
+
+
+def redact(text: str) -> str:
+    """`text` without the OpenRouter account id. Error bodies carry it as a top-level `"user_id"`, and the client
+    stores error text in every run's raw records, so it is removed before any error text is kept (Andrew,
+    2026-11-19: redact going forward). Redact before cutting text to length, or a cut can leave part of the id."""
+    return _ACCOUNT_ID.sub("user_[redacted]", _ACCOUNT_FIELD.sub(r"\1user_[redacted]\2", text))
+
+
 @dataclass
 class CallResult:
     """One chat-completion call: the raw response (or the last error) and how we got it."""
@@ -111,13 +123,13 @@ def _key() -> str:
 def _retryable_body(data: dict[str, Any]) -> str | None:
     """An error carried inside a 200 response (OpenRouter forwards provider failures that way)."""
     if isinstance(data.get("error"), dict):
-        return f"error {data['error'].get('code')}: {str(data['error'].get('message'))[:200]}"
+        return f"error {data['error'].get('code')}: {redact(str(data['error'].get('message')))[:200]}"
     choices = data.get("choices") or []
     if not choices:
         return "response has no choices"
     ch = choices[0]
     if ch.get("finish_reason") == "error" or isinstance(ch.get("error"), dict):
-        return f"choice error: {json.dumps(ch.get('error'))[:200]}"
+        return f"choice error: {redact(json.dumps(ch.get('error')))[:200]}"
     if not data.get("usage") and not _visible_output(ch):
         # every real response carries usage (see the module docstring); an empty reply without it is a provider
         # failure, not an answer (9 of 284 forced gpt-oss-120b calls on DeepInfra, 2026-11-18)
@@ -191,11 +203,12 @@ class OpenRouterClient:
                 resp = self.transport("POST", f"{API_BASE}{path}", self._headers(), payload, self.timeout_s)
             except (urllib.error.URLError, http.client.HTTPException, TimeoutError, ConnectionError, OSError) as e:
                 # HTTPException covers a body cut short (IncompleteRead) and a dropped connection
-                errors.append(f"attempt {attempt}: network {type(e).__name__}: {str(e)[:200]}")
+                errors.append(f"attempt {attempt}: network {type(e).__name__}: {redact(str(e))[:200]}")
             else:
                 status = resp.status
                 retry_after = resp.headers.get("Retry-After") or resp.headers.get("retry-after")
                 text = resp.body.decode("utf-8", errors="replace")
+                kept = redact(text)  # what error messages may keep of the body
                 data = None
                 try:
                     data = json.loads(text) if text.strip() else {}
@@ -203,7 +216,7 @@ class OpenRouterClient:
                     pass
                 charged = _reported_cost(data)
                 if resp.status in FATAL_STATUS:
-                    raise FatalAPIError(f"HTTP {resp.status}: {text[:500]}", charged)
+                    raise FatalAPIError(f"HTTP {resp.status}: {kept[:500]}", charged)
                 if resp.status == 200:
                     if data is None:
                         errors.append(f"attempt {attempt}: unparseable 200 body ({len(text)} chars)")
@@ -215,9 +228,9 @@ class OpenRouterClient:
                             raise FatalAPIError(problem, charged)
                         errors.append(f"attempt {attempt}: {problem}")
                 elif resp.status in RETRY_STATUS or resp.status >= 500:
-                    errors.append(f"attempt {attempt}: HTTP {resp.status}: {text[:200]}")
+                    errors.append(f"attempt {attempt}: HTTP {resp.status}: {kept[:200]}")
                 else:
-                    raise FatalAPIError(f"HTTP {resp.status}: {text[:500]}", charged)
+                    raise FatalAPIError(f"HTTP {resp.status}: {kept[:500]}", charged)
             failed_costs.append(charged)
             allowed = on_failed_attempt(charged) if on_failed_attempt is not None else True
             if not allowed:
@@ -232,7 +245,7 @@ class OpenRouterClient:
         """GET an API path (model endpoint listings, generation stats). Free; needs the key."""
         resp = self.transport("GET", f"{API_BASE}{path}", self._headers(), None, 60.0)
         if resp.status != 200:
-            raise FatalAPIError(f"GET {path}: HTTP {resp.status}: {resp.body[:300]!r}")
+            raise FatalAPIError(f"GET {path}: HTTP {resp.status}: {redact(resp.body.decode('utf-8', errors='replace'))[:300]!r}")
         return json.loads(resp.body.decode("utf-8"))
 
     def endpoints(self, model: str) -> dict[str, Any]:
@@ -249,5 +262,5 @@ class OpenRouterClient:
         try:
             data = self.get_json("/key").get("data") or {}
         except (FatalAPIError, OSError, ValueError) as e:
-            return {"error": str(e)[:200]}
+            return {"error": redact(str(e))[:200]}
         return {k: data.get(k) for k in ("usage", "usage_daily", "limit", "limit_remaining") if k in data}
