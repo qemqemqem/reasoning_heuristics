@@ -26,6 +26,10 @@ Scenario kinds (SCOPE §4 item 5):
 On finite channels (decisions, options, bits) a slip is a mixture with q, so the slip rate is not
 identified and the fit counts slips as unexplained mass (`Tensors.slip_identified`); fake models
 there plant no slips, so the planted weights are the identifiable ones.
+
+A scenario with `params` (a fitted `noise.NoiseParams`: per-member slip rates, any kernel, the strata
+q) draws slips and q from those instead of `eps`, `rho` and the default q (`UnitModel.sample_from`,
+`sample_q_from`); that is how a fit under a non-default noise model is turned back into fake data.
 """
 
 from __future__ import annotations
@@ -36,6 +40,7 @@ from typing import Any
 import numpy as np
 
 from reasoning_heuristics.identify.likelihood import Observation, UnitModel
+from reasoning_heuristics.identify.noise import NoiseParams
 from reasoning_heuristics.identify.records import Response
 from reasoning_heuristics.identify.spaces import BitSpace, FiniteSpace, PartitionSpace
 
@@ -54,6 +59,7 @@ class Scenario:
     clustered: bool = False
     truncation: dict[str, float] | None = None  # member label -> P(truncated); others `trunc_default`
     trunc_default: float = 0.05
+    params: NoiseParams | None = None  # fitted noise parameters; overrides eps, rho and the default q
 
     def weights_on(self, level: int | None) -> dict[str, float]:
         if self.level_weights is not None:
@@ -105,7 +111,12 @@ def simulate(um: UnitModel, sc: Scenario, rng: np.random.Generator, levels: np.n
             if rng.random() < p_cut:
                 obs.append(Observation(i, None))
                 continue
-        y = um.sample_q(i, rng) if label is None else um.sample(i, label, eps, sc.rho, rng)
+        if sc.params is None:
+            y = um.sample_q(i, rng) if label is None else um.sample(i, label, eps, sc.rho, rng)
+        elif label is None:
+            y = um.sample_q_from(i, sc.params, rng)
+        else:
+            y = um.sample(i, label, 0.0, sc.rho, rng) if finite else um.sample_from(i, label, sc.params, rng)
         obs.append(Observation(i, y))
     return obs
 

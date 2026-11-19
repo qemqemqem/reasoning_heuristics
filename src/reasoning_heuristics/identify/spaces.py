@@ -44,6 +44,21 @@ colourings: a uniformly random colour vector with n colours, read as a partition
 every partition positive mass). On finite spaces q is uniform. The `RANDOM (H)` member's
 "uniform over k^n colourings" is `log_uniform` (palette k, or n on fewest-colour tasks, where it
 coincides with q's structured part).
+
+Options of the noise model (`noise.py`; the defaults above are unchanged)
+-------------------------------------------------------------------------
+- **Size strata** (`q="strata"`): `q_stratum` gives an answer's stratum (colour blocks of a
+  partition, set positions of a bit vector), `log_stratum_size` how many answers share it (a
+  Stirling number of the second kind, or a binomial coefficient), `default_strata` the default
+  q's mass on each stratum, and `sample_stratum` a uniform answer from one.
+- **Free kernels** (`kernel="free"`): the same distance cells as the geometric kernel, so `slip`
+  serves; `sample_slip_g` draws D from a given kernel vector g instead of g(rho).
+- **Adds and drops** (`kernel="swap"`, bit spaces): `slip_ad`, `slip_set_ad` and `sample_slip_ad`
+  are the kernel over the (adds, drops) cells `AD_CELLS`: a slip draws a cell, then that many
+  positions to set among a's clear ones and to clear among its set ones, uniformly (a cell asking
+  for more than there are is clipped, as D is clipped at n), so P(y | a) = sum over the cells that
+  clip to y's (adds, drops) of g_cell / (C(n - k, adds) C(k, drops)), k = |a|. A one-for-one swap
+  is the cell (1, 1).
 """
 
 from __future__ import annotations
@@ -94,6 +109,52 @@ def _log_bell(n: int) -> float:
             new.append(new[-1] + x)
         row = new
     return math.log(row[-1]) if n > 0 else 0.0
+
+
+# (adds, drops) cells of the swap kernel; index 0 is unused, as d = 0 is in the distance kernel
+AD_CELLS: tuple[tuple[int, int], ...] = ((0, 0),) + tuple((a, r) for a in range(DMAX + 1) for r in range(DMAX + 1)
+                                                         if 0 < a + r <= DMAX)
+
+
+@lru_cache(maxsize=None)
+def _stirling2(n: int) -> tuple[tuple[int, ...], ...]:
+    """S[m][j]: partitions of m elements into j blocks, exact, for m, j = 0..n."""
+    S = [[0] * (n + 1) for _ in range(n + 1)]
+    S[0][0] = 1
+    for m in range(1, n + 1):
+        for j in range(1, m + 1):
+            S[m][j] = S[m - 1][j - 1] + j * S[m - 1][j]
+    return tuple(tuple(r) for r in S)
+
+
+def _log_int(x: int) -> float:
+    return math.log(x) if x < 2 ** 1000 else math.log(x >> 900) + 900 * math.log(2)
+
+
+def sample_partition_rgs(n: int, b: int, rng: np.random.Generator) -> np.ndarray:
+    """A uniformly random partition of n elements into exactly b blocks, as a restricted-growth string.
+
+    Element m is a singleton with probability S(m-1, b-1) / S(m, b), else it joins one of the b blocks
+    of a partition of the first m-1 (S(m, b) = S(m-1, b-1) + b S(m-1, b)); the choices are drawn from
+    m = n down, then the blocks are built from m = 1 up."""
+    if not 1 <= b <= n:
+        raise ValueError(f"no partition of {n} elements into {b} blocks")
+    S = _stirling2(n)
+    steps = []
+    j = b
+    for m in range(n, 0, -1):
+        single = j >= 1 and (S[m - 1][j - 1] == S[m][j] or rng.random() < S[m - 1][j - 1] / S[m][j])
+        steps.append(single)
+        j -= single
+    out = np.empty(n, dtype=np.int64)
+    blocks = 0
+    for m, single in enumerate(reversed(steps)):
+        if single:
+            out[m] = blocks
+            blocks += 1
+        else:
+            out[m] = int(rng.integers(blocks))
+    return PartitionSpace.canon(out)
 
 
 class Space:
@@ -151,6 +212,25 @@ class Space:
     def signature(self) -> tuple:
         """Two items whose spaces have equal signatures accept the same answers (for permutation baselines)."""
         return (self.kind,)
+
+    # --- noise-model options (noise.py) -----------------------------------------------------
+    def q_stratum(self, key: str) -> int | None:
+        """The size stratum of a structured answer (None for a special token or a finite space)."""
+        return None
+
+    def log_stratum_size(self, s: int) -> float:  # pragma: no cover - abstract
+        raise NotImplementedError
+
+    def default_strata(self) -> np.ndarray:  # pragma: no cover - abstract
+        """The default q's mass on each stratum 0..n, given a structured answer."""
+        raise NotImplementedError
+
+    def sample_stratum(self, s: int, rng: np.random.Generator) -> str:  # pragma: no cover - abstract
+        raise NotImplementedError
+
+    def sample_slip_g(self, a: str, g: np.ndarray, rng: np.random.Generator) -> str:  # pragma: no cover - abstract
+        """A near-miss slip with D drawn from the kernel vector g over distances 0..DMAX."""
+        raise NotImplementedError
 
 
 def _no_special(space: Space, a: str) -> None:
@@ -213,6 +293,9 @@ class FiniteSpace(Space):
     def sample_slip(self, a: str, rho: float, rng: np.random.Generator) -> str:
         others = [v for v in self.values if v != a]
         return others[int(rng.integers(len(others)))]
+
+    def sample_slip_g(self, a: str, g: np.ndarray, rng: np.random.Generator) -> str:
+        return self.sample_slip(a, 0.0, rng)
 
     def signature(self) -> tuple:
         return (self.kind, tuple(self.values))
@@ -413,6 +496,76 @@ class BitSpace(Space):
     def signature(self) -> tuple:
         return (self.kind, tuple(self.codec.names), self.specials)
 
+    # --- noise-model options -----------------------------------------------------------------
+    def q_stratum(self, key: str) -> int | None:
+        if key in self.specials:
+            return None
+        v = self.parse(key)
+        return None if v is None else int(v.sum())
+
+    def log_stratum_size(self, s: int) -> float:
+        return math.log(self._comb[s])
+
+    def default_strata(self) -> np.ndarray:
+        return self._comb / self._comb.sum()
+
+    def sample_stratum(self, s: int, rng: np.random.Generator) -> str:
+        vec = np.zeros(self.n, dtype=bool)
+        vec[rng.choice(self.n, size=s, replace=False)] = True
+        return self.encode(vec)
+
+    def sample_slip_g(self, a: str, g: np.ndarray, rng: np.random.Generator) -> str:
+        _no_special(self, a)
+        g = np.asarray(g, dtype=float)
+        d = min(int(rng.choice(len(g), p=g / g.sum())), self.n)
+        vec = self.parse(a).copy()
+        flip = rng.choice(self.n, size=d, replace=False)
+        vec[flip] = ~vec[flip]
+        return self.encode(vec)
+
+    def _ad_coeffs(self, adds: np.ndarray, drops: np.ndarray, k: np.ndarray) -> np.ndarray:
+        """(m, len(AD_CELLS)) coefficients for m (adds, drops, |a|) triples."""
+        n = self.n
+        c = np.zeros((len(adds), len(AD_CELLS)))
+        inv = 1.0 / np.array([math.comb(int(n - kk), int(aa)) * math.comb(int(kk), int(rr))
+                              for aa, rr, kk in zip(adds, drops, k)], dtype=float)
+        for j, (A, R) in enumerate(AD_CELLS[1:], start=1):
+            hit = (np.minimum(A, n - k) == adds) & (np.minimum(R, k) == drops)
+            c[hit, j] = inv[hit]
+        return c
+
+    def slip_ad(self, y: str, a: str) -> tuple[float, np.ndarray]:
+        """(b0, c) of the adds-and-drops kernel: P_slip(y | a) = sum_cells c[cell] g[cell]."""
+        _no_special(self, a)
+        if y in self.specials:
+            return 0.0, np.zeros(len(AD_CELLS))
+        vy, va = self.parse(y), self.parse(a)
+        adds, drops, k = int((vy & ~va).sum()), int((~vy & va).sum()), int(va.sum())
+        return 0.0, self._ad_coeffs(np.array([adds]), np.array([drops]), np.array([k]))[0]
+
+    def slip_set_ad(self, y: str, S: np.ndarray) -> np.ndarray:
+        if y in self.specials:
+            return np.zeros(len(AD_CELLS))
+        vy = self.parse(y)
+        adds = (vy[None, :] & ~S).sum(1)
+        drops = (~vy[None, :] & S).sum(1)
+        k = S.sum(1)
+        trip, counts = np.unique(np.stack([adds, drops, k], 1), axis=0, return_counts=True)
+        c = self._ad_coeffs(trip[:, 0], trip[:, 1], trip[:, 2])
+        return (c * counts[:, None]).sum(0) / len(S)
+
+    def sample_slip_ad(self, a: str, g: np.ndarray, rng: np.random.Generator) -> str:
+        _no_special(self, a)
+        g = np.asarray(g, dtype=float)
+        A, R = AD_CELLS[int(rng.choice(len(g), p=g / g.sum()))]
+        vec = self.parse(a).copy()
+        ones, zeros = np.flatnonzero(vec), np.flatnonzero(~vec)
+        add = rng.choice(zeros, size=min(A, len(zeros)), replace=False)
+        drop = rng.choice(ones, size=min(R, len(ones)), replace=False)
+        vec[add] = True
+        vec[drop] = False
+        return self.encode(vec)
+
 
 # =============================================================================================
 # Partitions (colourings up to renaming)
@@ -590,6 +743,38 @@ class PartitionSpace(Space):
 
     def signature(self) -> tuple:
         return (self.kind, tuple(self.vertices), self.k_uniform, self.specials)
+
+    # --- noise-model options -----------------------------------------------------------------
+    def q_stratum(self, key: str) -> int | None:
+        if key in self.specials:
+            return None
+        r = self.parse(key)
+        return None if r is None else int(r.max()) + 1
+
+    def log_stratum_size(self, s: int) -> float:
+        return _log_int(_stirling2(self.n)[self.n][s])
+
+    def default_strata(self) -> np.ndarray:
+        """q's structured part draws n colours uniformly: P(b blocks) = S(n, b) n! / (n - b)! / n^n."""
+        S = _stirling2(self.n)[self.n]
+        logs = np.array([(_log_int(S[b]) + self._log_falling(self.n, b) - self.n * math.log(self.n)) if S[b] else -np.inf
+                         for b in range(self.n + 1)])
+        p = np.exp(logs - logs.max())
+        return p / p.sum()
+
+    def sample_stratum(self, s: int, rng: np.random.Generator) -> str:
+        return self.encode(sample_partition_rgs(self.n, s, rng))
+
+    def sample_slip_g(self, a: str, g: np.ndarray, rng: np.random.Generator) -> str:
+        _no_special(self, a)
+        g = np.asarray(g, dtype=float)
+        ra = self.parse(a).copy()
+        C = int(ra.max()) + 2
+        d = min(int(rng.choice(len(g), p=g / g.sum())), self.n)
+        for v in rng.choice(self.n, size=d, replace=False):
+            new = int(rng.integers(C - 1))
+            ra[v] = new if new < ra[v] else new + 1
+        return self.encode(self.canon(ra))
 
 
 # =============================================================================================

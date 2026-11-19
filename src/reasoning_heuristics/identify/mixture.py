@@ -13,6 +13,12 @@ independent, so the 95% intervals are percentile intervals of a cluster bootstra
 (`units.clusters`) are resampled with replacement, the whole model (pi, eps, rho) is refitted on
 each replicate (warm-started at the point estimate).
 
+**Noise-model options** (`noise.py`, docs/NOISE_MODEL.md): when the tensors carry a non-default
+`NoiseModel`, `em` and `fit` hand over to `_GeneralStepper`, the same EM with a per-member slip
+rate, a free kernel over the tensors' cells, and the strata q's probabilities and special-token
+mass as further M-steps (all closed form). The default model never reaches it, so its results are
+unchanged.
+
 **Feature-dependent weights** (family I, strategy selection): `fit_softmax` fits
 pi_h(x) = softmax_h(beta_h . phi(x)) over the available members and q (q is the reference, beta_0 = 0),
 with a small ridge on beta, by L-BFGS on the marginal likelihood; the constant model is the special
@@ -28,7 +34,8 @@ import numpy as np
 from scipy.optimize import minimize
 
 from reasoning_heuristics.identify.likelihood import Tensors
-from reasoning_heuristics.identify.spaces import DMAX, trunc_geom
+from reasoning_heuristics.identify.noise import NoiseModel, NoiseParams
+from reasoning_heuristics.identify.spaces import AD_CELLS, DMAX, trunc_geom
 
 EPS_MAX = 0.5
 RHO_GRID = np.round(np.linspace(0.02, 0.9, 45), 4)
@@ -43,6 +50,7 @@ class EMResult:
     loglik: np.ndarray  # (B,)
     iters: int
     converged: np.ndarray  # (B,)
+    state: dict[str, np.ndarray] | None = None  # non-default noise models: every parameter, batched
 
 
 def _mixture_terms(T: Tensors, pi: np.ndarray, eps: np.ndarray, rho: np.ndarray, rho_free: bool):
@@ -129,6 +137,10 @@ def em(T: Tensors, W: np.ndarray | None = None, pi0: np.ndarray | None = None, e
     N, G = T.A.shape
     if fix_eps is None and not T.slip_identified:
         fix_eps = 0.0
+    if not T.noise.is_default:
+        if fix_rho is not None:
+            raise ValueError("fix_rho applies to the default (geometric) noise model only")
+        return em_general(T, W, pi0, eps0=eps0, fix_eps=fix_eps, max_iter=max_iter, tol=tol, accelerate=accelerate)
     W = np.ones((1, N)) if W is None else np.asarray(W, dtype=float)
     B = W.shape[0]
     if pi0 is None:
@@ -226,6 +238,8 @@ def fit(T: Tensors, n_boot: int = 200, rng: np.random.Generator | None = None, c
     rng = rng or np.random.default_rng(0)
     if fix_eps is None and not T.slip_identified:
         fix_eps = 0.0
+    if not T.noise.is_default:
+        return _fit_general(T, n_boot, rng, chunk, fix_eps, max_iter, tol, q_label, jackknife)
     point = em(T, fix_eps=fix_eps, fix_rho=fix_rho, max_iter=max_iter, tol=tol)
     pi_hat, eps_hat, rho_hat = point.pi[0], float(point.eps[0]), float(point.rho[0])
     labels = list(T.labels) + [q_label]
@@ -300,6 +314,290 @@ def data_ties(T: Tensors) -> list[list[str]]:
         key = np.concatenate([T.A[:, g], T.B0[:, g], T.C[:, g].ravel(), T.avail[:, g].astype(float)]).round(12).tobytes()
         sig.setdefault(key, []).append(T.labels[g])
     return [v for v in sig.values() if len(v) > 1]
+
+
+# =============================================================================================
+# Non-default noise models (noise.py)
+# =============================================================================================
+
+
+def default_kernel(cells: str, rho: float = 0.3) -> np.ndarray:
+    """The geometric kernel g(rho) over a noise model's cells (adds-drops: g_d split evenly over the
+    d + 1 cells with adds + drops = d)."""
+    g = trunc_geom(rho)
+    if cells == "distance":
+        return g
+    return np.array([0.0] + [g[a + r] / (a + r + 1) for a, r in AD_CELLS[1:]])
+
+
+class _GeneralStepper:
+    """One EM (MM) update of every parameter of a non-default noise model, batched over replicates.
+
+    State (each batched over B): pi (B, G + 1); eps (B, G) per member or (B, 1) shared; g (B, K) the
+    kernel over the tensors' cells (geometric: a grid M-step on rho as in the default; free and swap:
+    expected slips per cell, normalised); P (B, S) the strata q's probabilities and tau (B,) its
+    special-token mass (closed-form M-steps: q's responsibility per stratum, normalised within each
+    group, and q's responsibility on special tokens over its responsibility on rows whose space has
+    them)."""
+
+    def __init__(self, T: Tensors, W: np.ndarray, fix_eps: float | None):
+        self.T, self.W = T, W
+        self.noise: NoiseModel = T.noise
+        self.fix_eps = fix_eps
+        self.eps_max = self.noise.eps_max
+        self.G = T.A.shape[1]
+        self.slip_cols = T.slips.astype(float)
+        self.avail = T.avail.astype(float)
+        self.log_g_grid = np.log(np.maximum(trunc_geom(RHO_GRID), TINY))
+        self.qs = T.qs
+        if self.qs is not None:
+            q = self.qs
+            self.structured = q.row >= 0
+            self.row_idx = np.where(self.structured, q.row, 0)
+            S = len(q.p0)
+            self.onehot = np.zeros((T.n, S))
+            self.onehot[np.arange(T.n)[self.structured], q.row[self.structured]] = 1.0
+            ng = int(q.group.max()) + 1 if S else 0
+            self.group_mat = np.zeros((S, ng))
+            self.group_mat[np.arange(S), q.group] = 1.0
+
+    def init(self, B: int, pi0: np.ndarray | None, eps0: Any) -> dict[str, np.ndarray]:
+        G = self.G
+        pi = np.full((B, G + 1), 1.0 / (G + 1)) if pi0 is None else np.array(np.broadcast_to(pi0, (B, G + 1)), dtype=float)
+        Ge = G if self.noise.eps == "member" else 1
+        eps = np.full((B, Ge), float(self.fix_eps if self.fix_eps is not None else np.mean(eps0)))
+        g = np.tile(default_kernel(self.noise.cells), (B, 1))
+        st = {"pi": pi, "eps": eps, "g": g, "rho": np.full(B, 0.3)}
+        if self.qs is not None:
+            st["P"] = np.tile(self.qs.p0, (B, 1))
+            st["tau"] = np.full(B, self.qs.tau0)
+        return st
+
+    def q_rows(self, st: dict[str, np.ndarray]) -> np.ndarray:
+        """(B, N) q at the state, on the tensors' row scale."""
+        T = self.T
+        if self.qs is None:
+            return np.broadcast_to(T.Q[None], (st["pi"].shape[0], T.n))
+        q = self.qs
+        tau = st["tau"][:, None]
+        with np.errstate(divide="ignore"):
+            logP = np.log(np.maximum(st["P"], 0.0))
+            log_tau, log_1mtau = np.log(tau), np.log1p(-tau)
+        lq = np.broadcast_to(q.log_q_fixed[None], (len(tau), T.n)).copy()
+        s_rows = self.structured
+        lq[:, s_rows] = logP[:, self.row_idx[s_rows]] - q.logsize[None, s_rows] + np.where(
+            q.has_special[None, s_rows], log_1mtau, 0.0)
+        sp = q.special
+        lq[:, sp] = log_tau - q.log_nspecial[None, sp]
+        return np.exp(lq - T.log_scale[None])
+
+    def terms(self, st):
+        T, G = self.T, self.G
+        S = T.B0[None] + np.einsum("ngk,bk->bng", T.C, st["g"])
+        e = st["eps"][:, None, :]
+        L = (1 - e) * T.A[None] + e * S
+        w = st["pi"][:, None, :G] * T.avail[None]
+        num = w * L
+        Q = self.q_rows(st)
+        numq = st["pi"][:, None, G] * Q
+        tot = num.sum(-1) + numq
+        savail = np.maximum(w.sum(-1) + st["pi"][:, None, G], TINY)
+        return S, L, num, numq, tot, savail
+
+    def loglik(self, st) -> np.ndarray:
+        *_, tot, savail = self.terms(st)
+        return (self.W * (np.log(np.maximum(tot, TINY)) - np.log(savail) + self.T.log_scale[None])).sum(1)
+
+    def __call__(self, st):
+        T, W, G = self.T, self.W, self.G
+        S, L, num, numq, tot, savail = self.terms(st)
+        tot_safe = np.maximum(tot, TINY)
+        ll = (W * (np.log(tot_safe) - np.log(savail) + T.log_scale[None])).sum(1)
+        R = num / tot_safe[..., None]
+        Rq = numq / tot_safe
+        pi = st["pi"]
+        numer = np.einsum("bn,bng->bg", W, R)
+        numer_q = (W * Rq).sum(1)
+        Wd = W / savail
+        denom = Wd @ self.avail
+        denom_q = Wd.sum(1)
+        new_pi = np.empty_like(pi)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            new_pi[:, :G] = np.where(denom > 0, numer / np.maximum(denom, TINY), pi[:, :G])
+            new_pi[:, G] = numer_q / np.maximum(denom_q, TINY)
+        new_pi = np.maximum(new_pi, 0.0)
+        new_pi /= new_pi.sum(1, keepdims=True)
+        new = dict(st)
+        new["pi"] = new_pi
+        e = st["eps"][:, None, :]
+        Rs = R * self.slip_cols[None, None, :]
+        if self.fix_eps is None:
+            with np.errstate(invalid="ignore", divide="ignore"):
+                share = np.where(L > 0, e * S / np.maximum(L, TINY), 0.0)
+            top = np.einsum("bn,bng->bg", W, Rs * share)
+            bot = np.einsum("bn,bng->bg", W, Rs)
+            if self.noise.eps == "shared":
+                top, bot = top.sum(1, keepdims=True), bot.sum(1, keepdims=True)
+            new["eps"] = np.where(bot > 1e-12, np.minimum(top / np.maximum(bot, TINY), self.eps_max), st["eps"])
+        # kernel: expected slips per cell
+        with np.errstate(invalid="ignore", divide="ignore"):
+            inv_L = np.where(L > 0, 1.0 / np.maximum(L, TINY), 0.0)
+        Ed = np.einsum("bn,bng,ngk->bk", W, Rs * inv_L * e, T.C) * st["g"]
+        has = Ed.sum(1) > 0
+        if has.any():
+            if self.noise.kernel == "geometric":
+                rho = np.where(has, RHO_GRID[np.argmax(Ed @ self.log_g_grid.T, 1)], st["rho"])
+                new["rho"] = rho
+                new["g"] = np.where(has[:, None], trunc_geom(rho), st["g"])
+            else:
+                new["g"] = np.where(has[:, None], Ed / np.maximum(Ed.sum(1, keepdims=True), TINY), st["g"])
+        # the strata q
+        if self.qs is not None:
+            WRq = W * Rq
+            c = WRq @ self.onehot  # (B, S)
+            gs = c @ self.group_mat  # (B, groups)
+            per = gs @ self.group_mat.T  # (B, S): each stratum's group total
+            new["P"] = np.where(per > 0, c / np.maximum(per, TINY), st["P"])
+            if self.qs.tau_free:
+                sp = (WRq * self.qs.special[None]).sum(1)
+                den = (WRq * self.qs.has_special[None]).sum(1)
+                new["tau"] = np.where(den > 0, sp / np.maximum(den, TINY), st["tau"])
+        return new, ll
+
+
+def em_general(T: Tensors, W: np.ndarray | None = None, pi0: np.ndarray | None = None, eps0: Any = 0.1,
+               fix_eps: float | None = None, init: dict[str, np.ndarray] | None = None, max_iter: int = 3000,
+               tol: float = 1e-8, accelerate: bool = True) -> EMResult:
+    """`em` for a non-default noise model: the same batched EM with SQUAREM on (pi, eps); the kernel and
+    q parameters take the plain EM step. `init` warm-starts every parameter (each (B, ...) or one row)."""
+    N, G = T.A.shape
+    if fix_eps is None and not T.slip_identified:
+        fix_eps = 0.0
+    W = np.ones((1, N)) if W is None else np.asarray(W, dtype=float)
+    B = W.shape[0]
+    step = _GeneralStepper(T, W, fix_eps)
+    st = step.init(B, pi0, eps0)
+    if init is not None:
+        for k, v in init.items():
+            if k in st and not (k == "eps" and fix_eps is not None):
+                st[k] = np.array(np.broadcast_to(v, st[k].shape), dtype=float)
+        if pi0 is not None:
+            st["pi"] = np.array(np.broadcast_to(pi0, st["pi"].shape), dtype=float)
+    wsum = W.sum(1)
+    prev = np.full(B, -np.inf)
+    converged = np.zeros(B, dtype=bool)
+    steps = 0
+    em_max = step.eps_max
+    while steps < max_iter:
+        s1, ll0 = step(st)
+        steps += 1
+        converged = np.abs(ll0 - prev) / wsum < tol
+        prev = ll0
+        if converged.all():
+            break
+        if not accelerate:
+            st = s1
+            continue
+        s2, ll1 = step(s1)
+        rp, vp = s1["pi"] - st["pi"], s2["pi"] - 2 * s1["pi"] + st["pi"]
+        re, ve = s1["eps"] - st["eps"], s2["eps"] - 2 * s1["eps"] + st["eps"]
+        nr = np.sqrt((rp ** 2).sum(1) + (re ** 2).sum(1))
+        nv = np.sqrt((vp ** 2).sum(1) + (ve ** 2).sum(1))
+        with np.errstate(invalid="ignore", divide="ignore"):
+            alpha = np.where(nv > 0, -nr / np.maximum(nv, TINY), -1.0)
+        alpha = np.clip(alpha, -64.0, -1.0)
+        pe = np.maximum(st["pi"] - 2 * alpha[:, None] * rp + alpha[:, None] ** 2 * vp, 1e-12)
+        pe /= pe.sum(1, keepdims=True)
+        ext = dict(s2)
+        ext["pi"] = pe
+        if fix_eps is None:
+            ext["eps"] = np.clip(st["eps"] - 2 * alpha[:, None] * re + alpha[:, None] ** 2 * ve, 0.0, em_max)
+        s3, ll_ext = step(ext)
+        steps += 2
+        ok = ll_ext >= ll1
+        st = {k: np.where(ok.reshape((-1,) + (1,) * (s3[k].ndim - 1)), s3[k], s2[k]) for k in s3}
+    ll = step.loglik(st)
+    eps_out = _eps_summary(st, T)
+    return EMResult(st["pi"], eps_out, st["rho"] if T.noise.kernel == "geometric" else np.full(B, np.nan), ll, steps,
+                    converged, st)
+
+
+def _eps_summary(st: dict[str, np.ndarray], T: Tensors) -> np.ndarray:
+    """One slip rate per replicate: the shared rate, or the per-member rates averaged with the weights
+    of the slipping columns (a member that never slips does not count)."""
+    eps = st["eps"]
+    if eps.shape[1] == 1:
+        return eps[:, 0]
+    G = T.A.shape[1]
+    w = st["pi"][:, :G] * T.slips[None, :]
+    tot = w.sum(1)
+    return np.where(tot > 0, (w * eps).sum(1) / np.maximum(tot, TINY), eps.mean(1))
+
+
+def _fit_general(T: Tensors, n_boot: int, rng: np.random.Generator, chunk: int, fix_eps: float | None, max_iter: int,
+                 tol: float, q_label: str, jackknife: bool) -> FitResult:
+    """`fit` for a non-default noise model: point estimate, cluster bootstrap with every parameter
+    warm-started at the estimate (pi as in `fit`), optional jackknife. The kernel, the per-member slip
+    rates and the q parameters are in `extra`, with bootstrap intervals."""
+    point = em_general(T, fix_eps=fix_eps, max_iter=max_iter, tol=tol)
+    st = {k: v[:1] for k, v in point.state.items()}
+    pi_hat, eps_hat = point.pi[0], float(point.eps[0])
+    labels = list(T.labels) + [q_label]
+    extra = {"data_ties": data_ties(T), "slip_identified": T.slip_identified, "noise": T.noise.to_json(),
+             "state": {k: v[0].tolist() for k, v in st.items()}}
+    if n_boot <= 0:
+        z = np.full(len(labels), np.nan)
+        return FitResult(labels, pi_hat, z, z, eps_hat, (np.nan, np.nan), float(point.rho[0]), (np.nan, np.nan),
+                         float(point.loglik[0]), T.n, len(np.unique(T.cluster)), None, point.iters,
+                         bool(point.converged[0]), extra)
+    Wall = cluster_bootstrap(T.cluster, n_boot, rng)
+    starts = 0.5 * pi_hat[None, :] + 0.5 * rng.dirichlet(np.ones(len(pi_hat)), size=n_boot)
+    pis, epss, states = [], [], []
+    for start in range(0, n_boot, chunk):
+        Wb = Wall[start:start + chunk]
+        r = em_general(T, Wb, pi0=starts[start:start + chunk], fix_eps=fix_eps, init=st, max_iter=min(max_iter, 1500), tol=tol)
+        pis.append(r.pi)
+        epss.append(r.eps)
+        states.append(r.state)
+    boot = np.concatenate(pis)
+    eb = np.concatenate(epss)
+    bst = {k: np.concatenate([s[k] for s in states]) for k in states[0]}
+    lo, hi = np.percentile(boot, 2.5, 0), np.percentile(boot, 97.5, 0)
+    extra["state_ci"] = {k: [np.percentile(v, 2.5, 0).tolist(), np.percentile(v, 97.5, 0).tolist()] for k, v in bst.items()}
+    jack = None
+    if jackknife:
+        ids, inv = np.unique(T.cluster, return_inverse=True)
+        Wj = np.ones((len(ids), T.n))
+        Wj[inv, np.arange(T.n)] = 0.0
+        js = []
+        for start in range(0, len(ids), chunk):
+            r = em_general(T, Wj[start:start + chunk], pi0=pi_hat, fix_eps=fix_eps, init=st, max_iter=min(max_iter, 1500),
+                           tol=tol)
+            js.append(r.pi)
+        jack = np.concatenate(js)
+    rho_hat = float(point.rho[0])
+    rho_ci = (np.nan, np.nan) if np.isnan(rho_hat) else (float(np.percentile(bst["rho"], 2.5)), float(np.percentile(bst["rho"], 97.5)))
+    return FitResult(labels, pi_hat, lo, hi, eps_hat, (float(np.percentile(eb, 2.5)), float(np.percentile(eb, 97.5))),
+                     rho_hat, rho_ci, float(point.loglik[0]), T.n, len(np.unique(T.cluster)), boot, point.iters,
+                     bool(point.converged[0]), extra, jack)
+
+
+def noise_params(state: dict[str, Any], noise: NoiseModel, keys_by_column: list[str],
+                 strata_keys: list[tuple[str, int, int]] | None = None) -> NoiseParams:
+    """A fitted state (one replicate, e.g. `FitResult.extra['state']`) as `NoiseParams` for the fake
+    models. Per-member rates are keyed by `keys_by_column` (e.g. each group's first member); the strata
+    q's probabilities by `strata_keys` (`UnitModel.strata_index()[0]`)."""
+    eps = np.asarray(state["eps"], dtype=float).ravel()
+    e: float | dict[str, float] = float(eps[0]) if len(eps) == 1 else {c: float(x) for c, x in zip(keys_by_column, eps)}
+    strata = None
+    tau = None
+    if "P" in state:
+        P = np.asarray(state["P"], dtype=float).ravel()
+        strata = {}
+        for (kind, n, size), p in zip(strata_keys, P):
+            strata.setdefault((kind, n), np.zeros(n + 1))[size] = p
+        tau = float(np.asarray(state["tau"]).ravel()[0])
+    return NoiseParams(e, np.asarray(state["g"], dtype=float).ravel(), tau, strata, cells=noise.cells)
 
 
 # =============================================================================================
