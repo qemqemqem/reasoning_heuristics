@@ -269,3 +269,45 @@ def test_permutation_and_recovery_paths_use_the_units_noise_model():
     obs = plant(um, {"B": 0.6, "C": 0.4}, eps=0.0, rho=0.3, rng=rng)
     r = em(um.tensors(obs))
     assert r.state is not None and r.eps[0] == 0.0  # finite channel: eps held at 0
+
+
+def test_recovery_harness_fits_with_a_noise_model():
+    """run_unit with cfg['noise']: the generator stays the pre-registered model, the fits use the option."""
+    from reasoning_heuristics.identify.recovery import run_unit
+
+    items = load_items(ROOT / "data/items/smoke/C_E2_smoke_s1.jsonl.gz")
+    unit = make_units(items)["C_E2/knapsack"]
+    cfg = {"reps": 3, "boot": 10, "single_reps": 2, "feature_reps": 2, "feature_boot": 3, "offzoo_reps": 2, "seed": 0,
+           "scenarios": ["mix", "null_q", "null_always", "off_zoo"], "noise": "SEQ-r"}
+    out = run_unit(unit, cfg)
+    for k in ("mix", "null_q", "null_always", "off_zoo"):
+        assert k in out["scenarios"], k
+    assert out["noise"] == CANDIDATES["SEQ-r"].to_json() and out["reach"] == 3
+    base = run_unit(unit, dict(cfg, noise=None, scenarios=["null_q"]))  # same fake data, the default fit
+    assert base["noise"] == NoiseModel().to_json()
+    assert base["scenarios"]["null_q"]["quantities"]["q"]["mean"] != out["scenarios"]["null_q"]["quantities"]["q"]["mean"]
+
+
+def test_reach_limits_the_kernel_and_auto_follows_the_space_size(knapsack_unit):
+    """reach='auto' gives knapsack (10 items) a reach of 3 (the ball of radius 3 holds 176 of 1,024 packings);
+    no slip then lands more than 3 items away, and the slip pmf still sums to 1."""
+    nm = NoiseModel(kernel="free", eps_max=1.0, reach="auto")
+    um = UnitModel(knapsack_unit, noise=nm)
+    assert um.reach == 3
+    space = um.items[0].space
+    assert space.ball_fraction(3) == pytest.approx(176 / 1024) and space.ball_fraction(4) > 0.2
+    det = next(c for c in um.columns if um.pred(0, c.members[0]).kind == "det")
+    a = um.pred(0, det.members[0]).key
+    g = default_kernel("distance", 0.6, um.reach)
+    assert g[4:].sum() == 0 and abs(g.sum() - 1) < 1e-12
+    total = 0.0
+    for bits in itertools.product((False, True), repeat=space.n):
+        y = space.encode(np.array(bits))
+        A, B0, C, Q, avail = um.row(0, y)
+        j = um.columns.index(det)
+        total += B0[j] + C[j] @ g
+        if space.distance(y, a) > 3:
+            assert not C[j].any()
+    assert abs(total - 1) < 1e-9
+    with pytest.raises(ValueError):
+        NoiseModel(reach=3)  # the geometric kernel is defined up to 6

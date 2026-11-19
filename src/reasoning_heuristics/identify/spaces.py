@@ -232,6 +232,10 @@ class Space:
         """A near-miss slip with D drawn from the kernel vector g over distances 0..DMAX."""
         raise NotImplementedError
 
+    def ball_fraction(self, r: int, palette: int | None = None) -> float:  # pragma: no cover - abstract
+        """The share of the structured answers within distance r of a given one (an upper bound for partitions)."""
+        raise NotImplementedError
+
 
 def _no_special(space: Space, a: str) -> None:
     if a in space.specials:
@@ -509,6 +513,9 @@ class BitSpace(Space):
     def default_strata(self) -> np.ndarray:
         return self._comb / self._comb.sum()
 
+    def ball_fraction(self, r: int, palette: int | None = None) -> float:
+        return float(self._comb[: min(r, self.n) + 1].sum() / self._comb.sum())
+
     def sample_stratum(self, s: int, rng: np.random.Generator) -> str:
         vec = np.zeros(self.n, dtype=bool)
         vec[rng.choice(self.n, size=s, replace=False)] = True
@@ -764,6 +771,13 @@ class PartitionSpace(Space):
 
     def sample_stratum(self, s: int, rng: np.random.Generator) -> str:
         return self.encode(sample_partition_rgs(self.n, s, rng))
+
+    def ball_fraction(self, r: int, palette: int | None = None) -> float:
+        """At most sum_d C(n, d) (C - 1)^d of the Bell(n) partitions are within r recolourings of a
+        partition whose slips use C = palette colours (its blocks plus one new colour)."""
+        C = palette if palette is not None else self.n
+        ball = sum(math.comb(self.n, d) * (C - 1) ** d for d in range(min(r, self.n) + 1))
+        return min(1.0, ball / math.exp(_log_bell(self.n)))
 
     def sample_slip_g(self, a: str, g: np.ndarray, rng: np.random.Generator) -> str:
         _no_special(self, a)

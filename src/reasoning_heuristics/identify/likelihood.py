@@ -60,7 +60,7 @@ from typing import Any, Iterable, Protocol
 import numpy as np
 
 from reasoning_heuristics.identify.members import Pred, item_preds, normal_form, q_normal_form
-from reasoning_heuristics.identify.noise import NoiseModel, NoiseParams
+from reasoning_heuristics.identify.noise import REACH_COVER, NoiseModel, NoiseParams
 from reasoning_heuristics.identify.records import Response
 from reasoning_heuristics.identify.spaces import AD_CELLS, DMAX, BitSpace, FiniteSpace, Space, space_for
 from reasoning_heuristics.identify.units import Unit
@@ -188,6 +188,7 @@ class Tensors:
     finite: np.ndarray | None = None  # (N,) bool: the row's channel is finite (decision, option, bit)
     noise: NoiseModel = field(default_factory=NoiseModel)
     qs: QStrata | None = None  # q = "strata" only
+    reach: int = DMAX  # the kernel's cells beyond this distance are empty (noise option `reach`)
 
     @property
     def n(self) -> int:
@@ -210,7 +211,7 @@ class Tensors:
         return Tensors(self.A[rows], self.B0[rows], self.C[rows], self.Q[rows], self.avail[rows], self.slips,
                        self.log_scale[rows], self.item[rows], self.cluster[rows], self.labels,
                        None if self.finite is None else self.finite[rows], self.noise,
-                       None if self.qs is None else self.qs.subset(rows))
+                       None if self.qs is None else self.qs.subset(rows), self.reach)
 
 
 @dataclass
@@ -242,6 +243,28 @@ class UnitModel:
         self._cache: dict[tuple[int, str], tuple] = {}
         if self.noise.cells == "adds-drops" and not all(isinstance(im.space, (BitSpace, FiniteSpace)) for im in self.items):
             raise ValueError("the swap (adds, drops) kernel is defined on bit spaces only (item sets, assignments)")
+        self.reach = self._reach()
+        cells = AD_CELLS if self.noise.cells == "adds-drops" else [(d, 0) for d in range(DMAX + 1)]
+        self._beyond = np.array([a + r > self.reach for a, r in cells])
+
+    def _reach(self) -> int:
+        """The kernel's reach: the noise option, or with 'auto' the largest r <= DMAX such that on every item a
+        ball of radius r covers at most REACH_COVER of the answer space (partitions: with the members' palette)."""
+        if self.noise.reach != "auto":
+            return int(self.noise.reach)
+        reach = DMAX
+        for i, im in enumerate(self.items):
+            sp = im.space
+            if isinstance(sp, FiniteSpace):
+                continue
+            palette = None
+            if not isinstance(sp, BitSpace):
+                blocks = [int(sp.parse(p.key).max()) + 1 for p in im.preds.values() if p.kind == "det" and not sp.is_special(p.key)]
+                blocks += [int(sp.parse(p.sol.keys()[0]).max()) + 1 for p in im.preds.values() if p.kind == "set" and p.sol.size]
+                palette = (max(blocks) if blocks else sp.n) + 1
+            r = max([d for d in range(1, DMAX + 1) if sp.ball_fraction(d, palette) <= REACH_COVER], default=1)
+            reach = min(reach, r)
+        return reach
 
     # --- ties -------------------------------------------------------------------------------
     def signature(self, i: int, label: str) -> tuple:
@@ -324,6 +347,8 @@ class UnitModel:
                     B0[g] = self._candidate_slip(im, y, None)
             else:
                 A[g] = B0[g] = self._noslip_prob(im, p, y, Q)
+        if self.reach < DMAX:
+            C[:, self._beyond] = 0.0
         out = (A, B0, C, Q, avail)
         self._cache[ck] = out
         return out
@@ -520,7 +545,7 @@ class UnitModel:
                 raise NotImplementedError("the strata q is not combined with a token model yet")
             qs = self.q_strata(obs)
         return Tensors(A, B0, C, Q, avail, slips, np.log(scale), items, self.unit.cluster[items], [g.name for g in cols],
-                       finite, self.noise, qs)
+                       finite, self.noise, qs, self.reach)
 
     # --- the strata q (noise.py) ------------------------------------------------------------
     def always_token_columns(self) -> list[str]:

@@ -321,13 +321,15 @@ def data_ties(T: Tensors) -> list[list[str]]:
 # =============================================================================================
 
 
-def default_kernel(cells: str, rho: float = 0.3) -> np.ndarray:
+def default_kernel(cells: str, rho: float = 0.3, reach: int = DMAX) -> np.ndarray:
     """The geometric kernel g(rho) over a noise model's cells (adds-drops: g_d split evenly over the
-    d + 1 cells with adds + drops = d)."""
+    d + 1 cells with adds + drops = d), cut at `reach` and renormalised."""
     g = trunc_geom(rho)
-    if cells == "distance":
-        return g
-    return np.array([0.0] + [g[a + r] / (a + r + 1) for a, r in AD_CELLS[1:]])
+    if cells != "distance":
+        g = np.array([0.0] + [g[a + r] / (a + r + 1) for a, r in AD_CELLS[1:]])
+    dist = np.arange(DMAX + 1) if cells == "distance" else np.array([a + r for a, r in AD_CELLS])
+    g = np.where(dist <= reach, g, 0.0)
+    return g / g.sum()
 
 
 class _GeneralStepper:
@@ -366,7 +368,7 @@ class _GeneralStepper:
         pi = np.full((B, G + 1), 1.0 / (G + 1)) if pi0 is None else np.array(np.broadcast_to(pi0, (B, G + 1)), dtype=float)
         Ge = G if self.noise.eps == "member" else 1
         eps = np.full((B, Ge), float(self.fix_eps if self.fix_eps is not None else np.mean(eps0)))
-        g = np.tile(default_kernel(self.noise.cells), (B, 1))
+        g = np.tile(default_kernel(self.noise.cells, reach=self.T.reach), (B, 1))
         st = {"pi": pi, "eps": eps, "g": g, "rho": np.full(B, 0.3)}
         if self.qs is not None:
             st["P"] = np.tile(self.qs.p0, (B, 1))

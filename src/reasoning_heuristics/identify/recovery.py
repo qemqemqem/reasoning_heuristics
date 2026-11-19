@@ -187,7 +187,8 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
     sep = separations(um)
     labels = [g.name for g in um.columns] + [UNEXPLAINED]
     finite = all(type(im.space).__name__ == "FiniteSpace" for im in um.items)
-    out: dict[str, Any] = {"unit": unit.name, "n_items": len(unit.items), "n_clusters": unit.n_clusters,
+    out: dict[str, Any] = {"unit": unit.name, "noise": noise.to_json(), "reach": fitm[NEAR_MISS].reach,
+                           "n_items": len(unit.items), "n_clusters": unit.n_clusters,
                            "n_cells": len(set(unit.cells)), "items_per_cell": round(len(unit.items) / len(set(unit.cells)), 2),
                            "finite_channel": finite, "groups": [g.members for g in um.columns], "folded_into_q": um.q_members,
                            "scenarios": {}}

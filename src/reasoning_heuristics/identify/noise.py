@@ -19,6 +19,12 @@ The options, each estimated by the same EM (`mixture._GeneralStepper`):
     (or more drops than ones) is clipped to what there is, as the distance kernel clips D at n.
 - `eps`: `shared` (default) or `member` (one slip rate per tie group).
 - `eps_max`: the cap on eps (default 0.5; 1 lifts it).
+- `reach`: the largest distance a slip can move (free and swap kernels; default 6 = `spaces.DMAX`).
+  `auto` takes, per unit, the largest reach <= 6 whose ball around an answer covers at most
+  `REACH_COVER` (a fifth) of the item's answer space (`spaces.Space.ball_fraction`), on every item.
+  A member that always slips is then a cloud at least five times denser than q around its answer,
+  not a stand-in for q: on knapsack (10 items) six moves reach 83% of all packings, so with the cap
+  lifted, pure noise loads on members (docs/NOISE_MODEL.md, Stage 0).
 - `q`: the reference distribution.
   - `uniform` (default): as `spaces.Space.log_q`.
   - `strata`: uniform within size strata, with the strata's probabilities estimated: the number of
@@ -51,6 +57,7 @@ class NoiseModel:
     eps: str = "shared"
     eps_max: float = 0.5
     q: str = "uniform"
+    reach: int | str = 6
 
     def __post_init__(self) -> None:
         if self.kernel not in KERNELS:
@@ -61,6 +68,10 @@ class NoiseModel:
             raise ValueError(f"q must be one of {Q_MODES}, not {self.q!r}")
         if not 0.0 < self.eps_max <= 1.0:
             raise ValueError(f"eps_max must be in (0, 1], not {self.eps_max}")
+        if self.reach != "auto" and not (isinstance(self.reach, int) and 1 <= self.reach <= 6):
+            raise ValueError(f"reach must be 1..6 or 'auto', not {self.reach!r}")
+        if self.reach != 6 and self.kernel == "geometric":
+            raise ValueError("reach applies to the free and swap kernels (the geometric kernel is defined up to 6)")
 
     @property
     def is_default(self) -> bool:
@@ -85,9 +96,10 @@ class NoiseModel:
         for part in spec.split(","):
             k, _, v = part.partition("=")
             k = k.strip()
-            if k not in ("kernel", "eps", "eps_max", "q"):
+            if k not in ("kernel", "eps", "eps_max", "q", "reach"):
                 raise ValueError(f"unknown noise option {k!r} in {spec!r}")
-            kw[k] = float(v) if k == "eps_max" else v.strip()
+            v = v.strip()
+            kw[k] = float(v) if k == "eps_max" else (int(v) if k == "reach" and v != "auto" else v)
         return cls(**kw)
 
 
@@ -99,7 +111,10 @@ CANDIDATES: dict[str, NoiseModel] = {
     "KEQ": NoiseModel(kernel="free", eps_max=1.0, q="strata"),
     "KEQ-h": NoiseModel(kernel="free", eps="member", eps_max=1.0, q="strata"),
     "SEQ": NoiseModel(kernel="swap", eps_max=1.0, q="strata"),
+    "KEQ-r": NoiseModel(kernel="free", eps_max=1.0, q="strata", reach="auto"),
+    "SEQ-r": NoiseModel(kernel="swap", eps_max=1.0, q="strata", reach="auto"),
 }
+REACH_COVER = 0.2
 
 
 @dataclass

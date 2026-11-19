@@ -20,7 +20,10 @@ import numpy as np
 REPO = Path(__file__).resolve().parent.parent
 PRELIM = REPO / "analysis" / "out" / "prelim_2026_11_18.json"
 RECOVERY = {"pc20": REPO / "data" / "recovery" / "pc20.json", "pc40": REPO / "data" / "recovery" / "pc40.json"}
-ORDER = ["M0", "K", "KE", "KEQ", "KEQ-h", "SEQ"]
+ORDER = ["M0", "K", "KE", "KEQ", "KEQ-h", "SEQ", "KEQ-r", "SEQ-r"]
+# a reach variant equals its base wherever the automatic reach is 6 (colouring, C E5 SAT): those fits are
+# not rerun, and are taken from the base
+REACH_BASE = {"KEQ-r": "KEQ", "SEQ-r": "SEQ"}
 UNITS = ["C_E2/colouring", "C_E2/knapsack", "AH_E5/SAT", "C_E5/3-SAT (partial assignment given)"]
 SHORT = {"C_E2/colouring": "C E2 colouring", "C_E2/knapsack": "C E2 knapsack", "AH_E5/SAT": "A/H E5 SAT",
          "C_E5/3-SAT (partial assignment given)": "C E5 SAT, state given"}
@@ -54,6 +57,18 @@ def load(d: Path) -> dict[str, Any]:
                if (d / f"stage0_{s}_{name}.json").exists()}
         if got:
             stage0[name] = got
+    for var, base in REACH_BASE.items():
+        if var in fits and base in fits:
+            for u, runs in fits[base].items():
+                for r, rep in runs.items():
+                    fits[var].setdefault(u, {}).setdefault(r, rep)
+        if var in stage0 and base in stage0:
+            for size, doc in stage0[base].items():
+                if size not in stage0[var]:
+                    stage0[var][size] = doc
+                    continue
+                have = {ur["unit"] for ur in stage0[var][size]["units"]}
+                stage0[var][size]["units"] += [ur for ur in doc["units"] if ur["unit"] not in have]
     diag = json.loads((d / "diagnosis.json").read_text()) if (d / "diagnosis.json").exists() else None
     return {"prelim": prelim, "fits": fits, "stage0": stage0, "diag": diag}
 
@@ -216,6 +231,7 @@ def table_summary(data: dict[str, Any]) -> str:
         n = len(reps)
         ppc = sum(1 for x in reps if x.get("ppc", {}).get("pass"))
         cap = sum(1 for x in reps if x["fit"].get("eps_at_cap"))
+        ppc_free = sum(1 for x in reps if x.get("ppc", {}).get("pass") and not x["fit"].get("eps_at_cap"))
         rec = sum(1 for x in reps if x.get("recovery", {}).get("pass"))
         rec_b = sum(1 for x in reps if x.get("recovery", {}).get("bca", {}).get("pass"))
         s0p, s0t, _ = stage0_counts(data["stage0"].get(c, {}))
@@ -223,10 +239,10 @@ def table_summary(data: dict[str, Any]) -> str:
         mass = [x["mass"] for x in reps if "mass" in x] or [data["diag"]["units"][u][r]["ladder"][c]["mass"]
                                                              for u, r in tg if data["diag"] and c in data["diag"]["units"][u][r]["ladder"]]
         noise = [m["noise"] for m in mass]
-        rows.append([c, n, f"{ppc}", f"{cap}", f"{rec} / {rec_b}", f"{s0p} / {s0t}" if s0t else "–",
+        rows.append([c, n, f"{ppc}", f"{ppc_free}", f"{cap}", f"{rec} / {rec_b}", f"{s0p} / {s0t}" if s0t else "–",
                      f"{np.median(qm):.2f} ({min(qm):.2f}–{max(qm):.2f})",
                      f"{np.median(noise):.2f} ({min(noise):.2f}–{max(noise):.2f})" if noise else "–"])
-    return md(["Model", "Fits", "Pass every predictive check", "ε at its cap", "Recovery at the estimate passes (percentile / BCa)",
+    return md(["Model", "Fits", "Pass every predictive check", "… with ε below its cap", "ε at its cap", "Recovery at the estimate passes (percentile / BCa)",
                "Stage 0 scenarios passed", "π₀ (q), median (range)", "Answers put on noise (slips + q), median (range)"], rows)
 
 
