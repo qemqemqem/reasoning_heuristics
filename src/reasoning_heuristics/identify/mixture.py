@@ -501,19 +501,36 @@ def em_general(T: Tensors, W: np.ndarray | None = None, pi0: np.ndarray | None =
             st = s1
             continue
         s2, ll1 = step(s1)
-        rp, vp = s1["pi"] - st["pi"], s2["pi"] - 2 * s1["pi"] + st["pi"]
-        re, ve = s1["eps"] - st["eps"], s2["eps"] - 2 * s1["eps"] + st["eps"]
-        nr = np.sqrt((rp ** 2).sum(1) + (re ** 2).sum(1))
-        nv = np.sqrt((vp ** 2).sum(1) + (ve ** 2).sum(1))
+        # SQUAREM over every simplex-valued parameter (pi, the free kernel, the strata q) and eps, tau;
+        # the geometric kernel's rho is a grid M-step and takes the plain step
+        keys = ["pi", "eps"] + (["g"] if T.noise.kernel != "geometric" else []) + (["P", "tau"] if "P" in st else [])
+        if fix_eps is not None:
+            keys.remove("eps")
+        r1 = {k: (s1[k] - st[k]).reshape(B, -1) for k in keys}
+        v1 = {k: (s2[k] - 2 * s1[k] + st[k]).reshape(B, -1) for k in keys}
+        nr = np.sqrt(sum((r1[k] ** 2).sum(1) for k in keys))
+        nv = np.sqrt(sum((v1[k] ** 2).sum(1) for k in keys))
         with np.errstate(invalid="ignore", divide="ignore"):
             alpha = np.where(nv > 0, -nr / np.maximum(nv, TINY), -1.0)
         alpha = np.clip(alpha, -64.0, -1.0)
-        pe = np.maximum(st["pi"] - 2 * alpha[:, None] * rp + alpha[:, None] ** 2 * vp, 1e-12)
-        pe /= pe.sum(1, keepdims=True)
         ext = dict(s2)
-        ext["pi"] = pe
-        if fix_eps is None:
-            ext["eps"] = np.clip(st["eps"] - 2 * alpha[:, None] * re + alpha[:, None] ** 2 * ve, 0.0, em_max)
+        for k in keys:
+            x = st[k].reshape(B, -1) - 2 * alpha[:, None] * r1[k] + alpha[:, None] ** 2 * v1[k]
+            if k == "pi":
+                x = np.maximum(x, 1e-12)
+                x /= x.sum(1, keepdims=True)
+            elif k == "eps":
+                x = np.clip(x, 0.0, em_max)
+            elif k == "tau":
+                x = np.clip(x, 0.0, 1.0) if step.qs.tau_free else st[k].reshape(B, -1)
+            elif k == "g":  # cells that are empty (0, or beyond the reach) stay empty
+                x = np.where(s2[k] > 0, np.maximum(x, 1e-12), 0.0)
+                x /= np.maximum(x.sum(1, keepdims=True), TINY)
+            elif k == "P":  # renormalise within each group; strata with no mass stay empty
+                x = np.where(s2[k] > 0, np.maximum(x, 1e-12), 0.0)
+                tot = (x @ step.group_mat) @ step.group_mat.T
+                x = np.where(tot > 0, x / np.maximum(tot, TINY), s2[k])
+            ext[k] = x.reshape(st[k].shape)
         s3, ll_ext = step(ext)
         steps += 2
         ok = ll_ext >= ll1
