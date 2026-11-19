@@ -174,8 +174,9 @@ def fit_job(args: tuple) -> dict[str, Any]:
 
 
 def planted_of(rep: dict[str, Any]) -> tuple[dict[str, float], float]:
-    return P.planted_from_fit({"fit": {"weights": {k: {"pi": v["pi"]} for k, v in rep["fit"]["weights"].items()}}},
-                              rep["groups"])
+    """The fitted weights as a fake model, rounded to 4 decimals first as the prelim script's JSON round trip does."""
+    w = {k: {"pi": round(v["pi"], 4) if isinstance(v["pi"], float) else v["pi"]} for k, v in rep["fit"]["weights"].items()}
+    return P.planted_from_fit({"fit": {"weights": w}}, rep["groups"])
 
 
 def recovery_job(args: tuple) -> dict[str, Any]:
@@ -187,7 +188,9 @@ def recovery_job(args: tuple) -> dict[str, Any]:
     obs_real, _ = um.observations(responses(name, run_id))
     keep = Counter(ob.item for ob in obs_real)
     if noise.is_default:
-        sc = Scenario("at-estimate", "mix", weights=planted, q=q, eps=float(state["eps"][0]), rho=float(state["rho"]))
+        # rounded as in the prelim script, which plants the JSON's eps and rho
+        sc = Scenario("at-estimate", "mix", weights=planted, q=q, eps=round(float(state["eps"][0]), 4),
+                      rho=round(float(state["rho"]), 4))
     else:
         keys = [g.members[0] for g in um.columns]
         st = {k: np.asarray(v) for k, v in state.items()}
