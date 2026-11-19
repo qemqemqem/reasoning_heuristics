@@ -1,6 +1,6 @@
 # Status
 
-*Current state of the work as of 2026-11-18 (morning). Update this file when a stage finishes or a decision is made.*
+*Current state of the work as of 2026-11-19. Update this file when a stage finishes or a decision is made.*
 
 ## Summary
 
@@ -91,10 +91,11 @@ The [results page](results/2026-11-18-results.html) has the numbers, intervals, 
   - The runner is a thin custom one (DESIGN §9 question 5).
   - Agents open and merge PRs regularly ([RULES.md](../RULES.md)).
 - **From the 2026-11-18 results:**
-  - **The noise model.** Most fits put the slip rate at its cap: answers miss the members in ways the near-miss model with a uniform q cannot produce (on knapsack, more two-item swaps than one-item slips; with thinking, more exact matches and fewer far answers than predicted). The options are a validity-aware q, a richer error model, or per-member ε. Each departs from SCOPE §6 rule 3.
+  - **The noise model.** Most fits put the slip rate at its cap: answers miss the members in ways the near-miss model with a uniform q cannot produce (on knapsack, more two-item swaps than one-item slips; with thinking, more exact matches and fewer far answers than predicted). The options are a validity-aware q, a richer error model, or per-member ε. Each departs from SCOPE §6 rule 3. Andrew (2026-11-19) delegated the choice to an expert review: candidates implemented behind options and judged on recovery, predictive checks and how much mass goes to noise (in progress).
   - **Boundary-aware intervals.** Percentile and BCa intervals under-cover at the edge of the simplex (π₀ = 1 on knapsack); about a day's work.
-  - **gpt-oss's 32k-token cap** truncates 22% of gpt-oss-120b's and 36% of gpt-oss-20b's high-effort dev responses, and over 90% on some units: A/H E2 SAT for both, and C E2 knapsack for gpt-oss-20b. On C E3's uninstructed colouring gadgets (COL-U), where the design expected about 10%, they truncate 143 and 174 of 180. Raise it, or calibrate item sizes to it. This decides whether high effort has any heuristics to find: the answers it finishes are nearly all right, so its hard items show up only as truncations.
-  - **Repeat samples.** Every count is one sample per item; DESIGN §5 rule 8 asks for repeats.
+  - **gpt-oss's 32k-token cap** truncates 22% of gpt-oss-120b's and 36% of gpt-oss-20b's high-effort dev responses, and over 90% on some units: A/H E2 SAT for both, and C E2 knapsack for gpt-oss-20b. On C E3's uninstructed colouring gadgets (COL-U), where the design expected about 10%, they truncate 143 and 174 of 180. Raise it, or calibrate item sizes to it. This decides whether high effort has any heuristics to find: the answers it finishes are nearly all right, so its hard items show up only as truncations. **Decided 2026-11-19 (Andrew): keep 32k, and force an answer at the cap** (force-2, [RUNNER.md](RUNNER.md)). Telling the model its budget does not help: gpt-oss-20b truncates 198 of 320 dev items with the notice and 197 without.
+  - **Repeat samples.** Every count is one sample per item; DESIGN §5 rule 8 asks for repeats. **Decided 2026-11-19 (Andrew): in the cheap conditions only** (direct and low effort, pc20 and pc40).
+  - ~~The OpenRouter account id in stored error text.~~ Decided 2026-11-19 (Andrew): redact it going forward (#48). Runs committed before then keep it.
   - ~~Where the results page lives.~~ Decided 2026-11-18 (Andrew): GitHub Pages, serving `docs/` from `main`: <https://qemqemqem.github.io/reasoning_heuristics/results/2026-11-18-results.html>. `docs/.nojekyll` makes Pages serve the files as they are.
 - **From the 2026-11-17 review** (its "Design questions" section):
   - selection filters that depend on one member's behaviour vs SCOPE §6 rule 6;
