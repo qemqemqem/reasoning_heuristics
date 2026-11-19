@@ -1,0 +1,28 @@
+{
+  "scorer_version": "scorer-1.5.2",
+  "git": {
+    "sha": "43ae447bfdd0487f204cf8d7f36382ffd2bd1509",
+    "dirty": false,
+    "branch": "budget-notice"
+  },
+  "versions": {
+    "python": "3.12.12",
+    "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "reasoning_heuristics": "0.1.0",
+    "scorer": "scorer-1.5.2",
+    "tokenizer_proxy": "regex-digit-split-v1",
+    "python-sat": "1.9.dev22",
+    "pyetr": "1.0.0",
+    "numpy": "2.5.5",
+    "networkx": "3.7",
+    "jsonschema": "4.26.0"
+  },
+  "scored_at": "2026-11-19T00:46:22Z",
+  "items_source": "working tree",
+  "records": 320,
+  "categories": {
+    "ok": 121,
+    "truncated": 198,
+    "parse_fail": 1
+  }
+}
