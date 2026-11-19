@@ -10,6 +10,9 @@ for step in "$@"; do
   case $kind in
     m0check) nice -n 10 python analysis/noise_model_eval.py fits --noise M0 --only "C_E2/knapsack 2026-11-18-pc20-gpt-oss-20b" \
       --workers 3 --out $OUT/m0_check.json ;;
+    # predicted (and, with REPEATS set to the repeat runs' directory, observed) recurrence of wrong answers
+    recurrence) nice -n 10 python analysis/noise_model_eval.py recurrence --noise "$cand" --workers 3 \
+      ${REPEATS:+--repeats "$REPEATS"} --out $OUT/recurrence_${cand//,/_}.json ;;
     diagnose) nice -n 10 python analysis/noise_model_eval.py diagnose --workers 3 --out $OUT/diagnosis.json ;;
     fits) nice -n 10 python analysis/noise_model_eval.py fits --noise "$cand" --workers 3 --out $OUT/fits_$cand.json ;;
     # the same fits and predictive checks, without refitting the fake data (no recovery at the estimate)

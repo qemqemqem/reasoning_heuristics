@@ -417,6 +417,176 @@ def cmd_diagnose(a: argparse.Namespace) -> int:
 
 
 # =============================================================================================
+# recurrence: does the fitted model repeat wrong answers as often as the model does?
+# =============================================================================================
+
+# the runs redrawn with --samples 2 (PR #51): sample 0 is the 2026-11-18 response, sample 1 a new draw
+REPEAT_RUNS = [f"2026-11-18-{s}-{m}" for s in ("pc20", "pc40") for m in
+               ("qwen3-14b-direct", "qwen3-32b-direct", "gpt-oss-20b-thinking-low", "gpt-oss-120b-thinking-low")]
+
+
+def answer_class(um: UnitModel, i: int, y: str) -> str:
+    """'special' (a special token), 'member' (a deterministic member's answer or in a set member's solutions),
+    else 'unmatched'."""
+    if um.items[i].space.is_special(y):
+        return "special"
+    for g in um.columns:
+        p = um.pred(i, g.members[0])
+        if p.kind == "det" and p.key == y or p.kind == "set" and p.sol.contains(y):
+            return "member"
+    return "unmatched"
+
+
+def fitted_scenario(um: UnitModel, cand: str, rep: dict[str, Any]) -> Scenario:
+    planted, q = planted_of(rep)
+    noise = NoiseModel.parse(cand)
+    st = rep["fit"]["state"]
+    if noise.is_default:
+        return Scenario("fit", "mix", weights=planted, q=q, eps=round(float(st["eps"][0]), 4), rho=round(float(st["rho"]), 4))
+    prm = noise_params({k: np.asarray(v) for k, v in st.items()}, noise, [g.members[0] for g in um.columns],
+                       um.strata_index()[0] if noise.q == "strata" else None)
+    return Scenario("fit", "mix", weights=planted, q=q, params=prm)
+
+
+def recurrence_job(args: tuple) -> dict[str, Any]:
+    """Per item: the fitted model's probability that two independent draws are the same wrong answer, by the
+    first draw's class (Monte Carlo over `pairs` pairs of whole data sets)."""
+    set_name, name, run_id, cand, rep, pairs = args
+    um = unit_model(set_name, name, NoiseModel.parse(cand))
+    sc = fitted_scenario(um, cand, rep)
+    rng = np.random.default_rng(P.job_seed("recurrence", name, run_id, cand))
+    n = len(um.items)
+    hits = {c: np.zeros(n) for c in ("special", "member", "unmatched")}
+    cls_cache: dict[tuple[int, str], tuple[bool, str]] = {}
+    for _ in range(pairs):
+        a, b = simulate(um, sc, rng), simulate(um, sc, rng)
+        for oa, ob in zip(a, b):
+            if oa.key != ob.key:
+                continue
+            k = (oa.item, oa.key)
+            if k not in cls_cache:
+                cls_cache[k] = (agreement.is_correct(um, oa.item, oa.key), answer_class(um, oa.item, oa.key))
+            right, c = cls_cache[k]
+            if not right:
+                hits[c][oa.item] += 1
+    ids = [it["item_id"] for it in um.unit.items]
+    return {"unit": name, "run_id": run_id, "items": ids, "pairs": pairs,
+            "p_same_wrong": {c: (h / pairs).tolist() for c, h in hits.items()}}
+
+
+def cmd_recurrence(a: argparse.Namespace) -> int:
+    t0 = time.time()
+    targets = [t for t in load(a.runs_root) if t[2] in REPEAT_RUNS]
+    jobs = []
+    for cand in a.noise.split(","):
+        if cand == "M0":
+            fits = load_m0_fits()
+        else:
+            fits = json.loads((OUT_DIR / f"fits_{cand}.json").read_text())["fits"]
+        for s, n, r in targets:
+            if n in fits and r in fits[n]:
+                jobs.append((s, n, r, cand, fits[n][r], a.pairs))
+    with mp.get_context("fork").Pool(a.workers) as pool:
+        res = pool.map(recurrence_job, jobs, chunksize=1)
+        observed = pool.map(observed_job, [(s, n, r, str(a.repeats)) for s, n, r in targets], chunksize=1) if a.repeats else []
+    out: dict[str, Any] = defaultdict(lambda: defaultdict(dict))
+    for (s, n, r, cand, _, _), x in zip(jobs, res):
+        out[cand][n][r] = x
+    obs_out: dict[str, Any] = defaultdict(dict)
+    for (s, n, r), x in zip(targets, observed):
+        obs_out[n][r] = x
+    doc = {"command": " ".join(sys.argv), "git": P.git_state(), "pairs": a.pairs, "predicted": out,
+           "observed": obs_out, "seconds": round(time.time() - t0)}
+    a.out.parent.mkdir(parents=True, exist_ok=True)
+    a.out.write_text(json.dumps(P.to_jsonable(doc), indent=1, sort_keys=True) + "\n")
+    print(f"wrote {a.out} ({round(time.time() - t0)} s)")
+    return 0
+
+
+def load_m0_fits() -> dict[str, dict[str, Any]]:
+    """The committed (M0) fits in this script's layout: weights, eps, rho and the groups."""
+    ref = json.loads((REPO / "analysis" / "out" / "prelim_2026_11_18.json").read_text())
+    out: dict[str, dict[str, Any]] = defaultdict(dict)
+    for n, runs in ref["fits"].items():
+        for r, rep in runs.items():
+            out[n][r] = {"fit": {"weights": rep["fit"]["weights"], "state": {"eps": [rep["fit"]["eps"]], "rho": rep["fit"]["rho"]}},
+                         "groups": rep["diagnostics"]["groups"]}
+    return out
+
+
+def observed_recurrence(repeat_root: Path, name: str, run_id: str, um: UnitModel) -> dict[str, Any]:
+    """From a repeat run: per item answered ok (on the channel) in both samples, whether both are wrong and
+    equal, by sample 0's class."""
+    from reasoning_heuristics.identify.records import from_scored
+
+    rid = run_id.replace("2026-11-18-", "2026-11-19-repeat-")
+    resp, _ = from_scored(repeat_root / rid / "scored.jsonl.gz")
+    by: dict[str, dict[int, Any]] = defaultdict(dict)
+    for r in resp:
+        if r.item_id in um.unit.index:
+            by[r.item_id][r.sample] = r
+    out = {}
+    for iid, d in by.items():
+        if 0 not in d or 1 not in d:
+            continue
+        obs, _ = um.observations([d[0], d[1]])
+        if len(obs) != 2:
+            continue
+        i, y0, y1 = obs[0].item, obs[0].key, obs[1].key
+        w0, w1 = not agreement.is_correct(um, i, y0), not agreement.is_correct(um, i, y1)
+        out[iid] = {"both_wrong": w0 and w1, "same_wrong": w0 and w1 and y0 == y1, "class": answer_class(um, i, y0)}
+    return out
+
+
+def observed_job(args: tuple) -> dict[str, Any]:
+    set_name, name, run_id, root = args
+    return observed_recurrence(Path(root), name, run_id, UnitModel(P._unit(set_name, name)))
+
+
+def recurrence_table(paths: list[Path]) -> str:
+    """Observed against predicted recurrence of wrong answers, per fit with repeats, by sample 0's class: the
+    number of items answered twice whose two answers are the same wrong answer, observed, and expected under
+    each fitted model (the sum over those items of its probability)."""
+    preds: dict[str, Any] = {}
+    observed: dict[str, Any] = {}
+    for p in paths:
+        doc = json.loads(p.read_text())
+        preds.update(doc["predicted"])
+        for n, runs in doc.get("observed", {}).items():
+            observed.setdefault(n, {}).update(runs)
+    cands = [c for c in ("M0", "KEQ", "KEQ-r", "SEQ-r") if c in preds]
+    rows = []
+    for name in ("C_E2/colouring", "C_E2/knapsack", "AH_E5/SAT", "C_E5/3-SAT (partial assignment given)"):
+        for run_id in REPEAT_RUNS:
+            ob = observed.get(name, {}).get(run_id)
+            if ob is None:
+                continue
+            items = [iid for iid in ob]
+            n = len(items)
+            row = [name, run_id.split("-", 4)[-1], n]
+            for c in ("unmatched", "member", "special"):
+                k = sum(1 for iid in items if ob[iid]["same_wrong"] and ob[iid]["class"] == c)
+                cells = [f"{k}"]
+                for cand in cands:
+                    x = preds[cand].get(name, {}).get(run_id)
+                    if x is None:
+                        cells.append("–")
+                        continue
+                    idx = {iid: j for j, iid in enumerate(x["items"])}
+                    e = sum(x["p_same_wrong"][c][idx[iid]] for iid in items)
+                    cells.append(f"{e:.1f}")
+                row.append(" / ".join(cells))
+            rows.append(row)
+    head = " / ".join(["observed"] + cands)
+    return md_table(["Unit", "Run", "Items answered twice"] + [f"{c}: {head}" for c in ("unmatched", "member's answer", "special token")], rows)
+
+
+def md_table(header: list[str], rows: list[list[Any]]) -> str:
+    out = ["| " + " | ".join(header) + " |", "|" + "|".join("---" for _ in header) + "|"]
+    return "\n".join(out + ["| " + " | ".join(str(c) for c in r) + " |" for r in rows])
+
+
+# =============================================================================================
 # main
 # =============================================================================================
 
@@ -440,7 +610,22 @@ def main(argv: list[str] | None = None) -> int:
     d.add_argument("--out", type=Path, default=OUT_DIR / "diagnosis.json")
     t = sub.add_parser("table")
     t.add_argument("--dir", type=Path, default=OUT_DIR)
+    rc = sub.add_parser("recurrence", help="predicted recurrence of wrong answers under fitted models (the box)")
+    rc.add_argument("--noise", default="M0", help="','-separated candidates (M0, or ones with fits_<name>.json)")
+    rc.add_argument("--runs-root", type=Path, default=REPO / "data" / "runs")
+    rc.add_argument("--pairs", type=int, default=400)
+    rc.add_argument("--workers", type=int, default=3)
+    rc.add_argument("--out", type=Path, default=OUT_DIR / "recurrence.json")
+    rc.add_argument("--repeats", type=Path, default=None,
+                    help="a directory holding 2026-11-19-repeat-*/scored.jsonl.gz (PR #51): also the observed recurrence")
+    rt = sub.add_parser("recurrence-table", help="observed against predicted (from `recurrence` outputs)")
+    rt.add_argument("paths", type=Path, nargs="+")
     a = ap.parse_args(argv)
+    if a.cmd == "recurrence":
+        return cmd_recurrence(a)
+    if a.cmd == "recurrence-table":
+        print(recurrence_table(a.paths))
+        return 0
     if a.cmd == "fits":
         return cmd_fits(a)
     if a.cmd == "diagnose":
