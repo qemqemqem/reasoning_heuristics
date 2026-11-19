@@ -1,0 +1,454 @@
+{
+ "label": "pc40",
+ "items": "data/items/pc40",
+ "config": {
+  "reps": 100,
+  "boot": 100,
+  "single_reps": 20,
+  "feature_reps": 20,
+  "feature_boot": 40,
+  "offzoo_reps": 10,
+  "seed": 1,
+  "scenarios": [
+   "mix",
+   "null_q",
+   "null_always"
+  ],
+  "noise": "KEQ",
+  "noise_model": {
+   "kernel": "free",
+   "eps": "shared",
+   "eps_max": 1.0,
+   "q": "strata",
+   "reach": 6
+  }
+ },
+ "gates": {
+  "bias": 0.05,
+  "coverage": 0.9,
+  "width": 0.2
+ },
+ "generated": "2026-11-19 15:15",
+ "provenance": {
+  "git_sha": "0c54d504a646643542d8786c14684fb85a337115",
+  "git_dirty": false,
+  "item_files": {
+   "data/items/pc40/C_E5_dev_s1.jsonl.gz": "1ecb3c5141c28800847e774d8d7a5ede37eb9649e95430e6e98e02661d1e60f7"
+  }
+ },
+ "command": "python -m reasoning_heuristics.identify.recovery run --items data/items/pc40 --label pc40 --units C_E5/3-SAT (partial assignment given) --scenarios mix,null_q,null_always --reps 100 --boot 100 --noise KEQ --workers 3 --out analysis/out/noise_model/stage0_pc40_KEQ.json",
+ "units": [
+  {
+   "unit": "C_E5/3-SAT (partial assignment given)",
+   "noise": {
+    "kernel": "free",
+    "eps": "shared",
+    "eps_max": 1.0,
+    "q": "strata",
+    "reach": 6
+   },
+   "reach": 6,
+   "n_items": 120,
+   "n_clusters": 40,
+   "n_cells": 3,
+   "items_per_cell": 40.0,
+   "finite_channel": false,
+   "groups": [
+    [
+     "ALWAYS-UNSAT (A1 give-up)"
+    ],
+    [
+     "DPLL from state (D)"
+    ],
+    [
+     "EXACT"
+    ],
+    [
+     "GREEDY-MENTION from state (C1)"
+    ],
+    [
+     "GREEDY-MENTION-ABORT from state (C1)"
+    ],
+    [
+     "GUC-DET from state (C2)",
+     "SC-DET from state (C2)"
+    ],
+    [
+     "POLARITY (C0, ignores state)"
+    ],
+    [
+     "UC-DET from state (C2)"
+    ]
+   ],
+   "folded_into_q": [
+    "RANDOM (H)"
+   ],
+   "scenarios": {
+    "mix": {
+     "max_abs_bias": 0.008,
+     "worst_bias_quantity": "GREEDY-MENTION from state (C1)",
+     "min_coverage": 0.94,
+     "worst_coverage_quantity": "GREEDY-MENTION-ABORT from state (C1)",
+     "median_width": 0.178,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "GREEDY-MENTION from state (C1)": {
+       "truth": 0.6,
+       "mean": 0.592,
+       "bias": -0.008,
+       "coverage": 0.96,
+       "median_width": 0.196,
+       "mean_upper": 0.689
+      },
+      "GREEDY-MENTION-ABORT from state (C1)": {
+       "truth": 0.3,
+       "mean": 0.306,
+       "bias": 0.006,
+       "coverage": 0.94,
+       "median_width": 0.19,
+       "mean_upper": 0.404
+      },
+      "POLARITY (C0, ignores state)": {
+       "truth": 0.1,
+       "mean": 0.1,
+       "bias": -0.0,
+       "coverage": 0.94,
+       "median_width": 0.1,
+       "mean_upper": 0.153
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.93,
+      "worst_coverage_quantity": "POLARITY (C0, ignores state)",
+      "median_width": 0.178,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "GREEDY-MENTION from state (C1)": 0.94,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.95,
+       "POLARITY (C0, ignores state)": 0.93
+      },
+      "median_width_by_quantity": {
+       "GREEDY-MENTION from state (C1)": 0.197,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.19,
+       "POLARITY (C0, ignores state)": 0.101
+      }
+     }
+    },
+    "mix_uniform_slips": {
+     "max_abs_bias": 0.053,
+     "worst_bias_quantity": "GREEDY-MENTION from state (C1)",
+     "min_coverage": 0.8,
+     "worst_coverage_quantity": "GREEDY-MENTION from state (C1)",
+     "median_width": 0.189,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "truth": 0.0,
+       "mean": 0.01,
+       "bias": 0.01,
+       "coverage": 0.99,
+       "median_width": 0.049,
+       "mean_upper": 0.052
+      },
+      "DPLL from state (D)": {
+       "truth": 0.0,
+       "mean": 0.012,
+       "bias": 0.012,
+       "coverage": 0.97,
+       "median_width": 0.041,
+       "mean_upper": 0.04
+      },
+      "GREEDY-MENTION from state (C1)": {
+       "truth": 0.6,
+       "mean": 0.547,
+       "bias": -0.053,
+       "coverage": 0.8,
+       "median_width": 0.205,
+       "mean_upper": 0.65
+      },
+      "GREEDY-MENTION-ABORT from state (C1)": {
+       "truth": 0.3,
+       "mean": 0.281,
+       "bias": -0.019,
+       "coverage": 0.93,
+       "median_width": 0.208,
+       "mean_upper": 0.383
+      },
+      "POLARITY (C0, ignores state)": {
+       "truth": 0.1,
+       "mean": 0.108,
+       "bias": 0.008,
+       "coverage": 0.9,
+       "median_width": 0.107,
+       "mean_upper": 0.165
+      },
+      "q": {
+       "truth": 0.0,
+       "mean": 0.031,
+       "bias": 0.031,
+       "coverage": 0.85,
+       "median_width": 0.08,
+       "mean_upper": 0.078
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.78,
+      "worst_coverage_quantity": "GREEDY-MENTION from state (C1)",
+      "median_width": 0.186,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": true
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.96,
+       "DPLL from state (D)": 0.91,
+       "GREEDY-MENTION from state (C1)": 0.78,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.93,
+       "POLARITY (C0, ignores state)": 0.88,
+       "q": 0.6
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.059,
+       "DPLL from state (D)": 0.053,
+       "GREEDY-MENTION from state (C1)": 0.2,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.207,
+       "POLARITY (C0, ignores state)": 0.107,
+       "q": 0.078
+      }
+     }
+    },
+    "null_q": {
+     "max_abs_bias": 0.512,
+     "worst_bias_quantity": "q",
+     "min_coverage": 0.0,
+     "worst_coverage_quantity": "q",
+     "median_width": 0.172,
+     "gates": {
+      "bias": false,
+      "coverage": false,
+      "width": true
+     },
+     "pass": false,
+     "quantities": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "truth": 0.0,
+       "mean": 0.483,
+       "bias": 0.483,
+       "coverage": 0.0,
+       "median_width": 0.172,
+       "mean_upper": 0.567
+      },
+      "q": {
+       "truth": 1.0,
+       "mean": 0.488,
+       "bias": -0.512,
+       "coverage": 0.0,
+       "median_width": 0.172,
+       "mean_upper": 0.567
+      }
+     },
+     "replicates": 100,
+     "bca": {
+      "min_coverage": 0.0,
+      "worst_coverage_quantity": "q",
+      "median_width": 0.166,
+      "gates": {
+       "bias": false,
+       "coverage": false,
+       "width": true
+      },
+      "pass": false,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.0,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.93,
+       "q": 0.0
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.175,
+       "GREEDY-MENTION-ABORT from state (C1)": 0.058,
+       "q": 0.166
+      }
+     }
+    },
+    "null_always": {
+     "max_abs_bias": 0.0,
+     "worst_bias_quantity": "ALWAYS-UNSAT (A1 give-up)",
+     "min_coverage": 1.0,
+     "worst_coverage_quantity": "ALWAYS-UNSAT (A1 give-up)",
+     "median_width": 0.0,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "pass": true,
+     "quantities": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "truth": 1.0,
+       "mean": 1.0,
+       "bias": -0.0,
+       "coverage": 1.0,
+       "median_width": 0.0,
+       "mean_upper": 1.0
+      }
+     },
+     "replicates": 10,
+     "bca": {
+      "min_coverage": 1.0,
+      "worst_coverage_quantity": "ALWAYS-UNSAT (A1 give-up)",
+      "median_width": 0.0,
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "pass": true,
+      "coverage": {
+       "ALWAYS-UNSAT (A1 give-up)": 1.0
+      },
+      "median_width_by_quantity": {
+       "ALWAYS-UNSAT (A1 give-up)": 0.0
+      }
+     },
+     "truth_group": "ALWAYS-UNSAT (A1 give-up)"
+    }
+   },
+   "triple": [
+    "GREEDY-MENTION from state (C1)",
+    "GREEDY-MENTION-ABORT from state (C1)",
+    "POLARITY (C0, ignores state)"
+   ],
+   "design": null,
+   "least_separated": [
+    {
+     "pair": [
+      "DPLL from state (D)",
+      "UC-DET from state (C2)"
+     ],
+     "separating_items": 8
+    },
+    {
+     "pair": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "GREEDY-MENTION-ABORT from state (C1)"
+     ],
+     "separating_items": 40
+    },
+    {
+     "pair": [
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "UC-DET from state (C2)"
+     ],
+     "separating_items": 45
+    },
+    {
+     "pair": [
+      "DPLL from state (D)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)"
+     ],
+     "separating_items": 46
+    },
+    {
+     "pair": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)"
+     ],
+     "separating_items": 62
+    },
+    {
+     "pair": [
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)"
+     ],
+     "separating_items": 64
+    }
+   ],
+   "identifiability": {
+    "near-miss": {
+     "columns": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)",
+      "q"
+     ],
+     "rank": 9,
+     "deficiency": 0,
+     "sigma_ratio": 0.11149034512066582,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)",
+      "q"
+     ]
+    },
+    "uniform": {
+     "columns": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)",
+      "q"
+     ],
+     "rank": 9,
+     "deficiency": 0,
+     "sigma_ratio": 0.12644521794147873,
+     "null_directions": [],
+     "dependencies": [],
+     "not_identified": [],
+     "involved": [],
+     "identified": [
+      "ALWAYS-UNSAT (A1 give-up)",
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)",
+      "q"
+     ]
+    }
+   },
+   "all_gates_pass": false,
+   "not_testable": [],
+   "seconds": 135.1
+  }
+ ]
+}

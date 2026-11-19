@@ -80,7 +80,7 @@ def load(d: Path) -> dict[str, Any]:
                 have = {ur["unit"] for ur in stage0[var][size]["units"]}
                 stage0[var][size]["units"] += [ur for ur in doc["units"] if ur["unit"] not in have]
     diag = json.loads((d / "diagnosis.json").read_text()) if (d / "diagnosis.json").exists() else None
-    return {"prelim": prelim, "fits": fits, "stage0": stage0, "diag": diag}
+    return {"prelim": prelim, "fits": fits, "stage0": stage0, "diag": diag, "dir": str(d)}
 
 
 def m0_fits(prelim: dict[str, Any]) -> dict[str, dict[str, Any]]:
@@ -169,7 +169,8 @@ def table_answers(data: dict[str, Any]) -> str:
 def table_ladder(data: dict[str, Any]) -> str:
     diag = data["diag"]
     rows = []
-    cands = [c for c in ORDER if c != "M0"]
+    have = {c for u in diag["units"].values() for r in u.values() for c in r["ladder"]}
+    cands = [c for c in ORDER if c != "M0" and c in have]
     for u, r in targets(data["fits"]):
         lad = diag["units"][u][r]["ladder"]
         base = lad["M0"]
@@ -190,6 +191,17 @@ def table_ladder(data: dict[str, Any]) -> str:
 # =============================================================================================
 
 
+def definitional_null(doc: dict[str, Any], ur: dict[str, Any]) -> bool:
+    """`null_q` under a strata q on a unit with an always-token member: the generator's q answers the special token
+    with probability 1/2, which under the strata q (tau = 0 there) is the always-token member's, so the planted
+    'pi_0 = 1' is 1/2 that member and 1/2 q. True when the fit splits it about so (each within 0.1 of 1/2)."""
+    if doc.get("config", {}).get("noise_model", {}).get("q") != "strata":
+        return False
+    qs = ur["scenarios"].get("null_q", {}).get("quantities", {})
+    tok = [v for k, v in qs.items() if k.startswith("ALWAYS-UNSAT") or k.startswith("ALWAYS-IMPOSSIBLE")]
+    return bool(tok) and abs(tok[0]["mean"] - 0.5) < 0.1 and abs(qs.get("q", {}).get("mean", 0) - 0.5) < 0.1
+
+
 def stage0_cell(doc: dict[str, Any], unit: str) -> str:
     for ur in doc["units"]:
         if ur["unit"] == unit:
@@ -201,6 +213,8 @@ def stage0_cell(doc: dict[str, Any], unit: str) -> str:
                     parts.append("–")
                 elif s.get("pass") is None:
                     parts.append("n/t")
+                elif not s["pass"] and k == "null_q" and definitional_null(doc, ur):
+                    parts.append("✗†")
                 else:
                     parts.append("✓" if s["pass"] else "✗")
             return " ".join(parts)
@@ -208,6 +222,7 @@ def stage0_cell(doc: dict[str, Any], unit: str) -> str:
 
 
 def stage0_counts(docs: dict[str, Any]) -> tuple[int, int, list[str]]:
+    """Gated scenarios passed / run on the four units; a definitional null (†) counts as run, not passed."""
     passed, total, fails = 0, 0, []
     for size, units in STAGE0_UNITS.items():
         doc = docs.get(size)
@@ -334,6 +349,13 @@ def tables(data: dict[str, Any]) -> dict[str, str]:
     for c in ORDER[1:]:
         if c in data["fits"]:
             out[f"params-{c}"] = table_noise_params(data, c)
+    rec = sorted(Path(data["dir"]).glob("recurrence_*.json"))
+    if rec:
+        sys.path.insert(0, str(REPO / "analysis"))
+        from noise_model_eval import recurrence_table
+
+        out["recurrence"] = recurrence_table(rec).replace("C_E5/3-SAT (partial assignment given)", "C E5 SAT, state given") \
+            .replace("C_E2/colouring", "C E2 colouring").replace("C_E2/knapsack", "C E2 knapsack").replace("AH_E5/SAT", "A/H E5 SAT")
     return out
 
 

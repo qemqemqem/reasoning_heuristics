@@ -1,0 +1,6654 @@
+{
+ "command": "analysis/noise_model_eval.py fits --noise KEQ-r --only C_E2/knapsack;AH_E5/SAT --workers 3 --out analysis/out/noise_model/fits_KEQ-r.json",
+ "fits": {
+  "AH_E5/SAT": {
+   "2026-11-18-pc20-gpt-oss-120b-thinking-low": {
+    "excluded": {
+     "by_cell": {
+      "SAT/P": {
+       "parse_fail": 1
+      }
+     },
+     "rates": {
+      "SAT/P": {
+       "parse_fail": 0.05
+      }
+     },
+     "responses_by_cell": {
+      "SAT/I": 20,
+      "SAT/I+R": 20,
+      "SAT/N": 20,
+      "SAT/P": 20,
+      "SAT/T": 20
+     }
+    },
+    "fit": {
+     "always_token_columns": [],
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.804241,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.597318,
+      0.97008
+     ],
+     "kernel": [
+      0.0,
+      0.136339,
+      0.237373,
+      0.257272,
+      0.369016,
+      0.0,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -752.693309,
+     "n_clusters": 20,
+     "n_params": 40,
+     "n_rows": 99,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact"
+     ],
+     "state": {
+      "P": [
+       0.153456,
+       0.033901,
+       0.05442,
+       0.035797,
+       0.093509,
+       0.044775,
+       0.102602,
+       0.151266,
+       0.229857,
+       0.062074,
+       0.0,
+       0.0,
+       0.038342,
+       0.0,
+       0.0,
+       0.036915,
+       0.039541,
+       0.0,
+       0.09041,
+       0.079097,
+       0.124316,
+       0.238599,
+       0.0,
+       0.176411,
+       0.039541,
+       0.066306,
+       0.029781,
+       0.0,
+       0.079083,
+       0.0
+      ],
+      "eps": [
+       0.804241
+      ],
+      "g": [
+       0.0,
+       0.136339,
+       0.237373,
+       0.257272,
+       0.369016,
+       0.0,
+       0.0
+      ],
+      "pi": [
+       0.022987,
+       0.073687,
+       0.002798,
+       0.0,
+       0.220965,
+       0.679563
+      ],
+      "rho": 0.3,
+      "tau": 0.237824
+     },
+     "state_ci": {
+      "P": [
+       [
+        0.035446,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.077189,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.067111,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.304918,
+        0.146546,
+        0.160513,
+        0.135068,
+        0.220983,
+        0.142037,
+        0.253534,
+        0.285217,
+        0.376794,
+        0.219817,
+        0.0,
+        0.0,
+        0.120476,
+        0.0,
+        0.0,
+        0.116903,
+        0.128162,
+        0.0,
+        0.24263,
+        0.195471,
+        0.335298,
+        0.378604,
+        0.0,
+        0.329825,
+        0.122957,
+        0.180646,
+        0.107817,
+        0.0,
+        0.184477,
+        0.0
+       ]
+      ],
+      "eps": [
+       [
+        0.597318
+       ],
+       [
+        0.97008
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.317463,
+        0.578102,
+        0.573801,
+        0.659732,
+        0.0,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.092436,
+        0.577097
+       ],
+       [
+        0.102463,
+        0.143928,
+        0.080608,
+        0.034171,
+        0.339276,
+        0.789043
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ],
+      "tau": [
+       0.139262,
+       0.342238
+      ]
+     },
+     "tau_free": true,
+     "weights": {
+      "A3 TT[exact]": {
+       "bca": [
+        0.0,
+        0.151744
+       ],
+       "hi": 0.102463,
+       "lo": 0.0,
+       "pi": 0.022987
+      },
+      "C0 POLARITY": {
+       "bca": [
+        0.009859,
+        0.162651
+       ],
+       "hi": 0.143928,
+       "lo": 0.0,
+       "pi": 0.073687
+      },
+      "C1 GREEDY": {
+       "bca": [
+        0.0,
+        0.092851
+       ],
+       "hi": 0.080608,
+       "lo": 0.0,
+       "pi": 0.002798
+      },
+      "D DPLL (first solution)": {
+       "bca": [
+        0.0,
+        0.152127
+       ],
+       "hi": 0.034171,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "exact": {
+       "bca": [
+        0.110001,
+        0.352493
+       ],
+       "hi": 0.339276,
+       "lo": 0.092436,
+       "pi": 0.220965
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.578791,
+        0.791347
+       ],
+       "hi": 0.789043,
+       "lo": 0.577097,
+       "pi": 0.679563
+      }
+     }
+    },
+    "groups": [
+     [
+      "A3 TT[exact]"
+     ],
+     [
+      "C0 POLARITY"
+     ],
+     [
+      "C1 GREEDY"
+     ],
+     [
+      "D DPLL (first solution)"
+     ],
+     [
+      "exact"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.062729,
+     "noise": 0.937271,
+     "nonslipping_members": 0.0,
+     "q": 0.679564,
+     "slip": 0.257707
+    },
+    "near": {
+     "bins": {
+      "0": 7,
+      "1": 6,
+      "2": 12,
+      "3": 18,
+      "4-6": 35,
+      ">6": 5,
+      "special token": 16
+     },
+     "n": 99,
+     "positions_per_item": [
+      12,
+      16
+     ],
+     "set_sizes_max": 29
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "strata",
+     "reach": "auto"
+    },
+    "planted": {
+     "q": 0.68144,
+     "weights": {
+      "A3 TT[exact]": 0.023062,
+      "C0 POLARITY": 0.0739,
+      "exact": 0.221598
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.414141,
+     "exact": 0.070707,
+     "special": 0.161616
+    },
+    "recovery": {
+     "bca": {
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": true
+      },
+      "median_width": 0.171402,
+      "min_coverage": 0.85,
+      "pass": false,
+      "worst_coverage_quantity": "A3 TT[exact]"
+     },
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.070404,
+       "1": 0.050909,
+       "2": 0.100606,
+       "3": 0.147879,
+       "4-6": 0.376364,
+       ">6": 0.089697,
+       "no member": 0.0,
+       "special token": 0.164141
+      },
+      "observed": {
+       "0": 0.070707,
+       "1": 0.060606,
+       "2": 0.121212,
+       "3": 0.181818,
+       "4-6": 0.353535,
+       ">6": 0.050505,
+       "no member": 0.0,
+       "special token": 0.161616
+      },
+      "p05_p95": {
+       "0": [
+        0.030303,
+        0.121717
+       ],
+       "1": [
+        0.010101,
+        0.081313
+       ],
+       "2": [
+        0.050505,
+        0.151515
+       ],
+       "3": [
+        0.090909,
+        0.20202
+       ],
+       "4-6": [
+        0.292929,
+        0.444949
+       ],
+       ">6": [
+        0.050505,
+        0.131818
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.110101,
+        0.222222
+       ]
+      },
+      "p_value": 0.861386,
+      "tv_observed": 0.064545,
+      "tv_simulated_mean": 0.091172,
+      "tv_simulated_p05_p95": [
+       0.046919,
+       0.136515
+      ]
+     },
+     "eps_mean": 0.788881,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "max_abs_bias": 0.011346,
+     "median_width": 0.16851,
+     "min_coverage": 0.73,
+     "pass": false,
+     "quantities": {
+      "A3 TT[exact]": {
+       "bias": -0.002196,
+       "coverage": 0.73,
+       "coverage_bca": 0.85,
+       "mean": 0.020866,
+       "median_width": 0.068817,
+       "median_width_bca": 0.095542,
+       "truth": 0.023062
+      },
+      "C0 POLARITY": {
+       "bias": -0.005175,
+       "coverage": 0.89,
+       "coverage_bca": 0.95,
+       "mean": 0.068724,
+       "median_width": 0.124333,
+       "median_width_bca": 0.129887,
+       "truth": 0.0739
+      },
+      "C1 GREEDY": {
+       "bias": 0.005356,
+       "coverage": 1.0,
+       "coverage_bca": 0.8,
+       "mean": 0.005356,
+       "median_width": 0.019646,
+       "median_width_bca": 0.05133,
+       "truth": 0.0
+      },
+      "D DPLL (first solution)": {
+       "bias": 0.011346,
+       "coverage": 1.0,
+       "coverage_bca": 0.97,
+       "mean": 0.011346,
+       "median_width": 0.089296,
+       "median_width_bca": 0.129353,
+       "truth": 0.0
+      },
+      "exact": {
+       "bias": -0.008828,
+       "coverage": 0.9,
+       "coverage_bca": 0.92,
+       "mean": 0.21277,
+       "median_width": 0.222682,
+       "median_width_bca": 0.215117,
+       "truth": 0.221598
+      },
+      "unexplained (q)": {
+       "bias": -0.000502,
+       "coverage": 0.96,
+       "coverage_bca": 0.89,
+       "mean": 0.680937,
+       "median_width": 0.220685,
+       "median_width_bca": 0.220268,
+       "truth": 0.68144
+      }
+     },
+     "replicates": 100,
+     "rho_mean": null,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.467879,
+       "p05_p95": [
+        0.403535,
+        0.54596
+       ]
+      },
+      "exact": {
+       "mean": 0.070404,
+       "p05_p95": [
+        0.030303,
+        0.121717
+       ]
+      },
+      "special": {
+       "mean": 0.164141,
+       "p05_p95": [
+        0.110101,
+        0.222222
+       ]
+      }
+     },
+     "worst_bias_quantity": "D DPLL (first solution)",
+     "worst_coverage_quantity": "A3 TT[exact]"
+    },
+    "run_id": "2026-11-18-pc20-gpt-oss-120b-thinking-low",
+    "seconds_fit": 14.9,
+    "seed": 569998478,
+    "unit": "AH_E5/SAT"
+   },
+   "2026-11-18-pc20-gpt-oss-20b-thinking-low": {
+    "excluded": {
+     "by_cell": {
+      "SAT/I": {
+       "parse_fail": 1
+      },
+      "SAT/N": {
+       "parse_fail": 2
+      }
+     },
+     "rates": {
+      "SAT/I": {
+       "parse_fail": 0.05
+      },
+      "SAT/N": {
+       "parse_fail": 0.1
+      }
+     },
+     "responses_by_cell": {
+      "SAT/I": 20,
+      "SAT/I+R": 20,
+      "SAT/N": 20,
+      "SAT/P": 20,
+      "SAT/T": 20
+     }
+    },
+    "fit": {
+     "always_token_columns": [],
+     "converged": true,
+     "data_ties": [],
+     "eps": 1.0,
+     "eps_at_cap": true,
+     "eps_by_group": null,
+     "eps_ci": [
+      1.0,
+      1.0
+     ],
+     "kernel": [
+      0.0,
+      0.179886,
+      0.0,
+      0.820114,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -583.883456,
+     "n_clusters": 20,
+     "n_params": 40,
+     "n_rows": 97,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact"
+     ],
+     "state": {
+      "P": [
+       0.265339,
+       0.033174,
+       0.007482,
+       0.066348,
+       0.066348,
+       0.066348,
+       0.228829,
+       0.084263,
+       0.074653,
+       0.0,
+       0.046352,
+       0.028503,
+       0.032361,
+       0.177662,
+       0.106597,
+       0.034159,
+       0.102995,
+       0.0,
+       0.106597,
+       0.036461,
+       0.073621,
+       0.0,
+       0.077647,
+       0.106597,
+       0.035532,
+       0.035532,
+       0.0,
+       0.035532,
+       0.035532,
+       0.035532
+      ],
+      "eps": [
+       1.0
+      ],
+      "g": [
+       0.0,
+       0.179886,
+       0.0,
+       0.820114,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "pi": [
+       0.03406,
+       0.0,
+       0.06275,
+       0.034248,
+       0.0,
+       0.868941
+      ],
+      "rho": 0.3,
+      "tau": 0.308469
+     },
+     "state_ci": {
+      "P": [
+       [
+        0.117001,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.106573,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.036952,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.451981,
+        0.117542,
+        0.080133,
+        0.173802,
+        0.172272,
+        0.15948,
+        0.345913,
+        0.195445,
+        0.166622,
+        0.0,
+        0.131518,
+        0.112945,
+        0.099847,
+        0.375304,
+        0.242788,
+        0.111175,
+        0.210017,
+        0.0,
+        0.248986,
+        0.117503,
+        0.198423,
+        0.0,
+        0.187534,
+        0.207638,
+        0.106898,
+        0.110754,
+        0.0,
+        0.124647,
+        0.101597,
+        0.111756
+       ]
+      ],
+      "eps": [
+       [
+        1.0
+       ],
+       [
+        1.0
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.076248,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.623324,
+        0.227804,
+        1.0,
+        0.603529,
+        0.0,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.763497
+       ],
+       [
+        0.085461,
+        0.081221,
+        0.134909,
+        0.095475,
+        0.049114,
+        0.951869
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ],
+      "tau": [
+       0.185909,
+       0.441509
+      ]
+     },
+     "tau_free": true,
+     "weights": {
+      "A3 TT[exact]": {
+       "bca": [
+        0.0,
+        0.097839
+       ],
+       "hi": 0.085461,
+       "lo": 0.0,
+       "pi": 0.03406
+      },
+      "C0 POLARITY": {
+       "bca": [
+        0.0,
+        0.240977
+       ],
+       "hi": 0.081221,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "C1 GREEDY": {
+       "bca": [
+        0.0,
+        0.158522
+       ],
+       "hi": 0.134909,
+       "lo": 0.0,
+       "pi": 0.06275
+      },
+      "D DPLL (first solution)": {
+       "bca": [
+        0.0,
+        0.110021
+       ],
+       "hi": 0.095475,
+       "lo": 0.0,
+       "pi": 0.034248
+      },
+      "exact": {
+       "bca": [
+        0.0,
+        0.105909
+       ],
+       "hi": 0.049114,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.769135,
+        0.955771
+       ],
+       "hi": 0.951869,
+       "lo": 0.763497,
+       "pi": 0.868941
+      }
+     }
+    },
+    "groups": [
+     [
+      "A3 TT[exact]"
+     ],
+     [
+      "C0 POLARITY"
+     ],
+     [
+      "C1 GREEDY"
+     ],
+     [
+      "D DPLL (first solution)"
+     ],
+     [
+      "exact"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.0,
+     "noise": 1.0,
+     "nonslipping_members": 0.0,
+     "q": 0.868941,
+     "slip": 0.131059
+    },
+    "near": {
+     "bins": {
+      "1": 6,
+      "2": 7,
+      "3": 17,
+      "4-6": 36,
+      ">6": 5,
+      "special token": 26
+     },
+     "n": 97,
+     "positions_per_item": [
+      12,
+      16
+     ],
+     "set_sizes_max": 29
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "strata",
+     "reach": "auto"
+    },
+    "planted": {
+     "q": 0.8689,
+     "weights": {
+      "A3 TT[exact]": 0.0341,
+      "C1 GREEDY": 0.0628,
+      "D DPLL (first solution)": 0.0342
+     }
+    },
+    "ppc": {
+     "fails": [
+      "beyond_reach"
+     ],
+     "pass": false
+    },
+    "reach": {
+     "beyond_reach": 0.536082,
+     "exact": 0.0,
+     "special": 0.268041
+    },
+    "recovery": {
+     "bca": {
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": true
+      },
+      "median_width": 0.112139,
+      "min_coverage": 0.87,
+      "pass": false,
+      "worst_coverage_quantity": "D DPLL (first solution)"
+     },
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.001753,
+       "1": 0.035258,
+       "2": 0.046907,
+       "3": 0.171856,
+       "4-6": 0.368763,
+       ">6": 0.103093,
+       "no member": 0.0,
+       "special token": 0.272371
+      },
+      "observed": {
+       "0": 0.0,
+       "1": 0.061856,
+       "2": 0.072165,
+       "3": 0.175258,
+       "4-6": 0.371134,
+       ">6": 0.051546,
+       "no member": 0.0,
+       "special token": 0.268041
+      },
+      "p05_p95": {
+       "0": [
+        0.0,
+        0.010309
+       ],
+       "1": [
+        0.010309,
+        0.072165
+       ],
+       "2": [
+        0.020619,
+        0.082474
+       ],
+       "3": [
+        0.113402,
+        0.22732
+       ],
+       "4-6": [
+        0.28866,
+        0.443299
+       ],
+       ">6": [
+        0.051031,
+        0.154639
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.195876,
+        0.330412
+       ]
+      },
+      "p_value": 0.821782,
+      "tv_observed": 0.057629,
+      "tv_simulated_mean": 0.0817,
+      "tv_simulated_p05_p95": [
+       0.045536,
+       0.132474
+      ]
+     },
+     "eps_mean": 0.997676,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "max_abs_bias": 0.010091,
+     "median_width": 0.102589,
+     "min_coverage": 0.82,
+     "pass": false,
+     "quantities": {
+      "A3 TT[exact]": {
+       "bias": -0.002751,
+       "coverage": 0.82,
+       "coverage_bca": 0.88,
+       "mean": 0.031349,
+       "median_width": 0.080854,
+       "median_width_bca": 0.103297,
+       "truth": 0.0341
+      },
+      "C0 POLARITY": {
+       "bias": 0.002372,
+       "coverage": 1.0,
+       "coverage_bca": 0.76,
+       "mean": 0.002372,
+       "median_width": 0.0,
+       "median_width_bca": 0.010847,
+       "truth": 0.0
+      },
+      "C1 GREEDY": {
+       "bias": 0.000457,
+       "coverage": 0.93,
+       "coverage_bca": 0.93,
+       "mean": 0.063257,
+       "median_width": 0.104776,
+       "median_width_bca": 0.108806,
+       "truth": 0.0628
+      },
+      "D DPLL (first solution)": {
+       "bias": -0.006145,
+       "coverage": 0.83,
+       "coverage_bca": 0.87,
+       "mean": 0.028055,
+       "median_width": 0.077092,
+       "median_width_bca": 0.092399,
+       "truth": 0.0342
+      },
+      "exact": {
+       "bias": 0.010091,
+       "coverage": 1.0,
+       "coverage_bca": 0.89,
+       "mean": 0.010091,
+       "median_width": 0.047125,
+       "median_width_bca": 0.075535,
+       "truth": 0.0
+      },
+      "unexplained (q)": {
+       "bias": -0.004025,
+       "coverage": 0.91,
+       "coverage_bca": 0.88,
+       "mean": 0.864875,
+       "median_width": 0.154107,
+       "median_width_bca": 0.154965,
+       "truth": 0.8689
+      }
+     },
+     "replicates": 100,
+     "rho_mean": null,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.638763,
+       "p05_p95": [
+        0.556701,
+        0.711856
+       ]
+      },
+      "exact": {
+       "mean": 0.001753,
+       "p05_p95": [
+        0.0,
+        0.010309
+       ]
+      },
+      "special": {
+       "mean": 0.272371,
+       "p05_p95": [
+        0.195876,
+        0.330412
+       ]
+      }
+     },
+     "worst_bias_quantity": "exact",
+     "worst_coverage_quantity": "A3 TT[exact]"
+    },
+    "run_id": "2026-11-18-pc20-gpt-oss-20b-thinking-low",
+    "seconds_fit": 18.4,
+    "seed": 1668541553,
+    "unit": "AH_E5/SAT"
+   },
+   "2026-11-18-pc20-qwen3-14b-direct": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "SAT/I": 20,
+      "SAT/I+R": 20,
+      "SAT/N": 20,
+      "SAT/P": 20,
+      "SAT/T": 20
+     }
+    },
+    "fit": {
+     "always_token_columns": [],
+     "converged": true,
+     "data_ties": [],
+     "eps": 1.0,
+     "eps_at_cap": true,
+     "eps_by_group": null,
+     "eps_ci": [
+      1.0,
+      1.0
+     ],
+     "kernel": [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -703.503259,
+     "n_clusters": 20,
+     "n_params": 40,
+     "n_rows": 100,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact"
+     ],
+     "state": {
+      "P": [
+       0.020001,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.600031,
+       0.020001,
+       0.120006,
+       0.160008,
+       0.020001,
+       0.0,
+       0.059952,
+       0.346939,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.44898,
+       0.081633,
+       0.0,
+       0.040816,
+       0.020408,
+       0.0,
+       0.0,
+       0.0,
+       0.061224
+      ],
+      "eps": [
+       1.0
+      ],
+      "g": [
+       0.0,
+       0.0,
+       1.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "pi": [
+       0.0,
+       0.010026,
+       0.0,
+       0.0,
+       0.0,
+       0.989974
+      ],
+      "rho": 0.3,
+      "tau": 0.0
+     },
+     "state_ci": {
+      "P": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.45,
+        0.0,
+        0.02,
+        0.079987,
+        0.0,
+        0.0,
+        0.0,
+        0.233325,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.281539,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.066698,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.76936,
+        0.070346,
+        0.228608,
+        0.24,
+        0.066667,
+        0.0,
+        0.15866,
+        0.483362,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.607158,
+        0.220351,
+        0.0,
+        0.1,
+        0.0625,
+        0.0,
+        0.0,
+        0.0,
+        0.161956
+       ]
+      ],
+      "eps": [
+       [
+        1.0
+       ],
+       [
+        1.0
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        1.0,
+        0.003392,
+        1.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.912296
+       ],
+       [
+        0.0,
+        0.058177,
+        0.036116,
+        0.0,
+        0.044031,
+        1.0
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ],
+      "tau": [
+       0.0,
+       0.0
+      ]
+     },
+     "tau_free": true,
+     "weights": {
+      "A3 TT[exact]": {
+       "bca": [
+        0.0,
+        0.001384
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "C0 POLARITY": {
+       "bca": [
+        0.0,
+        0.092378
+       ],
+       "hi": 0.058177,
+       "lo": 0.0,
+       "pi": 0.010026
+      },
+      "C1 GREEDY": {
+       "bca": [
+        0.0,
+        0.082853
+       ],
+       "hi": 0.036116,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "D DPLL (first solution)": {
+       "bca": [
+        0.0,
+        5e-06
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "exact": {
+       "bca": [
+        0.0,
+        0.085475
+       ],
+       "hi": 0.044031,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.905682,
+        1.0
+       ],
+       "hi": 1.0,
+       "lo": 0.912296,
+       "pi": 0.989974
+      }
+     }
+    },
+    "groups": [
+     [
+      "A3 TT[exact]"
+     ],
+     [
+      "C0 POLARITY"
+     ],
+     [
+      "C1 GREEDY"
+     ],
+     [
+      "D DPLL (first solution)"
+     ],
+     [
+      "exact"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.0,
+     "noise": 1.0,
+     "nonslipping_members": 0.0,
+     "q": 0.989974,
+     "slip": 0.010026
+    },
+    "near": {
+     "bins": {
+      "1": 2,
+      "2": 8,
+      "3": 12,
+      "4-6": 58,
+      ">6": 20
+     },
+     "n": 100,
+     "positions_per_item": [
+      12,
+      16
+     ],
+     "set_sizes_max": 29
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "strata",
+     "reach": "auto"
+    },
+    "planted": {
+     "q": 0.99,
+     "weights": {
+      "C0 POLARITY": 0.01
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.6,
+     "exact": 0.0,
+     "special": 0.0
+    },
+    "recovery": {
+     "bca": {
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": true
+      },
+      "median_width": 0.05853,
+      "min_coverage": 0.79,
+      "pass": false,
+      "worst_coverage_quantity": "C0 POLARITY"
+     },
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.0012,
+       "1": 0.0153,
+       "2": 0.0658,
+       "3": 0.1504,
+       "4-6": 0.6037,
+       ">6": 0.1636,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.0,
+       "1": 0.02,
+       "2": 0.08,
+       "3": 0.12,
+       "4-6": 0.58,
+       ">6": 0.2,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.0,
+        0.01
+       ],
+       "1": [
+        0.0,
+        0.04
+       ],
+       "2": [
+        0.03,
+        0.1005
+       ],
+       "3": [
+        0.09,
+        0.2
+       ],
+       "4-6": [
+        0.52,
+        0.6705
+       ],
+       ">6": [
+        0.1095,
+        0.22
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.49505,
+      "tv_observed": 0.0553,
+      "tv_simulated_mean": 0.060915,
+      "tv_simulated_p05_p95": [
+       0.024675,
+       0.109385
+      ]
+     },
+     "eps_mean": 0.954045,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "max_abs_bias": 0.010288,
+     "median_width": 0.050212,
+     "min_coverage": 0.74,
+     "pass": false,
+     "quantities": {
+      "A3 TT[exact]": {
+       "bias": 0.002016,
+       "coverage": 1.0,
+       "coverage_bca": 0.8,
+       "mean": 0.002016,
+       "median_width": 0.0,
+       "median_width_bca": 0.008946,
+       "truth": 0.0
+      },
+      "C0 POLARITY": {
+       "bias": 0.001727,
+       "coverage": 0.74,
+       "coverage_bca": 0.79,
+       "mean": 0.011727,
+       "median_width": 0.039247,
+       "median_width_bca": 0.052986,
+       "truth": 0.01
+      },
+      "C1 GREEDY": {
+       "bias": 0.003806,
+       "coverage": 1.0,
+       "coverage_bca": 0.88,
+       "mean": 0.003806,
+       "median_width": 0.012252,
+       "median_width_bca": 0.028525,
+       "truth": 0.0
+      },
+      "D DPLL (first solution)": {
+       "bias": 0.001828,
+       "coverage": 1.0,
+       "coverage_bca": 0.85,
+       "mean": 0.001828,
+       "median_width": 0.0,
+       "median_width_bca": 0.011108,
+       "truth": 0.0
+      },
+      "exact": {
+       "bias": 0.000912,
+       "coverage": 1.0,
+       "coverage_bca": 0.79,
+       "mean": 0.000912,
+       "median_width": 0.0,
+       "median_width_bca": 0.001686,
+       "truth": 0.0
+      },
+      "unexplained (q)": {
+       "bias": -0.010288,
+       "coverage": 0.94,
+       "coverage_bca": 0.92,
+       "mean": 0.979712,
+       "median_width": 0.066413,
+       "median_width_bca": 0.062593,
+       "truth": 0.99
+      }
+     },
+     "replicates": 100,
+     "rho_mean": null,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.5707,
+       "p05_p95": [
+        0.5095,
+        0.65
+       ]
+      },
+      "exact": {
+       "mean": 0.0012,
+       "p05_p95": [
+        0.0,
+        0.01
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "worst_bias_quantity": "unexplained (q)",
+     "worst_coverage_quantity": "C0 POLARITY"
+    },
+    "run_id": "2026-11-18-pc20-qwen3-14b-direct",
+    "seconds_fit": 27.7,
+    "seed": 3127677854,
+    "unit": "AH_E5/SAT"
+   },
+   "2026-11-18-pc20-qwen3-14b-thinking-high": {
+    "excluded": {
+     "by_cell": {
+      "SAT/I": {
+       "truncated": 2
+      },
+      "SAT/N": {
+       "truncated": 1
+      },
+      "SAT/P": {
+       "truncated": 1
+      },
+      "SAT/T": {
+       "truncated": 1
+      }
+     },
+     "rates": {
+      "SAT/I": {
+       "truncated": 0.1
+      },
+      "SAT/N": {
+       "truncated": 0.05
+      },
+      "SAT/P": {
+       "truncated": 0.05
+      },
+      "SAT/T": {
+       "truncated": 0.05
+      }
+     },
+     "responses_by_cell": {
+      "SAT/I": 20,
+      "SAT/I+R": 20,
+      "SAT/N": 20,
+      "SAT/P": 20,
+      "SAT/T": 20
+     }
+    },
+    "fit": {
+     "always_token_columns": [],
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.37993,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.217997,
+      0.618144
+     ],
+     "kernel": [
+      0.0,
+      0.47689,
+      0.377362,
+      0.145748,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -601.47734,
+     "n_clusters": 20,
+     "n_params": 40,
+     "n_rows": 95,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact"
+     ],
+     "state": {
+      "P": [
+       0.0,
+       0.04005,
+       0.055209,
+       0.11865,
+       0.059908,
+       0.073053,
+       0.307349,
+       0.116712,
+       0.109627,
+       0.119443,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.095642,
+       0.14297,
+       0.047821,
+       0.0,
+       0.096609,
+       0.048093,
+       0.145272,
+       0.32724,
+       0.048342,
+       0.048011,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "eps": [
+       0.37993
+      ],
+      "g": [
+       0.0,
+       0.47689,
+       0.377362,
+       0.145748,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "pi": [
+       0.194925,
+       0.0,
+       0.0,
+       0.046591,
+       0.181848,
+       0.576635
+      ],
+      "rho": 0.3,
+      "tau": 0.31033
+     },
+     "state_ci": {
+      "P": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.076839,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.181969,
+        0.219106,
+        0.31672,
+        0.197568,
+        0.275875,
+        0.570968,
+        0.255733,
+        0.283254,
+        0.326112,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.237929,
+        0.252787,
+        0.172892,
+        0.0,
+        0.196984,
+        0.213732,
+        0.375015,
+        0.475347,
+        0.205285,
+        0.164246,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "eps": [
+       [
+        0.217997
+       ],
+       [
+        0.618144
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.124023,
+        0.113569,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.830284,
+        0.704293,
+        0.401016,
+        0.348179,
+        0.0,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.100465,
+        0.0,
+        0.0,
+        0.0,
+        0.064512,
+        0.430521
+       ],
+       [
+        0.298841,
+        0.055213,
+        0.0,
+        0.148574,
+        0.312295,
+        0.68524
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ],
+      "tau": [
+       0.218698,
+       0.416854
+      ]
+     },
+     "tau_free": true,
+     "weights": {
+      "A3 TT[exact]": {
+       "bca": [
+        0.102038,
+        0.299557
+       ],
+       "hi": 0.298841,
+       "lo": 0.100465,
+       "pi": 0.194925
+      },
+      "C0 POLARITY": {
+       "bca": [
+        0.0,
+        0.070444
+       ],
+       "hi": 0.055213,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "C1 GREEDY": {
+       "bca": [
+        0.0,
+        0.100516
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "D DPLL (first solution)": {
+       "bca": [
+        0.0,
+        0.155881
+       ],
+       "hi": 0.148574,
+       "lo": 0.0,
+       "pi": 0.046591
+      },
+      "exact": {
+       "bca": [
+        0.051233,
+        0.30117
+       ],
+       "hi": 0.312295,
+       "lo": 0.064512,
+       "pi": 0.181848
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.464914,
+        0.716998
+       ],
+       "hi": 0.68524,
+       "lo": 0.430521,
+       "pi": 0.576635
+      }
+     }
+    },
+    "groups": [
+     [
+      "A3 TT[exact]"
+     ],
+     [
+      "C0 POLARITY"
+     ],
+     [
+      "C1 GREEDY"
+     ],
+     [
+      "D DPLL (first solution)"
+     ],
+     [
+      "exact"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.262516,
+     "noise": 0.737484,
+     "nonslipping_members": 0.0,
+     "q": 0.576635,
+     "slip": 0.160849
+    },
+    "near": {
+     "bins": {
+      "0": 26,
+      "1": 8,
+      "2": 8,
+      "3": 8,
+      "4-6": 27,
+      ">6": 1,
+      "special token": 17
+     },
+     "n": 95,
+     "positions_per_item": [
+      12,
+      16
+     ],
+     "set_sizes_max": 29
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "strata",
+     "reach": "auto"
+    },
+    "planted": {
+     "q": 0.576658,
+     "weights": {
+      "A3 TT[exact]": 0.194919,
+      "D DPLL (first solution)": 0.046605,
+      "exact": 0.181818
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.357895,
+     "exact": 0.273684,
+     "special": 0.178947
+    },
+    "recovery": {
+     "bca": {
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "median_width": 0.197802,
+      "min_coverage": 0.9,
+      "pass": true,
+      "worst_coverage_quantity": "A3 TT[exact]"
+     },
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.270105,
+       "1": 0.083158,
+       "2": 0.079263,
+       "3": 0.069579,
+       "4-6": 0.247053,
+       ">6": 0.070316,
+       "no member": 0.0,
+       "special token": 0.180526
+      },
+      "observed": {
+       "0": 0.273684,
+       "1": 0.084211,
+       "2": 0.084211,
+       "3": 0.084211,
+       "4-6": 0.284211,
+       ">6": 0.010526,
+       "no member": 0.0,
+       "special token": 0.178947
+      },
+      "p05_p95": {
+       "0": [
+        0.220526,
+        0.357895
+       ],
+       "1": [
+        0.042105,
+        0.116316
+       ],
+       "2": [
+        0.042105,
+        0.115789
+       ],
+       "3": [
+        0.031579,
+        0.105789
+       ],
+       "4-6": [
+        0.178947,
+        0.315789
+       ],
+       ">6": [
+        0.031579,
+        0.115789
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.126316,
+        0.242632
+       ]
+      },
+      "p_value": 0.841584,
+      "tv_observed": 0.061368,
+      "tv_simulated_mean": 0.090605,
+      "tv_simulated_p05_p95": [
+       0.049284,
+       0.128689
+      ]
+     },
+     "eps_mean": 0.377096,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "max_abs_bias": 0.002423,
+     "median_width": 0.19567,
+     "min_coverage": 0.9,
+     "pass": true,
+     "quantities": {
+      "A3 TT[exact]": {
+       "bias": 0.000645,
+       "coverage": 0.92,
+       "coverage_bca": 0.9,
+       "mean": 0.195564,
+       "median_width": 0.191128,
+       "median_width_bca": 0.197802,
+       "truth": 0.194919
+      },
+      "C0 POLARITY": {
+       "bias": 0.000339,
+       "coverage": 1.0,
+       "coverage_bca": 0.78,
+       "mean": 0.000339,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "C1 GREEDY": {
+       "bias": 0.000493,
+       "coverage": 1.0,
+       "coverage_bca": 0.67,
+       "mean": 0.000493,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "D DPLL (first solution)": {
+       "bias": -0.002356,
+       "coverage": 0.9,
+       "coverage_bca": 0.96,
+       "mean": 0.044249,
+       "median_width": 0.126686,
+       "median_width_bca": 0.14618,
+       "truth": 0.046605
+      },
+      "exact": {
+       "bias": 0.002423,
+       "coverage": 0.94,
+       "coverage_bca": 0.94,
+       "mean": 0.184241,
+       "median_width": 0.225685,
+       "median_width_bca": 0.224825,
+       "truth": 0.181818
+      },
+      "unexplained (q)": {
+       "bias": -0.001544,
+       "coverage": 1.0,
+       "coverage_bca": 1.0,
+       "mean": 0.575114,
+       "median_width": 0.201671,
+       "median_width_bca": 0.205093,
+       "truth": 0.576658
+      }
+     },
+     "replicates": 100,
+     "rho_mean": null,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.413684,
+       "p05_p95": [
+        0.347368,
+        0.484211
+       ]
+      },
+      "exact": {
+       "mean": 0.270105,
+       "p05_p95": [
+        0.220526,
+        0.357895
+       ]
+      },
+      "special": {
+       "mean": 0.180526,
+       "p05_p95": [
+        0.126316,
+        0.242632
+       ]
+      }
+     },
+     "worst_bias_quantity": "exact",
+     "worst_coverage_quantity": "D DPLL (first solution)"
+    },
+    "run_id": "2026-11-18-pc20-qwen3-14b-thinking-high",
+    "seconds_fit": 18.0,
+    "seed": 3070201545,
+    "unit": "AH_E5/SAT"
+   },
+   "2026-11-18-pc20-qwen3-32b-direct": {
+    "excluded": {
+     "by_cell": {
+      "SAT/I+R": {
+       "parse_fail": 1
+      },
+      "SAT/P": {
+       "parse_fail": 4
+      }
+     },
+     "rates": {
+      "SAT/I+R": {
+       "parse_fail": 0.05
+      },
+      "SAT/P": {
+       "parse_fail": 0.2
+      }
+     },
+     "responses_by_cell": {
+      "SAT/I": 20,
+      "SAT/I+R": 20,
+      "SAT/N": 20,
+      "SAT/P": 20,
+      "SAT/T": 20
+     }
+    },
+    "fit": {
+     "always_token_columns": [],
+     "converged": true,
+     "data_ties": [],
+     "eps": 1.0,
+     "eps_at_cap": true,
+     "eps_by_group": null,
+     "eps_ci": [
+      1.0,
+      1.0
+     ],
+     "kernel": [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -848.299496,
+     "n_clusters": 20,
+     "n_params": 40,
+     "n_rows": 95,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact"
+     ],
+     "state": {
+      "P": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.022914,
+       0.0,
+       0.458285,
+       0.252057,
+       0.114571,
+       0.0835,
+       0.0,
+       0.0,
+       0.068673,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.02123,
+       0.0,
+       0.127382,
+       0.530757,
+       0.150788,
+       0.063691,
+       0.02123,
+       0.02123,
+       0.0,
+       0.042461,
+       0.02123,
+       0.0
+      ],
+      "eps": [
+       1.0
+      ],
+      "g": [
+       0.0,
+       0.0,
+       1.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "pi": [
+       0.0,
+       0.013227,
+       0.0,
+       0.0,
+       0.0,
+       0.986773
+      ],
+      "rho": 0.3,
+      "tau": 0.032002
+     },
+     "state_ci": {
+      "P": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.276596,
+        0.111258,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.048721,
+        0.352955,
+        0.064516,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.07501,
+        0.0,
+        0.647448,
+        0.435812,
+        0.224587,
+        0.173913,
+        0.0,
+        0.0,
+        0.139235,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.071429,
+        0.0,
+        0.199753,
+        0.675704,
+        0.239412,
+        0.16468,
+        0.070227,
+        0.070103,
+        0.0,
+        0.160014,
+        0.070103,
+        0.0
+       ]
+      ],
+      "eps": [
+       [
+        1.0
+       ],
+       [
+        1.0
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.883
+       ],
+       [
+        0.073606,
+        0.064266,
+        0.0,
+        0.025569,
+        0.056789,
+        1.0
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ],
+      "tau": [
+       0.0,
+       0.068318
+      ]
+     },
+     "tau_free": true,
+     "weights": {
+      "A3 TT[exact]": {
+       "bca": [
+        0.0,
+        0.148714
+       ],
+       "hi": 0.073606,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "C0 POLARITY": {
+       "bca": [
+        0.0,
+        0.085722
+       ],
+       "hi": 0.064266,
+       "lo": 0.0,
+       "pi": 0.013227
+      },
+      "C1 GREEDY": {
+       "bca": [
+        0.0,
+        0.004939
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "D DPLL (first solution)": {
+       "bca": [
+        0.0,
+        0.054705
+       ],
+       "hi": 0.025569,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "exact": {
+       "bca": [
+        0.0,
+        0.071491
+       ],
+       "hi": 0.056789,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.917922,
+        1.0
+       ],
+       "hi": 1.0,
+       "lo": 0.883,
+       "pi": 0.986773
+      }
+     }
+    },
+    "groups": [
+     [
+      "A3 TT[exact]"
+     ],
+     [
+      "C0 POLARITY"
+     ],
+     [
+      "C1 GREEDY"
+     ],
+     [
+      "D DPLL (first solution)"
+     ],
+     [
+      "exact"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.0,
+     "noise": 1.0,
+     "nonslipping_members": 0.0,
+     "q": 0.986773,
+     "slip": 0.013227
+    },
+    "near": {
+     "bins": {
+      "1": 3,
+      "2": 8,
+      "3": 12,
+      "4-6": 46,
+      ">6": 23,
+      "special token": 3
+     },
+     "n": 95,
+     "positions_per_item": [
+      12,
+      16
+     ],
+     "set_sizes_max": 29
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "strata",
+     "reach": "auto"
+    },
+    "planted": {
+     "q": 0.9868,
+     "weights": {
+      "C0 POLARITY": 0.0132
+     }
+    },
+    "ppc": {
+     "fails": [
+      "distance"
+     ],
+     "pass": false
+    },
+    "reach": {
+     "beyond_reach": 0.589474,
+     "exact": 0.0,
+     "special": 0.031579
+    },
+    "recovery": {
+     "bca": {
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": true
+      },
+      "median_width": 0.073622,
+      "min_coverage": 0.8,
+      "pass": false,
+      "worst_coverage_quantity": "C0 POLARITY"
+     },
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.001053,
+       "1": 0.015895,
+       "2": 0.068105,
+       "3": 0.144211,
+       "4-6": 0.584632,
+       ">6": 0.155684,
+       "no member": 0.0,
+       "special token": 0.030421
+      },
+      "observed": {
+       "0": 0.0,
+       "1": 0.031579,
+       "2": 0.084211,
+       "3": 0.126316,
+       "4-6": 0.484211,
+       ">6": 0.242105,
+       "no member": 0.0,
+       "special token": 0.031579
+      },
+      "p05_p95": {
+       "0": [
+        0.0,
+        0.010526
+       ],
+       "1": [
+        0.0,
+        0.042105
+       ],
+       "2": [
+        0.021053,
+        0.115789
+       ],
+       "3": [
+        0.094211,
+        0.189474
+       ],
+       "4-6": [
+        0.505263,
+        0.653158
+       ],
+       ">6": [
+        0.105263,
+        0.221053
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.010526,
+        0.063158
+       ]
+      },
+      "p_value": 0.009901,
+      "tv_observed": 0.119368,
+      "tv_simulated_mean": 0.066459,
+      "tv_simulated_p05_p95": [
+       0.035116,
+       0.106468
+      ]
+     },
+     "eps_mean": 0.968276,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "max_abs_bias": 0.019495,
+     "median_width": 0.071821,
+     "min_coverage": 0.76,
+     "pass": false,
+     "quantities": {
+      "A3 TT[exact]": {
+       "bias": 0.004947,
+       "coverage": 1.0,
+       "coverage_bca": 0.89,
+       "mean": 0.004947,
+       "median_width": 0.022401,
+       "median_width_bca": 0.041787,
+       "truth": 0.0
+      },
+      "C0 POLARITY": {
+       "bias": 0.004096,
+       "coverage": 0.76,
+       "coverage_bca": 0.8,
+       "mean": 0.017296,
+       "median_width": 0.051486,
+       "median_width_bca": 0.062551,
+       "truth": 0.0132
+      },
+      "C1 GREEDY": {
+       "bias": 0.005541,
+       "coverage": 1.0,
+       "coverage_bca": 0.89,
+       "mean": 0.005541,
+       "median_width": 0.027904,
+       "median_width_bca": 0.04446,
+       "truth": 0.0
+      },
+      "D DPLL (first solution)": {
+       "bias": 0.002133,
+       "coverage": 1.0,
+       "coverage_bca": 0.87,
+       "mean": 0.002133,
+       "median_width": 0.00386,
+       "median_width_bca": 0.034081,
+       "truth": 0.0
+      },
+      "exact": {
+       "bias": 0.002777,
+       "coverage": 1.0,
+       "coverage_bca": 0.75,
+       "mean": 0.002777,
+       "median_width": 0.0,
+       "median_width_bca": 0.022513,
+       "truth": 0.0
+      },
+      "unexplained (q)": {
+       "bias": -0.019495,
+       "coverage": 0.88,
+       "coverage_bca": 0.89,
+       "mean": 0.967305,
+       "median_width": 0.09158,
+       "median_width_bca": 0.079402,
+       "truth": 0.9868
+      }
+     },
+     "replicates": 100,
+     "rho_mean": null,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.574737,
+       "p05_p95": [
+        0.505263,
+        0.642105
+       ]
+      },
+      "exact": {
+       "mean": 0.001053,
+       "p05_p95": [
+        0.0,
+        0.010526
+       ]
+      },
+      "special": {
+       "mean": 0.030421,
+       "p05_p95": [
+        0.010526,
+        0.063158
+       ]
+      }
+     },
+     "worst_bias_quantity": "unexplained (q)",
+     "worst_coverage_quantity": "C0 POLARITY"
+    },
+    "run_id": "2026-11-18-pc20-qwen3-32b-direct",
+    "seconds_fit": 37.8,
+    "seed": 3447929385,
+    "unit": "AH_E5/SAT"
+   },
+   "2026-11-18-pc20-qwen3-32b-thinking-high": {
+    "excluded": {
+     "by_cell": {
+      "SAT/I+R": {
+       "truncated": 1
+      },
+      "SAT/N": {
+       "truncated": 1
+      },
+      "SAT/P": {
+       "truncated": 2
+      },
+      "SAT/T": {
+       "truncated": 1
+      }
+     },
+     "rates": {
+      "SAT/I+R": {
+       "truncated": 0.05
+      },
+      "SAT/N": {
+       "truncated": 0.05
+      },
+      "SAT/P": {
+       "truncated": 0.1
+      },
+      "SAT/T": {
+       "truncated": 0.05
+      }
+     },
+     "responses_by_cell": {
+      "SAT/I": 20,
+      "SAT/I+R": 20,
+      "SAT/N": 20,
+      "SAT/P": 20,
+      "SAT/T": 20
+     }
+    },
+    "fit": {
+     "always_token_columns": [],
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.424786,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.227535,
+      0.598997
+     ],
+     "kernel": [
+      0.0,
+      0.467002,
+      0.262005,
+      0.217255,
+      0.053738,
+      0.0,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -694.977478,
+     "n_clusters": 20,
+     "n_params": 40,
+     "n_rows": 95,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact"
+     ],
+     "state": {
+      "P": [
+       0.054425,
+       0.0,
+       0.054435,
+       0.26006,
+       0.0,
+       0.060504,
+       0.178181,
+       0.149085,
+       0.157692,
+       0.085618,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.045422,
+       0.074989,
+       0.078202,
+       0.254171,
+       0.08682,
+       0.214921,
+       0.211098,
+       0.034377,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "eps": [
+       0.424786
+      ],
+      "g": [
+       0.0,
+       0.467002,
+       0.262005,
+       0.217255,
+       0.053738,
+       0.0,
+       0.0
+      ],
+      "pi": [
+       0.18186,
+       0.0,
+       0.037931,
+       0.005729,
+       0.214989,
+       0.559491
+      ],
+      "rho": 0.3,
+      "tau": 0.169327
+     },
+     "state_ci": {
+      "P": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.050852,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.078178,
+        0.0,
+        0.0,
+        0.065557,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.181639,
+        0.0,
+        0.183017,
+        0.580423,
+        0.0,
+        0.214547,
+        0.341077,
+        0.397739,
+        0.335722,
+        0.224712,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.17674,
+        0.181156,
+        0.190739,
+        0.423755,
+        0.18765,
+        0.458635,
+        0.408547,
+        0.13891,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "eps": [
+       [
+        0.227535
+       ],
+       [
+        0.598997
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.135397,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.835512,
+        0.563167,
+        0.548006,
+        0.414259,
+        0.0,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.087492,
+        0.0,
+        0.0,
+        0.0,
+        0.109166,
+        0.386473
+       ],
+       [
+        0.279288,
+        0.016953,
+        0.126506,
+        0.047559,
+        0.329728,
+        0.691956
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ],
+      "tau": [
+       0.086541,
+       0.282118
+      ]
+     },
+     "tau_free": true,
+     "weights": {
+      "A3 TT[exact]": {
+       "bca": [
+        0.083057,
+        0.274485
+       ],
+       "hi": 0.279288,
+       "lo": 0.087492,
+       "pi": 0.18186
+      },
+      "C0 POLARITY": {
+       "bca": [
+        0.0,
+        0.103374
+       ],
+       "hi": 0.016953,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "C1 GREEDY": {
+       "bca": [
+        0.0,
+        0.134959
+       ],
+       "hi": 0.126506,
+       "lo": 0.0,
+       "pi": 0.037931
+      },
+      "D DPLL (first solution)": {
+       "bca": [
+        0.0,
+        0.055109
+       ],
+       "hi": 0.047559,
+       "lo": 0.0,
+       "pi": 0.005729
+      },
+      "exact": {
+       "bca": [
+        0.11306,
+        0.332445
+       ],
+       "hi": 0.329728,
+       "lo": 0.109166,
+       "pi": 0.214989
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.406622,
+        0.703754
+       ],
+       "hi": 0.691956,
+       "lo": 0.386473,
+       "pi": 0.559491
+      }
+     }
+    },
+    "groups": [
+     [
+      "A3 TT[exact]"
+     ],
+     [
+      "C0 POLARITY"
+     ],
+     [
+      "C1 GREEDY"
+     ],
+     [
+      "D DPLL (first solution)"
+     ],
+     [
+      "exact"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.253387,
+     "noise": 0.746613,
+     "nonslipping_members": 0.0,
+     "q": 0.559491,
+     "slip": 0.187122
+    },
+    "near": {
+     "bins": {
+      "0": 25,
+      "1": 9,
+      "2": 9,
+      "3": 11,
+      "4-6": 30,
+      ">6": 2,
+      "special token": 9
+     },
+     "n": 95,
+     "positions_per_item": [
+      12,
+      16
+     ],
+     "set_sizes_max": 29
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "strata",
+     "reach": "auto"
+    },
+    "planted": {
+     "q": 0.562707,
+     "weights": {
+      "A3 TT[exact]": 0.182943,
+      "C1 GREEDY": 0.038117,
+      "exact": 0.216233
+     }
+    },
+    "ppc": {
+     "fails": [
+      "beyond_reach"
+     ],
+     "pass": false
+    },
+    "reach": {
+     "beyond_reach": 0.273684,
+     "exact": 0.263158,
+     "special": 0.094737
+    },
+    "recovery": {
+     "bca": {
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "median_width": 0.193994,
+      "min_coverage": 0.92,
+      "pass": true,
+      "worst_coverage_quantity": "A3 TT[exact]"
+     },
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.252842,
+       "1": 0.095053,
+       "2": 0.079684,
+       "3": 0.102105,
+       "4-6": 0.301684,
+       ">6": 0.074,
+       "no member": 0.0,
+       "special token": 0.094632
+      },
+      "observed": {
+       "0": 0.263158,
+       "1": 0.094737,
+       "2": 0.094737,
+       "3": 0.115789,
+       "4-6": 0.315789,
+       ">6": 0.021053,
+       "no member": 0.0,
+       "special token": 0.094737
+      },
+      "p05_p95": {
+       "0": [
+        0.189474,
+        0.336842
+       ],
+       "1": [
+        0.042105,
+        0.137368
+       ],
+       "2": [
+        0.031579,
+        0.126842
+       ],
+       "3": [
+        0.052632,
+        0.157895
+       ],
+       "4-6": [
+        0.231053,
+        0.368421
+       ],
+       ">6": [
+        0.031579,
+        0.115789
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.052632,
+        0.147895
+       ]
+      },
+      "p_value": 0.930693,
+      "tv_observed": 0.053263,
+      "tv_simulated_mean": 0.094722,
+      "tv_simulated_p05_p95": [
+       0.049442,
+       0.150168
+      ]
+     },
+     "eps_mean": 0.437633,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "max_abs_bias": 0.012028,
+     "median_width": 0.193811,
+     "min_coverage": 0.91,
+     "pass": true,
+     "quantities": {
+      "A3 TT[exact]": {
+       "bias": -0.000746,
+       "coverage": 0.92,
+       "coverage_bca": 0.92,
+       "mean": 0.182196,
+       "median_width": 0.200048,
+       "median_width_bca": 0.200423,
+       "truth": 0.182943
+      },
+      "C0 POLARITY": {
+       "bias": 0.000304,
+       "coverage": 1.0,
+       "coverage_bca": 0.74,
+       "mean": 0.000304,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "C1 GREEDY": {
+       "bias": -0.002878,
+       "coverage": 0.91,
+       "coverage_bca": 0.94,
+       "mean": 0.035239,
+       "median_width": 0.072893,
+       "median_width_bca": 0.082857,
+       "truth": 0.038117
+      },
+      "D DPLL (first solution)": {
+       "bias": 0.012028,
+       "coverage": 0.99,
+       "coverage_bca": 0.9,
+       "mean": 0.012028,
+       "median_width": 0.072939,
+       "median_width_bca": 0.092561,
+       "truth": 0.0
+      },
+      "exact": {
+       "bias": -0.005646,
+       "coverage": 0.94,
+       "coverage_bca": 0.95,
+       "mean": 0.210587,
+       "median_width": 0.217293,
+       "median_width_bca": 0.220298,
+       "truth": 0.216233
+      },
+      "unexplained (q)": {
+       "bias": -0.003061,
+       "coverage": 0.95,
+       "coverage_bca": 0.94,
+       "mean": 0.559647,
+       "median_width": 0.219089,
+       "median_width_bca": 0.212801,
+       "truth": 0.562707
+      }
+     },
+     "replicates": 100,
+     "rho_mean": null,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.362842,
+       "p05_p95": [
+        0.294737,
+        0.453684
+       ]
+      },
+      "exact": {
+       "mean": 0.252842,
+       "p05_p95": [
+        0.189474,
+        0.336842
+       ]
+      },
+      "special": {
+       "mean": 0.094632,
+       "p05_p95": [
+        0.052632,
+        0.147895
+       ]
+      }
+     },
+     "worst_bias_quantity": "D DPLL (first solution)",
+     "worst_coverage_quantity": "C1 GREEDY"
+    },
+    "run_id": "2026-11-18-pc20-qwen3-32b-thinking-high",
+    "seconds_fit": 7.8,
+    "seed": 827488234,
+    "unit": "AH_E5/SAT"
+   }
+  },
+  "C_E2/knapsack": {
+   "2026-11-18-pc20-gpt-oss-120b-thinking-low": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "KNAP/PREFIX-vs-RATIO/BASE": 20,
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": 20,
+      "KNAP/PREFIX-vs-RATIO/D(RATIO|PREFIX)": 20,
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": 20,
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": 20,
+      "KNAP/RATIO-vs-DIFF/BASE": 20,
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": 20,
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": 20,
+      "KNAP/RATIO-vs-DIFF/G-ONLY": 20,
+      "KNAP/RATIO-vs-DIFF/PLACEBO": 20,
+      "KNAP/RATIO-vs-VALUE/BASE": 20,
+      "KNAP/RATIO-vs-VALUE/D(RATIO|VALUE)": 20,
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": 20,
+      "KNAP/RATIO-vs-VALUE/G-ONLY": 20,
+      "KNAP/RATIO-vs-VALUE/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "always_token_columns": [],
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.121304,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.070676,
+      0.171656
+     ],
+     "kernel": [
+      0.0,
+      0.048694,
+      0.607424,
+      0.343882,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -466.452757,
+     "n_clusters": 60,
+     "n_params": 23,
+     "n_rows": 300,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE"
+     ],
+     "state": {
+      "P": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       1.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "eps": [
+       0.121304
+      ],
+      "g": [
+       0.0,
+       0.048694,
+       0.607424,
+       0.343882,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "pi": [
+       0.047526,
+       0.723397,
+       0.0,
+       0.0,
+       0.0,
+       0.169026,
+       0.052393,
+       0.007657
+      ],
+      "rho": 0.3,
+      "tau": 0.0
+     },
+     "state_ci": {
+      "P": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "eps": [
+       [
+        0.070676
+       ],
+       [
+        0.171656
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.431126,
+        0.114091,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.140629,
+        0.817017,
+        0.532892,
+        0.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.640696,
+        0.0,
+        0.0,
+        0.0,
+        0.094989,
+        0.016382,
+        0.0
+       ],
+       [
+        0.102544,
+        0.806755,
+        0.0,
+        0.0,
+        0.0,
+        0.2508,
+        0.096379,
+        0.032473
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ],
+      "tau": [
+       0.0,
+       0.0
+      ]
+     },
+     "tau_free": true,
+     "weights": {
+      "DIFF": {
+       "bca": [
+        0.008862,
+        0.12566
+       ],
+       "hi": 0.102544,
+       "lo": 0.0,
+       "pi": 0.047526
+      },
+      "EXACT": {
+       "bca": [
+        0.642341,
+        0.808563
+       ],
+       "hi": 0.806755,
+       "lo": 0.640696,
+       "pi": 0.723397
+      },
+      "INPUT-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "LARGEST-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO-SKIP": {
+       "bca": [
+        0.097561,
+        0.257811
+       ],
+       "hi": 0.2508,
+       "lo": 0.094989,
+       "pi": 0.169026
+      },
+      "VALUE": {
+       "bca": [
+        0.02225,
+        0.107724
+       ],
+       "hi": 0.096379,
+       "lo": 0.016382,
+       "pi": 0.052393
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.0,
+        0.034174
+       ],
+       "hi": 0.032473,
+       "lo": 0.0,
+       "pi": 0.007657
+      }
+     }
+    },
+    "groups": [
+     [
+      "DIFF"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "INPUT-FIT"
+     ],
+     [
+      "LARGEST-FIT"
+     ],
+     [
+      "RATIO+BEST-SINGLE",
+      "RATIO-PREFIX"
+     ],
+     [
+      "RATIO-SKIP"
+     ],
+     [
+      "VALUE"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.871968,
+     "noise": 0.128032,
+     "nonslipping_members": 0.0,
+     "q": 0.007657,
+     "slip": 0.120375
+    },
+    "near": {
+     "bins": {
+      "0": 262,
+      "1": 7,
+      "2": 22,
+      "3": 9
+     },
+     "n": 300,
+     "positions_per_item": [
+      10
+     ],
+     "set_sizes_max": 1
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "strata",
+     "reach": "auto"
+    },
+    "planted": {
+     "q": 0.0,
+     "weights": {
+      "DIFF": 0.047869,
+      "EXACT": 0.729013,
+      "RATIO-SKIP": 0.170311,
+      "VALUE": 0.052807
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.0,
+     "exact": 0.873333,
+     "special": 0.0
+    },
+    "recovery": {
+     "bca": {
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": true
+      },
+      "median_width": 0.098515,
+      "min_coverage": 0.89,
+      "pass": false,
+      "worst_coverage_quantity": "DIFF"
+     },
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.8812,
+       "1": 0.016567,
+       "2": 0.0735,
+       "3": 0.028733,
+       "4-6": 0.0,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.873333,
+       "1": 0.023333,
+       "2": 0.073333,
+       "3": 0.03,
+       "4-6": 0.0,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.853,
+        0.916667
+       ],
+       "1": [
+        0.0065,
+        0.03
+       ],
+       "2": [
+        0.0465,
+        0.1
+       ],
+       "3": [
+        0.016667,
+        0.046667
+       ],
+       "4-6": [
+        0.0,
+        0.0
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.920792,
+      "tv_observed": 0.008033,
+      "tv_simulated_mean": 0.020049,
+      "tv_simulated_p05_p95": [
+       0.00772,
+       0.037918
+      ]
+     },
+     "eps_mean": 0.119343,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "max_abs_bias": 0.002579,
+     "median_width": 0.097008,
+     "min_coverage": 0.88,
+     "pass": false,
+     "quantities": {
+      "DIFF": {
+       "bias": 0.001965,
+       "coverage": 0.88,
+       "coverage_bca": 0.89,
+       "mean": 0.049834,
+       "median_width": 0.081027,
+       "median_width_bca": 0.084216,
+       "truth": 0.047869
+      },
+      "EXACT": {
+       "bias": -0.000656,
+       "coverage": 0.91,
+       "coverage_bca": 0.9,
+       "mean": 0.728357,
+       "median_width": 0.117412,
+       "median_width_bca": 0.117312,
+       "truth": 0.729013
+      },
+      "INPUT-FIT": {
+       "bias": 0.000203,
+       "coverage": 1.0,
+       "coverage_bca": 0.77,
+       "mean": 0.000203,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "LARGEST-FIT": {
+       "bias": 0.0,
+       "coverage": 1.0,
+       "coverage_bca": 0.91,
+       "mean": 0.0,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bias": 0.000659,
+       "coverage": 1.0,
+       "coverage_bca": 0.68,
+       "mean": 0.000659,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "RATIO-SKIP": {
+       "bias": -0.002579,
+       "coverage": 0.96,
+       "coverage_bca": 0.95,
+       "mean": 0.167732,
+       "median_width": 0.114802,
+       "median_width_bca": 0.116055,
+       "truth": 0.170311
+      },
+      "VALUE": {
+       "bias": -0.000547,
+       "coverage": 0.92,
+       "coverage_bca": 0.96,
+       "mean": 0.05226,
+       "median_width": 0.060432,
+       "median_width_bca": 0.061721,
+       "truth": 0.052807
+      },
+      "unexplained (q)": {
+       "bias": 0.000955,
+       "coverage": 1.0,
+       "coverage_bca": 0.93,
+       "mean": 0.000955,
+       "median_width": 0.010556,
+       "median_width_bca": 0.011058,
+       "truth": 0.0
+      }
+     },
+     "replicates": 100,
+     "rho_mean": null,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      },
+      "exact": {
+       "mean": 0.8812,
+       "p05_p95": [
+        0.853,
+        0.916667
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "worst_bias_quantity": "RATIO-SKIP",
+     "worst_coverage_quantity": "DIFF"
+    },
+    "run_id": "2026-11-18-pc20-gpt-oss-120b-thinking-low",
+    "seconds_fit": 40.5,
+    "seed": 970356698,
+    "unit": "C_E2/knapsack"
+   },
+   "2026-11-18-pc20-gpt-oss-20b-thinking-low": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "KNAP/PREFIX-vs-RATIO/BASE": 20,
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": 20,
+      "KNAP/PREFIX-vs-RATIO/D(RATIO|PREFIX)": 20,
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": 20,
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": 20,
+      "KNAP/RATIO-vs-DIFF/BASE": 20,
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": 20,
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": 20,
+      "KNAP/RATIO-vs-DIFF/G-ONLY": 20,
+      "KNAP/RATIO-vs-DIFF/PLACEBO": 20,
+      "KNAP/RATIO-vs-VALUE/BASE": 20,
+      "KNAP/RATIO-vs-VALUE/D(RATIO|VALUE)": 20,
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": 20,
+      "KNAP/RATIO-vs-VALUE/G-ONLY": 20,
+      "KNAP/RATIO-vs-VALUE/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "always_token_columns": [],
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.270689,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.214398,
+      0.327423
+     ],
+     "kernel": [
+      0.0,
+      0.206026,
+      0.502543,
+      0.291431,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -799.373215,
+     "n_clusters": 60,
+     "n_params": 23,
+     "n_rows": 300,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE"
+     ],
+     "state": {
+      "P": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       1.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "eps": [
+       0.270689
+      ],
+      "g": [
+       0.0,
+       0.206026,
+       0.502543,
+       0.291431,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "pi": [
+       0.089305,
+       0.605976,
+       0.004474,
+       0.0,
+       0.011883,
+       0.152041,
+       0.112594,
+       0.023728
+      ],
+      "rho": 0.3,
+      "tau": 0.0
+     },
+     "state_ci": {
+      "P": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        5e-06,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.998887,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "eps": [
+       [
+        0.214398
+       ],
+       [
+        0.327423
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.112954,
+        0.350635,
+        0.139236,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.320657,
+        0.654661,
+        0.436873,
+        0.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.036062,
+        0.518166,
+        0.0,
+        0.0,
+        0.0,
+        0.077131,
+        0.058303,
+        0.0
+       ],
+       [
+        0.151866,
+        0.685194,
+        0.021664,
+        0.0,
+        0.059953,
+        0.21812,
+        0.1789,
+        0.066761
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ],
+      "tau": [
+       0.0,
+       0.0
+      ]
+     },
+     "tau_free": true,
+     "weights": {
+      "DIFF": {
+       "bca": [
+        0.038587,
+        0.155808
+       ],
+       "hi": 0.151866,
+       "lo": 0.036062,
+       "pi": 0.089305
+      },
+      "EXACT": {
+       "bca": [
+        0.524237,
+        0.689768
+       ],
+       "hi": 0.685194,
+       "lo": 0.518166,
+       "pi": 0.605976
+      },
+      "INPUT-FIT": {
+       "bca": [
+        0.0,
+        0.048194
+       ],
+       "hi": 0.021664,
+       "lo": 0.0,
+       "pi": 0.004474
+      },
+      "LARGEST-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bca": [
+        0.0,
+        0.08592
+       ],
+       "hi": 0.059953,
+       "lo": 0.0,
+       "pi": 0.011883
+      },
+      "RATIO-SKIP": {
+       "bca": [
+        0.081313,
+        0.223152
+       ],
+       "hi": 0.21812,
+       "lo": 0.077131,
+       "pi": 0.152041
+      },
+      "VALUE": {
+       "bca": [
+        0.062825,
+        0.186071
+       ],
+       "hi": 0.1789,
+       "lo": 0.058303,
+       "pi": 0.112594
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.0,
+        0.086891
+       ],
+       "hi": 0.066761,
+       "lo": 0.0,
+       "pi": 0.023728
+      }
+     }
+    },
+    "groups": [
+     [
+      "DIFF"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "INPUT-FIT"
+     ],
+     [
+      "LARGEST-FIT"
+     ],
+     [
+      "RATIO+BEST-SINGLE",
+      "RATIO-PREFIX"
+     ],
+     [
+      "RATIO-SKIP"
+     ],
+     [
+      "VALUE"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.712006,
+     "noise": 0.287994,
+     "nonslipping_members": 0.0,
+     "q": 0.02373,
+     "slip": 0.264265
+    },
+    "near": {
+     "bins": {
+      "0": 215,
+      "1": 29,
+      "2": 45,
+      "3": 10,
+      "4-6": 1
+     },
+     "n": 300,
+     "positions_per_item": [
+      10
+     ],
+     "set_sizes_max": 1
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "strata",
+     "reach": "auto"
+    },
+    "planted": {
+     "q": 0.023807,
+     "weights": {
+      "DIFF": 0.089704,
+      "EXACT": 0.608739,
+      "RATIO+BEST-SINGLE": 0.011954,
+      "RATIO-SKIP": 0.152687,
+      "VALUE": 0.113109
+     }
+    },
+    "ppc": {
+     "fails": [
+      "beyond_reach"
+     ],
+     "pass": false
+    },
+    "reach": {
+     "beyond_reach": 0.003333,
+     "exact": 0.716667,
+     "special": 0.0
+    },
+    "recovery": {
+     "bca": {
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": true
+      },
+      "median_width": 0.098423,
+      "min_coverage": 0.84,
+      "pass": false,
+      "worst_coverage_quantity": "RATIO+BEST-SINGLE = RATIO-PREFIX"
+     },
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.716467,
+       "1": 0.072233,
+       "2": 0.138767,
+       "3": 0.061733,
+       "4-6": 0.0108,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.716667,
+       "1": 0.096667,
+       "2": 0.15,
+       "3": 0.033333,
+       "4-6": 0.003333,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.676333,
+        0.76
+       ],
+       "1": [
+        0.046667,
+        0.1
+       ],
+       "2": [
+        0.11,
+        0.166667
+       ],
+       "3": [
+        0.033333,
+        0.0835
+       ],
+       "4-6": [
+        0.003333,
+        0.02
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.326733,
+      "tv_observed": 0.035867,
+      "tv_simulated_mean": 0.030956,
+      "tv_simulated_p05_p95": [
+       0.012808,
+       0.053658
+      ]
+     },
+     "eps_mean": 0.268508,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "max_abs_bias": 0.002864,
+     "median_width": 0.097981,
+     "min_coverage": 0.82,
+     "pass": false,
+     "quantities": {
+      "DIFF": {
+       "bias": -0.000885,
+       "coverage": 0.94,
+       "coverage_bca": 0.94,
+       "mean": 0.088819,
+       "median_width": 0.107735,
+       "median_width_bca": 0.107106,
+       "truth": 0.089704
+      },
+      "EXACT": {
+       "bias": -0.002864,
+       "coverage": 0.94,
+       "coverage_bca": 0.91,
+       "mean": 0.605875,
+       "median_width": 0.134631,
+       "median_width_bca": 0.133267,
+       "truth": 0.608739
+      },
+      "INPUT-FIT": {
+       "bias": 0.000168,
+       "coverage": 1.0,
+       "coverage_bca": 0.43,
+       "mean": 0.000168,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "LARGEST-FIT": {
+       "bias": 0.000174,
+       "coverage": 1.0,
+       "coverage_bca": 0.7,
+       "mean": 0.000174,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bias": -0.001289,
+       "coverage": 0.82,
+       "coverage_bca": 0.84,
+       "mean": 0.010665,
+       "median_width": 0.033005,
+       "median_width_bca": 0.042237,
+       "truth": 0.011954
+      },
+      "RATIO-SKIP": {
+       "bias": 0.002433,
+       "coverage": 0.92,
+       "coverage_bca": 0.92,
+       "mean": 0.15512,
+       "median_width": 0.130702,
+       "median_width_bca": 0.134702,
+       "truth": 0.152687
+      },
+      "VALUE": {
+       "bias": -0.000501,
+       "coverage": 0.92,
+       "coverage_bca": 0.9,
+       "mean": 0.112608,
+       "median_width": 0.087386,
+       "median_width_bca": 0.088481,
+       "truth": 0.113109
+      },
+      "unexplained (q)": {
+       "bias": 0.002765,
+       "coverage": 0.95,
+       "coverage_bca": 0.95,
+       "mean": 0.026572,
+       "median_width": 0.042966,
+       "median_width_bca": 0.044672,
+       "truth": 0.023807
+      }
+     },
+     "replicates": 100,
+     "rho_mean": null,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.0108,
+       "p05_p95": [
+        0.003333,
+        0.02
+       ]
+      },
+      "exact": {
+       "mean": 0.716467,
+       "p05_p95": [
+        0.676333,
+        0.76
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "worst_bias_quantity": "EXACT",
+     "worst_coverage_quantity": "RATIO+BEST-SINGLE = RATIO-PREFIX"
+    },
+    "run_id": "2026-11-18-pc20-gpt-oss-20b-thinking-low",
+    "seconds_fit": 37.5,
+    "seed": 4215263142,
+    "unit": "C_E2/knapsack"
+   },
+   "2026-11-18-pc20-qwen3-14b-direct": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "KNAP/PREFIX-vs-RATIO/BASE": 20,
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": 20,
+      "KNAP/PREFIX-vs-RATIO/D(RATIO|PREFIX)": 20,
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": 20,
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": 20,
+      "KNAP/RATIO-vs-DIFF/BASE": 20,
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": 20,
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": 20,
+      "KNAP/RATIO-vs-DIFF/G-ONLY": 20,
+      "KNAP/RATIO-vs-DIFF/PLACEBO": 20,
+      "KNAP/RATIO-vs-VALUE/BASE": 20,
+      "KNAP/RATIO-vs-VALUE/D(RATIO|VALUE)": 20,
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": 20,
+      "KNAP/RATIO-vs-VALUE/G-ONLY": 20,
+      "KNAP/RATIO-vs-VALUE/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "always_token_columns": [],
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.849068,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.776153,
+      0.916034
+     ],
+     "kernel": [
+      0.0,
+      0.447009,
+      0.289537,
+      0.263454,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -1538.960987,
+     "n_clusters": 60,
+     "n_params": 23,
+     "n_rows": 300,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE"
+     ],
+     "state": {
+      "P": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.294035,
+       0.262247,
+       0.138133,
+       0.305585,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "eps": [
+       0.849068
+      ],
+      "g": [
+       0.0,
+       0.447009,
+       0.289537,
+       0.263454,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "pi": [
+       0.125006,
+       0.178157,
+       0.0,
+       0.0,
+       0.242205,
+       0.151847,
+       0.223443,
+       0.079341
+      ],
+      "rho": 0.3,
+      "tau": 0.0
+     },
+     "state_ci": {
+      "P": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.072779,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.687083,
+        0.626003,
+        0.398714,
+        0.621712,
+        0.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "eps": [
+       [
+        0.776153
+       ],
+       [
+        0.916034
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.3308,
+        0.173467,
+        0.148337,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.565946,
+        0.409009,
+        0.387892,
+        0.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.036095,
+        0.063753,
+        0.0,
+        0.0,
+        0.078123,
+        0.002924,
+        0.101789,
+        0.028547
+       ],
+       [
+        0.25167,
+        0.300504,
+        0.0,
+        0.0,
+        0.39721,
+        0.307,
+        0.352166,
+        0.147879
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ],
+      "tau": [
+       0.0,
+       0.0
+      ]
+     },
+     "tau_free": true,
+     "weights": {
+      "DIFF": {
+       "bca": [
+        0.036547,
+        0.253878
+       ],
+       "hi": 0.25167,
+       "lo": 0.036095,
+       "pi": 0.125006
+      },
+      "EXACT": {
+       "bca": [
+        0.069721,
+        0.309019
+       ],
+       "hi": 0.300504,
+       "lo": 0.063753,
+       "pi": 0.178157
+      },
+      "INPUT-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "LARGEST-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bca": [
+        0.084193,
+        0.402948
+       ],
+       "hi": 0.39721,
+       "lo": 0.078123,
+       "pi": 0.242205
+      },
+      "RATIO-SKIP": {
+       "bca": [
+        0.025829,
+        0.334687
+       ],
+       "hi": 0.307,
+       "lo": 0.002924,
+       "pi": 0.151847
+      },
+      "VALUE": {
+       "bca": [
+        0.107402,
+        0.364294
+       ],
+       "hi": 0.352166,
+       "lo": 0.101789,
+       "pi": 0.223443
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.032579,
+        0.15806
+       ],
+       "hi": 0.147879,
+       "lo": 0.028547,
+       "pi": 0.079341
+      }
+     }
+    },
+    "groups": [
+     [
+      "DIFF"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "INPUT-FIT"
+     ],
+     [
+      "LARGEST-FIT"
+     ],
+     [
+      "RATIO+BEST-SINGLE",
+      "RATIO-PREFIX"
+     ],
+     [
+      "RATIO-SKIP"
+     ],
+     [
+      "VALUE"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.138957,
+     "noise": 0.861043,
+     "nonslipping_members": 0.0,
+     "q": 0.079341,
+     "slip": 0.781702
+    },
+    "near": {
+     "bins": {
+      "0": 47,
+      "1": 116,
+      "2": 73,
+      "3": 51,
+      "4-6": 13
+     },
+     "n": 300,
+     "positions_per_item": [
+      10
+     ],
+     "set_sizes_max": 1
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "strata",
+     "reach": "auto"
+    },
+    "planted": {
+     "q": 0.079308,
+     "weights": {
+      "DIFF": 0.125013,
+      "EXACT": 0.178218,
+      "RATIO+BEST-SINGLE": 0.242224,
+      "RATIO-SKIP": 0.151815,
+      "VALUE": 0.223422
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.043333,
+     "exact": 0.156667,
+     "special": 0.0
+    },
+    "recovery": {
+     "bca": {
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "median_width": 0.145059,
+      "min_coverage": 0.93,
+      "pass": true,
+      "worst_coverage_quantity": "VALUE"
+     },
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.161467,
+       "1": 0.3779,
+       "2": 0.2584,
+       "3": 0.1677,
+       "4-6": 0.0344,
+       ">6": 0.000133,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.156667,
+       "1": 0.386667,
+       "2": 0.243333,
+       "3": 0.17,
+       "4-6": 0.043333,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.119833,
+        0.193667
+       ],
+       "1": [
+        0.329833,
+        0.4135
+       ],
+       "2": [
+        0.213333,
+        0.3035
+       ],
+       "3": [
+        0.1365,
+        0.196667
+       ],
+       "4-6": [
+        0.02,
+        0.053333
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.940594,
+      "tv_observed": 0.02,
+      "tv_simulated_mean": 0.040822,
+      "tv_simulated_p05_p95": [
+       0.018167,
+       0.06603
+      ]
+     },
+     "eps_mean": 0.846632,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "max_abs_bias": 0.006436,
+     "median_width": 0.144452,
+     "min_coverage": 0.93,
+     "pass": true,
+     "quantities": {
+      "DIFF": {
+       "bias": -0.001005,
+       "coverage": 0.93,
+       "coverage_bca": 0.97,
+       "mean": 0.124007,
+       "median_width": 0.152729,
+       "median_width_bca": 0.152814,
+       "truth": 0.125013
+      },
+      "EXACT": {
+       "bias": 0.004591,
+       "coverage": 0.96,
+       "coverage_bca": 0.95,
+       "mean": 0.182809,
+       "median_width": 0.136768,
+       "median_width_bca": 0.137988,
+       "truth": 0.178218
+      },
+      "INPUT-FIT": {
+       "bias": 0.001563,
+       "coverage": 1.0,
+       "coverage_bca": 0.82,
+       "mean": 0.001563,
+       "median_width": 0.00854,
+       "median_width_bca": 0.017283,
+       "truth": 0.0
+      },
+      "LARGEST-FIT": {
+       "bias": 0.000514,
+       "coverage": 1.0,
+       "coverage_bca": 0.69,
+       "mean": 0.000514,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bias": -0.006436,
+       "coverage": 0.93,
+       "coverage_bca": 0.94,
+       "mean": 0.235788,
+       "median_width": 0.185561,
+       "median_width_bca": 0.183913,
+       "truth": 0.242224
+      },
+      "RATIO-SKIP": {
+       "bias": 0.002308,
+       "coverage": 0.93,
+       "coverage_bca": 0.94,
+       "mean": 0.154123,
+       "median_width": 0.201542,
+       "median_width_bca": 0.20019,
+       "truth": 0.151815
+      },
+      "VALUE": {
+       "bias": 0.0021,
+       "coverage": 0.96,
+       "coverage_bca": 0.93,
+       "mean": 0.225522,
+       "median_width": 0.122106,
+       "median_width_bca": 0.124618,
+       "truth": 0.223422
+      },
+      "unexplained (q)": {
+       "bias": -0.003635,
+       "coverage": 0.96,
+       "coverage_bca": 0.94,
+       "mean": 0.075673,
+       "median_width": 0.074295,
+       "median_width_bca": 0.075074,
+       "truth": 0.079308
+      }
+     },
+     "replicates": 100,
+     "rho_mean": null,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.034533,
+       "p05_p95": [
+        0.02,
+        0.0535
+       ]
+      },
+      "exact": {
+       "mean": 0.161467,
+       "p05_p95": [
+        0.119833,
+        0.193667
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "worst_bias_quantity": "RATIO+BEST-SINGLE = RATIO-PREFIX",
+     "worst_coverage_quantity": "DIFF"
+    },
+    "run_id": "2026-11-18-pc20-qwen3-14b-direct",
+    "seconds_fit": 20.7,
+    "seed": 2041573403,
+    "unit": "C_E2/knapsack"
+   },
+   "2026-11-18-pc20-qwen3-14b-thinking-high": {
+    "excluded": {
+     "by_cell": {
+      "KNAP/PREFIX-vs-RATIO/BASE": {
+       "parse_fail": 3
+      },
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": {
+       "parse_fail": 1
+      },
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": {
+       "parse_fail": 2
+      },
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-DIFF/G-ONLY": {
+       "parse_fail": 2
+      },
+      "KNAP/RATIO-vs-DIFF/PLACEBO": {
+       "parse_fail": 4
+      },
+      "KNAP/RATIO-vs-VALUE/BASE": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": {
+       "parse_fail": 3
+      },
+      "KNAP/RATIO-vs-VALUE/G-ONLY": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-VALUE/PLACEBO": {
+       "parse_fail": 2
+      }
+     },
+     "rates": {
+      "KNAP/PREFIX-vs-RATIO/BASE": {
+       "parse_fail": 0.15
+      },
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": {
+       "parse_fail": 0.05
+      },
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": {
+       "parse_fail": 0.1
+      },
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-DIFF/G-ONLY": {
+       "parse_fail": 0.1
+      },
+      "KNAP/RATIO-vs-DIFF/PLACEBO": {
+       "parse_fail": 0.2
+      },
+      "KNAP/RATIO-vs-VALUE/BASE": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": {
+       "parse_fail": 0.15
+      },
+      "KNAP/RATIO-vs-VALUE/G-ONLY": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-VALUE/PLACEBO": {
+       "parse_fail": 0.1
+      }
+     },
+     "responses_by_cell": {
+      "KNAP/PREFIX-vs-RATIO/BASE": 20,
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": 20,
+      "KNAP/PREFIX-vs-RATIO/D(RATIO|PREFIX)": 20,
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": 20,
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": 20,
+      "KNAP/RATIO-vs-DIFF/BASE": 20,
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": 20,
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": 20,
+      "KNAP/RATIO-vs-DIFF/G-ONLY": 20,
+      "KNAP/RATIO-vs-DIFF/PLACEBO": 20,
+      "KNAP/RATIO-vs-VALUE/BASE": 20,
+      "KNAP/RATIO-vs-VALUE/D(RATIO|VALUE)": 20,
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": 20,
+      "KNAP/RATIO-vs-VALUE/G-ONLY": 20,
+      "KNAP/RATIO-vs-VALUE/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "always_token_columns": [],
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.002088,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.0,
+      0.011033
+     ],
+     "kernel": [
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -67.167213,
+     "n_clusters": 60,
+     "n_params": 23,
+     "n_rows": 278,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE"
+     ],
+     "state": {
+      "P": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.709228,
+       0.290772,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "eps": [
+       0.002088
+      ],
+      "g": [
+       0.0,
+       0.0,
+       1.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "pi": [
+       0.01268,
+       0.969784,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.005121,
+       0.012416
+      ],
+      "rho": 0.3,
+      "tau": 0.0
+     },
+     "state_ci": {
+      "P": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "eps": [
+       [
+        0.0
+       ],
+       [
+        0.011033
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.94321,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.028384,
+        0.991606,
+        0.0,
+        0.0,
+        0.0,
+        0.009523,
+        0.018346,
+        0.032817
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ],
+      "tau": [
+       0.0,
+       0.0
+      ]
+     },
+     "tau_free": true,
+     "weights": {
+      "DIFF": {
+       "bca": [
+        0.0,
+        0.033734
+       ],
+       "hi": 0.028384,
+       "lo": 0.0,
+       "pi": 0.01268
+      },
+      "EXACT": {
+       "bca": [
+        0.93715,
+        0.987594
+       ],
+       "hi": 0.991606,
+       "lo": 0.94321,
+       "pi": 0.969784
+      },
+      "INPUT-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "LARGEST-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO-SKIP": {
+       "bca": [
+        0.0,
+        0.024313
+       ],
+       "hi": 0.009523,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "VALUE": {
+       "bca": [
+        0.0,
+        0.027617
+       ],
+       "hi": 0.018346,
+       "lo": 0.0,
+       "pi": 0.005121
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.0,
+        0.044472
+       ],
+       "hi": 0.032817,
+       "lo": 0.0,
+       "pi": 0.012416
+      }
+     }
+    },
+    "groups": [
+     [
+      "DIFF"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "INPUT-FIT"
+     ],
+     [
+      "LARGEST-FIT"
+     ],
+     [
+      "RATIO+BEST-SINGLE",
+      "RATIO-PREFIX"
+     ],
+     [
+      "RATIO-SKIP"
+     ],
+     [
+      "VALUE"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.985522,
+     "noise": 0.014478,
+     "nonslipping_members": 0.0,
+     "q": 0.012416,
+     "slip": 0.002062
+    },
+    "near": {
+     "bins": {
+      "0": 274,
+      "1": 1,
+      "3": 3
+     },
+     "n": 278,
+     "positions_per_item": [
+      10
+     ],
+     "set_sizes_max": 1
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "strata",
+     "reach": "auto"
+    },
+    "planted": {
+     "q": 0.012464,
+     "weights": {
+      "DIFF": 0.012765,
+      "EXACT": 0.974771
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.0,
+     "exact": 0.985612,
+     "special": 0.0
+    },
+    "recovery": {
+     "bca": {
+      "gates": {
+       "bias": true,
+       "coverage": false,
+       "width": true
+      },
+      "median_width": 0.03212,
+      "min_coverage": 0.71,
+      "pass": false,
+      "worst_coverage_quantity": "DIFF"
+     },
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.984928,
+       "1": 0.000755,
+       "2": 0.004137,
+       "3": 0.004209,
+       "4-6": 0.005935,
+       ">6": 3.6e-05,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.985612,
+       "1": 0.003597,
+       "2": 0.0,
+       "3": 0.010791,
+       "4-6": 0.0,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.97464,
+        0.996403
+       ],
+       "1": [
+        0.0,
+        0.003597
+       ],
+       "2": [
+        0.0,
+        0.010791
+       ],
+       "3": [
+        0.0,
+        0.010791
+       ],
+       "4-6": [
+        0.0,
+        0.014388
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.336634,
+      "tv_observed": 0.010108,
+      "tv_simulated_mean": 0.008429,
+      "tv_simulated_p05_p95": [
+       0.003737,
+       0.01436
+      ]
+     },
+     "eps_mean": 0.002551,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "max_abs_bias": 0.002922,
+     "median_width": 0.028761,
+     "min_coverage": 0.68,
+     "pass": false,
+     "quantities": {
+      "DIFF": {
+       "bias": -0.002922,
+       "coverage": 0.68,
+       "coverage_bca": 0.71,
+       "mean": 0.009843,
+       "median_width": 0.02182,
+       "median_width_bca": 0.027886,
+       "truth": 0.012765
+      },
+      "EXACT": {
+       "bias": 0.000784,
+       "coverage": 0.89,
+       "coverage_bca": 0.95,
+       "mean": 0.975555,
+       "median_width": 0.036061,
+       "median_width_bca": 0.037929,
+       "truth": 0.974771
+      },
+      "INPUT-FIT": {
+       "bias": 3.6e-05,
+       "coverage": 1.0,
+       "coverage_bca": 1.0,
+       "mean": 3.6e-05,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "LARGEST-FIT": {
+       "bias": 0.0,
+       "coverage": 1.0,
+       "coverage_bca": 1.0,
+       "mean": 0.0,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bias": 0.0,
+       "coverage": 1.0,
+       "coverage_bca": 0.77,
+       "mean": 0.0,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "RATIO-SKIP": {
+       "bias": 0.001851,
+       "coverage": 0.97,
+       "coverage_bca": 0.86,
+       "mean": 0.001851,
+       "median_width": 0.010563,
+       "median_width_bca": 0.01799,
+       "truth": 0.0
+      },
+      "VALUE": {
+       "bias": 0.000103,
+       "coverage": 1.0,
+       "coverage_bca": 0.72,
+       "mean": 0.000103,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "unexplained (q)": {
+       "bias": 0.000148,
+       "coverage": 0.84,
+       "coverage_bca": 0.93,
+       "mean": 0.012612,
+       "median_width": 0.025439,
+       "median_width_bca": 0.028305,
+       "truth": 0.012464
+      }
+     },
+     "replicates": 100,
+     "rho_mean": null,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.005971,
+       "p05_p95": [
+        0.0,
+        0.014388
+       ]
+      },
+      "exact": {
+       "mean": 0.984928,
+       "p05_p95": [
+        0.97464,
+        0.996403
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "worst_bias_quantity": "DIFF",
+     "worst_coverage_quantity": "DIFF"
+    },
+    "run_id": "2026-11-18-pc20-qwen3-14b-thinking-high",
+    "seconds_fit": 13.7,
+    "seed": 687662475,
+    "unit": "C_E2/knapsack"
+   },
+   "2026-11-18-pc20-qwen3-32b-direct": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "KNAP/PREFIX-vs-RATIO/BASE": 20,
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": 20,
+      "KNAP/PREFIX-vs-RATIO/D(RATIO|PREFIX)": 20,
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": 20,
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": 20,
+      "KNAP/RATIO-vs-DIFF/BASE": 20,
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": 20,
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": 20,
+      "KNAP/RATIO-vs-DIFF/G-ONLY": 20,
+      "KNAP/RATIO-vs-DIFF/PLACEBO": 20,
+      "KNAP/RATIO-vs-VALUE/BASE": 20,
+      "KNAP/RATIO-vs-VALUE/D(RATIO|VALUE)": 20,
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": 20,
+      "KNAP/RATIO-vs-VALUE/G-ONLY": 20,
+      "KNAP/RATIO-vs-VALUE/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "always_token_columns": [],
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.939479,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.884283,
+      0.98262
+     ],
+     "kernel": [
+      0.0,
+      0.358812,
+      0.401431,
+      0.239757,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -1570.479504,
+     "n_clusters": 60,
+     "n_params": 23,
+     "n_rows": 300,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE"
+     ],
+     "state": {
+      "P": [
+       0.0,
+       0.0,
+       0.0,
+       0.183809,
+       0.637193,
+       0.113978,
+       0.033401,
+       0.0,
+       0.03162,
+       0.0,
+       0.0
+      ],
+      "eps": [
+       0.939479
+      ],
+      "g": [
+       0.0,
+       0.358812,
+       0.401431,
+       0.239757,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "pi": [
+       0.122877,
+       0.101052,
+       0.0,
+       0.0,
+       0.573372,
+       0.0,
+       0.097278,
+       0.10542
+      ],
+      "rho": 0.3,
+      "tau": 0.0
+     },
+     "state_ci": {
+      "P": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.328144,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.468671,
+        0.94686,
+        0.383989,
+        0.143112,
+        0.0,
+        0.143838,
+        0.0,
+        0.0
+       ]
+      ],
+      "eps": [
+       [
+        0.884283
+       ],
+       [
+        0.98262
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.247047,
+        0.277599,
+        0.136459,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.473877,
+        0.537506,
+        0.343553,
+        0.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.012687,
+        0.0,
+        0.0,
+        0.377812,
+        0.0,
+        0.009129,
+        0.042438
+       ],
+       [
+        0.300926,
+        0.203469,
+        0.0,
+        0.002862,
+        0.719289,
+        0.037516,
+        0.207523,
+        0.181324
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ],
+      "tau": [
+       0.0,
+       0.0
+      ]
+     },
+     "tau_free": true,
+     "weights": {
+      "DIFF": {
+       "bca": [
+        0.00947,
+        0.331634
+       ],
+       "hi": 0.300926,
+       "lo": 0.0,
+       "pi": 0.122877
+      },
+      "EXACT": {
+       "bca": [
+        0.023721,
+        0.218987
+       ],
+       "hi": 0.203469,
+       "lo": 0.012687,
+       "pi": 0.101052
+      },
+      "INPUT-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "LARGEST-FIT": {
+       "bca": [
+        0.0,
+        0.027475
+       ],
+       "hi": 0.002862,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bca": [
+        0.379694,
+        0.720552
+       ],
+       "hi": 0.719289,
+       "lo": 0.377812,
+       "pi": 0.573372
+      },
+      "RATIO-SKIP": {
+       "bca": [
+        0.0,
+        0.211509
+       ],
+       "hi": 0.037516,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "VALUE": {
+       "bca": [
+        0.020405,
+        0.239807
+       ],
+       "hi": 0.207523,
+       "lo": 0.009129,
+       "pi": 0.097278
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.048602,
+        0.195076
+       ],
+       "hi": 0.181324,
+       "lo": 0.042438,
+       "pi": 0.10542
+      }
+     }
+    },
+    "groups": [
+     [
+      "DIFF"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "INPUT-FIT"
+     ],
+     [
+      "LARGEST-FIT"
+     ],
+     [
+      "RATIO+BEST-SINGLE",
+      "RATIO-PREFIX"
+     ],
+     [
+      "RATIO-SKIP"
+     ],
+     [
+      "VALUE"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.054141,
+     "noise": 0.945859,
+     "nonslipping_members": 0.0,
+     "q": 0.10542,
+     "slip": 0.840439
+    },
+    "near": {
+     "bins": {
+      "0": 24,
+      "1": 98,
+      "2": 120,
+      "3": 44,
+      "4-6": 14
+     },
+     "n": 300,
+     "positions_per_item": [
+      10
+     ],
+     "set_sizes_max": 1
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "strata",
+     "reach": "auto"
+    },
+    "planted": {
+     "q": 0.105389,
+     "weights": {
+      "DIFF": 0.122888,
+      "EXACT": 0.10109,
+      "RATIO+BEST-SINGLE": 0.573343,
+      "VALUE": 0.09729
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.046667,
+     "exact": 0.08,
+     "special": 0.0
+    },
+    "recovery": {
+     "bca": {
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "median_width": 0.121499,
+      "min_coverage": 0.91,
+      "pass": true,
+      "worst_coverage_quantity": "EXACT"
+     },
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.081767,
+       "1": 0.358833,
+       "2": 0.355,
+       "3": 0.162767,
+       "4-6": 0.041567,
+       ">6": 6.7e-05,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.08,
+       "1": 0.326667,
+       "2": 0.4,
+       "3": 0.146667,
+       "4-6": 0.046667,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.06,
+        0.11
+       ],
+       "1": [
+        0.31,
+        0.396833
+       ],
+       "2": [
+        0.306667,
+        0.4005
+       ],
+       "3": [
+        0.13,
+        0.197
+       ],
+       "4-6": [
+        0.023167,
+        0.066667
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.277228,
+      "tv_observed": 0.0501,
+      "tv_simulated_mean": 0.043245,
+      "tv_simulated_p05_p95": [
+       0.020033,
+       0.076172
+      ]
+     },
+     "eps_mean": 0.937874,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "max_abs_bias": 0.022372,
+     "median_width": 0.121229,
+     "min_coverage": 0.91,
+     "pass": true,
+     "quantities": {
+      "DIFF": {
+       "bias": -0.006486,
+       "coverage": 0.92,
+       "coverage_bca": 0.93,
+       "mean": 0.116402,
+       "median_width": 0.145754,
+       "median_width_bca": 0.14687,
+       "truth": 0.122888
+      },
+      "EXACT": {
+       "bias": -0.002619,
+       "coverage": 0.91,
+       "coverage_bca": 0.91,
+       "mean": 0.098471,
+       "median_width": 0.122157,
+       "median_width_bca": 0.124037,
+       "truth": 0.10109
+      },
+      "INPUT-FIT": {
+       "bias": 0.001985,
+       "coverage": 1.0,
+       "coverage_bca": 0.83,
+       "mean": 0.001985,
+       "median_width": 0.010484,
+       "median_width_bca": 0.017254,
+       "truth": 0.0
+      },
+      "LARGEST-FIT": {
+       "bias": 0.001449,
+       "coverage": 1.0,
+       "coverage_bca": 0.91,
+       "mean": 0.001449,
+       "median_width": 0.010062,
+       "median_width_bca": 0.013629,
+       "truth": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bias": -0.010655,
+       "coverage": 0.93,
+       "coverage_bca": 0.95,
+       "mean": 0.562687,
+       "median_width": 0.188883,
+       "median_width_bca": 0.188526,
+       "truth": 0.573343
+      },
+      "RATIO-SKIP": {
+       "bias": 0.022372,
+       "coverage": 0.93,
+       "coverage_bca": 0.88,
+       "mean": 0.022372,
+       "median_width": 0.09809,
+       "median_width_bca": 0.107614,
+       "truth": 0.0
+      },
+      "VALUE": {
+       "bias": -0.005364,
+       "coverage": 0.93,
+       "coverage_bca": 0.95,
+       "mean": 0.091926,
+       "median_width": 0.098284,
+       "median_width_bca": 0.09812,
+       "truth": 0.09729
+      },
+      "unexplained (q)": {
+       "bias": -0.000682,
+       "coverage": 0.93,
+       "coverage_bca": 0.92,
+       "mean": 0.104707,
+       "median_width": 0.082923,
+       "median_width_bca": 0.08259,
+       "truth": 0.105389
+      }
+     },
+     "replicates": 100,
+     "rho_mean": null,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.041633,
+       "p05_p95": [
+        0.023167,
+        0.066667
+       ]
+      },
+      "exact": {
+       "mean": 0.081767,
+       "p05_p95": [
+        0.06,
+        0.11
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "worst_bias_quantity": "RATIO-SKIP",
+     "worst_coverage_quantity": "EXACT"
+    },
+    "run_id": "2026-11-18-pc20-qwen3-32b-direct",
+    "seconds_fit": 36.5,
+    "seed": 239098284,
+    "unit": "C_E2/knapsack"
+   },
+   "2026-11-18-pc20-qwen3-32b-thinking-high": {
+    "excluded": {
+     "by_cell": {
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-VALUE/PLACEBO": {
+       "parse_fail": 1
+      }
+     },
+     "rates": {
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-VALUE/PLACEBO": {
+       "parse_fail": 0.05
+      }
+     },
+     "responses_by_cell": {
+      "KNAP/PREFIX-vs-RATIO/BASE": 20,
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": 20,
+      "KNAP/PREFIX-vs-RATIO/D(RATIO|PREFIX)": 20,
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": 20,
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": 20,
+      "KNAP/RATIO-vs-DIFF/BASE": 20,
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": 20,
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": 20,
+      "KNAP/RATIO-vs-DIFF/G-ONLY": 20,
+      "KNAP/RATIO-vs-DIFF/PLACEBO": 20,
+      "KNAP/RATIO-vs-VALUE/BASE": 20,
+      "KNAP/RATIO-vs-VALUE/D(RATIO|VALUE)": 20,
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": 20,
+      "KNAP/RATIO-vs-VALUE/G-ONLY": 20,
+      "KNAP/RATIO-vs-VALUE/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "always_token_columns": [],
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.014815,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.003046,
+      0.030514
+     ],
+     "kernel": [
+      0.0,
+      0.764035,
+      0.0,
+      0.235965,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -89.226644,
+     "n_clusters": 60,
+     "n_params": 23,
+     "n_rows": 296,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE"
+     ],
+     "state": {
+      "P": [
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.76556,
+       0.23444,
+       0.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "eps": [
+       0.014815
+      ],
+      "g": [
+       0.0,
+       0.764035,
+       0.0,
+       0.235965,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "pi": [
+       0.005487,
+       0.977095,
+       0.003427,
+       0.0,
+       0.0,
+       0.0,
+       0.004958,
+       0.009032
+      ],
+      "rho": 0.3,
+      "tau": 0.0
+     },
+     "state_ci": {
+      "P": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "eps": [
+       [
+        0.003046
+       ],
+       [
+        0.030514
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        1.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.958025,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.016446,
+        0.99305,
+        0.010691,
+        0.0,
+        0.0,
+        0.013736,
+        0.016184,
+        0.022154
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ],
+      "tau": [
+       0.0,
+       0.0
+      ]
+     },
+     "tau_free": true,
+     "weights": {
+      "DIFF": {
+       "bca": [
+        0.0,
+        0.030465
+       ],
+       "hi": 0.016446,
+       "lo": 0.0,
+       "pi": 0.005487
+      },
+      "EXACT": {
+       "bca": [
+        0.956342,
+        0.991574
+       ],
+       "hi": 0.99305,
+       "lo": 0.958025,
+       "pi": 0.977095
+      },
+      "INPUT-FIT": {
+       "bca": [
+        0.0,
+        0.023133
+       ],
+       "hi": 0.010691,
+       "lo": 0.0,
+       "pi": 0.003427
+      },
+      "LARGEST-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO-SKIP": {
+       "bca": [
+        0.0,
+        0.014252
+       ],
+       "hi": 0.013736,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "VALUE": {
+       "bca": [
+        0.0,
+        0.026266
+       ],
+       "hi": 0.016184,
+       "lo": 0.0,
+       "pi": 0.004958
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.0,
+        0.024394
+       ],
+       "hi": 0.022154,
+       "lo": 0.0,
+       "pi": 0.009032
+      }
+     }
+    },
+    "groups": [
+     [
+      "DIFF"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "INPUT-FIT"
+     ],
+     [
+      "LARGEST-FIT"
+     ],
+     [
+      "RATIO+BEST-SINGLE",
+      "RATIO-PREFIX"
+     ],
+     [
+      "RATIO-SKIP"
+     ],
+     [
+      "VALUE"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.976287,
+     "noise": 0.023713,
+     "nonslipping_members": 0.0,
+     "q": 0.009032,
+     "slip": 0.014681
+    },
+    "near": {
+     "bins": {
+      "0": 289,
+      "1": 4,
+      "2": 2,
+      "3": 1
+     },
+     "n": 296,
+     "positions_per_item": [
+      10
+     ],
+     "set_sizes_max": 1
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "strata",
+     "reach": "auto"
+    },
+    "planted": {
+     "q": 0.0,
+     "weights": {
+      "EXACT": 1.0
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.0,
+     "exact": 0.976351,
+     "special": 0.0
+    },
+    "recovery": {
+     "bca": {
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "median_width": 0.0,
+      "min_coverage": 0.97,
+      "pass": true,
+      "worst_coverage_quantity": "EXACT"
+     },
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.984493,
+       "1": 0.012264,
+       "2": 0.000473,
+       "3": 0.00277,
+       "4-6": 0.0,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.976351,
+       "1": 0.013514,
+       "2": 0.006757,
+       "3": 0.003378,
+       "4-6": 0.0,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.972973,
+        0.993243
+       ],
+       "1": [
+        0.003378,
+        0.023649
+       ],
+       "2": [
+        0.0,
+        0.003378
+       ],
+       "3": [
+        0.0,
+        0.006757
+       ],
+       "4-6": [
+        0.0,
+        0.0
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.29703,
+      "tv_observed": 0.008142,
+      "tv_simulated_mean": 0.006714,
+      "tv_simulated_p05_p95": [
+       0.001858,
+       0.014764
+      ]
+     },
+     "eps_mean": 0.015033,
+     "gates": {
+      "bias": true,
+      "coverage": true,
+      "width": true
+     },
+     "max_abs_bias": 0.000954,
+     "median_width": 0.0,
+     "min_coverage": 1.0,
+     "pass": true,
+     "quantities": {
+      "DIFF": {
+       "bias": 0.0,
+       "coverage": 1.0,
+       "coverage_bca": 0.98,
+       "mean": 0.0,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "EXACT": {
+       "bias": -0.000954,
+       "coverage": 1.0,
+       "coverage_bca": 0.97,
+       "mean": 0.999046,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 1.0
+      },
+      "INPUT-FIT": {
+       "bias": 3.4e-05,
+       "coverage": 1.0,
+       "coverage_bca": 1.0,
+       "mean": 3.4e-05,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "LARGEST-FIT": {
+       "bias": 0.0,
+       "coverage": 1.0,
+       "coverage_bca": 1.0,
+       "mean": 0.0,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bias": 0.000145,
+       "coverage": 1.0,
+       "coverage_bca": 0.99,
+       "mean": 0.000145,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "RATIO-SKIP": {
+       "bias": 0.0,
+       "coverage": 1.0,
+       "coverage_bca": 0.96,
+       "mean": 0.0,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "VALUE": {
+       "bias": 4.8e-05,
+       "coverage": 1.0,
+       "coverage_bca": 0.96,
+       "mean": 4.8e-05,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "unexplained (q)": {
+       "bias": 0.000726,
+       "coverage": 1.0,
+       "coverage_bca": 1.0,
+       "mean": 0.000726,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      }
+     },
+     "replicates": 100,
+     "rho_mean": null,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      },
+      "exact": {
+       "mean": 0.984493,
+       "p05_p95": [
+        0.972973,
+        0.993243
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "worst_bias_quantity": "EXACT",
+     "worst_coverage_quantity": "EXACT"
+    },
+    "run_id": "2026-11-18-pc20-qwen3-32b-thinking-high",
+    "seconds_fit": 29.2,
+    "seed": 2941328552,
+    "unit": "C_E2/knapsack"
+   }
+  }
+ },
+ "git": {
+  "dirty_src": false,
+  "sha": "7c1cedf0a957a872b23bc5da896650144ed14353"
+ },
+ "noise": "KEQ-r",
+ "noise_model": {
+  "eps": "shared",
+  "eps_max": 1.0,
+  "kernel": "free",
+  "q": "strata",
+  "reach": "auto"
+ },
+ "seconds": 1053,
+ "settings": {
+  "n_boot": 2000,
+  "n_perm": 0,
+  "plant_min": 0.01,
+  "recovery_boot": 200,
+  "recovery_reps": 100
+ }
+}

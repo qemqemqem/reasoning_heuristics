@@ -561,6 +561,22 @@ def recurrence_table(paths: list[Path]) -> str:
             ob = observed.get(name, {}).get(run_id)
             if ob is None:
                 continue
+            items = list(ob)
+            n = len(items)
+            row = [name, run_label_short(run_id), n]
+            for c in ("unmatched", "member", "special"):
+                k = sum(1 for iid in items if ob[iid]["same_wrong"] and ob[iid]["class"] == c)
+                cells = [f"{k}"]
+                for cand in cands:
+                    x = preds[cand].get(name, {}).get(run_id)
+                    if x is None:
+                        cells.append("–")
+                        continue
+                    idx = {iid: j for j, iid in enumerate(x["items"])}
+                    cells.append(f"{sum(x['p_same_wrong'][c][idx[iid]] for iid in items):.1f}")
+                row.append(" / ".join(cells))
+            rows.append(row)
+            continue
             items = [iid for iid in ob]
             n = len(items)
             row = [name, run_id.split("-", 4)[-1], n]
@@ -579,6 +595,12 @@ def recurrence_table(paths: list[Path]) -> str:
             rows.append(row)
     head = " / ".join(["observed"] + cands)
     return md_table(["Unit", "Run", "Items answered twice"] + [f"{c}: {head}" for c in ("unmatched", "member's answer", "special token")], rows)
+
+
+def run_label_short(run_id: str) -> str:
+    rest = run_id.split("-", 4)[-1]
+    return (rest.replace("qwen3-14b", "Qwen3-14B").replace("qwen3-32b", "Qwen3-32B").replace("-thinking-low", " low effort")
+            .replace("-direct", " direct"))
 
 
 def md_table(header: list[str], rows: list[list[Any]]) -> str:
