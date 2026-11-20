@@ -104,32 +104,32 @@ Per-member ε matters little anywhere (KEQ-h against KEQ: 0–25 units, most on 
 Point fits (no bootstrap) of every candidate, as log-likelihood gained over M0 and free parameters added. The candidates are nested except SEQ, which replaces KEQ's distance kernel.
 
 <!-- BEGIN nm:ladder -->
-| Unit | Run | K: Δlog L (Δparams) | KE: Δlog L (Δparams) | KEQ: Δlog L (Δparams) | KEQ-h: Δlog L (Δparams) | SEQ: Δlog L (Δparams) |
-|---|---|---|---|---|---|---|
-| C E2 colouring | gpt-oss-120b low effort | +4 (+4) | +4 (+4) | +51 (+19) | +73 (+25) | – |
-| C E2 colouring | gpt-oss-20b low effort | +12 (+4) | +21 (+4) | +276 (+19) | +289 (+25) | – |
-| C E2 colouring | Qwen3-14B direct | +73 (+4) | +114 (+4) | +1837 (+19) | +1837 (+25) | – |
-| C E2 colouring | Qwen3-14B thinking | +2 (+4) | +2 (+4) | +2 (+19) | +6 (+25) | – |
-| C E2 colouring | Qwen3-32B direct | +154 (+4) | +293 (+4) | +2431 (+19) | +2431 (+25) | – |
-| C E2 colouring | Qwen3-32B thinking | +2 (+4) | +2 (+4) | +2 (+19) | +6 (+25) | – |
-| C E2 knapsack | gpt-oss-120b low effort | +21 (+4) | +21 (+4) | +21 (+14) | +32 (+20) | +38 (+35) |
-| C E2 knapsack | gpt-oss-20b low effort | +21 (+4) | +21 (+4) | +23 (+14) | +48 (+20) | +52 (+35) |
-| C E2 knapsack | Qwen3-14B direct | +14 (+4) | +96 (+4) | +96 (+14) | +106 (+20) | +105 (+35) |
-| C E2 knapsack | Qwen3-14B thinking | +3 (+4) | +3 (+4) | +4 (+14) | +9 (+20) | +6 (+35) |
-| C E2 knapsack | Qwen3-32B direct | +29 (+4) | +153 (+4) | +160 (+14) | +163 (+20) | +239 (+35) |
-| C E2 knapsack | Qwen3-32B thinking | +3 (+4) | +3 (+4) | +3 (+14) | +6 (+20) | +6 (+35) |
-| A/H E5 SAT | gpt-oss-120b low effort | +1 (+4) | +18 (+4) | +61 (+33) | +64 (+37) | +72 (+54) |
-| A/H E5 SAT | gpt-oss-20b low effort | +3 (+4) | +21 (+4) | +163 (+33) | +163 (+37) | +172 (+54) |
-| A/H E5 SAT | Qwen3-14B direct | +3 (+4) | +21 (+4) | +336 (+33) | +336 (+37) | +340 (+54) |
-| A/H E5 SAT | Qwen3-14B thinking | +3 (+4) | +5 (+4) | +23 (+33) | +26 (+37) | +28 (+54) |
-| A/H E5 SAT | Qwen3-32B direct | +2 (+4) | +22 (+4) | +115 (+33) | +115 (+37) | +116 (+54) |
-| A/H E5 SAT | Qwen3-32B thinking | +2 (+4) | +5 (+4) | +22 (+33) | +27 (+37) | +27 (+54) |
-| C E5 SAT, state given | gpt-oss-120b low effort | +0 (+4) | +0 (+4) | +7 (+24) | +14 (+30) | +26 (+45) |
-| C E5 SAT, state given | gpt-oss-20b low effort | +3 (+4) | +8 (+4) | +19 (+24) | +23 (+30) | +30 (+45) |
-| C E5 SAT, state given | Qwen3-14B direct | +24 (+4) | +96 (+4) | +142 (+24) | +144 (+30) | +401 (+45) |
-| C E5 SAT, state given | Qwen3-14B thinking | +0 (+4) | +0 (+4) | +3 (+24) | +4 (+30) | +9 (+45) |
-| C E5 SAT, state given | Qwen3-32B direct | +11 (+4) | +65 (+4) | +77 (+24) | +77 (+30) | +121 (+45) |
-| C E5 SAT, state given | Qwen3-32B thinking | +0 (+4) | +0 (+4) | +0 (+24) | +9 (+30) | +3 (+45) |
+| Unit | Run | K: Δlog L (Δparams) | KE: Δlog L (Δparams) | KEQ: Δlog L (Δparams) | KEQ-h: Δlog L (Δparams) | SEQ: Δlog L (Δparams) | KEQ-r: Δlog L (Δparams) | SEQ-r: Δlog L (Δparams) |
+|---|---|---|---|---|---|---|---|---|
+| C E2 colouring | gpt-oss-120b low effort | +4 (+4) | +4 (+4) | +51 (+19) | +73 (+25) | – | +51 (+19) | – |
+| C E2 colouring | gpt-oss-20b low effort | +12 (+4) | +21 (+4) | +276 (+19) | +289 (+25) | – | +276 (+19) | – |
+| C E2 colouring | Qwen3-14B direct | +73 (+4) | +114 (+4) | +1837 (+19) | +1837 (+25) | – | +1837 (+19) | – |
+| C E2 colouring | Qwen3-14B thinking | +2 (+4) | +2 (+4) | +2 (+19) | +6 (+25) | – | +2 (+19) | – |
+| C E2 colouring | Qwen3-32B direct | +154 (+4) | +293 (+4) | +2431 (+19) | +2431 (+25) | – | +2431 (+19) | – |
+| C E2 colouring | Qwen3-32B thinking | +2 (+4) | +2 (+4) | +2 (+19) | +6 (+25) | – | +2 (+19) | – |
+| C E2 knapsack | gpt-oss-120b low effort | +21 (+4) | +21 (+4) | +21 (+14) | +32 (+20) | +37 (+35) | +21 (+14) | +37 (+35) |
+| C E2 knapsack | gpt-oss-20b low effort | +21 (+4) | +21 (+4) | +23 (+14) | +48 (+20) | +52 (+35) | +23 (+14) | +51 (+35) |
+| C E2 knapsack | Qwen3-14B direct | +14 (+4) | +96 (+4) | +96 (+14) | +106 (+20) | +105 (+35) | +88 (+14) | +96 (+35) |
+| C E2 knapsack | Qwen3-14B thinking | +3 (+4) | +3 (+4) | +4 (+14) | +9 (+20) | +6 (+35) | +4 (+14) | +4 (+35) |
+| C E2 knapsack | Qwen3-32B direct | +29 (+4) | +153 (+4) | +160 (+14) | +163 (+20) | +239 (+35) | +158 (+14) | +230 (+35) |
+| C E2 knapsack | Qwen3-32B thinking | +3 (+4) | +3 (+4) | +3 (+14) | +6 (+20) | +6 (+35) | +2 (+14) | +3 (+35) |
+| A/H E5 SAT | gpt-oss-120b low effort | +1 (+4) | +18 (+4) | +61 (+33) | +64 (+37) | +72 (+54) | +59 (+33) | +66 (+54) |
+| A/H E5 SAT | gpt-oss-20b low effort | +3 (+4) | +21 (+4) | +163 (+33) | +163 (+37) | +172 (+54) | +160 (+33) | +171 (+54) |
+| A/H E5 SAT | Qwen3-14B direct | +3 (+4) | +21 (+4) | +336 (+33) | +336 (+37) | +340 (+54) | +336 (+33) | +339 (+54) |
+| A/H E5 SAT | Qwen3-14B thinking | +3 (+4) | +5 (+4) | +23 (+33) | +26 (+37) | +28 (+54) | +17 (+33) | +20 (+54) |
+| A/H E5 SAT | Qwen3-32B direct | +2 (+4) | +22 (+4) | +115 (+33) | +115 (+37) | +116 (+54) | +115 (+33) | +115 (+54) |
+| A/H E5 SAT | Qwen3-32B thinking | +2 (+4) | +5 (+4) | +22 (+33) | +27 (+37) | +27 (+54) | +19 (+33) | +21 (+54) |
+| C E5 SAT, state given | gpt-oss-120b low effort | +0 (+4) | +0 (+4) | +7 (+24) | +14 (+30) | +26 (+45) | +7 (+24) | +26 (+45) |
+| C E5 SAT, state given | gpt-oss-20b low effort | +3 (+4) | +8 (+4) | +19 (+24) | +23 (+30) | +30 (+45) | +19 (+24) | +30 (+45) |
+| C E5 SAT, state given | Qwen3-14B direct | +24 (+4) | +96 (+4) | +142 (+24) | +144 (+30) | +401 (+45) | +142 (+24) | +401 (+45) |
+| C E5 SAT, state given | Qwen3-14B thinking | +0 (+4) | +0 (+4) | +3 (+24) | +4 (+30) | +9 (+45) | +3 (+24) | +9 (+45) |
+| C E5 SAT, state given | Qwen3-32B direct | +11 (+4) | +65 (+4) | +77 (+24) | +77 (+30) | +121 (+45) | +77 (+24) | +121 (+45) |
+| C E5 SAT, state given | Qwen3-32B thinking | +0 (+4) | +0 (+4) | +0 (+24) | +9 (+30) | +3 (+45) | +0 (+24) | +3 (+45) |
 <!-- END nm:ladder -->
 
 ## 3. Candidates
@@ -169,8 +169,10 @@ All are options of `identify.noise.NoiseModel` (`kernel`, `eps`, `eps_max`, `q`)
 | Model | Fits | Pass every predictive check | … with ε below its cap | ε at its cap | Recovery at the estimate passes (percentile / BCa) | Stage 0 scenarios passed | π₀ (q), median (range) | Answers put on noise (slips + q), median (range) |
 |---|---|---|---|---|---|---|---|---|
 | M0 | 24 | 5 | 4 | 14 | 6 / 9 | 11 / 12 | 0.09 (0.00–0.97) | 0.63 (0.01–1.00) |
+| KE | 24 | 17 | 14 | 5 | not run | – | 0.04 (0.00–0.80) | 0.66 (0.01–1.00) |
 | KEQ | 24 | 14 | 12 | 5 | 3 / 8 | 9 / 12 | 0.09 (0.00–0.99) | 0.63 (0.01–1.00) |
 | KEQ-r | 24 | 11 | 10 | 5 | 5 / 11 | 9 / 12 | 0.09 (0.00–0.99) | 0.64 (0.01–1.00) |
+| SEQ-r | 18 | 15 | 12 | 4 | not run | – | 0.06 (0.01–0.98) | 0.74 (0.01–1.00) |
 <!-- END nm:summary -->
 
 ### 4.2 Predictive checks, fit by fit
@@ -178,32 +180,32 @@ All are options of `identify.noise.NoiseModel` (`kernel`, `eps`, `eps_max`, `q`)
 Each cell lists the checks that fail ("pass" if none); "(ε cap)" marks ε at the candidate's cap.
 
 <!-- BEGIN nm:ppc -->
-| Unit | Run | M0 | KEQ | KEQ-r |
-|---|---|---|---|---|
-| C E2 colouring | gpt-oss-120b low effort | beyond_reach | beyond_reach | beyond_reach |
-| C E2 colouring | gpt-oss-20b low effort | exact, distance (ε cap) | pass | pass |
-| C E2 colouring | Qwen3-14B direct | exact, distance (ε cap) | beyond_reach (ε cap) | beyond_reach (ε cap) |
-| C E2 colouring | Qwen3-14B thinking | exact, beyond_reach | exact, beyond_reach, distance | exact, beyond_reach, distance |
-| C E2 colouring | Qwen3-32B direct | exact, distance (ε cap) | beyond_reach, distance (ε cap) | beyond_reach, distance (ε cap) |
-| C E2 colouring | Qwen3-32B thinking | exact, beyond_reach, distance | beyond_reach, distance | beyond_reach, distance |
-| C E2 knapsack | gpt-oss-120b low effort | distance | pass | pass |
-| C E2 knapsack | gpt-oss-20b low effort | distance | pass | beyond_reach |
-| C E2 knapsack | Qwen3-14B direct | exact, distance (ε cap) | pass | pass |
-| C E2 knapsack | Qwen3-14B thinking | pass | pass | pass |
-| C E2 knapsack | Qwen3-32B direct | exact, distance (ε cap) | pass | pass |
-| C E2 knapsack | Qwen3-32B thinking | pass | pass | pass |
-| A/H E5 SAT | gpt-oss-120b low effort | exact, beyond_reach, special, distance (ε cap) | pass | pass |
-| A/H E5 SAT | gpt-oss-20b low effort | exact, beyond_reach, special, distance (ε cap) | pass (ε cap) | beyond_reach (ε cap) |
-| A/H E5 SAT | Qwen3-14B direct | beyond_reach, special, distance (ε cap) | pass (ε cap) | pass (ε cap) |
-| A/H E5 SAT | Qwen3-14B thinking | pass (ε cap) | pass | pass |
-| A/H E5 SAT | Qwen3-32B direct | beyond_reach, special, distance (ε cap) | beyond_reach, distance (ε cap) | distance (ε cap) |
-| A/H E5 SAT | Qwen3-32B thinking | beyond_reach, special, distance (ε cap) | pass | beyond_reach |
-| C E5 SAT, state given | gpt-oss-120b low effort | special | beyond_reach, special | beyond_reach, special |
-| C E5 SAT, state given | gpt-oss-20b low effort | exact (ε cap) | pass | pass |
-| C E5 SAT, state given | Qwen3-14B direct | exact, special, distance (ε cap) | beyond_reach, distance | beyond_reach, distance |
-| C E5 SAT, state given | Qwen3-14B thinking | pass | pass | pass |
-| C E5 SAT, state given | Qwen3-32B direct | exact, special, distance (ε cap) | special | special |
-| C E5 SAT, state given | Qwen3-32B thinking | pass | special | special |
+| Unit | Run | M0 | KE | KEQ | KEQ-r | SEQ-r |
+|---|---|---|---|---|---|---|
+| C E2 colouring | gpt-oss-120b low effort | beyond_reach | beyond_reach | beyond_reach | beyond_reach | – |
+| C E2 colouring | gpt-oss-20b low effort | exact, distance (ε cap) | pass | pass | pass | – |
+| C E2 colouring | Qwen3-14B direct | exact, distance (ε cap) | pass (ε cap) | beyond_reach (ε cap) | beyond_reach (ε cap) | – |
+| C E2 colouring | Qwen3-14B thinking | exact, beyond_reach | exact, beyond_reach | exact, beyond_reach, distance | exact, beyond_reach, distance | – |
+| C E2 colouring | Qwen3-32B direct | exact, distance (ε cap) | pass (ε cap) | beyond_reach, distance (ε cap) | beyond_reach, distance (ε cap) | – |
+| C E2 colouring | Qwen3-32B thinking | exact, beyond_reach, distance | exact, beyond_reach, distance | beyond_reach, distance | beyond_reach, distance | – |
+| C E2 knapsack | gpt-oss-120b low effort | distance | pass | pass | pass | pass |
+| C E2 knapsack | gpt-oss-20b low effort | distance | pass | pass | beyond_reach | pass |
+| C E2 knapsack | Qwen3-14B direct | exact, distance (ε cap) | pass | pass | pass | pass |
+| C E2 knapsack | Qwen3-14B thinking | pass | pass | pass | pass | pass |
+| C E2 knapsack | Qwen3-32B direct | exact, distance (ε cap) | pass | pass | pass | pass |
+| C E2 knapsack | Qwen3-32B thinking | pass | pass | pass | pass | pass |
+| A/H E5 SAT | gpt-oss-120b low effort | exact, beyond_reach, special, distance (ε cap) | pass | pass | pass | pass |
+| A/H E5 SAT | gpt-oss-20b low effort | exact, beyond_reach, special, distance (ε cap) | pass (ε cap) | pass (ε cap) | beyond_reach (ε cap) | pass (ε cap) |
+| A/H E5 SAT | Qwen3-14B direct | beyond_reach, special, distance (ε cap) | beyond_reach, special, distance (ε cap) | pass (ε cap) | pass (ε cap) | pass (ε cap) |
+| A/H E5 SAT | Qwen3-14B thinking | pass (ε cap) | pass | pass | pass | pass |
+| A/H E5 SAT | Qwen3-32B direct | beyond_reach, special, distance (ε cap) | special, distance (ε cap) | beyond_reach, distance (ε cap) | distance (ε cap) | pass (ε cap) |
+| A/H E5 SAT | Qwen3-32B thinking | beyond_reach, special, distance (ε cap) | pass | pass | beyond_reach | beyond_reach |
+| C E5 SAT, state given | gpt-oss-120b low effort | special | special | beyond_reach, special | beyond_reach, special | beyond_reach, special, distance |
+| C E5 SAT, state given | gpt-oss-20b low effort | exact (ε cap) | pass | pass | pass | pass |
+| C E5 SAT, state given | Qwen3-14B direct | exact, special, distance (ε cap) | exact, special | beyond_reach, distance | beyond_reach, distance | exact, special (ε cap) |
+| C E5 SAT, state given | Qwen3-14B thinking | pass | pass | pass | pass | pass |
+| C E5 SAT, state given | Qwen3-32B direct | exact, special, distance (ε cap) | pass | special | special | pass |
+| C E5 SAT, state given | Qwen3-32B thinking | pass | pass | special | special | pass |
 <!-- END nm:ppc -->
 
 ### 4.3 Stage 0: planted mixtures at pilot sizes
@@ -224,58 +226,62 @@ Each cell lists the checks that fail ("pass" if none); "(ε cap)" marks ε at th
 π with its 95% percentile interval, for the members the findings rest on (rows where every candidate gives below 0.02 are left out).
 
 <!-- BEGIN nm:weights -->
-| Unit | Member | Run | M0 | KEQ | KEQ-r |
-|---|---|---|---|---|---|
-| C E2 colouring | FF-LIST (C1, list order) | gpt-oss-120b low effort | 0.39 [0.31, 0.47] | 0.39 [0.31, 0.47] | 0.39 [0.31, 0.47] |
-| C E2 colouring | FF-LIST (C1, list order) | gpt-oss-20b low effort | 0.35 [0.28, 0.41] | 0.35 [0.28, 0.41] | 0.35 [0.28, 0.41] |
-| C E2 colouring | FF-LIST (C1, list order) | Qwen3-14B thinking | 0.46 [0.40, 0.53] | 0.46 [0.40, 0.53] | 0.46 [0.40, 0.53] |
-| C E2 colouring | FF-LIST (C1, list order) | Qwen3-32B direct | 0.10 [0.06, 0.15] | 0.03 [0.00, 0.07] | 0.03 [0.00, 0.07] |
-| C E2 colouring | FF-LIST (C1, list order) | Qwen3-32B thinking | 0.37 [0.31, 0.44] | 0.37 [0.31, 0.44] | 0.37 [0.31, 0.44] |
-| C E2 colouring | RO-FF (C3) | gpt-oss-120b low effort | 0.41 [0.34, 0.48] | 0.41 [0.34, 0.48] | 0.41 [0.34, 0.48] |
-| C E2 colouring | RO-FF (C3) | gpt-oss-20b low effort | 0.27 [0.22, 0.33] | 0.28 [0.22, 0.34] | 0.28 [0.22, 0.34] |
-| C E2 colouring | RO-FF (C3) | Qwen3-14B thinking | 0.35 [0.29, 0.41] | 0.35 [0.29, 0.41] | 0.35 [0.29, 0.41] |
-| C E2 colouring | RO-FF (C3) | Qwen3-32B thinking | 0.30 [0.24, 0.36] | 0.30 [0.24, 0.36] | 0.30 [0.24, 0.36] |
-| C E2 colouring | EXACT | gpt-oss-120b low effort | 0.07 [0.04, 0.10] | 0.06 [0.03, 0.10] | 0.06 [0.03, 0.10] |
-| C E2 colouring | EXACT | gpt-oss-20b low effort | 0.15 [0.10, 0.20] | 0.13 [0.08, 0.18] | 0.13 [0.08, 0.18] |
-| C E2 colouring | EXACT | Qwen3-14B direct | 0.14 [0.08, 0.20] | 0.03 [0.00, 0.08] | 0.03 [0.00, 0.08] |
-| C E2 colouring | EXACT | Qwen3-14B thinking | 0.03 [0.00, 0.06] | 0.03 [0.00, 0.06] | 0.03 [0.00, 0.06] |
-| C E2 colouring | EXACT | Qwen3-32B direct | 0.40 [0.33, 0.48] | 0.09 [0.01, 0.16] | 0.09 [0.01, 0.16] |
-| C E2 colouring | EXACT | Qwen3-32B thinking | 0.06 [0.00, 0.11] | 0.06 [0.00, 0.12] | 0.06 [0.00, 0.12] |
-| C E2 knapsack | EXACT | gpt-oss-120b low effort | 0.74 [0.65, 0.82] | 0.72 [0.64, 0.81] | 0.72 [0.64, 0.81] |
-| C E2 knapsack | EXACT | gpt-oss-20b low effort | 0.62 [0.53, 0.69] | 0.61 [0.52, 0.69] | 0.61 [0.52, 0.69] |
-| C E2 knapsack | EXACT | Qwen3-14B direct | 0.17 [0.04, 0.30] | 0.19 [0.05, 0.33] | 0.18 [0.06, 0.30] |
-| C E2 knapsack | EXACT | Qwen3-14B thinking | 0.98 [0.95, 0.99] | 0.97 [0.95, 0.99] | 0.97 [0.94, 0.99] |
-| C E2 knapsack | EXACT | Qwen3-32B direct | 0.08 [0.00, 0.19] | 0.10 [0.01, 0.21] | 0.10 [0.01, 0.20] |
-| C E2 knapsack | EXACT | Qwen3-32B thinking | 0.97 [0.95, 0.99] | 0.98 [0.96, 1.00] | 0.98 [0.96, 0.99] |
-| C E2 knapsack | RATIO+BEST-SINGLE (C1) | gpt-oss-20b low effort | 0.03 [0.00, 0.11] | 0.01 [0.00, 0.06] | 0.01 [0.00, 0.06] |
-| C E2 knapsack | RATIO+BEST-SINGLE (C1) | Qwen3-14B direct | 0.26 [0.10, 0.41] | 0.28 [0.09, 0.47] | 0.24 [0.08, 0.40] |
-| C E2 knapsack | RATIO+BEST-SINGLE (C1) | Qwen3-32B direct | 0.59 [0.42, 0.74] | 0.59 [0.39, 0.76] | 0.57 [0.38, 0.72] |
-| A/H E5 SAT | exact | gpt-oss-120b low effort | 0.30 [0.15, 0.47] | 0.28 [0.08, 0.42] | 0.22 [0.09, 0.34] |
-| A/H E5 SAT | exact | gpt-oss-20b low effort | 0.05 [0.00, 0.13] | 0.01 [0.00, 0.09] | 0.00 [0.00, 0.05] |
-| A/H E5 SAT | exact | Qwen3-14B direct | 0.02 [0.00, 0.15] | 0.00 [0.00, 0.04] | 0.00 [0.00, 0.04] |
-| A/H E5 SAT | exact | Qwen3-14B thinking | 0.30 [0.16, 0.42] | 0.25 [0.10, 0.35] | 0.18 [0.06, 0.31] |
-| A/H E5 SAT | exact | Qwen3-32B direct | 0.02 [0.00, 0.09] | 0.00 [0.00, 0.08] | 0.00 [0.00, 0.06] |
-| A/H E5 SAT | exact | Qwen3-32B thinking | 0.33 [0.17, 0.48] | 0.31 [0.15, 0.41] | 0.21 [0.11, 0.33] |
-| A/H E5 SAT | A3 TT[exact] | gpt-oss-120b low effort | 0.01 [0.00, 0.10] | 0.03 [0.00, 0.13] | 0.02 [0.00, 0.10] |
-| A/H E5 SAT | A3 TT[exact] | gpt-oss-20b low effort | 0.00 [0.00, 0.05] | 0.03 [0.00, 0.08] | 0.03 [0.00, 0.09] |
-| A/H E5 SAT | A3 TT[exact] | Qwen3-14B thinking | 0.27 [0.14, 0.40] | 0.31 [0.14, 0.41] | 0.19 [0.10, 0.30] |
-| A/H E5 SAT | A3 TT[exact] | Qwen3-32B thinking | 0.24 [0.13, 0.35] | 0.22 [0.10, 0.32] | 0.18 [0.09, 0.28] |
-| A/H E5 SAT | C0 POLARITY | gpt-oss-120b low effort | 0.09 [0.00, 0.16] | 0.11 [0.00, 0.23] | 0.07 [0.00, 0.14] |
-| A/H E5 SAT | C0 POLARITY | gpt-oss-20b low effort | 0.05 [0.00, 0.14] | 0.00 [0.00, 0.06] | 0.00 [0.00, 0.08] |
-| A/H E5 SAT | C0 POLARITY | Qwen3-14B direct | 0.02 [0.00, 0.07] | 0.01 [0.00, 0.06] | 0.01 [0.00, 0.06] |
-| A/H E5 SAT | C0 POLARITY | Qwen3-32B direct | 0.02 [0.00, 0.09] | 0.01 [0.00, 0.09] | 0.01 [0.00, 0.06] |
-| C E5 SAT, state given | EXACT | gpt-oss-120b low effort | 0.84 [0.76, 0.91] | 0.84 [0.76, 0.90] | 0.84 [0.76, 0.90] |
-| C E5 SAT, state given | EXACT | gpt-oss-20b low effort | 0.61 [0.49, 0.71] | 0.61 [0.48, 0.71] | 0.61 [0.48, 0.71] |
-| C E5 SAT, state given | EXACT | Qwen3-14B thinking | 0.93 [0.85, 0.99] | 0.92 [0.83, 0.98] | 0.92 [0.83, 0.98] |
-| C E5 SAT, state given | EXACT | Qwen3-32B thinking | 0.89 [0.81, 0.96] | 0.89 [0.81, 0.96] | 0.89 [0.81, 0.96] |
-| C E5 SAT, state given | POLARITY (C0) | gpt-oss-120b low effort | 0.07 [0.01, 0.12] | 0.03 [0.00, 0.07] | 0.03 [0.00, 0.07] |
-| C E5 SAT, state given | POLARITY (C0) | gpt-oss-20b low effort | 0.06 [0.02, 0.11] | 0.05 [0.00, 0.12] | 0.05 [0.00, 0.12] |
-| C E5 SAT, state given | POLARITY (C0) | Qwen3-14B direct | 0.48 [0.33, 0.64] | 0.43 [0.26, 0.60] | 0.43 [0.26, 0.60] |
-| C E5 SAT, state given | POLARITY (C0) | Qwen3-32B direct | 0.57 [0.44, 0.70] | 0.56 [0.43, 0.70] | 0.56 [0.43, 0.70] |
-| C E5 SAT, state given | POLARITY (C0) | Qwen3-32B thinking | 0.02 [0.00, 0.05] | 0.02 [0.00, 0.06] | 0.02 [0.00, 0.06] |
-| C E5 SAT, state given | ALWAYS-UNSAT (A1) | gpt-oss-20b low effort | 0.20 [0.10, 0.32] | 0.24 [0.15, 0.35] | 0.24 [0.15, 0.35] |
-| C E5 SAT, state given | ALWAYS-UNSAT (A1) | Qwen3-14B thinking | 0.02 [0.00, 0.05] | 0.02 [0.00, 0.05] | 0.02 [0.00, 0.05] |
-| C E5 SAT, state given | ALWAYS-UNSAT (A1) | Qwen3-32B direct | 0.00 [0.00, 0.01] | 0.03 [0.00, 0.07] | 0.03 [0.00, 0.07] |
+| Unit | Member | Run | M0 | KE | KEQ | KEQ-r | SEQ-r |
+|---|---|---|---|---|---|---|---|
+| C E2 colouring | FF-LIST (C1, list order) | gpt-oss-120b low effort | 0.39 [0.31, 0.47] | 0.39 [0.31, 0.47] | 0.39 [0.31, 0.47] | 0.39 [0.31, 0.47] | – |
+| C E2 colouring | FF-LIST (C1, list order) | gpt-oss-20b low effort | 0.35 [0.28, 0.41] | 0.35 [0.29, 0.41] | 0.35 [0.28, 0.41] | 0.35 [0.28, 0.41] | – |
+| C E2 colouring | FF-LIST (C1, list order) | Qwen3-14B thinking | 0.46 [0.40, 0.53] | 0.46 [0.40, 0.53] | 0.46 [0.40, 0.53] | 0.46 [0.40, 0.53] | – |
+| C E2 colouring | FF-LIST (C1, list order) | Qwen3-32B direct | 0.10 [0.06, 0.15] | 0.11 [0.06, 0.15] | 0.03 [0.00, 0.07] | 0.03 [0.00, 0.07] | – |
+| C E2 colouring | FF-LIST (C1, list order) | Qwen3-32B thinking | 0.37 [0.31, 0.44] | 0.37 [0.31, 0.44] | 0.37 [0.31, 0.44] | 0.37 [0.31, 0.44] | – |
+| C E2 colouring | RO-FF (C3) | gpt-oss-120b low effort | 0.41 [0.34, 0.48] | 0.41 [0.34, 0.48] | 0.41 [0.34, 0.48] | 0.41 [0.34, 0.48] | – |
+| C E2 colouring | RO-FF (C3) | gpt-oss-20b low effort | 0.27 [0.22, 0.33] | 0.28 [0.22, 0.34] | 0.28 [0.22, 0.34] | 0.28 [0.22, 0.34] | – |
+| C E2 colouring | RO-FF (C3) | Qwen3-14B thinking | 0.35 [0.29, 0.41] | 0.35 [0.29, 0.41] | 0.35 [0.29, 0.41] | 0.35 [0.29, 0.41] | – |
+| C E2 colouring | RO-FF (C3) | Qwen3-32B thinking | 0.30 [0.24, 0.36] | 0.30 [0.24, 0.36] | 0.30 [0.24, 0.36] | 0.30 [0.24, 0.36] | – |
+| C E2 colouring | EXACT | gpt-oss-120b low effort | 0.07 [0.04, 0.10] | 0.07 [0.03, 0.10] | 0.06 [0.03, 0.10] | 0.06 [0.03, 0.10] | – |
+| C E2 colouring | EXACT | gpt-oss-20b low effort | 0.15 [0.10, 0.20] | 0.14 [0.07, 0.19] | 0.13 [0.08, 0.18] | 0.13 [0.08, 0.18] | – |
+| C E2 colouring | EXACT | Qwen3-14B direct | 0.14 [0.08, 0.20] | 0.14 [0.08, 0.20] | 0.03 [0.00, 0.08] | 0.03 [0.00, 0.08] | – |
+| C E2 colouring | EXACT | Qwen3-14B thinking | 0.03 [0.00, 0.06] | 0.03 [0.00, 0.06] | 0.03 [0.00, 0.06] | 0.03 [0.00, 0.06] | – |
+| C E2 colouring | EXACT | Qwen3-32B direct | 0.40 [0.33, 0.48] | 0.40 [0.32, 0.48] | 0.09 [0.01, 0.16] | 0.09 [0.01, 0.16] | – |
+| C E2 colouring | EXACT | Qwen3-32B thinking | 0.06 [0.00, 0.11] | 0.06 [0.00, 0.12] | 0.06 [0.00, 0.12] | 0.06 [0.00, 0.12] | – |
+| C E2 knapsack | EXACT | gpt-oss-120b low effort | 0.74 [0.65, 0.82] | 0.72 [0.64, 0.81] | 0.72 [0.64, 0.81] | 0.72 [0.64, 0.81] | 0.72 [0.64, 0.81] |
+| C E2 knapsack | EXACT | gpt-oss-20b low effort | 0.62 [0.53, 0.69] | 0.62 [0.53, 0.69] | 0.61 [0.52, 0.69] | 0.61 [0.52, 0.69] | 0.60 [0.51, 0.68] |
+| C E2 knapsack | EXACT | Qwen3-14B direct | 0.17 [0.04, 0.30] | 0.19 [0.05, 0.33] | 0.19 [0.05, 0.33] | 0.18 [0.06, 0.30] | 0.19 [0.06, 0.31] |
+| C E2 knapsack | EXACT | Qwen3-14B thinking | 0.98 [0.95, 0.99] | 0.98 [0.96, 1.00] | 0.97 [0.95, 0.99] | 0.97 [0.94, 0.99] | 0.97 [0.94, 0.99] |
+| C E2 knapsack | EXACT | Qwen3-32B direct | 0.08 [0.00, 0.19] | 0.11 [0.01, 0.24] | 0.10 [0.01, 0.21] | 0.10 [0.01, 0.20] | 0.14 [0.03, 0.26] |
+| C E2 knapsack | EXACT | Qwen3-32B thinking | 0.97 [0.95, 0.99] | 0.99 [0.97, 1.00] | 0.98 [0.96, 1.00] | 0.98 [0.96, 0.99] | 0.98 [0.96, 0.99] |
+| C E2 knapsack | RATIO+BEST-SINGLE (C1) | gpt-oss-20b low effort | 0.03 [0.00, 0.11] | 0.01 [0.00, 0.06] | 0.01 [0.00, 0.06] | 0.01 [0.00, 0.06] | 0.02 [0.00, 0.09] |
+| C E2 knapsack | RATIO+BEST-SINGLE (C1) | Qwen3-14B direct | 0.26 [0.10, 0.41] | 0.28 [0.09, 0.48] | 0.28 [0.09, 0.47] | 0.24 [0.08, 0.40] | 0.24 [0.03, 0.42] |
+| C E2 knapsack | RATIO+BEST-SINGLE (C1) | Qwen3-32B direct | 0.59 [0.42, 0.74] | 0.65 [0.44, 0.83] | 0.59 [0.39, 0.76] | 0.57 [0.38, 0.72] | 0.42 [0.18, 0.63] |
+| A/H E5 SAT | exact | gpt-oss-120b low effort | 0.30 [0.15, 0.47] | 0.35 [0.17, 0.54] | 0.28 [0.08, 0.42] | 0.22 [0.09, 0.34] | 0.29 [0.15, 0.42] |
+| A/H E5 SAT | exact | gpt-oss-20b low effort | 0.05 [0.00, 0.13] | 0.08 [0.00, 0.20] | 0.01 [0.00, 0.09] | 0.00 [0.00, 0.05] | 0.00 [0.00, 0.08] |
+| A/H E5 SAT | exact | Qwen3-14B direct | 0.02 [0.00, 0.15] | 0.19 [0.00, 0.34] | 0.00 [0.00, 0.04] | 0.00 [0.00, 0.04] | 0.00 [0.00, 0.03] |
+| A/H E5 SAT | exact | Qwen3-14B thinking | 0.30 [0.16, 0.42] | 0.31 [0.15, 0.44] | 0.25 [0.10, 0.35] | 0.18 [0.06, 0.31] | 0.22 [0.07, 0.38] |
+| A/H E5 SAT | exact | Qwen3-32B direct | 0.02 [0.00, 0.09] | 0.19 [0.00, 0.34] | 0.00 [0.00, 0.08] | 0.00 [0.00, 0.06] | 0.03 [0.00, 0.10] |
+| A/H E5 SAT | exact | Qwen3-32B thinking | 0.33 [0.17, 0.48] | 0.37 [0.21, 0.53] | 0.31 [0.15, 0.41] | 0.21 [0.11, 0.33] | 0.22 [0.11, 0.35] |
+| A/H E5 SAT | A3 TT[exact] | gpt-oss-120b low effort | 0.01 [0.00, 0.10] | 0.08 [0.00, 0.21] | 0.03 [0.00, 0.13] | 0.02 [0.00, 0.10] | 0.00 [0.00, 0.07] |
+| A/H E5 SAT | A3 TT[exact] | gpt-oss-20b low effort | 0.00 [0.00, 0.05] | 0.02 [0.00, 0.15] | 0.03 [0.00, 0.08] | 0.03 [0.00, 0.09] | 0.00 [0.00, 0.00] |
+| A/H E5 SAT | A3 TT[exact] | Qwen3-14B direct | 0.00 [0.00, 0.00] | 0.21 [0.00, 0.41] | 0.00 [0.00, 0.00] | 0.00 [0.00, 0.00] | 0.00 [0.00, 0.00] |
+| A/H E5 SAT | A3 TT[exact] | Qwen3-14B thinking | 0.27 [0.14, 0.40] | 0.33 [0.20, 0.46] | 0.31 [0.14, 0.41] | 0.19 [0.10, 0.30] | 0.19 [0.09, 0.32] |
+| A/H E5 SAT | A3 TT[exact] | Qwen3-32B direct | 0.00 [0.00, 0.13] | 0.15 [0.00, 0.31] | 0.00 [0.00, 0.11] | 0.00 [0.00, 0.07] | 0.00 [0.00, 0.12] |
+| A/H E5 SAT | A3 TT[exact] | Qwen3-32B thinking | 0.24 [0.13, 0.35] | 0.27 [0.16, 0.38] | 0.22 [0.10, 0.32] | 0.18 [0.09, 0.28] | 0.18 [0.08, 0.30] |
+| A/H E5 SAT | C0 POLARITY | gpt-oss-120b low effort | 0.09 [0.00, 0.16] | 0.14 [0.02, 0.25] | 0.11 [0.00, 0.23] | 0.07 [0.00, 0.14] | 0.08 [0.00, 0.15] |
+| A/H E5 SAT | C0 POLARITY | gpt-oss-20b low effort | 0.05 [0.00, 0.14] | 0.23 [0.00, 0.40] | 0.00 [0.00, 0.06] | 0.00 [0.00, 0.08] | 0.15 [0.05, 0.26] |
+| A/H E5 SAT | C0 POLARITY | Qwen3-14B direct | 0.02 [0.00, 0.07] | 0.09 [0.00, 0.31] | 0.01 [0.00, 0.06] | 0.01 [0.00, 0.06] | 0.02 [0.00, 0.09] |
+| A/H E5 SAT | C0 POLARITY | Qwen3-32B direct | 0.02 [0.00, 0.09] | 0.13 [0.00, 0.32] | 0.01 [0.00, 0.09] | 0.01 [0.00, 0.06] | 0.01 [0.00, 0.07] |
+| C E5 SAT, state given | EXACT | gpt-oss-120b low effort | 0.84 [0.76, 0.91] | 0.84 [0.76, 0.91] | 0.84 [0.76, 0.90] | 0.84 [0.76, 0.90] | 0.84 [0.76, 0.91] |
+| C E5 SAT, state given | EXACT | gpt-oss-20b low effort | 0.61 [0.49, 0.71] | 0.60 [0.47, 0.71] | 0.61 [0.48, 0.71] | 0.61 [0.48, 0.71] | 0.59 [0.46, 0.70] |
+| C E5 SAT, state given | EXACT | Qwen3-14B direct | 0.00 [0.00, 0.00] | 0.02 [0.00, 0.08] | 0.00 [0.00, 0.00] | 0.00 [0.00, 0.00] | 0.09 [0.00, 0.17] |
+| C E5 SAT, state given | EXACT | Qwen3-14B thinking | 0.93 [0.85, 0.99] | 0.93 [0.85, 0.99] | 0.92 [0.83, 0.98] | 0.92 [0.83, 0.98] | 0.93 [0.85, 0.99] |
+| C E5 SAT, state given | EXACT | Qwen3-32B direct | 0.00 [0.00, 0.05] | 0.00 [0.00, 0.05] | 0.00 [0.00, 0.04] | 0.00 [0.00, 0.04] | 0.05 [0.00, 0.13] |
+| C E5 SAT, state given | EXACT | Qwen3-32B thinking | 0.89 [0.81, 0.96] | 0.89 [0.81, 0.96] | 0.89 [0.81, 0.96] | 0.89 [0.81, 0.96] | 0.89 [0.81, 0.96] |
+| C E5 SAT, state given | POLARITY (C0) | gpt-oss-120b low effort | 0.07 [0.01, 0.12] | 0.07 [0.01, 0.12] | 0.03 [0.00, 0.07] | 0.03 [0.00, 0.07] | 0.03 [0.00, 0.09] |
+| C E5 SAT, state given | POLARITY (C0) | gpt-oss-20b low effort | 0.06 [0.02, 0.11] | 0.07 [0.02, 0.13] | 0.05 [0.00, 0.12] | 0.05 [0.00, 0.12] | 0.06 [0.00, 0.13] |
+| C E5 SAT, state given | POLARITY (C0) | Qwen3-14B direct | 0.48 [0.33, 0.64] | 0.49 [0.33, 0.66] | 0.43 [0.26, 0.60] | 0.43 [0.26, 0.60] | 0.50 [0.34, 0.68] |
+| C E5 SAT, state given | POLARITY (C0) | Qwen3-32B direct | 0.57 [0.44, 0.70] | 0.58 [0.44, 0.72] | 0.56 [0.43, 0.70] | 0.56 [0.43, 0.70] | 0.60 [0.47, 0.74] |
+| C E5 SAT, state given | POLARITY (C0) | Qwen3-32B thinking | 0.02 [0.00, 0.05] | 0.02 [0.00, 0.06] | 0.02 [0.00, 0.06] | 0.02 [0.00, 0.06] | 0.02 [0.00, 0.05] |
+| C E5 SAT, state given | ALWAYS-UNSAT (A1) | gpt-oss-20b low effort | 0.20 [0.10, 0.32] | 0.20 [0.09, 0.32] | 0.24 [0.15, 0.35] | 0.24 [0.15, 0.35] | 0.24 [0.14, 0.35] |
+| C E5 SAT, state given | ALWAYS-UNSAT (A1) | Qwen3-14B thinking | 0.02 [0.00, 0.05] | 0.02 [0.00, 0.05] | 0.02 [0.00, 0.05] | 0.02 [0.00, 0.05] | 0.02 [0.00, 0.05] |
+| C E5 SAT, state given | ALWAYS-UNSAT (A1) | Qwen3-32B direct | 0.00 [0.00, 0.01] | 0.00 [0.00, 0.02] | 0.03 [0.00, 0.07] | 0.03 [0.00, 0.07] | 0.04 [0.00, 0.08] |
 <!-- END nm:weights -->
 
 ### 4.5 Noise parameters under KEQ
@@ -313,38 +319,38 @@ Each cell lists the checks that fail ("pass" if none); "(ε cap)" marks ε at th
 
 ### 4.6 What the evaluation shows
 
-- **Fit.** M0 passes every check on 5 of 24 fits; KEQ on 14; KEQ-r on 11; KE on 17, but by the wrong attribution (§5.4) (its three losses against KEQ are marginal "beyond reach" failures on gpt-oss-20b knapsack, gpt-oss-20b and Qwen3-32B thinking A/H E5 SAT: with the reach cut, answers 4–6 positions out are q's, and q's rate of producing them is a little off). ε is at its cap on 14 fits under M0 and on 5 under KEQ, all five at ε = 1 in the direct condition, where almost no answer is a member's exact answer and the fit says so. What KEQ still fails: the thinking colouring fits (RO-FF, §2.3 item 4, unchanged by any noise model), the direct colouring fits on "beyond reach" (q's random 3- and 4-colourings are farther from the members than the real far answers, which are poor colourings of *this* graph: an instance-aware q would be needed), and the C E5 special-token share of three fits (τ is 0 there by the ridge rule, so constant UNSAT is ALWAYS-UNSAT's).
+- **Fit.** M0 passes every check on 5 of 24 fits; KEQ on 14; KEQ-r on 11 (its three losses against KEQ are marginal "beyond reach" failures on gpt-oss-20b knapsack, gpt-oss-20b and Qwen3-32B thinking A/H E5 SAT: with the reach cut, answers 4–6 positions out are q's, and q's rate of producing them is a little off); KE on 17, but by the wrong attribution (§5.4); SEQ-r on 15 of its 18 bit-space fits. ε is at its cap on 14 fits under M0 and on 5 under KEQ, all five at ε = 1 in the direct condition, where almost no answer is a member's exact answer and the fit says so. What KEQ still fails: the thinking colouring fits (RO-FF, §2.3 item 4, unchanged by any noise model), the direct colouring fits on "beyond reach" (q's random 3- and 4-colourings are farther from the members than the real far answers, which are poor colourings of *this* graph: an instance-aware q would be needed), and the C E5 special-token share of three fits (τ is 0 there by the ridge rule, so constant UNSAT is ALWAYS-UNSAT's).
 - **Identifiability at pilot sizes (Stage 0).** The 60/30/10 mixture passes on all four units under every candidate that was run, with the same bias, coverage and width as M0. The nulls are where lifting the cap costs: with six-position slips, pure q data load 0.23 on members on knapsack and 0.07 on A/H E5 SAT (KEQ). Cutting the reach (KEQ-r) brings that to 0.050 and 0.036, at the gate, against 0.007 and 0.004 under M0; q's interval then covers 1 in 2% and 51% of replicates (M0: 73% and 98%; knapsack's null already failed under M0, a boundary effect, RECOVERY.md). On C E5 the `null_q` failure is definitional: M0's q answers UNSAT half the time, and under KEQ a constant UNSAT is ALWAYS-UNSAT's, which gets 0.48 against the 0.5 that definition implies (q 0.49).
-- **Recovery at the estimate** passes on 6 fits under M0 (percentile; 9 with BCa), 3 under KEQ (8 with BCa) and 5 under KEQ-r (11 with BCa). The failures are coverage of small weights (0.82–0.89 against the 0.9 gate) with bias below 0.05 everywhere but one quantity (A/H E5 SAT, Qwen3-32B thinking, q: 0.061). The extra parameters cost some coverage at these sizes; BCa recovers most of it on colouring.
+- **Recovery at the estimate** passes on 6 fits under M0 (percentile; 9 with BCa), 3 under KEQ (8 with BCa) and 5 under KEQ-r (11 with BCa). The failures are coverage of small planted weights (mostly 0.7–0.89 against the 0.9 gate; 0.35–0.45 for the 0.02 weights of C E5's thinking fits, under M0 too), with bias below 0.05 everywhere but one quantity under KEQ (A/H E5 SAT, Qwen3-32B thinking, q: 0.061; 0.012 under KEQ-r). The extra parameters cost some coverage at these sizes; BCa recovers most of it on colouring.
 - **Weights.** Where the findings rest on a weight, it does not move: C1 list-order first fit (FF-LIST) in thinking-condition colouring is 0.46 [0.40, 0.53] and 0.37 [0.31, 0.44] under both M0 and KEQ; EXACT on thinking knapsack and C E5, gpt-oss's knapsack and colouring weights, POLARITY on C E5 direct (0.48 → 0.43, 0.57 → 0.56), RATIO+BEST-SINGLE on direct knapsack (0.26 → 0.28, 0.59 → 0.59) all stay within their intervals. What moves is the direct-condition colouring: M0's EXACT weights there, 0.40 [0.33, 0.48] (Qwen3-32B) and 0.14 (Qwen3-14B), were the uniform q's artefact (every 3- or 4-colouring within six vertices of an optimal one was a slip of EXACT); under KEQ they are 0.09 and 0.03, and q takes 0.83 and 0.95. And under KEQ-r, A/H E5 SAT's thinking-condition weights move with the reach: exact 0.30 → 0.18 and 0.33 → 0.21, A3 TT[exact] 0.27 → 0.19 and 0.24 → 0.18 (intervals overlap), with q's share of the answers rising from about 0.4 to about 0.57, because answers five or six flips from a member are no longer its slips. Those weights depend on how far a slip is allowed to go, which the data on these items do not pin down.
 - **Noise mass.** Across the 24 fits the share of answers put on slips or q has the same median under M0 and KEQ (0.63). KEQ does not pass by calling more of the data noise; it moves noise from slips to q where the answers are far (direct colouring) and from q to slips where they are near (direct knapsack: q 0.09 → 0.00).
 
 ### 4.7 Recurrence: do wrong answers repeat as often as the fitted model says?
 
-The eight cheap pilot runs were redrawn with a second sample (PR #51). If wrong answers were independent draws from the fitted mixture, two samples of an item would give the same wrong answer with probability Σ_y P(y | x)² over wrong y. The table gives, per fit with repeats, the number of items whose two answers are the same wrong answer, observed, then expected under M0 and KEQ (the sum of that probability over the items; 400 simulated pairs per item), split by sample 0's answer: matching no member, a member's answer, a special token.
+The eight cheap pilot runs were redrawn with a second sample (PR #51). If wrong answers were independent draws from the fitted mixture, two samples of an item would give the same wrong answer with probability Σ_y P(y | x)² over wrong y. The table gives, per fit with repeats, the number of items whose two answers are the same wrong answer, observed, then expected under M0, KEQ and KEQ-r (the sum of that probability over the items; 400 simulated pairs per item; KEQ-r is KEQ on colouring and C E5), split by sample 0's answer: matching no member, a member's answer, a special token.
 
 <!-- BEGIN nm:recurrence -->
-| Unit | Run | Items answered twice | unmatched: observed / M0 / KEQ | member's answer: observed / M0 / KEQ | special token: observed / M0 / KEQ |
+| Unit | Run | Items answered twice | unmatched: observed / M0 / KEQ / KEQ-r | member's answer: observed / M0 / KEQ / KEQ-r | special token: observed / M0 / KEQ / KEQ-r |
 |---|---|---|---|---|---|
-| C E2 colouring | Qwen3-14B direct | 300 | 117 / 0.0 / 6.0 | 0 / 0.1 / 0.0 | 0 / 0.0 / 0.0 |
-| C E2 colouring | Qwen3-32B direct | 299 | 17 / 0.0 / 0.0 | 0 / 1.1 / 0.0 | 0 / 0.0 / 0.0 |
-| C E2 colouring | gpt-oss-20b low effort | 299 | 2 / 0.1 / 0.1 | 9 / 7.7 / 3.9 | 0 / 0.0 / 0.0 |
-| C E2 colouring | gpt-oss-120b low effort | 300 | 17 / 0.1 / 0.1 | 24 / 13.3 / 13.3 | 0 / 0.0 / 0.0 |
-| C E2 knapsack | Qwen3-14B direct | 300 | 153 / 0.8 / 1.9 | 22 / 14.6 / 1.6 | 0 / 0.0 / 0.0 |
-| C E2 knapsack | Qwen3-32B direct | 300 | 163 / 1.0 / 2.4 | 17 / 28.9 / 0.6 | 0 / 0.0 / 0.0 |
-| C E2 knapsack | gpt-oss-20b low effort | 300 | 6 / 0.3 / 0.1 | 13 / 8.1 / 8.1 | 0 / 0.0 / 0.0 |
-| C E2 knapsack | gpt-oss-120b low effort | 300 | 9 / 0.0 / 0.0 | 14 / 7.4 / 8.1 | 0 / 0.0 / 0.0 |
-| A/H E5 SAT | Qwen3-14B direct | 100 | 46 / 0.0 / 6.5 | 0 / 0.0 / 0.0 | 0 / 23.5 / 0.0 |
-| A/H E5 SAT | Qwen3-32B direct | 90 | 17 / 0.0 / 0.2 | 0 / 0.0 / 0.0 | 1 / 20.3 / 0.1 |
-| A/H E5 SAT | gpt-oss-20b low effort | 93 | 4 / 0.0 / 2.0 | 0 / 0.1 / 0.0 | 12 / 17.4 / 6.9 |
-| A/H E5 SAT | gpt-oss-120b low effort | 98 | 1 / 0.0 / 0.3 | 0 / 0.2 / 0.0 | 5 / 9.1 / 2.5 |
-| C E5 SAT, state given | Qwen3-14B direct | 120 | 66 / 0.0 / 0.0 | 0 / 8.8 / 0.0 | 0 / 0.2 / 0.0 |
-| C E5 SAT, state given | Qwen3-32B direct | 120 | 19 / 0.0 / 0.0 | 0 / 9.5 / 0.1 | 0 / 0.6 / 0.4 |
-| C E5 SAT, state given | gpt-oss-20b low effort | 120 | 0 / 0.0 / 0.0 | 0 / 0.2 / 0.0 | 6 / 4.5 / 4.5 |
-| C E5 SAT, state given | gpt-oss-120b low effort | 120 | 0 / 0.0 / 0.0 | 0 / 0.2 / 0.1 | 0 / 0.0 / 0.0 |
+| C E2 colouring | Qwen3-14B direct | 300 | 117 / 0.0 / 6.0 / – | 0 / 0.1 / 0.0 / – | 0 / 0.0 / 0.0 / – |
+| C E2 colouring | Qwen3-32B direct | 299 | 17 / 0.0 / 0.0 / – | 0 / 1.1 / 0.0 / – | 0 / 0.0 / 0.0 / – |
+| C E2 colouring | gpt-oss-20b low effort | 299 | 2 / 0.1 / 0.1 / – | 9 / 7.7 / 3.9 / – | 0 / 0.0 / 0.0 / – |
+| C E2 colouring | gpt-oss-120b low effort | 300 | 17 / 0.1 / 0.1 / – | 24 / 13.3 / 13.3 / – | 0 / 0.0 / 0.0 / – |
+| C E2 knapsack | Qwen3-14B direct | 300 | 153 / 0.8 / 1.9 / 2.0 | 22 / 14.6 / 1.6 / 1.5 | 0 / 0.0 / 0.0 / 0.0 |
+| C E2 knapsack | Qwen3-32B direct | 300 | 163 / 1.0 / 2.4 / 2.3 | 17 / 28.9 / 0.6 / 0.6 | 0 / 0.0 / 0.0 / 0.0 |
+| C E2 knapsack | gpt-oss-20b low effort | 300 | 6 / 0.3 / 0.1 / 0.1 | 13 / 8.1 / 8.1 / 8.2 | 0 / 0.0 / 0.0 / 0.0 |
+| C E2 knapsack | gpt-oss-120b low effort | 300 | 9 / 0.0 / 0.0 / 0.1 | 14 / 7.4 / 8.1 / 7.9 | 0 / 0.0 / 0.0 / 0.0 |
+| A/H E5 SAT | Qwen3-14B direct | 100 | 46 / 0.0 / 6.5 / 6.2 | 0 / 0.0 / 0.0 / 0.0 | 0 / 23.5 / 0.0 / 0.0 |
+| A/H E5 SAT | Qwen3-32B direct | 90 | 17 / 0.0 / 0.2 / 0.2 | 0 / 0.0 / 0.0 / 0.0 | 1 / 20.3 / 0.1 / 0.1 |
+| A/H E5 SAT | gpt-oss-20b low effort | 93 | 4 / 0.0 / 2.0 / 1.8 | 0 / 0.1 / 0.0 / 0.0 | 12 / 17.4 / 6.9 / 6.7 |
+| A/H E5 SAT | gpt-oss-120b low effort | 98 | 1 / 0.0 / 0.3 / 0.3 | 0 / 0.2 / 0.0 / 0.0 | 5 / 9.1 / 2.5 / 2.5 |
+| C E5 SAT, state given | Qwen3-14B direct | 120 | 66 / 0.0 / 0.0 / – | 0 / 8.8 / 0.0 / – | 0 / 0.2 / 0.0 / – |
+| C E5 SAT, state given | Qwen3-32B direct | 120 | 19 / 0.0 / 0.0 / – | 0 / 9.5 / 0.1 / – | 0 / 0.6 / 0.4 / – |
+| C E5 SAT, state given | gpt-oss-20b low effort | 120 | 0 / 0.0 / 0.0 / – | 0 / 0.2 / 0.0 / – | 6 / 4.5 / 4.5 / – |
+| C E5 SAT, state given | gpt-oss-120b low effort | 120 | 0 / 0.0 / 0.0 / – | 0 / 0.2 / 0.1 / – | 0 / 0.0 / 0.0 / – |
 <!-- END nm:recurrence -->
 
-- **Qwen3 direct: the unexplained answers are not noise.** 117, 153, 163, 46 and 66 items repeat an answer no member gives, where M0 and KEQ expect 0–6.5. They are reproducible procedures outside the zoo: the repeat-samples analysis lists template answers (all-true, all-false and alternating assignments, colours cycled in list order), and §2.2 shows under-filled packings (drops from a greedy packing) and over-true C E5 assignments. No slip kernel or q in this family generates them, because slips and q are independent draws. The strata q comes closest where the template is a one-answer stratum (all-false, all-distinct colours: 6.0 and 6.5 expected).
+- **Qwen3 direct: the unexplained answers are not noise.** 117, 153, 163, 46 and 66 items repeat an answer no member gives, where M0, KEQ and KEQ-r expect 0–6.5. They are reproducible procedures outside the zoo: the repeat-samples analysis lists template answers (all-true, all-false and alternating assignments, colours cycled in list order), and §2.2 shows under-filled packings (drops from a greedy packing) and over-true C E5 assignments. No slip kernel or q in this family generates them, because slips and q are independent draws. The strata q comes closest where the template is a one-answer stratum (all-false, all-distinct colours: 6.0 and 6.5 expected).
 - **Member answers repeat more than any per-draw mixture allows** (gpt-oss-120b colouring: 24 observed, 13 expected; Qwen3 direct knapsack: 17–22 observed, where KEQ, with ε ≈ 0.9, expects about 1). Strategy choice looks fixed per item, not drawn afresh per response.
 - **The special token:** M0 expects 20–23 repeated UNSATs from Qwen3 direct on A/H E5, from q's fixed half; 0 and 1 are observed. KEQ's estimated τ expects 0.0 and 0.1.
 - **gpt-oss:** unmatched wrong answers rarely repeat (0–17 items, mostly 0–9), close to what a noise model allows.
@@ -387,7 +393,7 @@ Why this one:
 ### 5.2 Trade-offs
 
 - **Pure noise leaks onto members on small bit spaces.** Under KEQ-r, at pilot sizes, about 0.04–0.05 of pure q data goes to members on knapsack and A/H E5 SAT (M0: under 0.01), spread over the members (knapsack: no single member above 0.06 under KEQ, less under KEQ-r). Read weights below about 0.05 on those units as compatible with none, and do not read π₀'s interval at the boundary there: it under-covers (also under M0 on knapsack). The boundary-aware interval for π₀ (RECOVERY.md, "What is left") is the fix for the coverage; it is about a day's work.
-- **Recovery at the estimate covers small weights slightly less** (§4.6): more parameters at the same sample size.
+- **Recovery at the estimate passes about as often as under M0** (5 against 6 with percentile intervals, 11 against 9 with BCa); small weights' coverage is the binding gate for both (§4.6).
 - **ε = 1 is a statement, not a failure.** It says no answer is the member's exact output; such a member's weight is nearness to its answer, and the results page's rule (ε at its cap → "nearness, not use") should keep applying with the cap at 1.
 - **More parameters per unit**: 4 for the kernel, up to n per number of positions for q, and τ.
 - **The reach threshold is a choice.** A fifth of the answer space is a judgement, not an estimate. It decides knapsack's and A/H E5 SAT's reach (3 and 4), and A/H E5 SAT's thinking weights move with it (§4.6). A larger reach (KEQ) fits better and leaks more noise; a smaller one would push more near misses into q.
@@ -409,7 +415,12 @@ Because they were chosen after seeing the data, fits under the new model on thes
 - **K (free kernel, cap kept)** fixes the knapsack swaps' distance profile but none of the cap or q failures.
 - **KE (cap lifted, uniform q)** passes the most checks (17 of 24), and that is the warning in this evaluation: it passes them by putting far answers on members' always-slipping clouds instead of on q. On A/H E5 SAT in the direct condition π₀ falls to 0.47 and 0.53 (KEQ 0.99, M0 0.97) and exact and A3 TT[exact] take 0.15–0.21 each, from answers the recurrence check shows to be reproducible off-zoo procedures; on direct colouring it keeps M0's EXACT artefact (0.40, π₀ 0.33). Its likelihood is 1,700–2,100 units below KEQ's on direct colouring and 115–315 below on A/H E5 SAT. The four checks are coarse (a share of exact answers, of far answers, of special tokens, a distance profile), and a flexible kernel can match them with the wrong attribution; the likelihood ladder and the weights have to be read with them.
 - **KEQ-h (per-member ε)** gains 0–25 log-likelihood units for up to 9 more parameters; a member with little weight has an unidentified rate.
-- **SEQ / SEQ-r (adds-and-drops kernel)** gains most on the direct bit-vector fits (79–259 units), and it captures something real: one-for-one swaps on gpt-oss's knapsacks, dropped items and over-true assignments in the direct condition. But in the direct condition those are the reproducible off-zoo procedures of §4.7, not slips, so a kernel that absorbs them makes the noise model carry a missing member. If gpt-oss's swaps matter for a claim, revisit it then, with the 21 extra cells.
+- **SEQ-r (adds-and-drops kernel), the runner-up for bit spaces.** On the 18 bit-space fits (knapsack, both SAT units) it passes every check on 15, against 10 for KEQ-r, and SEQ gains 1–259 log-likelihood units over KEQ (§2.4), most on the direct fits. It captures real structure: gpt-oss's one-for-one swaps, the direct condition's dropped items and over-true assignments. Three things keep it second:
+  - it has not been through Stage 0 (no box time), and it has 21 more kernel cells per unit;
+  - it moves direct-condition attributions: Qwen3-32B's direct knapsack goes from RATIO+BEST-SINGLE 0.57 and DIFF 0.12 (KEQ-r) to 0.42 and 0.26, and C E5's Qwen3-14B direct π₀ from 0.33 to 0.06, by crediting members with the dropped-item and over-true answers that §4.7 shows recur, i.e. are procedures, not slips (KEQ-r does the same for answers within its reach, but less);
+  - on the thinking and gpt-oss fits, where the attribution matters, it agrees with KEQ-r; overall it puts more of the data on slips (median noise share 0.74 on its 18 fits, against 0.64 for KEQ-r on 24).
+
+  If gpt-oss's knapsack swaps matter for a claim, run SEQ-r through Stage 0 at pilot size and adopt it for bit spaces if it passes; colouring keeps KEQ-r either way (the kernel is not defined on partitions).
 - **A validity-aware q** is not identified on SAT and k-colouring (the valid answers are EXACT's support), and the far answers it would explain are mostly invalid (§2.3).
 
 ### 5.5 What the noise model cannot fix, and what would
