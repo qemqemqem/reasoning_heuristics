@@ -94,6 +94,10 @@ def design_matrix(um: UnitModel, eps: float = 0.1, rho: float = 0.3, samples: in
     cols = um.columns
     G = len(cols)
     g = trunc_geom(rho)
+    if um.noise.cells != "distance" or um.reach < len(g) - 1:  # a noise option's cells: the same kernel over them
+        from reasoning_heuristics.identify.mixture import default_kernel
+
+        g = default_kernel(um.noise.cells, rho, um.reach)
     rows = []
     for i, im in enumerate(um.items):
         if isinstance(im.space, FiniteSpace):

@@ -311,3 +311,13 @@ def test_reach_limits_the_kernel_and_auto_follows_the_space_size(knapsack_unit):
     assert abs(total - 1) < 1e-9
     with pytest.raises(ValueError):
         NoiseModel(reach=3)  # the geometric kernel is defined up to 6
+
+
+def test_identifiability_runs_under_every_noise_option(knapsack_unit):
+    """engine.identifiability builds its design rows with the unit's kernel cells (the swap kernel has 28)."""
+    from reasoning_heuristics.identify.engine import identifiability
+
+    for name in ("SEQ", "SEQ-r", "KEQ-r"):
+        um = UnitModel(knapsack_unit, noise=CANDIDATES[name])
+        out = identifiability(um, rng=np.random.default_rng(0))
+        assert out["rank"] >= 1
