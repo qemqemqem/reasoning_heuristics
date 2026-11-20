@@ -1,6 +1,6 @@
 # Status
 
-*Current state of the work as of 2026-11-18 (morning). Update this file when a stage finishes or a decision is made.*
+*Current state of the work as of 2026-11-19. Update this file when a stage finishes or a decision is made.*
 
 ## Summary
 
@@ -91,10 +91,21 @@ The [results page](results/2026-11-18-results.html) has the numbers, intervals, 
   - The runner is a thin custom one (DESIGN §9 question 5).
   - Agents open and merge PRs regularly ([RULES.md](../RULES.md)).
 - **From the 2026-11-18 results:**
-  - **The noise model.** Most fits put the slip rate at its cap: answers miss the members in ways the near-miss model with a uniform q cannot produce (on knapsack, more two-item swaps than one-item slips; with thinking, more exact matches and fewer far answers than predicted). The options are a validity-aware q, a richer error model, or per-member ε. Each departs from SCOPE §6 rule 3. **Recommendation (2026-11-19, for Andrew's decision): [NOISE_MODEL.md](NOISE_MODEL.md), PR #50** — KEQ-r: a free distance kernel, ε up to 1 with the kernel's reach cut on small spaces, and q's size strata and special-token mass estimated. It passes every predictive check on 14 of 24 fits (M0: 5), keeps the weights the findings rest on, and removes M0's EXACT weight in direct-condition colouring as an artefact of the uniform q; pure noise leaks ≤ 0.05 onto members on knapsack and A/H E5 SAT. Repeat samples show the direct condition's unexplained answers are reproducible procedures, which no noise model fixes: they need template members.
+  - **The noise model.** Most fits put the slip rate at its cap: answers miss the members in ways the near-miss model with a uniform q cannot produce (on knapsack, more two-item swaps than one-item slips; with thinking, more exact matches and fewer far answers than predicted). The options are a validity-aware q, a richer error model, or per-member ε. Each departs from SCOPE §6 rule 3. Andrew (2026-11-19) delegated the choice to an expert review: candidates implemented behind options and judged on recovery, predictive checks and how much mass goes to noise (done): **Recommendation (2026-11-19, for Andrew's decision): [NOISE_MODEL.md](NOISE_MODEL.md), PR #50** — KEQ-r: a free distance kernel, ε up to 1 with the kernel's reach cut on small spaces, and q's size strata and special-token mass estimated. It passes every predictive check on 11 of 24 fits (M0: 5) and puts ε at its cap on 5 (M0: 14), keeps the weights the findings rest on, and removes M0's EXACT weight in direct-condition colouring as an artefact of the uniform q; pure noise leaks ≤ 0.05 onto members on knapsack and A/H E5 SAT. Repeat samples show the direct condition's unexplained answers are reproducible procedures, which no noise model fixes: they need template members.
   - **Boundary-aware intervals.** Percentile and BCa intervals under-cover at the edge of the simplex (π₀ = 1 on knapsack); about a day's work.
-  - **gpt-oss's 32k-token cap** truncates 22% of gpt-oss-120b's and 36% of gpt-oss-20b's high-effort dev responses, and over 90% on some units: A/H E2 SAT for both, and C E2 knapsack for gpt-oss-20b. On C E3's uninstructed colouring gadgets (COL-U), where the design expected about 10%, they truncate 143 and 174 of 180. Raise it, or calibrate item sizes to it. This decides whether high effort has any heuristics to find: the answers it finishes are nearly all right, so its hard items show up only as truncations.
-  - **Repeat samples.** Every count is one sample per item; DESIGN §5 rule 8 asks for repeats.
+  - **gpt-oss's 32k-token cap** truncates 22% of gpt-oss-120b's and 36% of gpt-oss-20b's high-effort dev responses, and over 90% on some units: A/H E2 SAT for both, and C E2 knapsack for gpt-oss-20b. On C E3's uninstructed colouring gadgets (COL-U), where the design expected about 10%, they truncate 143 and 174 of 180. Raise it, or calibrate item sizes to it. This decides whether high effort has any heuristics to find: the answers it finishes are nearly all right, so its hard items show up only as truncations. **Decided 2026-11-19 (Andrew): keep 32k, and force an answer at the cap** (force-2, [RUNNER.md](RUNNER.md)). Telling the model its budget does not help: gpt-oss-20b truncates 198 of 320 dev items with the notice and 197 without.
+  - **Repeat samples.** Every count is one sample per item; DESIGN §5 rule 8 asks for repeats. **Decided 2026-11-19 (Andrew): in the cheap conditions only** (direct and low effort, pc20 and pc40).
+    - **Done 2026-11-19** ($1.28): one more sample of every item in those 8 runs (`data/runs/2026-11-19-repeat-*`; sample 0 is the original response). `analysis/repeat_samples.py` measures test-retest (`analysis/out/repeat_samples.md`).
+    - Accuracy does not drift between the two days in any run (exact McNemar p ≥ 0.06).
+    - **For gpt-oss at low effort, the listed heuristics capture the systematic errors.** A wrong construction (a colouring, assignment or packing) recurs in the second sample:
+      - 48% (gpt-oss-120b) and 31% (gpt-oss-20b) of the time when it equals a listed heuristic's answer;
+      - 6% and 3% of the time when it equals none.
+
+      So the unmatched constructions behave like noise, as the mixture's q assumes.
+    - **For Qwen3 direct, they do not.** Unmatched wrong constructions recur 49% (14B) and 24% (32B) of the time.
+      - Many are template answers that no listed heuristic produces: all-true, all-false or alternating SAT assignments, and colours cycled in the listed order.
+      - Qwen3 samples at temperature 0.7 with top-k 20, which makes any answer likelier to repeat, so compare matched with unmatched within a model, not repeat rates across models.
+  - ~~The OpenRouter account id in stored error text.~~ Decided 2026-11-19 (Andrew): redact it going forward (#48). Runs committed before then keep it.
   - ~~Where the results page lives.~~ Decided 2026-11-18 (Andrew): GitHub Pages, serving `docs/` from `main`: <https://qemqemqem.github.io/reasoning_heuristics/results/2026-11-18-results.html>. `docs/.nojekyll` makes Pages serve the files as they are.
 - **From the 2026-11-17 review** (its "Design questions" section):
   - selection filters that depend on one member's behaviour vs SCOPE §6 rule 6;

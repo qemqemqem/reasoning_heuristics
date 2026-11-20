@@ -229,6 +229,11 @@ whether enough reasoning would replace them with correct answers cannot be told 
 too few wrong answers to fit. Qwen3 was run at a single reasoning setting, and in the thinking condition it still
 makes the first-fit errors of claim 1. Correct shares on heavily truncated units describe only the items the model
 finished; the tables mark them †.</p>
+<p>Telling the model its budget does not change this. In a second gpt-oss-20b high-effort run on the 320 dev items
+of C E2 and A/H E2, the prompt ended by stating the 32,768-token budget and that reaching it cuts the reasoning off.
+198 responses were truncated, against 197 without the notice; 115 were correct, against 117; and 26 items were
+truncated only with the notice, against 25 only without (exact McNemar p = 1; analysis/budget_notice.py). With an
+answer forced at the cap, 222 and 218 are correct.</p>
 <p>Counts, with paired tests (analysis/findings_checks.py). Dev items, 5 per cell; gpt-oss-120b has no low-effort
 dev run to pair with. Chance level: none.
 <span class="strength c">(c) descriptive count</span></p>

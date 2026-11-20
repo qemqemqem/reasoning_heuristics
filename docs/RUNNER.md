@@ -46,7 +46,7 @@ python -m reasoning_heuristics.evals.probe --model qwen/qwen3-32b --out data/run
 - **Resuming.** Re-running into the same `--out` sends only the (item, sample) pairs that have no response yet. The manifest keeps every earlier invocation (git SHA, times, status, spend) under `previous_invocations` and the total charge in `charged_usd_all_invocations`. It refuses a resume with a different condition or item set.
 - **Re-scoring after the items change.** `score` refuses a run whose item files no longer hash to its manifest. `--items-at-run-sha` reads each file with `git show <run's SHA>:<path>` and checks it against the manifest's SHA-256 (`--items-ref <ref>` picks another ref). PRs merge with merge commits, so a run made at a pushed branch commit stays re-scorable after the merge.
 - **The cache** (`data/cache/openrouter/`, gitignored) means an identical request is never paid for twice, across runs. Repeat samples are separate keys. The permanent copy is each run's `raw.jsonl.gz`; `ResponseCache.import_runs` rebuilds a cache from those.
-- **Concurrency** defaults to 8. Timeouts are 30 minutes per request. Retries: 6 attempts with exponential backoff and jitter (honouring `Retry-After`). They cover network errors (including a dropped connection or a body cut short), 408/409/425/429/5xx, errors inside a 200 body, and an empty reply with no `usage` record (a provider failure, not an answer: 9 of 284 forced gpt-oss-120b calls on DeepInfra, 2026-11-18). 400/401/402/403/404/413/422 stop the run at once. A stored response the client would now retry does not count as done: a resume sends it again, and the response cache does not serve it (`usable` in evals/client.py).
+- **Concurrency** defaults to 8. Timeouts are 30 minutes per request. Retries: 6 attempts with exponential backoff and jitter (honouring `Retry-After`). They cover network errors (including a dropped connection or a body cut short), 408/409/425/429/5xx, errors inside a 200 body, and an empty reply with no `usage` record (a provider failure, not an answer: 9 of 284 forced gpt-oss-120b calls on DeepInfra, 2026-11-18). 400/401/402/403/404/413/422 stop the run at once. A stored response the client would now retry does not count as done: a resume sends it again, and the response cache does not serve it (`usable` in evals/client.py). Error text keeps no account id: OpenRouter's error bodies carry a top-level `user_id`, which the client replaces with `user_[redacted]` before it keeps any error text (`redact` in evals/client.py; from 2026-11-19, so runs committed before then still carry it in `errors`).
 - **E8 is skipped** (`--exclude-eval E8`; the loader also refuses E8 specs). See [E8](#e8-continuations-and-prefill) below.
 
 ## Conditions
@@ -63,6 +63,12 @@ Decision record: [decisions/2026-11-17-direct-answer-arm.md](decisions/2026-11-1
 
 - **gpt-oss cannot turn reasoning off.** It has no direct condition; the runner refuses one. `--effort low` is a budget arm of the thinking condition, labelled `thinking-low`.
 - **The budget notice** (`--budget-notice`; Andrew's suggestion, 2026-11-18) is a variant of the thinking condition, labelled `thinking-<effort>+budget`. The user message ends with: "You have a budget of 32,768 tokens for your reasoning and your answer together. If you reach it before you have answered, your reasoning will be cut off and you will have to give your final answer straight away." That is `BUDGET_NOTICE` in evals/models.py, with the condition's max_tokens. Nothing else in the request changes.
+  - **Result (2026-11-19): no effect.** gpt-oss-20b at high effort, on the 320 dev items of C E2 and A/H E2 (`2026-11-18-budget-dev-gpt-oss-20b-thinking-high`), against the run without the notice on the same items:
+    - truncated at the cap: 198 against 197;
+    - correct: 115 against 117, and 222 against 218 with an answer forced at the cap;
+    - median completion tokens: the cap in both;
+    - items truncated in one run only: 26 against 25 (exact McNemar p = 1).
+  - The model does not plan around a stated budget. `analysis/budget_notice.py` computes these (`analysis/out/budget_notice.md`).
   - Pair it with `force.py`, which gives the responses cut at the cap their final answer.
   - The analysis (`RUN_PATTERNS`) does not know the variant, so name such runs `2026-11-18-budget-<tier>-…` to keep them out.
 - **The system instruction is an experimental factor.** Its exact text is in every manifest (`condition.system_prompt`) and in every raw request.
@@ -465,12 +471,12 @@ The manifest records both routings: `source.provider_routing` (the source run's)
 - **Cut traces:** `answered` and `parsed` should each be at least 95% of the responses.
 - **Repeatability** is measured with `--samples 2`: the share of records whose two samples give the same answer key (scored records grouped by `item_id` and `source_sample`).
 
-**Acceptance results, 2026-11-18.** These cover the thinking-high runs: dev for all four models, plus pc20 and pc40 for Qwen3. The f = 1 sets are `--per-unit 3 --samples 2` on dev. `analysis/forcing_acceptance.py` computes them from `data/runs/forced-2/` (JSON: `analysis/out/forcing_acceptance.json`).
+**Acceptance results, 2026-11-18.** These cover the thinking-high runs: dev for all four models, plus pc20 and pc40 for Qwen3, and, from 2026-11-19, gpt-oss-20b's dev budget-notice run (198 cut traces: 198 answered, 194 parsed). The f = 1 sets are `--per-unit 3 --samples 2` on dev. `analysis/forcing_acceptance.py` computes them from `data/runs/forced-2/` (JSON: `analysis/out/forcing_acceptance.json`).
 
 | Model | f = 1: same answer | f = 1: same correctness | Repeatable | Cut: answered | Cut: parsed | Renewed reasoning |
 |---|---|---|---|---|---|---|
 | gpt-oss-120b | 136/136 (100%) | 136/136 (100%) | 68/68 | 284/284 (100%) | 270/284 (95.1%) | 0 |
-| gpt-oss-20b | 132/132 (100%) | 132/132 (100%) | 66/66 | 461/462 (99.8%) | 439/462 (95.0%) | 0 |
+| gpt-oss-20b | 132/132 (100%) | 132/132 (100%) | 66/66 | 659/660 (99.8%) | 633/660 (95.9%) | 0 |
 | Qwen3-14B | 131/136 (96.3%) | 136/136 (100%) | 66/68 | 67/70 (95.7%) | 66/70 (94.3%) | 0 |
 | Qwen3-32B | 127/136 (93.4%) | 132/136 (97.1%) | 63/67 | 50/54 (92.6%) | 50/54 (92.6%) | 0 |
 
@@ -528,7 +534,7 @@ The two options are mutually exclusive, and force-2 only.
 
 - **K** keeps the first K tokens of each trace, counted by the model's own tokenizer. A trace of at most K tokens is not sent. It is counted `within_budget`, and its natural answer stands, as a finished response's would under that budget. A response cut at the source's cap has no natural answer, so if its trace fits, it counts as not correct.
 - **F** keeps the first ⌊F × n⌋ of a trace's n tokens, 0 ≤ F < 1, computed exactly (F is read as a decimal). F = 0 sends an empty trace: what the model answers before any reasoning (C E6's pre-commitment check). A fraction below 1 always cuts, so nothing is within budget.
-- **A cut trace is a prefix of an unlimited run.** The model did not know the budget. The trace is what it wrote under the source's 32k cap, stopped at K tokens. That is the design's budget forcing (C E3: "truncate the thinking at the cap and force the answer") and Lanham et al.'s (2023) early answering. A model told its budget (run.py's `--budget-notice`) or trained for short budgets might reason differently, so accuracy at K measures what an unhurried run knew after K tokens.
+- **A cut trace is a prefix of an unlimited run.** The model did not know the budget. The trace is what it wrote under the source's 32k cap, stopped at K tokens. That is the design's budget forcing (C E3: "truncate the thinking at the cap and force the answer") and Lanham et al.'s (2023) early answering. A model trained for short budgets might reason differently, so accuracy at K measures what an unhurried run knew after K tokens. Telling the model its budget (run.py's `--budget-notice`) changes nothing for gpt-oss-20b (above).
 - **The cut** is made on token ids and decoded back to text. A cut inside a UTF-8 character moves back to the character's start (at most 3 tokens), and `cut_tokens` records what was kept.
 - **The prompt is force-2's**, with the cut trace in place of the whole one. The template, routing, logit_bias and raw-prompt check are unchanged.
 - **`--select all`** takes every response with a trace, finished or cut at the cap, so a sweep covers all items. Records from finished responses keep `--select done`'s natural-answer fields. For a cut trace, `same_as_natural` is the early-answering agreement: whether the answer at K is the model's final answer.

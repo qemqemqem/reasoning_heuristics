@@ -28,12 +28,12 @@
   },
   "gpt-oss-20b": {
    "cut": {
-    "answered": 461,
+    "answered": 659,
     "answered_pct": 99.8,
-    "forced": 462,
-    "parsed": 439,
-    "parsed_pct": 95.0,
-    "parsed_pct_without_provider_empty": 95.0,
+    "forced": 660,
+    "parsed": 633,
+    "parsed_pct": 95.9,
+    "parsed_pct_without_provider_empty": 95.9,
     "provider_empty": 0,
     "renewed_reasoning": 0,
     "still_writing": 1
@@ -107,6 +107,14 @@
  },
  "description": "Acceptance tests of force-2; see the docstring of analysis/forcing_acceptance.py",
  "passes": {
+  "cut/2026-11-18-budget-dev-gpt-oss-20b-thinking-high": {
+   "answered": 198,
+   "forced": 198,
+   "parsed": 194,
+   "provider_empty": 0,
+   "renewed_reasoning": 0,
+   "still_writing": 0
+  },
   "cut/2026-11-18-dev-gpt-oss-120b-thinking-high": {
    "answered": 284,
    "forced": 284,
