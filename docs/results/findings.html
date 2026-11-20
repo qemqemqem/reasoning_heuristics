@@ -133,6 +133,21 @@ largest weight is on FF-LIST: 0.373 [0.313, 0.436] and 0.464 [0.398, 0.531]. But
 beyond every member's reach, and there are 0 and 1 of 299. They also predict fewer exact matches than the data have:
 0.66 against 0.71, and 0.65 against 0.70.</li>
 </ul>
+<p><strong>Under the noise model adopted on 2026-11-19</strong> (KEQ-r, docs/NOISE_MODEL.md), 11 of the 24 fits pass every
+check, 10 of them with ε below its cap. KEQ-r estimates the slip kernel's shape, lifts the cap on ε, and lets q learn
+how many colours, items or true variables an answer has. It was chosen after seeing these data, so these fits are
+exploratory; the pre-registered fits above stand. It does not pass by calling more of the data noise: the median
+share of answers put on slips or q is 0.64, against 0.63. The FF-LIST weights above do not move. The weight that
+goes away is EXACT's in direct-condition colouring, 0.40 for Qwen3-32B, which came from the uniform q. Two kinds of
+misfit remain:</p>
+<ul>
+<li>Thinking-condition colouring, as above: RO-FF's random-order colourings spread wider than the answers do.</li>
+<li>The direct condition. A second sample of each item (2026-11-19) shows that Qwen3's direct-condition wrong
+answers that equal no member's recur: the same wrong colouring, assignment or packing comes back for 24–49% of
+them. Mixed with noise, they would almost never recur. Many are templates no member produces: all-true, all-false or
+alternating assignments, and colours cycled in the listed order (analysis/repeat_samples.py). For gpt-oss at low
+effort they recur 3–6% of the time, against 31–48% for its wrong answers that equal a member's.</li>
+</ul>
 <p>Check: each fit is compared with 100 fake data sets drawn from it, on four statistics. A single marginal failure
 is weak evidence; the clear failures are those with ε at its cap or with several checks failed.
 <span class="strength b">(b) fitted, but the model does not reproduce the data</span>, except the four named
