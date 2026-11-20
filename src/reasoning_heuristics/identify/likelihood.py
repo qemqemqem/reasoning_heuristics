@@ -26,6 +26,12 @@ Both share q, the "none of the above" distribution (`Space.log_q`), and both are
 P(y | h, x) = (1 - eps) A[h] + eps (B0[h] + sum_d C[h, d] g_d(rho)) with rows rescaled so the
 largest entry is 1 (`log_scale` keeps the factor), so one EM serves both.
 
+**Noise-model options** (`noise.py`, docs/NOISE_MODEL.md). A `UnitModel` carries a `NoiseModel`
+(default: the pre-registered one, whose rows are unchanged) and hands it to its `Tensors`, so the
+fit uses it wherever the tensors go. The swap kernel replaces the distance cells of C by
+(adds, drops) cells; the strata q adds per-row stratum data (`QStrata`) from which the fit computes
+q at its current parameters. `sample_from` and `sample_q_from` draw from a fitted `NoiseParams`.
+
 Responses that are not `ok` (DESIGN §5 rule 5):
 
 - `parse_fail`, `refusal`, `partial`: excluded from the answer likelihood; counted per cell.
@@ -54,8 +60,9 @@ from typing import Any, Iterable, Protocol
 import numpy as np
 
 from reasoning_heuristics.identify.members import Pred, item_preds, normal_form, q_normal_form
+from reasoning_heuristics.identify.noise import REACH_COVER, NoiseModel, NoiseParams
 from reasoning_heuristics.identify.records import Response
-from reasoning_heuristics.identify.spaces import DMAX, FiniteSpace, Space, space_for
+from reasoning_heuristics.identify.spaces import AD_CELLS, DMAX, BitSpace, FiniteSpace, Space, space_for
 from reasoning_heuristics.identify.units import Unit
 
 NEAR_MISS = "near-miss"
@@ -143,10 +150,34 @@ class Exclusions:
 
 
 @dataclass
+class QStrata:
+    """Per-row data for the strata q (noise.py): q(y) = tau / s for a special token, else
+    (1 - tau [the space has special tokens]) P[stratum(y)] / |stratum(y)|, with P normalised within
+    each group (one group per number of positions n). Rows on finite channels keep the fixed q."""
+
+    row: np.ndarray  # (N,) global stratum index; -1 a special token; -2 q is fixed (finite channel)
+    logsize: np.ndarray  # (N,) log |stratum| (0 where not structured)
+    special: np.ndarray  # (N,) bool: the answer is a special token
+    has_special: np.ndarray  # (N,) bool: the row's space has special tokens
+    log_nspecial: np.ndarray  # (N,) log of the number of special tokens (0 where none)
+    log_q_fixed: np.ndarray  # (N,) absolute log q of the default model (used where row == -2)
+    group: np.ndarray  # (S,) group index of each stratum
+    p0: np.ndarray  # (S,) the default q's stratum probabilities
+    keys: list[tuple[str, int, int]]  # (space kind, n, size) of each stratum
+    tau_free: bool  # False where a member predicts a special token on every item: tau is then 0
+    tau0: float  # starting tau (the default q's) or the fixed 0
+
+    def subset(self, rows: np.ndarray) -> "QStrata":
+        return QStrata(self.row[rows], self.logsize[rows], self.special[rows], self.has_special[rows],
+                       self.log_nspecial[rows], self.log_q_fixed[rows], self.group, self.p0, self.keys, self.tau_free,
+                       self.tau0)
+
+
+@dataclass
 class Tensors:
     A: np.ndarray  # (N, G) no-slip probability
     B0: np.ndarray  # (N, G) rho-free slip probability
-    C: np.ndarray  # (N, G, DMAX + 1) coefficients of g(rho)
+    C: np.ndarray  # (N, G, K) coefficients of the kernel g over its K cells (distance: K = DMAX + 1)
     Q: np.ndarray  # (N,) q
     avail: np.ndarray  # (N, G) bool
     slips: np.ndarray  # (G,) bool: the column has slips
@@ -155,6 +186,9 @@ class Tensors:
     cluster: np.ndarray  # (N,)
     labels: list[str]  # column labels (group names)
     finite: np.ndarray | None = None  # (N,) bool: the row's channel is finite (decision, option, bit)
+    noise: NoiseModel = field(default_factory=NoiseModel)
+    qs: QStrata | None = None  # q = "strata" only
+    reach: int = DMAX  # the kernel's cells beyond this distance are empty (noise option `reach`)
 
     @property
     def n(self) -> int:
@@ -176,7 +210,8 @@ class Tensors:
     def subset(self, rows: np.ndarray) -> "Tensors":
         return Tensors(self.A[rows], self.B0[rows], self.C[rows], self.Q[rows], self.avail[rows], self.slips,
                        self.log_scale[rows], self.item[rows], self.cluster[rows], self.labels,
-                       None if self.finite is None else self.finite[rows])
+                       None if self.finite is None else self.finite[rows], self.noise,
+                       None if self.qs is None else self.qs.subset(rows), self.reach)
 
 
 @dataclass
@@ -195,15 +230,41 @@ class UnitModel:
     item (e.g. RANDOM (H) on a fewest-colour task) is folded into the unexplained mass.
     """
 
-    def __init__(self, unit: Unit, model: str = NEAR_MISS, merge_ties: bool = True, labels: list[str] | None = None):
+    def __init__(self, unit: Unit, model: str = NEAR_MISS, merge_ties: bool = True, labels: list[str] | None = None,
+                 noise: NoiseModel | None = None):
         if model not in MODELS:
             raise ValueError(f"likelihood model must be one of {MODELS}")
         self.unit = unit
         self.model = model
+        self.noise = noise if noise is not None else NoiseModel()
         self.items = [ItemModel.build(it) for it in unit.items]
         self.labels = labels if labels is not None else unit.labels()
         self.groups = self._groups(merge_ties)
         self._cache: dict[tuple[int, str], tuple] = {}
+        if self.noise.cells == "adds-drops" and not all(isinstance(im.space, (BitSpace, FiniteSpace)) for im in self.items):
+            raise ValueError("the swap (adds, drops) kernel is defined on bit spaces only (item sets, assignments)")
+        self.reach = self._reach()
+        cells = AD_CELLS if self.noise.cells == "adds-drops" else [(d, 0) for d in range(DMAX + 1)]
+        self._beyond = np.array([a + r > self.reach for a, r in cells])
+
+    def _reach(self) -> int:
+        """The kernel's reach: the noise option, or with 'auto' the largest r <= DMAX such that on every item a
+        ball of radius r covers at most REACH_COVER of the answer space (partitions: with the members' palette)."""
+        if self.noise.reach != "auto":
+            return int(self.noise.reach)
+        reach = DMAX
+        for i, im in enumerate(self.items):
+            sp = im.space
+            if isinstance(sp, FiniteSpace):
+                continue
+            palette = None
+            if not isinstance(sp, BitSpace):
+                blocks = [int(sp.parse(p.key).max()) + 1 for p in im.preds.values() if p.kind == "det" and not sp.is_special(p.key)]
+                blocks += [int(sp.parse(p.sol.keys()[0]).max()) + 1 for p in im.preds.values() if p.kind == "set" and p.sol.size]
+                palette = (max(blocks) if blocks else sp.n) + 1
+            r = max([d for d in range(1, DMAX + 1) if sp.ball_fraction(d, palette) <= REACH_COVER], default=1)
+            reach = min(reach, r)
+        return reach
 
     # --- ties -------------------------------------------------------------------------------
     def signature(self, i: int, label: str) -> tuple:
@@ -255,7 +316,8 @@ class UnitModel:
         cols = self.columns
         G = len(cols)
         A, B0 = np.zeros(G), np.zeros(G)
-        C = np.zeros((G, DMAX + 1))
+        ad = self.noise.cells == "adds-drops"
+        C = np.zeros((G, len(AD_CELLS) if ad else DMAX + 1))
         avail = np.zeros(G, dtype=bool)
         Q = math.exp(im.space.log_q(y))
         for g, grp in enumerate(cols):
@@ -268,17 +330,25 @@ class UnitModel:
                 if not self.slips(i, p):
                     B0[g] = A[g]  # (1 - eps) A + eps B0 = A at any eps
                 elif self.model == NEAR_MISS:
-                    B0[g], C[g] = im.space.slip(y, p.key)
+                    if ad and isinstance(im.space, BitSpace):
+                        B0[g], C[g] = im.space.slip_ad(y, p.key)
+                    elif ad:  # a finite channel: B0 only
+                        B0[g] = im.space.slip(y, p.key)[0]
+                    else:
+                        B0[g], C[g] = im.space.slip(y, p.key)
                 else:
                     B0[g] = self._candidate_slip(im, y, p.key)
             elif p.kind == "set":
                 A[g] = 1.0 / p.sol.size if p.sol.contains(y) else 0.0
                 if self.model == NEAR_MISS:
-                    C[g] = im.space.slip_set(y, p.sol.array(im.space))
+                    C[g] = (im.space.slip_set_ad(y, p.sol.array(im.space)) if ad
+                            else im.space.slip_set(y, p.sol.array(im.space)))
                 else:
                     B0[g] = self._candidate_slip(im, y, None)
             else:
                 A[g] = B0[g] = self._noslip_prob(im, p, y, Q)
+        if self.reach < DMAX:
+            C[:, self._beyond] = 0.0
         out = (A, B0, C, Q, avail)
         self._cache[ck] = out
         return out
@@ -311,6 +381,35 @@ class UnitModel:
                 return im.space.sample_slip(a, rho, rng)
             return self._sample_candidate_slip(im, a if p.kind == "det" else None, rng)
         return self._sample_noslip(im, p, rng)
+
+    def sample_from(self, i: int, label: str, prm: NoiseParams, rng: np.random.Generator) -> str:
+        """Draw an answer key from P(y | h, x) at fitted noise parameters (per-member eps, any kernel)."""
+        im = self.items[i]
+        p = self.pred(i, label)
+        if p.kind == "na":
+            raise ValueError(f"{label} has no prediction on item {im.item['item_id']}")
+        if p.kind in ("det", "set"):
+            a = p.key if p.kind == "det" else p.sol.keys()[int(rng.integers(p.sol.size))]
+            if not self.slips(i, p) or rng.random() >= prm.eps_for(label):
+                return a
+            if self.model != NEAR_MISS:
+                return self._sample_candidate_slip(im, a if p.kind == "det" else None, rng)
+            if prm.cells == "adds-drops" and isinstance(im.space, BitSpace):
+                return im.space.sample_slip_ad(a, prm.g, rng)
+            if prm.cells == "adds-drops":
+                return im.space.sample_slip(a, 0.0, rng)  # finite channel
+            return im.space.sample_slip_g(a, prm.g, rng)
+        return self._sample_noslip(im, p, rng)
+
+    def sample_q_from(self, i: int, prm: NoiseParams, rng: np.random.Generator) -> str:
+        """Draw from q at fitted parameters: the default q when prm.strata is None."""
+        space = self.items[i].space
+        if prm.strata is None or isinstance(space, FiniteSpace):
+            return space.sample_q(rng)
+        if space.specials and rng.random() < prm.tau:
+            return space.specials[int(rng.integers(len(space.specials)))]
+        P = np.asarray(prm.strata[(space.kind, space.n)], dtype=float)
+        return space.sample_stratum(int(rng.choice(len(P), p=P / P.sum())), rng)
 
     @staticmethod
     def _sample_candidate_slip(im: ItemModel, a: str | None, rng: np.random.Generator) -> str:
@@ -408,7 +507,7 @@ class UnitModel:
         cols = self.columns
         G, N = len(cols), len(obs)
         A, B0 = np.zeros((N, G)), np.zeros((N, G))
-        C = np.zeros((N, G, DMAX + 1))
+        C = np.zeros((N, G, len(AD_CELLS) if self.noise.cells == "adds-drops" else DMAX + 1))
         Q = np.zeros(N)
         avail = np.zeros((N, G), dtype=bool)
         for n, ob in enumerate(obs):
@@ -440,8 +539,72 @@ class UnitModel:
         slips = np.array([any(self.slips(i, self.pred(i, g.members[0])) for i in range(len(self.items))) for g in cols])
         items = np.array([o.item for o in obs], dtype=np.int64)
         finite = np.array([isinstance(self.items[o.item].space, FiniteSpace) for o in obs], dtype=bool)
+        qs = None
+        if self.noise.q == "strata":
+            if token_model is not None:
+                raise NotImplementedError("the strata q is not combined with a token model yet")
+            qs = self.q_strata(obs)
         return Tensors(A, B0, C, Q, avail, slips, np.log(scale), items, self.unit.cluster[items], [g.name for g in cols],
-                       finite)
+                       finite, self.noise, qs, self.reach)
+
+    # --- the strata q (noise.py) ------------------------------------------------------------
+    def always_token_columns(self) -> list[str]:
+        """Column groups that predict a special token (UNSAT, IMPOSSIBLE, X) on every item, available everywhere."""
+        out = []
+        for g in self.columns:
+            preds = [self.pred(i, g.members[0]) for i in range(len(self.items))]
+            if all(p.kind == "det" and self.items[i].space.is_special(p.key) for i, p in enumerate(preds)):
+                out.append(g.name)
+        return out
+
+    def strata_index(self) -> tuple[list[tuple[str, int, int]], np.ndarray, np.ndarray]:
+        """Every stratum of the unit's structured spaces: keys (kind, n, size), group index, default probabilities."""
+        if not hasattr(self, "_strata"):
+            keys: list[tuple[str, int, int]] = []
+            group: list[int] = []
+            p0: list[float] = []
+            seen: dict[tuple[str, int], int] = {}
+            for im in self.items:
+                sp = im.space
+                if isinstance(sp, FiniteSpace) or (sp.kind, sp.n) in seen:
+                    continue
+                seen[(sp.kind, sp.n)] = len(seen)
+                d = sp.default_strata()
+                for size in range(sp.n + 1):
+                    keys.append((sp.kind, sp.n, size))
+                    group.append(seen[(sp.kind, sp.n)])
+                    p0.append(float(d[size]))
+            self._strata = (keys, np.array(group, dtype=np.int64), np.array(p0))
+        return self._strata
+
+    def q_strata(self, obs: list[Observation]) -> QStrata:
+        keys, group, p0 = self.strata_index()
+        where = {k: j for j, k in enumerate(keys)}
+        N = len(obs)
+        row, logsize = np.full(N, -2, dtype=np.int64), np.zeros(N)
+        special, has_special = np.zeros(N, dtype=bool), np.zeros(N, dtype=bool)
+        log_ns, log_fixed = np.zeros(N), np.zeros(N)
+        taus = []
+        for n, ob in enumerate(obs):
+            sp = self.items[ob.item].space
+            log_fixed[n] = sp.log_q(ob.key)
+            if isinstance(sp, FiniteSpace):
+                continue
+            if sp.specials:
+                has_special[n] = True
+                log_ns[n] = math.log(len(sp.specials))
+                taus.append(sp.tau)
+            if sp.is_special(ob.key):
+                special[n] = True
+                row[n] = -1
+                continue
+            size = sp.q_stratum(ob.key)
+            row[n] = where[(sp.kind, sp.n, size)]
+            logsize[n] = sp.log_stratum_size(size)
+        always = self.always_token_columns()
+        tau_free = not always
+        tau0 = (float(np.mean(taus)) if taus else 0.0) if tau_free else 0.0
+        return QStrata(row, logsize, special, has_special, log_ns, log_fixed, group, p0, keys, tau_free, tau0)
 
 
 def _impossibility_token(space: Space) -> str | None:

@@ -31,6 +31,11 @@ others remain.
 **Feature levels** (`feature`): the first factor of the cell label that takes exactly two values
 in the unit (cells split on "/" and "·"); if there is none, the cells are split into two halves in
 sorted order.
+
+**Noise-model options** (`--noise`, docs/NOISE_MODEL.md): the fake models still answer with the
+pre-registered noise (geometric slips at eps = 0.1, rho = 0.3, uniform q), which every option
+nests, and the near-miss fits use the given noise model instead. That asks whether a more
+flexible noise model still recovers the planted weights, or absorbs them into noise.
 """
 
 from __future__ import annotations
@@ -52,6 +57,7 @@ from reasoning_heuristics.identify.engine import design_rank, identifiability, s
 from reasoning_heuristics.identify.fake import Scenario, always_answer, simulate, truth_vector
 from reasoning_heuristics.identify.likelihood import NEAR_MISS, UNIFORM, TruncationTable, UnitModel
 from reasoning_heuristics.identify.mixture import UNEXPLAINED, bca_interval, em, fit, fit_features
+from reasoning_heuristics.identify.noise import NoiseModel
 from reasoning_heuristics.identify.units import Unit, load_items, make_units
 
 GATES = {"bias": 0.05, "coverage": 0.90, "width": 0.20}
@@ -174,11 +180,15 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
     rng = np.random.default_rng(cfg["seed"])
     gen = {NEAR_MISS: UnitModel(unit, NEAR_MISS), UNIFORM: UnitModel(unit, UNIFORM)}
     fitm = gen  # the full zoo is both generator and fit, except off_zoo
+    noise = NoiseModel.parse(cfg.get("noise"))
+    if not noise.is_default:  # fit the near-miss scenarios with another noise model (the generator stays)
+        fitm = {NEAR_MISS: UnitModel(unit, NEAR_MISS, noise=noise), UNIFORM: gen[UNIFORM]}
     um = gen[NEAR_MISS]
     sep = separations(um)
     labels = [g.name for g in um.columns] + [UNEXPLAINED]
     finite = all(type(im.space).__name__ == "FiniteSpace" for im in um.items)
-    out: dict[str, Any] = {"unit": unit.name, "n_items": len(unit.items), "n_clusters": unit.n_clusters,
+    out: dict[str, Any] = {"unit": unit.name, "noise": noise.to_json(), "reach": fitm[NEAR_MISS].reach,
+                           "n_items": len(unit.items), "n_clusters": unit.n_clusters,
                            "n_cells": len(set(unit.cells)), "items_per_cell": round(len(unit.items) / len(set(unit.cells)), 2),
                            "finite_channel": finite, "groups": [g.members for g in um.columns], "folded_into_q": um.q_members,
                            "scenarios": {}}
@@ -277,6 +287,8 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
             Tid = ident[NEAR_MISS]["transform"]
             idl = ident[NEAR_MISS]["identified"]
             truths, ests, los, his = [], [], [], []
+            if not noise.is_default:
+                raise NotImplementedError("the feature scenario is fitted with the default noise model only")
             for _ in range(cfg["feature_reps"]):
                 obs = simulate(um, sc, rng, levels)
                 T = um.tensors(obs)
@@ -302,7 +314,7 @@ def run_unit(unit: Unit, cfg: dict[str, Any]) -> dict[str, Any]:
                 if not all(um.pred(i, g.members[0]).available for i in range(len(um.items))):
                     continue
                 keep = [l for l in um.labels if l not in g.members]
-                um_fit = UnitModel(unit, NEAR_MISS, labels=keep)
+                um_fit = UnitModel(unit, NEAR_MISS, labels=keep, noise=noise)
                 fl = [c.name for c in um_fit.columns] + [UNEXPLAINED]
                 q_identified = True
                 if finite:
@@ -407,6 +419,9 @@ def run(argv: list[str]) -> int:
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--workers", type=int, default=max(1, min(6, (os.cpu_count() or 2) - 2)))
     ap.add_argument("--label", default=None, help="a name for this item set (e.g. dev, pc20)")
+    ap.add_argument("--noise", default=None,
+                    help="fit with this noise model (a name in noise.CANDIDATES, or 'kernel=free,eps_max=1,q=strata'); "
+                         "default: the pre-registered one")
     ap.add_argument("--out", required=True)
     a = ap.parse_args(argv)
     evals = a.evals.split(",") if a.evals else None
@@ -420,6 +435,9 @@ def run(argv: list[str]) -> int:
     cfg = {"reps": a.reps, "boot": a.boot, "single_reps": a.single_reps, "feature_reps": a.feature_reps,
            "feature_boot": a.feature_boot, "offzoo_reps": a.offzoo_reps, "seed": a.seed,
            "scenarios": a.scenarios.split(",")}
+    if a.noise:
+        cfg["noise"] = a.noise
+        cfg["noise_model"] = NoiseModel.parse(a.noise).to_json()
     wanted = [u.strip() for u in a.units.split(";") if u.strip()] if a.units else None
     tasks, found = [], set()
     for ev, ps in sorted(by_eval.items()):

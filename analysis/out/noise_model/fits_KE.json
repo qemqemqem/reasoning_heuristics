@@ -1,0 +1,9751 @@
+{
+ "command": "analysis/noise_model_eval.py fits --noise KE --recovery-boot 0 --workers 3 --out analysis/out/noise_model/fits_KE.json",
+ "fits": {
+  "AH_E5/SAT": {
+   "2026-11-18-pc20-gpt-oss-120b-thinking-low": {
+    "excluded": {
+     "by_cell": {
+      "SAT/P": {
+       "parse_fail": 1
+      }
+     },
+     "rates": {
+      "SAT/P": {
+       "parse_fail": 0.05
+      }
+     },
+     "responses_by_cell": {
+      "SAT/I": 20,
+      "SAT/I+R": 20,
+      "SAT/N": 20,
+      "SAT/P": 20,
+      "SAT/T": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.899033,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.793772,
+      0.983067
+     ],
+     "kernel": [
+      0.0,
+      0.079319,
+      0.130125,
+      0.207354,
+      0.183221,
+      0.262079,
+      0.137902
+     ],
+     "kernel_cells": "distance",
+     "loglik": -793.854002,
+     "n_clusters": 20,
+     "n_params": 11,
+     "n_rows": 99,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact"
+     ],
+     "state": {
+      "eps": [
+       0.899033
+      ],
+      "g": [
+       0.0,
+       0.079319,
+       0.130125,
+       0.207354,
+       0.183221,
+       0.262079,
+       0.137902
+      ],
+      "pi": [
+       0.075166,
+       0.141753,
+       0.052861,
+       0.0,
+       0.35325,
+       0.376971
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.793772
+       ],
+       [
+        0.983067
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.02631,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.151394,
+        0.262528,
+        0.392579,
+        0.357652,
+        0.525078,
+        0.444276
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.018805,
+        0.0,
+        0.0,
+        0.171291,
+        0.215423
+       ],
+       [
+        0.212548,
+        0.245451,
+        0.206127,
+        0.047905,
+        0.542695,
+        0.522915
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "A3 TT[exact]": {
+       "bca": [
+        0.0,
+        0.264965
+       ],
+       "hi": 0.212548,
+       "lo": 0.0,
+       "pi": 0.075166
+      },
+      "C0 POLARITY": {
+       "bca": [
+        0.041496,
+        0.26435
+       ],
+       "hi": 0.245451,
+       "lo": 0.018805,
+       "pi": 0.141753
+      },
+      "C1 GREEDY": {
+       "bca": [
+        0.0,
+        0.229532
+       ],
+       "hi": 0.206127,
+       "lo": 0.0,
+       "pi": 0.052861
+      },
+      "D DPLL (first solution)": {
+       "bca": [
+        0.0,
+        0.256524
+       ],
+       "hi": 0.047905,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "exact": {
+       "bca": [
+        0.180914,
+        0.550105
+       ],
+       "hi": 0.542695,
+       "lo": 0.171291,
+       "pi": 0.35325
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.215771,
+        0.523674
+       ],
+       "hi": 0.522915,
+       "lo": 0.215423,
+       "pi": 0.376971
+      }
+     }
+    },
+    "groups": [
+     [
+      "A3 TT[exact]"
+     ],
+     [
+      "C0 POLARITY"
+     ],
+     [
+      "C1 GREEDY"
+     ],
+     [
+      "D DPLL (first solution)"
+     ],
+     [
+      "exact"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.062905,
+     "noise": 0.937095,
+     "nonslipping_members": 0.0,
+     "q": 0.37697,
+     "slip": 0.560124
+    },
+    "near": {
+     "bins": {
+      "0": 7,
+      "1": 6,
+      "2": 12,
+      "3": 18,
+      "4-6": 35,
+      ">6": 5,
+      "special token": 16
+     },
+     "n": 99,
+     "positions_per_item": [
+      12,
+      16
+     ],
+     "set_sizes_max": 29
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.376925,
+     "weights": {
+      "A3 TT[exact]": 0.075185,
+      "C0 POLARITY": 0.141772,
+      "C1 GREEDY": 0.052889,
+      "exact": 0.353229
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.212121,
+     "exact": 0.070707,
+     "special": 0.161616
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.064949,
+       "1": 0.063838,
+       "2": 0.114545,
+       "3": 0.169596,
+       "4-6": 0.357374,
+       ">6": 0.032828,
+       "no member": 0.0,
+       "special token": 0.196869
+      },
+      "observed": {
+       "0": 0.070707,
+       "1": 0.060606,
+       "2": 0.121212,
+       "3": 0.181818,
+       "4-6": 0.353535,
+       ">6": 0.050505,
+       "no member": 0.0,
+       "special token": 0.161616
+      },
+      "p05_p95": {
+       "0": [
+        0.030303,
+        0.10101
+       ],
+       "1": [
+        0.030303,
+        0.091414
+       ],
+       "2": [
+        0.060606,
+        0.171717
+       ],
+       "3": [
+        0.111111,
+        0.222222
+       ],
+       "4-6": [
+        0.302525,
+        0.425253
+       ],
+       ">6": [
+        0.010101,
+        0.060606
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.140909,
+        0.252525
+       ]
+      },
+      "p_value": 0.920792,
+      "tv_observed": 0.042323,
+      "tv_simulated_mean": 0.08252,
+      "tv_simulated_p05_p95": [
+       0.039783,
+       0.12098
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.229697,
+       "p05_p95": [
+        0.161616,
+        0.292929
+       ]
+      },
+      "exact": {
+       "mean": 0.064949,
+       "p05_p95": [
+        0.030303,
+        0.10101
+       ]
+      },
+      "special": {
+       "mean": 0.196869,
+       "p05_p95": [
+        0.140909,
+        0.252525
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-gpt-oss-120b-thinking-low",
+    "seconds_fit": 14.0,
+    "seed": 569998478,
+    "unit": "AH_E5/SAT"
+   },
+   "2026-11-18-pc20-gpt-oss-20b-thinking-low": {
+    "excluded": {
+     "by_cell": {
+      "SAT/I": {
+       "parse_fail": 1
+      },
+      "SAT/N": {
+       "parse_fail": 2
+      }
+     },
+     "rates": {
+      "SAT/I": {
+       "parse_fail": 0.05
+      },
+      "SAT/N": {
+       "parse_fail": 0.1
+      }
+     },
+     "responses_by_cell": {
+      "SAT/I": 20,
+      "SAT/I+R": 20,
+      "SAT/N": 20,
+      "SAT/P": 20,
+      "SAT/T": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 1.0,
+     "eps_at_cap": true,
+     "eps_by_group": null,
+     "eps_ci": [
+      1.0,
+      1.0
+     ],
+     "kernel": [
+      0.0,
+      0.10292,
+      0.090191,
+      0.129287,
+      0.509534,
+      1e-06,
+      0.168068
+     ],
+     "kernel_cells": "distance",
+     "loglik": -722.750592,
+     "n_clusters": 20,
+     "n_params": 11,
+     "n_rows": 97,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact"
+     ],
+     "state": {
+      "eps": [
+       1.0
+      ],
+      "g": [
+       0.0,
+       0.10292,
+       0.090191,
+       0.129287,
+       0.509534,
+       1e-06,
+       0.168068
+      ],
+      "pi": [
+       0.021434,
+       0.234307,
+       0.0,
+       0.024886,
+       0.083654,
+       0.635719
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        1.0
+       ],
+       [
+        1.0
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.279144,
+        0.214922,
+        0.386478,
+        0.744072,
+        0.363512,
+        0.382733
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.45526
+       ],
+       [
+        0.146321,
+        0.403948,
+        0.156124,
+        0.125883,
+        0.197339,
+        0.75719
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "A3 TT[exact]": {
+       "bca": [
+        0.0,
+        0.160998
+       ],
+       "hi": 0.146321,
+       "lo": 0.0,
+       "pi": 0.021434
+      },
+      "C0 POLARITY": {
+       "bca": [
+        0.0,
+        0.403341
+       ],
+       "hi": 0.403948,
+       "lo": 0.0,
+       "pi": 0.234307
+      },
+      "C1 GREEDY": {
+       "bca": [
+        0.0,
+        0.232783
+       ],
+       "hi": 0.156124,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "D DPLL (first solution)": {
+       "bca": [
+        0.0,
+        0.162213
+       ],
+       "hi": 0.125883,
+       "lo": 0.0,
+       "pi": 0.024886
+      },
+      "exact": {
+       "bca": [
+        0.0,
+        0.21735
+       ],
+       "hi": 0.197339,
+       "lo": 0.0,
+       "pi": 0.083654
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.491246,
+        0.798203
+       ],
+       "hi": 0.75719,
+       "lo": 0.45526,
+       "pi": 0.635719
+      }
+     }
+    },
+    "groups": [
+     [
+      "A3 TT[exact]"
+     ],
+     [
+      "C0 POLARITY"
+     ],
+     [
+      "C1 GREEDY"
+     ],
+     [
+      "D DPLL (first solution)"
+     ],
+     [
+      "exact"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.0,
+     "noise": 1.0,
+     "nonslipping_members": 0.0,
+     "q": 0.635719,
+     "slip": 0.364281
+    },
+    "near": {
+     "bins": {
+      "1": 6,
+      "2": 7,
+      "3": 17,
+      "4-6": 36,
+      ">6": 5,
+      "special token": 26
+     },
+     "n": 97,
+     "positions_per_item": [
+      12,
+      16
+     ],
+     "set_sizes_max": 29
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.6357,
+     "weights": {
+      "A3 TT[exact]": 0.0214,
+      "C0 POLARITY": 0.2343,
+      "D DPLL (first solution)": 0.0249,
+      "exact": 0.0837
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.319588,
+     "exact": 0.0,
+     "special": 0.268041
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.001959,
+       "1": 0.051753,
+       "2": 0.073505,
+       "3": 0.130722,
+       "4-6": 0.373402,
+       ">6": 0.052784,
+       "no member": 0.0,
+       "special token": 0.315876
+      },
+      "observed": {
+       "0": 0.0,
+       "1": 0.061856,
+       "2": 0.072165,
+       "3": 0.175258,
+       "4-6": 0.371134,
+       ">6": 0.051546,
+       "no member": 0.0,
+       "special token": 0.268041
+      },
+      "p05_p95": {
+       "0": [
+        0.0,
+        0.010309
+       ],
+       "1": [
+        0.020619,
+        0.092784
+       ],
+       "2": [
+        0.040722,
+        0.113402
+       ],
+       "3": [
+        0.082474,
+        0.195876
+       ],
+       "4-6": [
+        0.28866,
+        0.453608
+       ],
+       ">6": [
+        0.020619,
+        0.08299
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.237113,
+        0.391753
+       ]
+      },
+      "p_value": 0.782178,
+      "tv_observed": 0.054639,
+      "tv_simulated_mean": 0.080481,
+      "tv_simulated_p05_p95": [
+       0.034593,
+       0.134144
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.36866,
+       "p05_p95": [
+        0.28866,
+        0.463918
+       ]
+      },
+      "exact": {
+       "mean": 0.001959,
+       "p05_p95": [
+        0.0,
+        0.010309
+       ]
+      },
+      "special": {
+       "mean": 0.315876,
+       "p05_p95": [
+        0.237113,
+        0.391753
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-gpt-oss-20b-thinking-low",
+    "seconds_fit": 32.6,
+    "seed": 1668541553,
+    "unit": "AH_E5/SAT"
+   },
+   "2026-11-18-pc20-qwen3-14b-direct": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "SAT/I": 20,
+      "SAT/I+R": 20,
+      "SAT/N": 20,
+      "SAT/P": 20,
+      "SAT/T": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 1.0,
+     "eps_at_cap": true,
+     "eps_by_group": null,
+     "eps_ci": [
+      1.0,
+      1.0
+     ],
+     "kernel": [
+      0.0,
+      0.0,
+      0.073674,
+      0.096635,
+      0.114553,
+      0.37182,
+      0.343318
+     ],
+     "kernel_cells": "distance",
+     "loglik": -1017.825224,
+     "n_clusters": 20,
+     "n_params": 11,
+     "n_rows": 100,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact"
+     ],
+     "state": {
+      "eps": [
+       1.0
+      ],
+      "g": [
+       0.0,
+       0.0,
+       0.073674,
+       0.096635,
+       0.114553,
+       0.37182,
+       0.343318
+      ],
+      "pi": [
+       0.209066,
+       0.09089,
+       0.037013,
+       0.001941,
+       0.194353,
+       0.466737
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        1.0
+       ],
+       [
+        1.0
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        0.304756,
+        0.30159,
+        0.556681,
+        0.727774,
+        0.717853
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.200206
+       ],
+       [
+        0.412702,
+        0.307302,
+        0.177482,
+        0.285973,
+        0.337228,
+        0.774509
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "A3 TT[exact]": {
+       "bca": [
+        0.0,
+        0.436727
+       ],
+       "hi": 0.412702,
+       "lo": 0.0,
+       "pi": 0.209066
+      },
+      "C0 POLARITY": {
+       "bca": [
+        0.0,
+        0.318081
+       ],
+       "hi": 0.307302,
+       "lo": 0.0,
+       "pi": 0.09089
+      },
+      "C1 GREEDY": {
+       "bca": [
+        0.0,
+        0.189527
+       ],
+       "hi": 0.177482,
+       "lo": 0.0,
+       "pi": 0.037013
+      },
+      "D DPLL (first solution)": {
+       "bca": [
+        0.0,
+        0.244265
+       ],
+       "hi": 0.285973,
+       "lo": 0.0,
+       "pi": 0.001941
+      },
+      "exact": {
+       "bca": [
+        0.005111,
+        0.441561
+       ],
+       "hi": 0.337228,
+       "lo": 0.0,
+       "pi": 0.194353
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.203655,
+        0.779777
+       ],
+       "hi": 0.774509,
+       "lo": 0.200206,
+       "pi": 0.466737
+      }
+     }
+    },
+    "groups": [
+     [
+      "A3 TT[exact]"
+     ],
+     [
+      "C0 POLARITY"
+     ],
+     [
+      "C1 GREEDY"
+     ],
+     [
+      "D DPLL (first solution)"
+     ],
+     [
+      "exact"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.0,
+     "noise": 1.0,
+     "nonslipping_members": 0.0,
+     "q": 0.466738,
+     "slip": 0.533262
+    },
+    "near": {
+     "bins": {
+      "1": 2,
+      "2": 8,
+      "3": 12,
+      "4-6": 58,
+      ">6": 20
+     },
+     "n": 100,
+     "positions_per_item": [
+      12,
+      16
+     ],
+     "set_sizes_max": 29
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.467588,
+     "weights": {
+      "A3 TT[exact]": 0.209498,
+      "C0 POLARITY": 0.091073,
+      "C1 GREEDY": 0.03707,
+      "exact": 0.19477
+     }
+    },
+    "ppc": {
+     "fails": [
+      "beyond_reach",
+      "special",
+      "distance"
+     ],
+     "pass": false
+    },
+    "reach": {
+     "beyond_reach": 0.2,
+     "exact": 0.0,
+     "special": 0.0
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.0022,
+       "1": 0.0136,
+       "2": 0.0815,
+       "3": 0.1402,
+       "4-6": 0.4868,
+       ">6": 0.0399,
+       "no member": 0.0,
+       "special token": 0.2358
+      },
+      "observed": {
+       "0": 0.0,
+       "1": 0.02,
+       "2": 0.08,
+       "3": 0.12,
+       "4-6": 0.58,
+       ">6": 0.2,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.0,
+        0.01
+       ],
+       "1": [
+        0.0,
+        0.0305
+       ],
+       "2": [
+        0.04,
+        0.1305
+       ],
+       "3": [
+        0.09,
+        0.19
+       ],
+       "4-6": [
+        0.4095,
+        0.56
+       ],
+       ">6": [
+        0.01,
+        0.07
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.17,
+        0.3
+       ]
+      },
+      "p_value": 0.009901,
+      "tv_observed": 0.2597,
+      "tv_simulated_mean": 0.071855,
+      "tv_simulated_p05_p95": [
+       0.02732,
+       0.116965
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.2757,
+       "p05_p95": [
+        0.21,
+        0.3305
+       ]
+      },
+      "exact": {
+       "mean": 0.0022,
+       "p05_p95": [
+        0.0,
+        0.01
+       ]
+      },
+      "special": {
+       "mean": 0.2358,
+       "p05_p95": [
+        0.17,
+        0.3
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-qwen3-14b-direct",
+    "seconds_fit": 34.9,
+    "seed": 3127677854,
+    "unit": "AH_E5/SAT"
+   },
+   "2026-11-18-pc20-qwen3-14b-thinking-high": {
+    "excluded": {
+     "by_cell": {
+      "SAT/I": {
+       "truncated": 2
+      },
+      "SAT/N": {
+       "truncated": 1
+      },
+      "SAT/P": {
+       "truncated": 1
+      },
+      "SAT/T": {
+       "truncated": 1
+      }
+     },
+     "rates": {
+      "SAT/I": {
+       "truncated": 0.1
+      },
+      "SAT/N": {
+       "truncated": 0.05
+      },
+      "SAT/P": {
+       "truncated": 0.05
+      },
+      "SAT/T": {
+       "truncated": 0.05
+      }
+     },
+     "responses_by_cell": {
+      "SAT/I": 20,
+      "SAT/I+R": 20,
+      "SAT/N": 20,
+      "SAT/P": 20,
+      "SAT/T": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.608984,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.485623,
+      0.746938
+     ],
+     "kernel": [
+      0.0,
+      0.201114,
+      0.142808,
+      0.064738,
+      0.029945,
+      0.311847,
+      0.249549
+     ],
+     "kernel_cells": "distance",
+     "loglik": -614.34145,
+     "n_clusters": 20,
+     "n_params": 11,
+     "n_rows": 95,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact"
+     ],
+     "state": {
+      "eps": [
+       0.608984
+      ],
+      "g": [
+       0.0,
+       0.201114,
+       0.142808,
+       0.064738,
+       0.029945,
+       0.311847,
+       0.249549
+      ],
+      "pi": [
+       0.329408,
+       0.0,
+       0.0,
+       0.032691,
+       0.311039,
+       0.326862
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.485623
+       ],
+       [
+        0.746938
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.073048,
+        0.037477,
+        0.0,
+        0.0,
+        0.058141,
+        0.070316
+       ],
+       [
+        0.0,
+        0.334793,
+        0.263799,
+        0.213844,
+        0.183568,
+        0.534969,
+        0.455178
+       ]
+      ],
+      "pi": [
+       [
+        0.198514,
+        0.0,
+        0.0,
+        0.0,
+        0.149867,
+        0.204052
+       ],
+       [
+        0.455154,
+        0.008769,
+        0.0,
+        0.16357,
+        0.436207,
+        0.435151
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "A3 TT[exact]": {
+       "bca": [
+        0.199113,
+        0.456255
+       ],
+       "hi": 0.455154,
+       "lo": 0.198514,
+       "pi": 0.329408
+      },
+      "C0 POLARITY": {
+       "bca": [
+        0.0,
+        0.062879
+       ],
+       "hi": 0.008769,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "C1 GREEDY": {
+       "bca": [
+        0.0,
+        0.049089
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "D DPLL (first solution)": {
+       "bca": [
+        0.0,
+        0.177075
+       ],
+       "hi": 0.16357,
+       "lo": 0.0,
+       "pi": 0.032691
+      },
+      "exact": {
+       "bca": [
+        0.145548,
+        0.433503
+       ],
+       "hi": 0.436207,
+       "lo": 0.149867,
+       "pi": 0.311039
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.222143,
+        0.44553
+       ],
+       "hi": 0.435151,
+       "lo": 0.204052,
+       "pi": 0.326862
+      }
+     }
+    },
+    "groups": [
+     [
+      "A3 TT[exact]"
+     ],
+     [
+      "C0 POLARITY"
+     ],
+     [
+      "C1 GREEDY"
+     ],
+     [
+      "D DPLL (first solution)"
+     ],
+     [
+      "exact"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.263208,
+     "noise": 0.736792,
+     "nonslipping_members": 0.0,
+     "q": 0.326863,
+     "slip": 0.409929
+    },
+    "near": {
+     "bins": {
+      "0": 26,
+      "1": 8,
+      "2": 8,
+      "3": 8,
+      "4-6": 27,
+      ">6": 1,
+      "special token": 17
+     },
+     "n": 95,
+     "positions_per_item": [
+      12,
+      16
+     ],
+     "set_sizes_max": 29
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.3269,
+     "weights": {
+      "A3 TT[exact]": 0.3294,
+      "D DPLL (first solution)": 0.0327,
+      "exact": 0.311
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.189474,
+     "exact": 0.273684,
+     "special": 0.178947
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.263895,
+       "1": 0.091053,
+       "2": 0.078842,
+       "3": 0.077789,
+       "4-6": 0.296947,
+       ">6": 0.028947,
+       "no member": 0.0,
+       "special token": 0.162526
+      },
+      "observed": {
+       "0": 0.273684,
+       "1": 0.084211,
+       "2": 0.084211,
+       "3": 0.084211,
+       "4-6": 0.284211,
+       ">6": 0.010526,
+       "no member": 0.0,
+       "special token": 0.178947
+      },
+      "p05_p95": {
+       "0": [
+        0.2,
+        0.336842
+       ],
+       "1": [
+        0.042105,
+        0.147368
+       ],
+       "2": [
+        0.031579,
+        0.115789
+       ],
+       "3": [
+        0.031579,
+        0.126842
+       ],
+       "4-6": [
+        0.210526,
+        0.378947
+       ],
+       ">6": [
+        0.0,
+        0.063158
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.105263,
+        0.231579
+       ]
+      },
+      "p_value": 0.980198,
+      "tv_observed": 0.038,
+      "tv_simulated_mean": 0.092412,
+      "tv_simulated_p05_p95": [
+       0.053711,
+       0.140068
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.191474,
+       "p05_p95": [
+        0.136842,
+        0.252632
+       ]
+      },
+      "exact": {
+       "mean": 0.263895,
+       "p05_p95": [
+        0.2,
+        0.336842
+       ]
+      },
+      "special": {
+       "mean": 0.162526,
+       "p05_p95": [
+        0.105263,
+        0.231579
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-qwen3-14b-thinking-high",
+    "seconds_fit": 25.4,
+    "seed": 3070201545,
+    "unit": "AH_E5/SAT"
+   },
+   "2026-11-18-pc20-qwen3-32b-direct": {
+    "excluded": {
+     "by_cell": {
+      "SAT/I+R": {
+       "parse_fail": 1
+      },
+      "SAT/P": {
+       "parse_fail": 4
+      }
+     },
+     "rates": {
+      "SAT/I+R": {
+       "parse_fail": 0.05
+      },
+      "SAT/P": {
+       "parse_fail": 0.2
+      }
+     },
+     "responses_by_cell": {
+      "SAT/I": 20,
+      "SAT/I+R": 20,
+      "SAT/N": 20,
+      "SAT/P": 20,
+      "SAT/T": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 1.0,
+     "eps_at_cap": true,
+     "eps_by_group": null,
+     "eps_ci": [
+      1.0,
+      1.0
+     ],
+     "kernel": [
+      0.0,
+      0.0,
+      0.101013,
+      0.139623,
+      0.05577,
+      0.48723,
+      0.216365
+     ],
+     "kernel_cells": "distance",
+     "loglik": -941.312546,
+     "n_clusters": 20,
+     "n_params": 11,
+     "n_rows": 95,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact"
+     ],
+     "state": {
+      "eps": [
+       1.0
+      ],
+      "g": [
+       0.0,
+       0.0,
+       0.101013,
+       0.139623,
+       0.05577,
+       0.48723,
+       0.216365
+      ],
+      "pi": [
+       0.147075,
+       0.133946,
+       0.0,
+       0.0,
+       0.192716,
+       0.526263
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        1.0
+       ],
+       [
+        1.0
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.159318,
+        0.0
+       ],
+       [
+        0.0,
+        0.03178,
+        0.272834,
+        0.345544,
+        0.310025,
+        0.851592,
+        0.559984
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.312652
+       ],
+       [
+        0.312825,
+        0.318608,
+        0.130417,
+        0.27343,
+        0.33957,
+        0.702934
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "A3 TT[exact]": {
+       "bca": [
+        0.0,
+        0.335471
+       ],
+       "hi": 0.312825,
+       "lo": 0.0,
+       "pi": 0.147075
+      },
+      "C0 POLARITY": {
+       "bca": [
+        0.0,
+        0.348649
+       ],
+       "hi": 0.318608,
+       "lo": 0.0,
+       "pi": 0.133946
+      },
+      "C1 GREEDY": {
+       "bca": [
+        0.0,
+        0.222343
+       ],
+       "hi": 0.130417,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "D DPLL (first solution)": {
+       "bca": [
+        0.0,
+        0.373818
+       ],
+       "hi": 0.27343,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "exact": {
+       "bca": [
+        1.6e-05,
+        0.384669
+       ],
+       "hi": 0.33957,
+       "lo": 0.0,
+       "pi": 0.192716
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.341901,
+        0.724573
+       ],
+       "hi": 0.702934,
+       "lo": 0.312652,
+       "pi": 0.526263
+      }
+     }
+    },
+    "groups": [
+     [
+      "A3 TT[exact]"
+     ],
+     [
+      "C0 POLARITY"
+     ],
+     [
+      "C1 GREEDY"
+     ],
+     [
+      "D DPLL (first solution)"
+     ],
+     [
+      "exact"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.0,
+     "noise": 1.0,
+     "nonslipping_members": 0.0,
+     "q": 0.526263,
+     "slip": 0.473737
+    },
+    "near": {
+     "bins": {
+      "1": 3,
+      "2": 8,
+      "3": 12,
+      "4-6": 46,
+      ">6": 23,
+      "special token": 3
+     },
+     "n": 95,
+     "positions_per_item": [
+      12,
+      16
+     ],
+     "set_sizes_max": 29
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.5263,
+     "weights": {
+      "A3 TT[exact]": 0.1471,
+      "C0 POLARITY": 0.1339,
+      "exact": 0.1927
+     }
+    },
+    "ppc": {
+     "fails": [
+      "special",
+      "distance"
+     ],
+     "pass": false
+    },
+    "reach": {
+     "beyond_reach": 0.273684,
+     "exact": 0.0,
+     "special": 0.031579
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.001579,
+       "1": 0.014421,
+       "2": 0.086737,
+       "3": 0.138632,
+       "4-6": 0.448947,
+       ">6": 0.050211,
+       "no member": 0.0,
+       "special token": 0.259474
+      },
+      "observed": {
+       "0": 0.0,
+       "1": 0.031579,
+       "2": 0.084211,
+       "3": 0.126316,
+       "4-6": 0.484211,
+       ">6": 0.242105,
+       "no member": 0.0,
+       "special token": 0.031579
+      },
+      "p05_p95": {
+       "0": [
+        0.0,
+        0.010526
+       ],
+       "1": [
+        0.0,
+        0.042105
+       ],
+       "2": [
+        0.052632,
+        0.126316
+       ],
+       "3": [
+        0.073684,
+        0.19
+       ],
+       "4-6": [
+        0.367895,
+        0.526316
+       ],
+       ">6": [
+        0.021053,
+        0.084737
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.178421,
+        0.326316
+       ]
+      },
+      "p_value": 0.009901,
+      "tv_observed": 0.244316,
+      "tv_simulated_mean": 0.078395,
+      "tv_simulated_p05_p95": [
+       0.035089,
+       0.126132
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.309684,
+       "p05_p95": [
+        0.241579,
+        0.38
+       ]
+      },
+      "exact": {
+       "mean": 0.001579,
+       "p05_p95": [
+        0.0,
+        0.010526
+       ]
+      },
+      "special": {
+       "mean": 0.259474,
+       "p05_p95": [
+        0.178421,
+        0.326316
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-qwen3-32b-direct",
+    "seconds_fit": 56.2,
+    "seed": 3447929385,
+    "unit": "AH_E5/SAT"
+   },
+   "2026-11-18-pc20-qwen3-32b-thinking-high": {
+    "excluded": {
+     "by_cell": {
+      "SAT/I+R": {
+       "truncated": 1
+      },
+      "SAT/N": {
+       "truncated": 1
+      },
+      "SAT/P": {
+       "truncated": 2
+      },
+      "SAT/T": {
+       "truncated": 1
+      }
+     },
+     "rates": {
+      "SAT/I+R": {
+       "truncated": 0.05
+      },
+      "SAT/N": {
+       "truncated": 0.05
+      },
+      "SAT/P": {
+       "truncated": 0.1
+      },
+      "SAT/T": {
+       "truncated": 0.05
+      }
+     },
+     "responses_by_cell": {
+      "SAT/I": 20,
+      "SAT/I+R": 20,
+      "SAT/N": 20,
+      "SAT/P": 20,
+      "SAT/T": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.670961,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.570916,
+      0.783276
+     ],
+     "kernel": [
+      0.0,
+      0.16023,
+      0.137242,
+      0.117711,
+      0.0884,
+      0.233399,
+      0.263018
+     ],
+     "kernel_cells": "distance",
+     "loglik": -709.055897,
+     "n_clusters": 20,
+     "n_params": 11,
+     "n_rows": 95,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "A3 TT[exact]",
+      "C0 POLARITY",
+      "C1 GREEDY",
+      "D DPLL (first solution)",
+      "exact"
+     ],
+     "state": {
+      "eps": [
+       0.670961
+      ],
+      "g": [
+       0.0,
+       0.16023,
+       0.137242,
+       0.117711,
+       0.0884,
+       0.233399,
+       0.263018
+      ],
+      "pi": [
+       0.266612,
+       0.014952,
+       0.091709,
+       0.022503,
+       0.374137,
+       0.230088
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.570916
+       ],
+       [
+        0.783276
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.038327,
+        0.0,
+        0.0,
+        0.0,
+        0.0177,
+        0.109659
+       ],
+       [
+        0.0,
+        0.284036,
+        0.301862,
+        0.240035,
+        0.260335,
+        0.435657,
+        0.444545
+       ]
+      ],
+      "pi": [
+       [
+        0.158525,
+        0.0,
+        0.0,
+        0.0,
+        0.210807,
+        0.116652
+       ],
+       [
+        0.380307,
+        0.135279,
+        0.173644,
+        0.122093,
+        0.526096,
+        0.322288
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "A3 TT[exact]": {
+       "bca": [
+        0.154886,
+        0.377651
+       ],
+       "hi": 0.380307,
+       "lo": 0.158525,
+       "pi": 0.266612
+      },
+      "C0 POLARITY": {
+       "bca": [
+        0.0,
+        0.152479
+       ],
+       "hi": 0.135279,
+       "lo": 0.0,
+       "pi": 0.014952
+      },
+      "C1 GREEDY": {
+       "bca": [
+        0.014687,
+        0.186835
+       ],
+       "hi": 0.173644,
+       "lo": 0.0,
+       "pi": 0.091709
+      },
+      "D DPLL (first solution)": {
+       "bca": [
+        0.0,
+        0.136075
+       ],
+       "hi": 0.122093,
+       "lo": 0.0,
+       "pi": 0.022503
+      },
+      "exact": {
+       "bca": [
+        0.228095,
+        0.541449
+       ],
+       "hi": 0.526096,
+       "lo": 0.210807,
+       "pi": 0.374137
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.14322,
+        0.354005
+       ],
+       "hi": 0.322288,
+       "lo": 0.116652,
+       "pi": 0.230088
+      }
+     }
+    },
+    "groups": [
+     [
+      "A3 TT[exact]"
+     ],
+     [
+      "C0 POLARITY"
+     ],
+     [
+      "C1 GREEDY"
+     ],
+     [
+      "D DPLL (first solution)"
+     ],
+     [
+      "exact"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.253331,
+     "noise": 0.746669,
+     "nonslipping_members": 0.0,
+     "q": 0.230088,
+     "slip": 0.51658
+    },
+    "near": {
+     "bins": {
+      "0": 25,
+      "1": 9,
+      "2": 9,
+      "3": 11,
+      "4-6": 30,
+      ">6": 2,
+      "special token": 9
+     },
+     "n": 95,
+     "positions_per_item": [
+      12,
+      16
+     ],
+     "set_sizes_max": 29
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.2301,
+     "weights": {
+      "A3 TT[exact]": 0.2666,
+      "C0 POLARITY": 0.015,
+      "C1 GREEDY": 0.0917,
+      "D DPLL (first solution)": 0.0225,
+      "exact": 0.3741
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.115789,
+     "exact": 0.263158,
+     "special": 0.094737
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.258842,
+       "1": 0.097474,
+       "2": 0.098421,
+       "3": 0.103053,
+       "4-6": 0.308947,
+       ">6": 0.020947,
+       "no member": 0.0,
+       "special token": 0.112316
+      },
+      "observed": {
+       "0": 0.263158,
+       "1": 0.094737,
+       "2": 0.094737,
+       "3": 0.115789,
+       "4-6": 0.315789,
+       ">6": 0.021053,
+       "no member": 0.0,
+       "special token": 0.094737
+      },
+      "p05_p95": {
+       "0": [
+        0.178947,
+        0.336842
+       ],
+       "1": [
+        0.052632,
+        0.147895
+       ],
+       "2": [
+        0.052105,
+        0.157895
+       ],
+       "3": [
+        0.062632,
+        0.147895
+       ],
+       "4-6": [
+        0.231053,
+        0.378947
+       ],
+       ">6": [
+        0.0,
+        0.042632
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.063158,
+        0.158421
+       ]
+      },
+      "p_value": 1.0,
+      "tv_observed": 0.024,
+      "tv_simulated_mean": 0.091757,
+      "tv_simulated_p05_p95": [
+       0.046037,
+       0.140689
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.133263,
+       "p05_p95": [
+        0.084211,
+        0.200526
+       ]
+      },
+      "exact": {
+       "mean": 0.258842,
+       "p05_p95": [
+        0.178947,
+        0.336842
+       ]
+      },
+      "special": {
+       "mean": 0.112316,
+       "p05_p95": [
+        0.063158,
+        0.158421
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-qwen3-32b-thinking-high",
+    "seconds_fit": 37.8,
+    "seed": 827488234,
+    "unit": "AH_E5/SAT"
+   }
+  },
+  "C_E2/colouring": {
+   "2026-11-18-pc20-gpt-oss-120b-thinking-low": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "COL/DSATUR-vs-LF/BASE": 20,
+      "COL/DSATUR-vs-LF/D(DSATUR|LF)": 20,
+      "COL/DSATUR-vs-LF/D(LF|DSATUR)": 20,
+      "COL/DSATUR-vs-LF/G-ONLY": 20,
+      "COL/DSATUR-vs-LF/PLACEBO": 20,
+      "COL/FF-vs-DSATUR/BASE": 20,
+      "COL/FF-vs-DSATUR/D(DSATUR|FF)": 20,
+      "COL/FF-vs-DSATUR/D(FF|DSATUR)": 20,
+      "COL/FF-vs-DSATUR/G-ONLY": 20,
+      "COL/FF-vs-DSATUR/PLACEBO": 20,
+      "COL/FF-vs-LF/BASE": 20,
+      "COL/FF-vs-LF/D(FF|LF)": 20,
+      "COL/FF-vs-LF/D(LF|FF)": 20,
+      "COL/FF-vs-LF/G-ONLY": 20,
+      "COL/FF-vs-LF/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.412051,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.332492,
+      0.496935
+     ],
+     "kernel": [
+      0.0,
+      0.147429,
+      0.151811,
+      0.21572,
+      0.141576,
+      0.095671,
+      0.247794
+     ],
+     "kernel_cells": "distance",
+     "loglik": -2373.904759,
+     "n_clusters": 60,
+     "n_params": 15,
+     "n_rows": 300,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "LF"
+     ],
+     "state": {
+      "eps": [
+       0.412051
+      ],
+      "g": [
+       0.0,
+       0.147429,
+       0.151811,
+       0.21572,
+       0.141576,
+       0.095671,
+       0.247794
+      ],
+      "pi": [
+       0.059304,
+       0.01615,
+       0.006927,
+       0.066414,
+       0.018257,
+       0.389672,
+       0.019803,
+       0.0,
+       0.406825,
+       0.016648
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.332492
+       ],
+       [
+        0.496935
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.071263,
+        0.073642,
+        0.116022,
+        0.040016,
+        0.015228,
+        0.140686
+       ],
+       [
+        0.0,
+        0.229056,
+        0.227212,
+        0.327496,
+        0.262659,
+        0.177389,
+        0.354876
+       ]
+      ],
+      "pi": [
+       [
+        0.016419,
+        0.002694,
+        0.0,
+        0.034411,
+        0.0,
+        0.312521,
+        0.003934,
+        0.0,
+        0.338201,
+        0.003314
+       ],
+       [
+        0.104373,
+        0.033161,
+        0.020269,
+        0.099811,
+        0.047743,
+        0.470272,
+        0.039649,
+        0.011036,
+        0.477519,
+        0.029983
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "DPLL-LIST (D)": {
+       "bca": [
+        0.021486,
+        0.110154
+       ],
+       "hi": 0.104373,
+       "lo": 0.016419,
+       "pi": 0.059304
+      },
+      "DSATUR": {
+       "bca": [
+        0.003998,
+        0.039429
+       ],
+       "hi": 0.033161,
+       "lo": 0.002694,
+       "pi": 0.01615
+      },
+      "DSATUR-LABEL": {
+       "bca": [
+        0.0,
+        0.027656
+       ],
+       "hi": 0.020269,
+       "lo": 0.0,
+       "pi": 0.006927
+      },
+      "EXACT": {
+       "bca": [
+        0.037338,
+        0.10278
+       ],
+       "hi": 0.099811,
+       "lo": 0.034411,
+       "pi": 0.066414
+      },
+      "FF-LABEL": {
+       "bca": [
+        0.0,
+        0.073087
+       ],
+       "hi": 0.047743,
+       "lo": 0.0,
+       "pi": 0.018257
+      },
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)": {
+       "bca": [
+        0.315342,
+        0.471346
+       ],
+       "hi": 0.470272,
+       "lo": 0.312521,
+       "pi": 0.389672
+      },
+      "LF": {
+       "bca": [
+        0.007125,
+        0.042803
+       ],
+       "hi": 0.039649,
+       "lo": 0.003934,
+       "pi": 0.019803
+      },
+      "NOISY-EXACT": {
+       "bca": [
+        0.0,
+        0.067817
+       ],
+       "hi": 0.011036,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RO-FF (C3)": {
+       "bca": [
+        0.34021,
+        0.47977
+       ],
+       "hi": 0.477519,
+       "lo": 0.338201,
+       "pi": 0.406825
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.006646,
+        0.034557
+       ],
+       "hi": 0.029983,
+       "lo": 0.003314,
+       "pi": 0.016648
+      }
+     }
+    },
+    "groups": [
+     [
+      "DPLL-LIST (D)"
+     ],
+     [
+      "DSATUR"
+     ],
+     [
+      "DSATUR-LABEL"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "FF-LABEL"
+     ],
+     [
+      "FF-LIST",
+      "GREEDY+REPAIR-LIST (C->F)"
+     ],
+     [
+      "LF"
+     ],
+     [
+      "NOISY-EXACT"
+     ],
+     [
+      "RO-FF (C3)"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.338968,
+     "noise": 0.254206,
+     "nonslipping_members": 0.406825,
+     "q": 0.016648,
+     "slip": 0.237559
+    },
+    "near": {
+     "bins": {
+      "0": 127,
+      "1": 13,
+      "2": 30,
+      "3": 40,
+      "4-6": 86,
+      ">6": 4
+     },
+     "n": 300,
+     "positions_per_item": [
+      16
+     ],
+     "set_sizes_max": 149388
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.016715,
+     "weights": {
+      "DPLL-LIST (D)": 0.059712,
+      "DSATUR": 0.016313,
+      "EXACT": 0.066861,
+      "FF-LABEL": 0.018427,
+      "FF-LIST": 0.392408,
+      "LF": 0.019938,
+      "RO-FF (C3)": 0.409626
+     }
+    },
+    "ppc": {
+     "fails": [
+      "beyond_reach"
+     ],
+     "pass": false
+    },
+    "reach": {
+     "beyond_reach": 0.023333,
+     "exact": 0.423333,
+     "special": 0.0
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.431133,
+       "1": 0.042633,
+       "2": 0.0924,
+       "3": 0.099967,
+       "4-6": 0.282333,
+       ">6": 0.051533,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.423333,
+       "1": 0.043333,
+       "2": 0.1,
+       "3": 0.133333,
+       "4-6": 0.286667,
+       ">6": 0.013333,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.379833,
+        0.486833
+       ],
+       "1": [
+        0.023333,
+        0.06
+       ],
+       "2": [
+        0.0665,
+        0.130333
+       ],
+       "3": [
+        0.073333,
+        0.130167
+       ],
+       "4-6": [
+        0.2465,
+        0.316833
+       ],
+       ">6": [
+        0.033333,
+        0.07
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.465347,
+      "tv_observed": 0.046,
+      "tv_simulated_mean": 0.047525,
+      "tv_simulated_p05_p95": [
+       0.023172,
+       0.080273
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.061667,
+       "p05_p95": [
+        0.039833,
+        0.080167
+       ]
+      },
+      "exact": {
+       "mean": 0.431133,
+       "p05_p95": [
+        0.379833,
+        0.486833
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-gpt-oss-120b-thinking-low",
+    "seconds_fit": 191.6,
+    "seed": 1215989478,
+    "unit": "C_E2/colouring"
+   },
+   "2026-11-18-pc20-gpt-oss-20b-thinking-low": {
+    "excluded": {
+     "by_cell": {
+      "COL/FF-vs-DSATUR/G-ONLY": {
+       "parse_fail": 1
+      }
+     },
+     "rates": {
+      "COL/FF-vs-DSATUR/G-ONLY": {
+       "parse_fail": 0.05
+      }
+     },
+     "responses_by_cell": {
+      "COL/DSATUR-vs-LF/BASE": 20,
+      "COL/DSATUR-vs-LF/D(DSATUR|LF)": 20,
+      "COL/DSATUR-vs-LF/D(LF|DSATUR)": 20,
+      "COL/DSATUR-vs-LF/G-ONLY": 20,
+      "COL/DSATUR-vs-LF/PLACEBO": 20,
+      "COL/FF-vs-DSATUR/BASE": 20,
+      "COL/FF-vs-DSATUR/D(DSATUR|FF)": 20,
+      "COL/FF-vs-DSATUR/D(FF|DSATUR)": 20,
+      "COL/FF-vs-DSATUR/G-ONLY": 20,
+      "COL/FF-vs-DSATUR/PLACEBO": 20,
+      "COL/FF-vs-LF/BASE": 20,
+      "COL/FF-vs-LF/D(FF|LF)": 20,
+      "COL/FF-vs-LF/D(LF|FF)": 20,
+      "COL/FF-vs-LF/G-ONLY": 20,
+      "COL/FF-vs-LF/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.661861,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.595762,
+      0.741718
+     ],
+     "kernel": [
+      0.0,
+      0.20082,
+      0.118666,
+      0.083253,
+      0.124569,
+      0.270754,
+      0.201938
+     ],
+     "kernel_cells": "distance",
+     "loglik": -3686.147098,
+     "n_clusters": 60,
+     "n_params": 15,
+     "n_rows": 299,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "LF"
+     ],
+     "state": {
+      "eps": [
+       0.661861
+      ],
+      "g": [
+       0.0,
+       0.20082,
+       0.118666,
+       0.083253,
+       0.124569,
+       0.270754,
+       0.201938
+      ],
+      "pi": [
+       0.029258,
+       0.0,
+       0.040175,
+       0.140993,
+       0.036629,
+       0.347793,
+       0.038153,
+       0.003779,
+       0.277387,
+       0.085834
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.595762
+       ],
+       [
+        0.741718
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.133046,
+        0.061715,
+        0.031438,
+        0.054954,
+        0.155143,
+        0.1129
+       ],
+       [
+        0.0,
+        0.273044,
+        0.175044,
+        0.138038,
+        0.20187,
+        0.401591,
+        0.296319
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.0,
+        0.012518,
+        0.069673,
+        0.011951,
+        0.286339,
+        0.010345,
+        0.0,
+        0.221938,
+        0.054077
+       ],
+       [
+        0.063873,
+        0.010908,
+        0.072685,
+        0.193362,
+        0.064104,
+        0.413263,
+        0.071732,
+        0.05871,
+        0.335386,
+        0.114292
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "DPLL-LIST (D)": {
+       "bca": [
+        2.8e-05,
+        0.07142
+       ],
+       "hi": 0.063873,
+       "lo": 0.0,
+       "pi": 0.029258
+      },
+      "DSATUR": {
+       "bca": [
+        0.0,
+        0.035754
+       ],
+       "hi": 0.010908,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "DSATUR-LABEL": {
+       "bca": [
+        0.015701,
+        0.077591
+       ],
+       "hi": 0.072685,
+       "lo": 0.012518,
+       "pi": 0.040175
+      },
+      "EXACT": {
+       "bca": [
+        0.087638,
+        0.208251
+       ],
+       "hi": 0.193362,
+       "lo": 0.069673,
+       "pi": 0.140993
+      },
+      "FF-LABEL": {
+       "bca": [
+        0.014545,
+        0.069225
+       ],
+       "hi": 0.064104,
+       "lo": 0.011951,
+       "pi": 0.036629
+      },
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)": {
+       "bca": [
+        0.290311,
+        0.416459
+       ],
+       "hi": 0.413263,
+       "lo": 0.286339,
+       "pi": 0.347793
+      },
+      "LF": {
+       "bca": [
+        0.01442,
+        0.07994
+       ],
+       "hi": 0.071732,
+       "lo": 0.010345,
+       "pi": 0.038153
+      },
+      "NOISY-EXACT": {
+       "bca": [
+        0.0,
+        0.058764
+       ],
+       "hi": 0.05871,
+       "lo": 0.0,
+       "pi": 0.003779
+      },
+      "RO-FF (C3)": {
+       "bca": [
+        0.220933,
+        0.334939
+       ],
+       "hi": 0.335386,
+       "lo": 0.221938,
+       "pi": 0.277387
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.059988,
+        0.123321
+       ],
+       "hi": 0.114292,
+       "lo": 0.054077,
+       "pi": 0.085834
+      }
+     }
+    },
+    "groups": [
+     [
+      "DPLL-LIST (D)"
+     ],
+     [
+      "DSATUR"
+     ],
+     [
+      "DSATUR-LABEL"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "FF-LABEL"
+     ],
+     [
+      "FF-LIST",
+      "GREEDY+REPAIR-LIST (C->F)"
+     ],
+     [
+      "LF"
+     ],
+     [
+      "NOISY-EXACT"
+     ],
+     [
+      "RO-FF (C3)"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.214043,
+     "noise": 0.504793,
+     "nonslipping_members": 0.281165,
+     "q": 0.085834,
+     "slip": 0.418958
+    },
+    "near": {
+     "bins": {
+      "0": 84,
+      "1": 28,
+      "2": 31,
+      "3": 26,
+      "4-6": 105,
+      ">6": 25
+     },
+     "n": 299,
+     "positions_per_item": [
+      16
+     ],
+     "set_sizes_max": 149388
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.086119,
+     "weights": {
+      "DPLL-LIST (D)": 0.029409,
+      "DSATUR-LABEL": 0.040349,
+      "EXACT": 0.141524,
+      "FF-LABEL": 0.036736,
+      "FF-LIST": 0.349092,
+      "LF": 0.038342,
+      "RO-FF (C3)": 0.27843
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.103679,
+     "exact": 0.280936,
+     "special": 0.0
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.278094,
+       "1": 0.091204,
+       "2": 0.087291,
+       "3": 0.085184,
+       "4-6": 0.350602,
+       ">6": 0.107625,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.280936,
+       "1": 0.093645,
+       "2": 0.103679,
+       "3": 0.086957,
+       "4-6": 0.351171,
+       ">6": 0.083612,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.240803,
+        0.314381
+       ],
+       "1": [
+        0.063378,
+        0.120401
+       ],
+       "2": [
+        0.063545,
+        0.110535
+       ],
+       "3": [
+        0.060033,
+        0.11388
+       ],
+       "4-6": [
+        0.307692,
+        0.391304
+       ],
+       ">6": [
+        0.080268,
+        0.137124
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.930693,
+      "tv_observed": 0.024013,
+      "tv_simulated_mean": 0.045391,
+      "tv_simulated_p05_p95": [
+       0.02243,
+       0.071388
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.114983,
+       "p05_p95": [
+        0.086789,
+        0.140635
+       ]
+      },
+      "exact": {
+       "mean": 0.278094,
+       "p05_p95": [
+        0.240803,
+        0.314381
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-gpt-oss-20b-thinking-low",
+    "seconds_fit": 246.5,
+    "seed": 3863706338,
+    "unit": "C_E2/colouring"
+   },
+   "2026-11-18-pc20-qwen3-14b-direct": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "COL/DSATUR-vs-LF/BASE": 20,
+      "COL/DSATUR-vs-LF/D(DSATUR|LF)": 20,
+      "COL/DSATUR-vs-LF/D(LF|DSATUR)": 20,
+      "COL/DSATUR-vs-LF/G-ONLY": 20,
+      "COL/DSATUR-vs-LF/PLACEBO": 20,
+      "COL/FF-vs-DSATUR/BASE": 20,
+      "COL/FF-vs-DSATUR/D(DSATUR|FF)": 20,
+      "COL/FF-vs-DSATUR/D(FF|DSATUR)": 20,
+      "COL/FF-vs-DSATUR/G-ONLY": 20,
+      "COL/FF-vs-DSATUR/PLACEBO": 20,
+      "COL/FF-vs-LF/BASE": 20,
+      "COL/FF-vs-LF/D(FF|LF)": 20,
+      "COL/FF-vs-LF/D(LF|FF)": 20,
+      "COL/FF-vs-LF/G-ONLY": 20,
+      "COL/FF-vs-LF/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 1.0,
+     "eps_at_cap": true,
+     "eps_by_group": null,
+     "eps_ci": [
+      1.0,
+      1.0
+     ],
+     "kernel": [
+      0.0,
+      0.015626,
+      0.0,
+      0.0,
+      0.0,
+      0.050346,
+      0.934028
+     ],
+     "kernel_cells": "distance",
+     "loglik": -7333.481385,
+     "n_clusters": 60,
+     "n_params": 15,
+     "n_rows": 300,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "LF"
+     ],
+     "state": {
+      "eps": [
+       1.0
+      ],
+      "g": [
+       0.0,
+       0.015626,
+       0.0,
+       0.0,
+       0.0,
+       0.050346,
+       0.934028
+      ],
+      "pi": [
+       0.0,
+       0.0,
+       0.0,
+       0.136902,
+       0.023532,
+       0.010289,
+       0.02551,
+       0.0,
+       0.0,
+       0.803766
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        1.0
+       ],
+       [
+        1.0
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.779751
+       ],
+       [
+        0.0,
+        0.050751,
+        0.0,
+        0.06432,
+        0.0,
+        0.210107,
+        1.0
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.079376,
+        0.003673,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.736951
+       ],
+       [
+        0.01747,
+        0.010375,
+        0.012735,
+        0.200814,
+        0.047274,
+        0.025305,
+        0.055019,
+        0.0,
+        0.0,
+        0.864466
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "DPLL-LIST (D)": {
+       "bca": [
+        0.0,
+        0.03152
+       ],
+       "hi": 0.01747,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "DSATUR": {
+       "bca": [
+        0.0,
+        0.027261
+       ],
+       "hi": 0.010375,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "DSATUR-LABEL": {
+       "bca": [
+        0.0,
+        0.02015
+       ],
+       "hi": 0.012735,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "EXACT": {
+       "bca": [
+        0.088355,
+        0.217024
+       ],
+       "hi": 0.200814,
+       "lo": 0.079376,
+       "pi": 0.136902
+      },
+      "FF-LABEL": {
+       "bca": [
+        0.006331,
+        0.053584
+       ],
+       "hi": 0.047274,
+       "lo": 0.003673,
+       "pi": 0.023532
+      },
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)": {
+       "bca": [
+        0.0,
+        0.032861
+       ],
+       "hi": 0.025305,
+       "lo": 0.0,
+       "pi": 0.010289
+      },
+      "LF": {
+       "bca": [
+        0.0,
+        0.071672
+       ],
+       "hi": 0.055019,
+       "lo": 0.0,
+       "pi": 0.02551
+      },
+      "NOISY-EXACT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RO-FF (C3)": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.730015,
+        0.860383
+       ],
+       "hi": 0.864466,
+       "lo": 0.736951,
+       "pi": 0.803766
+      }
+     }
+    },
+    "groups": [
+     [
+      "DPLL-LIST (D)"
+     ],
+     [
+      "DSATUR"
+     ],
+     [
+      "DSATUR-LABEL"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "FF-LABEL"
+     ],
+     [
+      "FF-LIST",
+      "GREEDY+REPAIR-LIST (C->F)"
+     ],
+     [
+      "LF"
+     ],
+     [
+      "NOISY-EXACT"
+     ],
+     [
+      "RO-FF (C3)"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.0,
+     "noise": 1.0,
+     "nonslipping_members": 0.0,
+     "q": 0.803766,
+     "slip": 0.196234
+    },
+    "near": {
+     "bins": {
+      "1": 1,
+      "2": 1,
+      "3": 7,
+      "4-6": 60,
+      ">6": 231
+     },
+     "n": 300,
+     "positions_per_item": [
+      16
+     ],
+     "set_sizes_max": 149388
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.8038,
+     "weights": {
+      "EXACT": 0.1369,
+      "FF-LABEL": 0.0235,
+      "FF-LIST": 0.0103,
+      "LF": 0.0255
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.803333,
+     "exact": 0.0,
+     "special": 0.0
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.000167,
+       "1": 0.0025,
+       "2": 0.001667,
+       "3": 0.008633,
+       "4-6": 0.190433,
+       ">6": 0.7966,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.0,
+       "1": 0.003333,
+       "2": 0.003333,
+       "3": 0.023333,
+       "4-6": 0.2,
+       ">6": 0.77,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.0,
+        0.0
+       ],
+       "1": [
+        0.0,
+        0.006667
+       ],
+       "2": [
+        0.0,
+        0.006667
+       ],
+       "3": [
+        0.0,
+        0.016667
+       ],
+       "4-6": [
+        0.156667,
+        0.226833
+       ],
+       ">6": [
+        0.756667,
+        0.833333
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.326733,
+      "tv_observed": 0.026767,
+      "tv_simulated_mean": 0.021343,
+      "tv_simulated_p05_p95": [
+       0.005045,
+       0.049867
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.805033,
+       "p05_p95": [
+        0.766333,
+        0.836833
+       ]
+      },
+      "exact": {
+       "mean": 0.000167,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-qwen3-14b-direct",
+    "seconds_fit": 237.9,
+    "seed": 3387221693,
+    "unit": "C_E2/colouring"
+   },
+   "2026-11-18-pc20-qwen3-14b-thinking-high": {
+    "excluded": {
+     "by_cell": {
+      "COL/DSATUR-vs-LF/G-ONLY": {
+       "parse_fail": 1
+      }
+     },
+     "rates": {
+      "COL/DSATUR-vs-LF/G-ONLY": {
+       "parse_fail": 0.05
+      }
+     },
+     "responses_by_cell": {
+      "COL/DSATUR-vs-LF/BASE": 20,
+      "COL/DSATUR-vs-LF/D(DSATUR|LF)": 20,
+      "COL/DSATUR-vs-LF/D(LF|DSATUR)": 20,
+      "COL/DSATUR-vs-LF/G-ONLY": 20,
+      "COL/DSATUR-vs-LF/PLACEBO": 20,
+      "COL/FF-vs-DSATUR/BASE": 20,
+      "COL/FF-vs-DSATUR/D(DSATUR|FF)": 20,
+      "COL/FF-vs-DSATUR/D(FF|DSATUR)": 20,
+      "COL/FF-vs-DSATUR/G-ONLY": 20,
+      "COL/FF-vs-DSATUR/PLACEBO": 20,
+      "COL/FF-vs-LF/BASE": 20,
+      "COL/FF-vs-LF/D(FF|LF)": 20,
+      "COL/FF-vs-LF/D(LF|FF)": 20,
+      "COL/FF-vs-LF/G-ONLY": 20,
+      "COL/FF-vs-LF/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.128515,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.072101,
+      0.194286
+     ],
+     "kernel": [
+      0.0,
+      0.266514,
+      0.088128,
+      0.164059,
+      0.252497,
+      0.172989,
+      0.055815
+     ],
+     "kernel_cells": "distance",
+     "loglik": -1352.51415,
+     "n_clusters": 60,
+     "n_params": 15,
+     "n_rows": 299,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "LF"
+     ],
+     "state": {
+      "eps": [
+       0.128515
+      ],
+      "g": [
+       0.0,
+       0.266514,
+       0.088128,
+       0.164059,
+       0.252497,
+       0.172989,
+       0.055815
+      ],
+      "pi": [
+       0.051243,
+       0.021981,
+       0.006508,
+       0.026277,
+       0.00343,
+       0.464166,
+       0.077254,
+       0.0,
+       0.349142,
+       0.0
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.072101
+       ],
+       [
+        0.194286
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.056834,
+        0.0,
+        0.0,
+        0.026155,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.47126,
+        0.24067,
+        0.349418,
+        0.50151,
+        0.450065,
+        0.19207
+       ]
+      ],
+      "pi": [
+       [
+        0.008175,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.399224,
+        0.042517,
+        0.0,
+        0.288081,
+        0.0
+       ],
+       [
+        0.09964,
+        0.050002,
+        0.028815,
+        0.060291,
+        0.010539,
+        0.531289,
+        0.11715,
+        0.0,
+        0.409879,
+        0.0
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "DPLL-LIST (D)": {
+       "bca": [
+        0.013468,
+        0.108909
+       ],
+       "hi": 0.09964,
+       "lo": 0.008175,
+       "pi": 0.051243
+      },
+      "DSATUR": {
+       "bca": [
+        0.0,
+        0.060271
+       ],
+       "hi": 0.050002,
+       "lo": 0.0,
+       "pi": 0.021981
+      },
+      "DSATUR-LABEL": {
+       "bca": [
+        0.0,
+        0.031091
+       ],
+       "hi": 0.028815,
+       "lo": 0.0,
+       "pi": 0.006508
+      },
+      "EXACT": {
+       "bca": [
+        0.0,
+        0.071108
+       ],
+       "hi": 0.060291,
+       "lo": 0.0,
+       "pi": 0.026277
+      },
+      "FF-LABEL": {
+       "bca": [
+        0.0,
+        0.025477
+       ],
+       "hi": 0.010539,
+       "lo": 0.0,
+       "pi": 0.00343
+      },
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)": {
+       "bca": [
+        0.398761,
+        0.531223
+       ],
+       "hi": 0.531289,
+       "lo": 0.399224,
+       "pi": 0.464166
+      },
+      "LF": {
+       "bca": [
+        0.04767,
+        0.123033
+       ],
+       "hi": 0.11715,
+       "lo": 0.042517,
+       "pi": 0.077254
+      },
+      "NOISY-EXACT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RO-FF (C3)": {
+       "bca": [
+        0.289187,
+        0.412582
+       ],
+       "hi": 0.409879,
+       "lo": 0.288081,
+       "pi": 0.349142
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      }
+     }
+    },
+    "groups": [
+     [
+      "DPLL-LIST (D)"
+     ],
+     [
+      "DSATUR"
+     ],
+     [
+      "DSATUR-LABEL"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "FF-LABEL"
+     ],
+     [
+      "FF-LIST",
+      "GREEDY+REPAIR-LIST (C->F)"
+     ],
+     [
+      "LF"
+     ],
+     [
+      "NOISY-EXACT"
+     ],
+     [
+      "RO-FF (C3)"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.567213,
+     "noise": 0.083645,
+     "nonslipping_members": 0.349142,
+     "q": 0.0,
+     "slip": 0.083645
+    },
+    "near": {
+     "bins": {
+      "0": 209,
+      "1": 6,
+      "2": 21,
+      "3": 17,
+      "4-6": 45,
+      ">6": 1
+     },
+     "n": 299,
+     "positions_per_item": [
+      16
+     ],
+     "set_sizes_max": 149388
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.0,
+     "weights": {
+      "DPLL-LIST (D)": 0.051712,
+      "DSATUR": 0.02222,
+      "EXACT": 0.026563,
+      "FF-LIST": 0.468842,
+      "LF": 0.078073,
+      "RO-FF (C3)": 0.352591
+     }
+    },
+    "ppc": {
+     "fails": [
+      "exact",
+      "beyond_reach"
+     ],
+     "pass": false
+    },
+    "reach": {
+     "beyond_reach": 0.003344,
+     "exact": 0.698997,
+     "special": 0.0
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.650468,
+       "1": 0.026823,
+       "2": 0.054916,
+       "3": 0.056722,
+       "4-6": 0.181271,
+       ">6": 0.029799,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.698997,
+       "1": 0.020067,
+       "2": 0.070234,
+       "3": 0.056856,
+       "4-6": 0.150502,
+       ">6": 0.003344,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.602007,
+        0.692809
+       ],
+       "1": [
+        0.010033,
+        0.040134
+       ],
+       "2": [
+        0.033278,
+        0.080268
+       ],
+       "3": [
+        0.033445,
+        0.076923
+       ],
+       "4-6": [
+        0.140301,
+        0.220903
+       ],
+       ">6": [
+        0.016555,
+        0.043478
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.09901,
+      "tv_observed": 0.06398,
+      "tv_simulated_mean": 0.040296,
+      "tv_simulated_p05_p95": [
+       0.018948,
+       0.067191
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.036388,
+       "p05_p95": [
+        0.020067,
+        0.053512
+       ]
+      },
+      "exact": {
+       "mean": 0.650468,
+       "p05_p95": [
+        0.602007,
+        0.692809
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-qwen3-14b-thinking-high",
+    "seconds_fit": 177.8,
+    "seed": 3948529051,
+    "unit": "C_E2/colouring"
+   },
+   "2026-11-18-pc20-qwen3-32b-direct": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "COL/DSATUR-vs-LF/BASE": 20,
+      "COL/DSATUR-vs-LF/D(DSATUR|LF)": 20,
+      "COL/DSATUR-vs-LF/D(LF|DSATUR)": 20,
+      "COL/DSATUR-vs-LF/G-ONLY": 20,
+      "COL/DSATUR-vs-LF/PLACEBO": 20,
+      "COL/FF-vs-DSATUR/BASE": 20,
+      "COL/FF-vs-DSATUR/D(DSATUR|FF)": 20,
+      "COL/FF-vs-DSATUR/D(FF|DSATUR)": 20,
+      "COL/FF-vs-DSATUR/G-ONLY": 20,
+      "COL/FF-vs-DSATUR/PLACEBO": 20,
+      "COL/FF-vs-LF/BASE": 20,
+      "COL/FF-vs-LF/D(FF|LF)": 20,
+      "COL/FF-vs-LF/D(LF|FF)": 20,
+      "COL/FF-vs-LF/G-ONLY": 20,
+      "COL/FF-vs-LF/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 1.0,
+     "eps_at_cap": true,
+     "eps_by_group": null,
+     "eps_ci": [
+      1.0,
+      1.0
+     ],
+     "kernel": [
+      0.0,
+      0.0,
+      0.008268,
+      0.084211,
+      0.129259,
+      0.120375,
+      0.657887
+     ],
+     "kernel_cells": "distance",
+     "loglik": -7349.2699,
+     "n_clusters": 60,
+     "n_params": 15,
+     "n_rows": 300,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "LF"
+     ],
+     "state": {
+      "eps": [
+       1.0
+      ],
+      "g": [
+       0.0,
+       0.0,
+       0.008268,
+       0.084211,
+       0.129259,
+       0.120375,
+       0.657887
+      ],
+      "pi": [
+       0.018445,
+       0.042123,
+       0.0,
+       0.401802,
+       0.044039,
+       0.106486,
+       0.053772,
+       0.0,
+       0.0,
+       0.333334
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        1.0
+       ],
+       [
+        1.0
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.024825,
+        0.069487,
+        0.037219,
+        0.539129
+       ],
+       [
+        0.0,
+        0.0,
+        0.033556,
+        0.146648,
+        0.195746,
+        0.208558,
+        0.768153
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.318887,
+        0.017352,
+        0.064436,
+        0.019092,
+        0.0,
+        0.0,
+        0.266667
+       ],
+       [
+        0.069867,
+        0.078769,
+        0.034341,
+        0.478367,
+        0.077996,
+        0.149398,
+        0.097912,
+        0.0,
+        0.0,
+        0.403334
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "DPLL-LIST (D)": {
+       "bca": [
+        0.0,
+        0.085526
+       ],
+       "hi": 0.069867,
+       "lo": 0.0,
+       "pi": 0.018445
+      },
+      "DSATUR": {
+       "bca": [
+        0.013127,
+        0.087293
+       ],
+       "hi": 0.078769,
+       "lo": 0.0,
+       "pi": 0.042123
+      },
+      "DSATUR-LABEL": {
+       "bca": [
+        0.0,
+        0.052005
+       ],
+       "hi": 0.034341,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "EXACT": {
+       "bca": [
+        0.322943,
+        0.480139
+       ],
+       "hi": 0.478367,
+       "lo": 0.318887,
+       "pi": 0.401802
+      },
+      "FF-LABEL": {
+       "bca": [
+        0.020485,
+        0.083434
+       ],
+       "hi": 0.077996,
+       "lo": 0.017352,
+       "pi": 0.044039
+      },
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)": {
+       "bca": [
+        0.06752,
+        0.153654
+       ],
+       "hi": 0.149398,
+       "lo": 0.064436,
+       "pi": 0.106486
+      },
+      "LF": {
+       "bca": [
+        0.021783,
+        0.105986
+       ],
+       "hi": 0.097912,
+       "lo": 0.019092,
+       "pi": 0.053772
+      },
+      "NOISY-EXACT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RO-FF (C3)": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.273334,
+        0.407472
+       ],
+       "hi": 0.403334,
+       "lo": 0.266667,
+       "pi": 0.333334
+      }
+     }
+    },
+    "groups": [
+     [
+      "DPLL-LIST (D)"
+     ],
+     [
+      "DSATUR"
+     ],
+     [
+      "DSATUR-LABEL"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "FF-LABEL"
+     ],
+     [
+      "FF-LIST",
+      "GREEDY+REPAIR-LIST (C->F)"
+     ],
+     [
+      "LF"
+     ],
+     [
+      "NOISY-EXACT"
+     ],
+     [
+      "RO-FF (C3)"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.0,
+     "noise": 1.0,
+     "nonslipping_members": 0.0,
+     "q": 0.333334,
+     "slip": 0.666666
+    },
+    "near": {
+     "bins": {
+      "1": 1,
+      "2": 8,
+      "3": 24,
+      "4-6": 168,
+      ">6": 99
+     },
+     "n": 300,
+     "positions_per_item": [
+      16
+     ],
+     "set_sizes_max": 149388
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.333333,
+     "weights": {
+      "DPLL-LIST (D)": 0.018402,
+      "DSATUR": 0.042104,
+      "EXACT": 0.40184,
+      "FF-LABEL": 0.044004,
+      "FF-LIST": 0.106511,
+      "LF": 0.053805
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.333333,
+     "exact": 0.0,
+     "special": 0.0
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.0,
+       "1": 0.0027,
+       "2": 0.021467,
+       "3": 0.0886,
+       "4-6": 0.5612,
+       ">6": 0.326033,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.0,
+       "1": 0.003333,
+       "2": 0.026667,
+       "3": 0.08,
+       "4-6": 0.56,
+       ">6": 0.33,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.0,
+        0.0
+       ],
+       "1": [
+        0.0,
+        0.01
+       ],
+       "2": [
+        0.01,
+        0.0335
+       ],
+       "3": [
+        0.06,
+        0.113333
+       ],
+       "4-6": [
+        0.516667,
+        0.606667
+       ],
+       ">6": [
+        0.29,
+        0.366667
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.950495,
+      "tv_observed": 0.0098,
+      "tv_simulated_mean": 0.030362,
+      "tv_simulated_p05_p95": [
+       0.009782,
+       0.056075
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.329367,
+       "p05_p95": [
+        0.293333,
+        0.370167
+       ]
+      },
+      "exact": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-qwen3-32b-direct",
+    "seconds_fit": 340.6,
+    "seed": 3188412170,
+    "unit": "C_E2/colouring"
+   },
+   "2026-11-18-pc20-qwen3-32b-thinking-high": {
+    "excluded": {
+     "by_cell": {
+      "COL/DSATUR-vs-LF/BASE": {
+       "parse_fail": 1
+      },
+      "COL/DSATUR-vs-LF/D(DSATUR|LF)": {
+       "parse_fail": 1
+      },
+      "COL/DSATUR-vs-LF/G-ONLY": {
+       "parse_fail": 2
+      },
+      "COL/DSATUR-vs-LF/PLACEBO": {
+       "parse_fail": 1
+      },
+      "COL/FF-vs-DSATUR/D(FF|DSATUR)": {
+       "parse_fail": 1
+      },
+      "COL/FF-vs-DSATUR/G-ONLY": {
+       "parse_fail": 1
+      },
+      "COL/FF-vs-DSATUR/PLACEBO": {
+       "parse_fail": 1
+      },
+      "COL/FF-vs-LF/BASE": {
+       "parse_fail": 1
+      },
+      "COL/FF-vs-LF/G-ONLY": {
+       "parse_fail": 1
+      }
+     },
+     "rates": {
+      "COL/DSATUR-vs-LF/BASE": {
+       "parse_fail": 0.05
+      },
+      "COL/DSATUR-vs-LF/D(DSATUR|LF)": {
+       "parse_fail": 0.05
+      },
+      "COL/DSATUR-vs-LF/G-ONLY": {
+       "parse_fail": 0.1
+      },
+      "COL/DSATUR-vs-LF/PLACEBO": {
+       "parse_fail": 0.05
+      },
+      "COL/FF-vs-DSATUR/D(FF|DSATUR)": {
+       "parse_fail": 0.05
+      },
+      "COL/FF-vs-DSATUR/G-ONLY": {
+       "parse_fail": 0.05
+      },
+      "COL/FF-vs-DSATUR/PLACEBO": {
+       "parse_fail": 0.05
+      },
+      "COL/FF-vs-LF/BASE": {
+       "parse_fail": 0.05
+      },
+      "COL/FF-vs-LF/G-ONLY": {
+       "parse_fail": 0.05
+      }
+     },
+     "responses_by_cell": {
+      "COL/DSATUR-vs-LF/BASE": 20,
+      "COL/DSATUR-vs-LF/D(DSATUR|LF)": 20,
+      "COL/DSATUR-vs-LF/D(LF|DSATUR)": 20,
+      "COL/DSATUR-vs-LF/G-ONLY": 20,
+      "COL/DSATUR-vs-LF/PLACEBO": 20,
+      "COL/FF-vs-DSATUR/BASE": 20,
+      "COL/FF-vs-DSATUR/D(DSATUR|FF)": 20,
+      "COL/FF-vs-DSATUR/D(FF|DSATUR)": 20,
+      "COL/FF-vs-DSATUR/G-ONLY": 20,
+      "COL/FF-vs-DSATUR/PLACEBO": 20,
+      "COL/FF-vs-LF/BASE": 20,
+      "COL/FF-vs-LF/D(FF|LF)": 20,
+      "COL/FF-vs-LF/D(LF|FF)": 20,
+      "COL/FF-vs-LF/G-ONLY": 20,
+      "COL/FF-vs-LF/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.146242,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.099215,
+      0.196946
+     ],
+     "kernel": [
+      0.0,
+      0.30619,
+      0.220891,
+      0.164443,
+      0.166096,
+      0.14238,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -1332.215953,
+     "n_clusters": 60,
+     "n_params": 15,
+     "n_rows": 290,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DPLL-LIST (D)",
+      "DSATUR",
+      "DSATUR-LABEL",
+      "EXACT",
+      "FF-LABEL",
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)",
+      "LF"
+     ],
+     "state": {
+      "eps": [
+       0.146242
+      ],
+      "g": [
+       0.0,
+       0.30619,
+       0.220891,
+       0.164443,
+       0.166096,
+       0.14238,
+       0.0
+      ],
+      "pi": [
+       0.117717,
+       0.041129,
+       0.018838,
+       0.06005,
+       0.0,
+       0.372879,
+       0.087864,
+       0.0,
+       0.301523,
+       0.0
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.099215
+       ],
+       [
+        0.196946
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.102499,
+        0.072619,
+        0.003634,
+        0.010436,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.519168,
+        0.399202,
+        0.327037,
+        0.350013,
+        0.328563,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.065962,
+        0.01541,
+        0.0,
+        0.000136,
+        0.0,
+        0.312853,
+        0.050706,
+        0.0,
+        0.244597,
+        0.0
+       ],
+       [
+        0.168379,
+        0.068671,
+        0.051994,
+        0.115449,
+        0.0,
+        0.436195,
+        0.130402,
+        0.0,
+        0.363637,
+        0.0
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "DPLL-LIST (D)": {
+       "bca": [
+        0.069502,
+        0.175085
+       ],
+       "hi": 0.168379,
+       "lo": 0.065962,
+       "pi": 0.117717
+      },
+      "DSATUR": {
+       "bca": [
+        0.016652,
+        0.071406
+       ],
+       "hi": 0.068671,
+       "lo": 0.01541,
+       "pi": 0.041129
+      },
+      "DSATUR-LABEL": {
+       "bca": [
+        0.0,
+        0.063847
+       ],
+       "hi": 0.051994,
+       "lo": 0.0,
+       "pi": 0.018838
+      },
+      "EXACT": {
+       "bca": [
+        0.010815,
+        0.122234
+       ],
+       "hi": 0.115449,
+       "lo": 0.000136,
+       "pi": 0.06005
+      },
+      "FF-LABEL": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "FF-LIST = GREEDY+REPAIR-LIST (C->F)": {
+       "bca": [
+        0.312971,
+        0.436549
+       ],
+       "hi": 0.436195,
+       "lo": 0.312853,
+       "pi": 0.372879
+      },
+      "LF": {
+       "bca": [
+        0.054676,
+        0.137955
+       ],
+       "hi": 0.130402,
+       "lo": 0.050706,
+       "pi": 0.087864
+      },
+      "NOISY-EXACT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RO-FF (C3)": {
+       "bca": [
+        0.245285,
+        0.365699
+       ],
+       "hi": 0.363637,
+       "lo": 0.244597,
+       "pi": 0.301523
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      }
+     }
+    },
+    "groups": [
+     [
+      "DPLL-LIST (D)"
+     ],
+     [
+      "DSATUR"
+     ],
+     [
+      "DSATUR-LABEL"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "FF-LABEL"
+     ],
+     [
+      "FF-LIST",
+      "GREEDY+REPAIR-LIST (C->F)"
+     ],
+     [
+      "LF"
+     ],
+     [
+      "NOISY-EXACT"
+     ],
+     [
+      "RO-FF (C3)"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.59633,
+     "noise": 0.102147,
+     "nonslipping_members": 0.301523,
+     "q": 0.0,
+     "slip": 0.102147
+    },
+    "near": {
+     "bins": {
+      "0": 206,
+      "1": 12,
+      "2": 14,
+      "3": 25,
+      "4-6": 33
+     },
+     "n": 290,
+     "positions_per_item": [
+      16
+     ],
+     "set_sizes_max": 149388
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.0,
+     "weights": {
+      "DPLL-LIST (D)": 0.117712,
+      "DSATUR": 0.041104,
+      "DSATUR-LABEL": 0.018802,
+      "EXACT": 0.060006,
+      "FF-LIST": 0.372937,
+      "LF": 0.087909,
+      "RO-FF (C3)": 0.30153
+     }
+    },
+    "ppc": {
+     "fails": [
+      "exact",
+      "beyond_reach",
+      "distance"
+     ],
+     "pass": false
+    },
+    "reach": {
+     "beyond_reach": 0.0,
+     "exact": 0.710345,
+     "special": 0.0
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.662552,
+       "1": 0.033448,
+       "2": 0.063138,
+       "3": 0.05531,
+       "4-6": 0.159897,
+       ">6": 0.025655,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.710345,
+       "1": 0.041379,
+       "2": 0.048276,
+       "3": 0.086207,
+       "4-6": 0.113793,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.613621,
+        0.703621
+       ],
+       "1": [
+        0.017241,
+        0.048448
+       ],
+       "2": [
+        0.037931,
+        0.086207
+       ],
+       "3": [
+        0.031034,
+        0.079483
+       ],
+       "4-6": [
+        0.123966,
+        0.196552
+       ],
+       ">6": [
+        0.010345,
+        0.041379
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.009901,
+      "tv_observed": 0.086621,
+      "tv_simulated_mean": 0.03999,
+      "tv_simulated_p05_p95": [
+       0.019019,
+       0.070528
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.032517,
+       "p05_p95": [
+        0.017241,
+        0.051897
+       ]
+      },
+      "exact": {
+       "mean": 0.662552,
+       "p05_p95": [
+        0.613621,
+        0.703621
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-qwen3-32b-thinking-high",
+    "seconds_fit": 232.9,
+    "seed": 1827945656,
+    "unit": "C_E2/colouring"
+   }
+  },
+  "C_E2/knapsack": {
+   "2026-11-18-pc20-gpt-oss-120b-thinking-low": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "KNAP/PREFIX-vs-RATIO/BASE": 20,
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": 20,
+      "KNAP/PREFIX-vs-RATIO/D(RATIO|PREFIX)": 20,
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": 20,
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": 20,
+      "KNAP/RATIO-vs-DIFF/BASE": 20,
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": 20,
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": 20,
+      "KNAP/RATIO-vs-DIFF/G-ONLY": 20,
+      "KNAP/RATIO-vs-DIFF/PLACEBO": 20,
+      "KNAP/RATIO-vs-VALUE/BASE": 20,
+      "KNAP/RATIO-vs-VALUE/D(RATIO|VALUE)": 20,
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": 20,
+      "KNAP/RATIO-vs-VALUE/G-ONLY": 20,
+      "KNAP/RATIO-vs-VALUE/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.128016,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.077421,
+      0.185291
+     ],
+     "kernel": [
+      0.0,
+      0.044998,
+      0.576929,
+      0.378073,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -466.862987,
+     "n_clusters": 60,
+     "n_params": 13,
+     "n_rows": 300,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE"
+     ],
+     "state": {
+      "eps": [
+       0.128016
+      ],
+      "g": [
+       0.0,
+       0.044998,
+       0.576929,
+       0.378073,
+       0.0,
+       0.0,
+       0.0
+      ],
+      "pi": [
+       0.04934,
+       0.724086,
+       0.0,
+       0.0,
+       0.0,
+       0.169661,
+       0.056912,
+       0.0
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.077421
+       ],
+       [
+        0.185291
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.411577,
+        0.160821,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.130507,
+        0.768782,
+        0.556387,
+        0.0,
+        0.0,
+        0.081745
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.639962,
+        0.0,
+        0.0,
+        0.0,
+        0.09798,
+        0.017872,
+        0.0
+       ],
+       [
+        0.104525,
+        0.811351,
+        0.0,
+        0.0,
+        0.0,
+        0.252443,
+        0.104301,
+        0.0
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "DIFF": {
+       "bca": [
+        0.009156,
+        0.126572
+       ],
+       "hi": 0.104525,
+       "lo": 0.0,
+       "pi": 0.04934
+      },
+      "EXACT": {
+       "bca": [
+        0.636938,
+        0.808849
+       ],
+       "hi": 0.811351,
+       "lo": 0.639962,
+       "pi": 0.724086
+      },
+      "INPUT-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "LARGEST-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO-SKIP": {
+       "bca": [
+        0.098753,
+        0.255771
+       ],
+       "hi": 0.252443,
+       "lo": 0.09798,
+       "pi": 0.169661
+      },
+      "VALUE": {
+       "bca": [
+        0.02468,
+        0.117055
+       ],
+       "hi": 0.104301,
+       "lo": 0.017872,
+       "pi": 0.056912
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      }
+     }
+    },
+    "groups": [
+     [
+      "DIFF"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "INPUT-FIT"
+     ],
+     [
+      "LARGEST-FIT"
+     ],
+     [
+      "RATIO+BEST-SINGLE",
+      "RATIO-PREFIX"
+     ],
+     [
+      "RATIO-SKIP"
+     ],
+     [
+      "VALUE"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.871984,
+     "noise": 0.128016,
+     "nonslipping_members": 0.0,
+     "q": 0.0,
+     "slip": 0.128016
+    },
+    "near": {
+     "bins": {
+      "0": 262,
+      "1": 7,
+      "2": 22,
+      "3": 9
+     },
+     "n": 300,
+     "positions_per_item": [
+      10
+     ],
+     "set_sizes_max": 1
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.0,
+     "weights": {
+      "DIFF": 0.0493,
+      "EXACT": 0.7241,
+      "RATIO-SKIP": 0.1697,
+      "VALUE": 0.0569
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.0,
+     "exact": 0.873333,
+     "special": 0.0
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.871633,
+       "1": 0.018367,
+       "2": 0.075533,
+       "3": 0.034467,
+       "4-6": 0.0,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.873333,
+       "1": 0.023333,
+       "2": 0.073333,
+       "3": 0.03,
+       "4-6": 0.0,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.8365,
+        0.903333
+       ],
+       "1": [
+        0.006667,
+        0.033333
+       ],
+       "2": [
+        0.05,
+        0.1
+       ],
+       "3": [
+        0.019833,
+        0.056833
+       ],
+       "4-6": [
+        0.0,
+        0.0
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.970297,
+      "tv_observed": 0.006667,
+      "tv_simulated_mean": 0.02161,
+      "tv_simulated_p05_p95": [
+       0.007768,
+       0.042795
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      },
+      "exact": {
+       "mean": 0.871633,
+       "p05_p95": [
+        0.8365,
+        0.903333
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-gpt-oss-120b-thinking-low",
+    "seconds_fit": 37.3,
+    "seed": 970356698,
+    "unit": "C_E2/knapsack"
+   },
+   "2026-11-18-pc20-gpt-oss-20b-thinking-low": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "KNAP/PREFIX-vs-RATIO/BASE": 20,
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": 20,
+      "KNAP/PREFIX-vs-RATIO/D(RATIO|PREFIX)": 20,
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": 20,
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": 20,
+      "KNAP/RATIO-vs-DIFF/BASE": 20,
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": 20,
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": 20,
+      "KNAP/RATIO-vs-DIFF/G-ONLY": 20,
+      "KNAP/RATIO-vs-DIFF/PLACEBO": 20,
+      "KNAP/RATIO-vs-VALUE/BASE": 20,
+      "KNAP/RATIO-vs-VALUE/D(RATIO|VALUE)": 20,
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": 20,
+      "KNAP/RATIO-vs-VALUE/G-ONLY": 20,
+      "KNAP/RATIO-vs-VALUE/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.287753,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.231201,
+      0.345009
+     ],
+     "kernel": [
+      0.0,
+      0.190917,
+      0.467016,
+      0.299914,
+      0.042154,
+      0.0,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -801.278219,
+     "n_clusters": 60,
+     "n_params": 13,
+     "n_rows": 300,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE"
+     ],
+     "state": {
+      "eps": [
+       0.287753
+      ],
+      "g": [
+       0.0,
+       0.190917,
+       0.467016,
+       0.299914,
+       0.042154,
+       0.0,
+       0.0
+      ],
+      "pi": [
+       0.092682,
+       0.616051,
+       0.005553,
+       0.0,
+       0.014146,
+       0.152167,
+       0.119402,
+       0.0
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.231201
+       ],
+       [
+        0.345009
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.108109,
+        0.317916,
+        0.159085,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.286729,
+        0.627587,
+        0.439567,
+        0.124868,
+        0.0,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.037643,
+        0.532274,
+        0.0,
+        0.0,
+        0.0,
+        0.075907,
+        0.062706,
+        0.0
+       ],
+       [
+        0.158279,
+        0.692442,
+        0.025785,
+        0.0,
+        0.063676,
+        0.221799,
+        0.188314,
+        0.0
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "DIFF": {
+       "bca": [
+        0.040187,
+        0.161304
+       ],
+       "hi": 0.158279,
+       "lo": 0.037643,
+       "pi": 0.092682
+      },
+      "EXACT": {
+       "bca": [
+        0.539016,
+        0.699309
+       ],
+       "hi": 0.692442,
+       "lo": 0.532274,
+       "pi": 0.616051
+      },
+      "INPUT-FIT": {
+       "bca": [
+        0.0,
+        0.03768
+       ],
+       "hi": 0.025785,
+       "lo": 0.0,
+       "pi": 0.005553
+      },
+      "LARGEST-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bca": [
+        0.0,
+        0.089533
+       ],
+       "hi": 0.063676,
+       "lo": 0.0,
+       "pi": 0.014146
+      },
+      "RATIO-SKIP": {
+       "bca": [
+        0.079742,
+        0.224696
+       ],
+       "hi": 0.221799,
+       "lo": 0.075907,
+       "pi": 0.152167
+      },
+      "VALUE": {
+       "bca": [
+        0.067759,
+        0.195691
+       ],
+       "hi": 0.188314,
+       "lo": 0.062706,
+       "pi": 0.119402
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      }
+     }
+    },
+    "groups": [
+     [
+      "DIFF"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "INPUT-FIT"
+     ],
+     [
+      "LARGEST-FIT"
+     ],
+     [
+      "RATIO+BEST-SINGLE",
+      "RATIO-PREFIX"
+     ],
+     [
+      "RATIO-SKIP"
+     ],
+     [
+      "VALUE"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.712247,
+     "noise": 0.287753,
+     "nonslipping_members": 0.0,
+     "q": 0.0,
+     "slip": 0.287753
+    },
+    "near": {
+     "bins": {
+      "0": 215,
+      "1": 29,
+      "2": 45,
+      "3": 10,
+      "4-6": 1
+     },
+     "n": 300,
+     "positions_per_item": [
+      10
+     ],
+     "set_sizes_max": 1
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.0,
+     "weights": {
+      "DIFF": 0.093213,
+      "EXACT": 0.619507,
+      "RATIO+BEST-SINGLE": 0.014178,
+      "RATIO-SKIP": 0.153042,
+      "VALUE": 0.12006
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.0,
+     "exact": 0.716667,
+     "special": 0.0
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.714867,
+       "1": 0.075733,
+       "2": 0.139833,
+       "3": 0.064267,
+       "4-6": 0.0053,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.716667,
+       "1": 0.096667,
+       "2": 0.15,
+       "3": 0.033333,
+       "4-6": 0.003333,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.67,
+        0.756667
+       ],
+       "1": [
+        0.053167,
+        0.100167
+       ],
+       "2": [
+        0.11,
+        0.176833
+       ],
+       "3": [
+        0.04,
+        0.086667
+       ],
+       "4-6": [
+        0.0,
+        0.013333
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.475248,
+      "tv_observed": 0.0329,
+      "tv_simulated_mean": 0.032862,
+      "tv_simulated_p05_p95": [
+       0.015112,
+       0.055
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      },
+      "exact": {
+       "mean": 0.714867,
+       "p05_p95": [
+        0.67,
+        0.756667
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-gpt-oss-20b-thinking-low",
+    "seconds_fit": 56.2,
+    "seed": 4215263142,
+    "unit": "C_E2/knapsack"
+   },
+   "2026-11-18-pc20-qwen3-14b-direct": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "KNAP/PREFIX-vs-RATIO/BASE": 20,
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": 20,
+      "KNAP/PREFIX-vs-RATIO/D(RATIO|PREFIX)": 20,
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": 20,
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": 20,
+      "KNAP/RATIO-vs-DIFF/BASE": 20,
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": 20,
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": 20,
+      "KNAP/RATIO-vs-DIFF/G-ONLY": 20,
+      "KNAP/RATIO-vs-DIFF/PLACEBO": 20,
+      "KNAP/RATIO-vs-VALUE/BASE": 20,
+      "KNAP/RATIO-vs-VALUE/D(RATIO|VALUE)": 20,
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": 20,
+      "KNAP/RATIO-vs-VALUE/G-ONLY": 20,
+      "KNAP/RATIO-vs-VALUE/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.861389,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.792293,
+      0.925206
+     ],
+     "kernel": [
+      0.0,
+      0.406969,
+      0.267204,
+      0.233884,
+      0.091943,
+      0.0,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -1531.336916,
+     "n_clusters": 60,
+     "n_params": 13,
+     "n_rows": 300,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE"
+     ],
+     "state": {
+      "eps": [
+       0.861389
+      ],
+      "g": [
+       0.0,
+       0.406969,
+       0.267204,
+       0.233884,
+       0.091943,
+       0.0,
+       0.0
+      ],
+      "pi": [
+       0.134996,
+       0.189597,
+       0.0,
+       0.0,
+       0.284076,
+       0.151172,
+       0.240159,
+       0.0
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.792293
+       ],
+       [
+        0.925206
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.296384,
+        0.159975,
+        0.126825,
+        0.035079,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.519633,
+        0.37138,
+        0.348912,
+        0.163002,
+        0.0,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.034539,
+        0.05151,
+        0.0,
+        0.0,
+        0.094887,
+        1e-06,
+        0.115376,
+        0.0
+       ],
+       [
+        0.277812,
+        0.326126,
+        0.0,
+        0.0,
+        0.476505,
+        0.320227,
+        0.373934,
+        0.0
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "DIFF": {
+       "bca": [
+        0.036139,
+        0.281332
+       ],
+       "hi": 0.277812,
+       "lo": 0.034539,
+       "pi": 0.134996
+      },
+      "EXACT": {
+       "bca": [
+        0.060117,
+        0.33674
+       ],
+       "hi": 0.326126,
+       "lo": 0.05151,
+       "pi": 0.189597
+      },
+      "INPUT-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "LARGEST-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bca": [
+        0.106538,
+        0.485782
+       ],
+       "hi": 0.476505,
+       "lo": 0.094887,
+       "pi": 0.284076
+      },
+      "RATIO-SKIP": {
+       "bca": [
+        0.015451,
+        0.359216
+       ],
+       "hi": 0.320227,
+       "lo": 1e-06,
+       "pi": 0.151172
+      },
+      "VALUE": {
+       "bca": [
+        0.124073,
+        0.390097
+       ],
+       "hi": 0.373934,
+       "lo": 0.115376,
+       "pi": 0.240159
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.0,
+        0.041223
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      }
+     }
+    },
+    "groups": [
+     [
+      "DIFF"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "INPUT-FIT"
+     ],
+     [
+      "LARGEST-FIT"
+     ],
+     [
+      "RATIO+BEST-SINGLE",
+      "RATIO-PREFIX"
+     ],
+     [
+      "RATIO-SKIP"
+     ],
+     [
+      "VALUE"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.138611,
+     "noise": 0.861389,
+     "nonslipping_members": 0.0,
+     "q": 0.0,
+     "slip": 0.861389
+    },
+    "near": {
+     "bins": {
+      "0": 47,
+      "1": 116,
+      "2": 73,
+      "3": 51,
+      "4-6": 13
+     },
+     "n": 300,
+     "positions_per_item": [
+      10
+     ],
+     "set_sizes_max": 1
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.0,
+     "weights": {
+      "DIFF": 0.134987,
+      "EXACT": 0.189581,
+      "RATIO+BEST-SINGLE": 0.284072,
+      "RATIO-SKIP": 0.151185,
+      "VALUE": 0.240176
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.0,
+     "exact": 0.156667,
+     "special": 0.0
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.1613,
+       "1": 0.383467,
+       "2": 0.261167,
+       "3": 0.1619,
+       "4-6": 0.032167,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.156667,
+       "1": 0.386667,
+       "2": 0.243333,
+       "3": 0.17,
+       "4-6": 0.043333,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.129667,
+        0.1935
+       ],
+       "1": [
+        0.34,
+        0.430167
+       ],
+       "2": [
+        0.229833,
+        0.296667
+       ],
+       "3": [
+        0.123167,
+        0.190167
+       ],
+       "4-6": [
+        0.016667,
+        0.053333
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.871287,
+      "tv_observed": 0.022467,
+      "tv_simulated_mean": 0.04127,
+      "tv_simulated_p05_p95": [
+       0.016615,
+       0.07524
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      },
+      "exact": {
+       "mean": 0.1613,
+       "p05_p95": [
+        0.129667,
+        0.1935
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-qwen3-14b-direct",
+    "seconds_fit": 82.1,
+    "seed": 2041573403,
+    "unit": "C_E2/knapsack"
+   },
+   "2026-11-18-pc20-qwen3-14b-thinking-high": {
+    "excluded": {
+     "by_cell": {
+      "KNAP/PREFIX-vs-RATIO/BASE": {
+       "parse_fail": 3
+      },
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": {
+       "parse_fail": 1
+      },
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": {
+       "parse_fail": 2
+      },
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-DIFF/G-ONLY": {
+       "parse_fail": 2
+      },
+      "KNAP/RATIO-vs-DIFF/PLACEBO": {
+       "parse_fail": 4
+      },
+      "KNAP/RATIO-vs-VALUE/BASE": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": {
+       "parse_fail": 3
+      },
+      "KNAP/RATIO-vs-VALUE/G-ONLY": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-VALUE/PLACEBO": {
+       "parse_fail": 2
+      }
+     },
+     "rates": {
+      "KNAP/PREFIX-vs-RATIO/BASE": {
+       "parse_fail": 0.15
+      },
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": {
+       "parse_fail": 0.05
+      },
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": {
+       "parse_fail": 0.1
+      },
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-DIFF/G-ONLY": {
+       "parse_fail": 0.1
+      },
+      "KNAP/RATIO-vs-DIFF/PLACEBO": {
+       "parse_fail": 0.2
+      },
+      "KNAP/RATIO-vs-VALUE/BASE": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": {
+       "parse_fail": 0.15
+      },
+      "KNAP/RATIO-vs-VALUE/G-ONLY": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-VALUE/PLACEBO": {
+       "parse_fail": 0.1
+      }
+     },
+     "responses_by_cell": {
+      "KNAP/PREFIX-vs-RATIO/BASE": 20,
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": 20,
+      "KNAP/PREFIX-vs-RATIO/D(RATIO|PREFIX)": 20,
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": 20,
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": 20,
+      "KNAP/RATIO-vs-DIFF/BASE": 20,
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": 20,
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": 20,
+      "KNAP/RATIO-vs-DIFF/G-ONLY": 20,
+      "KNAP/RATIO-vs-DIFF/PLACEBO": 20,
+      "KNAP/RATIO-vs-VALUE/BASE": 20,
+      "KNAP/RATIO-vs-VALUE/D(RATIO|VALUE)": 20,
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": 20,
+      "KNAP/RATIO-vs-VALUE/G-ONLY": 20,
+      "KNAP/RATIO-vs-VALUE/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.014435,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.0,
+      0.035308
+     ],
+     "kernel": [
+      0.0,
+      0.0,
+      0.252399,
+      0.0,
+      0.0,
+      0.2492,
+      0.498401
+     ],
+     "kernel_cells": "distance",
+     "loglik": -67.441736,
+     "n_clusters": 60,
+     "n_params": 13,
+     "n_rows": 278,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE"
+     ],
+     "state": {
+      "eps": [
+       0.014435
+      ],
+      "g": [
+       0.0,
+       0.0,
+       0.252399,
+       0.0,
+       0.0,
+       0.2492,
+       0.498401
+      ],
+      "pi": [
+       0.012669,
+       0.982176,
+       0.0,
+       0.0,
+       0.0,
+       0.0,
+       0.005155,
+       0.0
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.0
+       ],
+       [
+        0.035308
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.963183,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.028341,
+        0.995879,
+        0.0,
+        0.0,
+        0.0,
+        0.009523,
+        0.018497,
+        0.0
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "DIFF": {
+       "bca": [
+        0.0,
+        0.033731
+       ],
+       "hi": 0.028341,
+       "lo": 0.0,
+       "pi": 0.012669
+      },
+      "EXACT": {
+       "bca": [
+        0.959148,
+        0.995516
+       ],
+       "hi": 0.995879,
+       "lo": 0.963183,
+       "pi": 0.982176
+      },
+      "INPUT-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "LARGEST-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bca": [
+        0.0,
+        0.0037
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO-SKIP": {
+       "bca": [
+        0.0,
+        0.024741
+       ],
+       "hi": 0.009523,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "VALUE": {
+       "bca": [
+        0.0,
+        0.027825
+       ],
+       "hi": 0.018497,
+       "lo": 0.0,
+       "pi": 0.005155
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      }
+     }
+    },
+    "groups": [
+     [
+      "DIFF"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "INPUT-FIT"
+     ],
+     [
+      "LARGEST-FIT"
+     ],
+     [
+      "RATIO+BEST-SINGLE",
+      "RATIO-PREFIX"
+     ],
+     [
+      "RATIO-SKIP"
+     ],
+     [
+      "VALUE"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.985565,
+     "noise": 0.014435,
+     "nonslipping_members": 0.0,
+     "q": 0.0,
+     "slip": 0.014435
+    },
+    "near": {
+     "bins": {
+      "0": 274,
+      "1": 1,
+      "3": 3
+     },
+     "n": 278,
+     "positions_per_item": [
+      10
+     ],
+     "set_sizes_max": 1
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.0,
+     "weights": {
+      "DIFF": 0.012765,
+      "EXACT": 0.987235
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.0,
+     "exact": 0.985612,
+     "special": 0.0
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.984281,
+       "1": 0.000719,
+       "2": 0.004712,
+       "3": 0.003669,
+       "4-6": 0.006619,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.985612,
+       "1": 0.003597,
+       "2": 0.0,
+       "3": 0.010791,
+       "4-6": 0.0,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.971223,
+        0.996403
+       ],
+       "1": [
+        0.0,
+        0.003597
+       ],
+       "2": [
+        0.0,
+        0.010791
+       ],
+       "3": [
+        0.0,
+        0.010791
+       ],
+       "4-6": [
+        0.0,
+        0.017986
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.287129,
+      "tv_observed": 0.011331,
+      "tv_simulated_mean": 0.008747,
+      "tv_simulated_p05_p95": [
+       0.003775,
+       0.014209
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      },
+      "exact": {
+       "mean": 0.984281,
+       "p05_p95": [
+        0.971223,
+        0.996403
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-qwen3-14b-thinking-high",
+    "seconds_fit": 25.1,
+    "seed": 687662475,
+    "unit": "C_E2/knapsack"
+   },
+   "2026-11-18-pc20-qwen3-32b-direct": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "KNAP/PREFIX-vs-RATIO/BASE": 20,
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": 20,
+      "KNAP/PREFIX-vs-RATIO/D(RATIO|PREFIX)": 20,
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": 20,
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": 20,
+      "KNAP/RATIO-vs-DIFF/BASE": 20,
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": 20,
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": 20,
+      "KNAP/RATIO-vs-DIFF/G-ONLY": 20,
+      "KNAP/RATIO-vs-DIFF/PLACEBO": 20,
+      "KNAP/RATIO-vs-VALUE/BASE": 20,
+      "KNAP/RATIO-vs-VALUE/D(RATIO|VALUE)": 20,
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": 20,
+      "KNAP/RATIO-vs-VALUE/G-ONLY": 20,
+      "KNAP/RATIO-vs-VALUE/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.946195,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.895658,
+      0.984545
+     ],
+     "kernel": [
+      0.0,
+      0.323056,
+      0.362302,
+      0.232641,
+      0.052035,
+      0.029966,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -1576.06273,
+     "n_clusters": 60,
+     "n_params": 13,
+     "n_rows": 300,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE"
+     ],
+     "state": {
+      "eps": [
+       0.946195
+      ],
+      "g": [
+       0.0,
+       0.323056,
+       0.362302,
+       0.232641,
+       0.052035,
+       0.029966,
+       0.0
+      ],
+      "pi": [
+       0.123501,
+       0.114122,
+       0.0,
+       0.0,
+       0.646709,
+       0.0,
+       0.115668,
+       0.0
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.895658
+       ],
+       [
+        0.984545
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.220438,
+        0.247533,
+        0.144268,
+        0.010349,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.428742,
+        0.481551,
+        0.326619,
+        0.100413,
+        0.065928,
+        0.017091
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.012297,
+        0.0,
+        0.0,
+        0.437281,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.325317,
+        0.236377,
+        0.0,
+        0.009189,
+        0.829761,
+        0.024824,
+        0.235809,
+        0.0
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "DIFF": {
+       "bca": [
+        0.0,
+        0.355502
+       ],
+       "hi": 0.325317,
+       "lo": 0.0,
+       "pi": 0.123501
+      },
+      "EXACT": {
+       "bca": [
+        0.022742,
+        0.258512
+       ],
+       "hi": 0.236377,
+       "lo": 0.012297,
+       "pi": 0.114122
+      },
+      "INPUT-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "LARGEST-FIT": {
+       "bca": [
+        0.0,
+        0.017285
+       ],
+       "hi": 0.009189,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bca": [
+        0.412809,
+        0.817745
+       ],
+       "hi": 0.829761,
+       "lo": 0.437281,
+       "pi": 0.646709
+      },
+      "RATIO-SKIP": {
+       "bca": [
+        0.0,
+        0.183238
+       ],
+       "hi": 0.024824,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "VALUE": {
+       "bca": [
+        0.023897,
+        0.284141
+       ],
+       "hi": 0.235809,
+       "lo": 0.0,
+       "pi": 0.115668
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      }
+     }
+    },
+    "groups": [
+     [
+      "DIFF"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "INPUT-FIT"
+     ],
+     [
+      "LARGEST-FIT"
+     ],
+     [
+      "RATIO+BEST-SINGLE",
+      "RATIO-PREFIX"
+     ],
+     [
+      "RATIO-SKIP"
+     ],
+     [
+      "VALUE"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.053805,
+     "noise": 0.946195,
+     "nonslipping_members": 0.0,
+     "q": 0.0,
+     "slip": 0.946195
+    },
+    "near": {
+     "bins": {
+      "0": 24,
+      "1": 98,
+      "2": 120,
+      "3": 44,
+      "4-6": 14
+     },
+     "n": 300,
+     "positions_per_item": [
+      10
+     ],
+     "set_sizes_max": 1
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.0,
+     "weights": {
+      "DIFF": 0.1235,
+      "EXACT": 0.1141,
+      "RATIO+BEST-SINGLE": 0.6467,
+      "VALUE": 0.1157
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.0,
+     "exact": 0.08,
+     "special": 0.0
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.079367,
+       "1": 0.3596,
+       "2": 0.355,
+       "3": 0.1715,
+       "4-6": 0.034533,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.08,
+       "1": 0.326667,
+       "2": 0.4,
+       "3": 0.146667,
+       "4-6": 0.046667,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.056667,
+        0.103333
+       ],
+       "1": [
+        0.313333,
+        0.4105
+       ],
+       "2": [
+        0.309833,
+        0.4
+       ],
+       "3": [
+        0.13,
+        0.2135
+       ],
+       "4-6": [
+        0.016667,
+        0.056667
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.19802,
+      "tv_observed": 0.057767,
+      "tv_simulated_mean": 0.043255,
+      "tv_simulated_p05_p95": [
+       0.017458,
+       0.069565
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      },
+      "exact": {
+       "mean": 0.079367,
+       "p05_p95": [
+        0.056667,
+        0.103333
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-qwen3-32b-direct",
+    "seconds_fit": 141.5,
+    "seed": 239098284,
+    "unit": "C_E2/knapsack"
+   },
+   "2026-11-18-pc20-qwen3-32b-thinking-high": {
+    "excluded": {
+     "by_cell": {
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": {
+       "parse_fail": 1
+      },
+      "KNAP/RATIO-vs-VALUE/PLACEBO": {
+       "parse_fail": 1
+      }
+     },
+     "rates": {
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": {
+       "parse_fail": 0.05
+      },
+      "KNAP/RATIO-vs-VALUE/PLACEBO": {
+       "parse_fail": 0.05
+      }
+     },
+     "responses_by_cell": {
+      "KNAP/PREFIX-vs-RATIO/BASE": 20,
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": 20,
+      "KNAP/PREFIX-vs-RATIO/D(RATIO|PREFIX)": 20,
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": 20,
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": 20,
+      "KNAP/RATIO-vs-DIFF/BASE": 20,
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": 20,
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": 20,
+      "KNAP/RATIO-vs-DIFF/G-ONLY": 20,
+      "KNAP/RATIO-vs-DIFF/PLACEBO": 20,
+      "KNAP/RATIO-vs-VALUE/BASE": 20,
+      "KNAP/RATIO-vs-VALUE/D(RATIO|VALUE)": 20,
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": 20,
+      "KNAP/RATIO-vs-VALUE/G-ONLY": 20,
+      "KNAP/RATIO-vs-VALUE/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.023721,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.01001,
+      0.04083
+     ],
+     "kernel": [
+      0.0,
+      0.446203,
+      0.0,
+      0.145849,
+      0.268717,
+      0.0,
+      0.139232
+     ],
+     "kernel_cells": "distance",
+     "loglik": -89.113853,
+     "n_clusters": 60,
+     "n_params": 13,
+     "n_rows": 296,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE"
+     ],
+     "state": {
+      "eps": [
+       0.023721
+      ],
+      "g": [
+       0.0,
+       0.446203,
+       0.0,
+       0.145849,
+       0.268717,
+       0.0,
+       0.139232
+      ],
+      "pi": [
+       0.004395,
+       0.987058,
+       0.003436,
+       0.0,
+       0.0,
+       0.000155,
+       0.004955,
+       0.0
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.01001
+       ],
+       [
+        0.04083
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        1.0,
+        0.0,
+        0.501635,
+        0.667786,
+        0.0,
+        0.497097
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.969575,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.015089,
+        1.0,
+        0.010815,
+        0.0,
+        0.0,
+        0.013938,
+        0.016194,
+        0.0
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "DIFF": {
+       "bca": [
+        0.0,
+        0.028103
+       ],
+       "hi": 0.015089,
+       "lo": 0.0,
+       "pi": 0.004395
+      },
+      "EXACT": {
+       "bca": [
+        0.964864,
+        0.996642
+       ],
+       "hi": 1.0,
+       "lo": 0.969575,
+       "pi": 0.987058
+      },
+      "INPUT-FIT": {
+       "bca": [
+        0.0,
+        0.023746
+       ],
+       "hi": 0.010815,
+       "lo": 0.0,
+       "pi": 0.003436
+      },
+      "LARGEST-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO-SKIP": {
+       "bca": [
+        0.0,
+        0.017101
+       ],
+       "hi": 0.013938,
+       "lo": 0.0,
+       "pi": 0.000155
+      },
+      "VALUE": {
+       "bca": [
+        0.0,
+        0.026356
+       ],
+       "hi": 0.016194,
+       "lo": 0.0,
+       "pi": 0.004955
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      }
+     }
+    },
+    "groups": [
+     [
+      "DIFF"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "INPUT-FIT"
+     ],
+     [
+      "LARGEST-FIT"
+     ],
+     [
+      "RATIO+BEST-SINGLE",
+      "RATIO-PREFIX"
+     ],
+     [
+      "RATIO-SKIP"
+     ],
+     [
+      "VALUE"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.976279,
+     "noise": 0.023721,
+     "nonslipping_members": 0.0,
+     "q": 0.0,
+     "slip": 0.023721
+    },
+    "near": {
+     "bins": {
+      "0": 289,
+      "1": 4,
+      "2": 2,
+      "3": 1
+     },
+     "n": 296,
+     "positions_per_item": [
+      10
+     ],
+     "set_sizes_max": 1
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.0,
+     "weights": {
+      "EXACT": 1.0
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.0,
+     "exact": 0.976351,
+     "special": 0.0
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.976824,
+       "1": 0.01125,
+       "2": 0.00223,
+       "3": 0.005101,
+       "4-6": 0.004595,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.976351,
+       "1": 0.013514,
+       "2": 0.006757,
+       "3": 0.003378,
+       "4-6": 0.0,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.962838,
+        0.989865
+       ],
+       "1": [
+        0.003378,
+        0.023649
+       ],
+       "2": [
+        0.0,
+        0.006757
+       ],
+       "3": [
+        0.0,
+        0.013514
+       ],
+       "4-6": [
+        0.0,
+        0.010304
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.653465,
+      "tv_observed": 0.006791,
+      "tv_simulated_mean": 0.009808,
+      "tv_simulated_p05_p95": [
+       0.004054,
+       0.017971
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      },
+      "exact": {
+       "mean": 0.976824,
+       "p05_p95": [
+        0.962838,
+        0.989865
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc20-qwen3-32b-thinking-high",
+    "seconds_fit": 125.0,
+    "seed": 2941328552,
+    "unit": "C_E2/knapsack"
+   }
+  },
+  "C_E5/3-SAT (partial assignment given)": {
+   "2026-11-18-pc40-gpt-oss-120b-thinking-low": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "STATE/SAT/s1": 40,
+      "STATE/SAT/s2": 40,
+      "STATE/SAT/s3": 40
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.45299,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.350644,
+      0.553591
+     ],
+     "kernel": [
+      0.0,
+      0.313643,
+      0.283671,
+      0.116926,
+      0.113883,
+      0.086917,
+      0.084961
+     ],
+     "kernel_cells": "distance",
+     "loglik": -548.665932,
+     "n_clusters": 40,
+     "n_params": 14,
+     "n_rows": 120,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)"
+     ],
+     "state": {
+      "eps": [
+       0.45299
+      ],
+      "g": [
+       0.0,
+       0.313643,
+       0.283671,
+       0.116926,
+       0.113883,
+       0.086917,
+       0.084961
+      ],
+      "pi": [
+       0.0,
+       0.0,
+       0.843347,
+       0.05541,
+       0.028207,
+       0.004813,
+       0.068222,
+       0.0,
+       0.0
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.350644
+       ],
+       [
+        0.553591
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.141762,
+        0.130346,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.490348,
+        0.427881,
+        0.243458,
+        0.247843,
+        0.197785,
+        0.200195
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.0,
+        0.757996,
+        0.008883,
+        0.0,
+        0.0,
+        0.013004,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.0,
+        0.907873,
+        0.105517,
+        0.070135,
+        0.070801,
+        0.118746,
+        0.0,
+        0.018213
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "bca": [
+        0.0,
+        1e-06
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "DPLL from state (D)": {
+       "bca": [
+        0.0,
+        0.048603
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "EXACT": {
+       "bca": [
+        0.764324,
+        0.910026
+       ],
+       "hi": 0.907873,
+       "lo": 0.757996,
+       "pi": 0.843347
+      },
+      "GREEDY-MENTION from state (C1)": {
+       "bca": [
+        0.014903,
+        0.115961
+       ],
+       "hi": 0.105517,
+       "lo": 0.008883,
+       "pi": 0.05541
+      },
+      "GREEDY-MENTION-ABORT from state (C1)": {
+       "bca": [
+        0.0,
+        0.114143
+       ],
+       "hi": 0.070135,
+       "lo": 0.0,
+       "pi": 0.028207
+      },
+      "GUC-DET from state (C2) = SC-DET from state (C2)": {
+       "bca": [
+        0.0,
+        0.067507
+       ],
+       "hi": 0.070801,
+       "lo": 0.0,
+       "pi": 0.004813
+      },
+      "POLARITY (C0, ignores state)": {
+       "bca": [
+        0.02057,
+        0.121881
+       ],
+       "hi": 0.118746,
+       "lo": 0.013004,
+       "pi": 0.068222
+      },
+      "UC-DET from state (C2)": {
+       "bca": [
+        0.0,
+        0.003079
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.0,
+        0.068005
+       ],
+       "hi": 0.018213,
+       "lo": 0.0,
+       "pi": 0.0
+      }
+     }
+    },
+    "groups": [
+     [
+      "ALWAYS-UNSAT (A1 give-up)"
+     ],
+     [
+      "DPLL from state (D)"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "GREEDY-MENTION from state (C1)"
+     ],
+     [
+      "GREEDY-MENTION-ABORT from state (C1)"
+     ],
+     [
+      "GUC-DET from state (C2)",
+      "SC-DET from state (C2)"
+     ],
+     [
+      "POLARITY (C0, ignores state)"
+     ],
+     [
+      "UC-DET from state (C2)"
+     ]
+    ],
+    "item_set": "pc40",
+    "mass": {
+     "exact": 0.54701,
+     "noise": 0.45299,
+     "nonslipping_members": 0.0,
+     "q": 0.0,
+     "slip": 0.45299
+    },
+    "near": {
+     "bins": {
+      "0": 51,
+      "1": 14,
+      "2": 10,
+      "3": 4,
+      "4-6": 11,
+      "special token": 30
+     },
+     "n": 120,
+     "positions_per_item": [
+      20
+     ],
+     "set_sizes_max": 154
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.0,
+     "weights": {
+      "EXACT": 0.847453,
+      "GREEDY-MENTION from state (C1)": 0.055673,
+      "GREEDY-MENTION-ABORT from state (C1)": 0.028339,
+      "POLARITY (C0, ignores state)": 0.068536
+     }
+    },
+    "ppc": {
+     "fails": [
+      "special"
+     ],
+     "pass": false
+    },
+    "reach": {
+     "beyond_reach": 0.0,
+     "exact": 0.675,
+     "special": 0.25
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.3985,
+       "1": 0.103083,
+       "2": 0.084417,
+       "3": 0.042167,
+       "4-6": 0.07,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.301833
+      },
+      "observed": {
+       "0": 0.425,
+       "1": 0.116667,
+       "2": 0.083333,
+       "3": 0.033333,
+       "4-6": 0.091667,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.25
+      },
+      "p05_p95": {
+       "0": [
+        0.333333,
+        0.466667
+       ],
+       "1": [
+        0.066667,
+        0.150833
+       ],
+       "2": [
+        0.041667,
+        0.125
+       ],
+       "3": [
+        0.008333,
+        0.075417
+       ],
+       "4-6": [
+        0.033333,
+        0.108333
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.26625,
+        0.333333
+       ]
+      },
+      "p_value": 0.475248,
+      "tv_observed": 0.06175,
+      "tv_simulated_mean": 0.062518,
+      "tv_simulated_p05_p95": [
+       0.031896,
+       0.112071
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      },
+      "exact": {
+       "mean": 0.700333,
+       "p05_p95": [
+        0.641667,
+        0.767083
+       ]
+      },
+      "special": {
+       "mean": 0.301833,
+       "p05_p95": [
+        0.26625,
+        0.333333
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc40-gpt-oss-120b-thinking-low",
+    "seconds_fit": 55.3,
+    "seed": 3588891538,
+    "unit": "C_E5/3-SAT (partial assignment given)"
+   },
+   "2026-11-18-pc40-gpt-oss-20b-thinking-low": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "STATE/SAT/s1": 40,
+      "STATE/SAT/s2": 40,
+      "STATE/SAT/s3": 40
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.693095,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.56216,
+      0.822001
+     ],
+     "kernel": [
+      0.0,
+      0.191174,
+      0.213378,
+      0.240695,
+      0.157754,
+      0.196998,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -631.408243,
+     "n_clusters": 40,
+     "n_params": 14,
+     "n_rows": 120,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)"
+     ],
+     "state": {
+      "eps": [
+       0.693095
+      ],
+      "g": [
+       0.0,
+       0.191174,
+       0.213378,
+       0.240695,
+       0.157754,
+       0.196998,
+       0.0
+      ],
+      "pi": [
+       0.201045,
+       0.013135,
+       0.598913,
+       0.038475,
+       0.0,
+       0.0,
+       0.071974,
+       0.0,
+       0.076458
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.56216
+       ],
+       [
+        0.822001
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.029489,
+        0.042594,
+        0.048587,
+        0.003499,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.356849,
+        0.408567,
+        0.444221,
+        0.330989,
+        0.330994,
+        0.090711
+       ]
+      ],
+      "pi": [
+       [
+        0.092879,
+        0.0,
+        0.474407,
+        0.0,
+        0.0,
+        0.0,
+        0.017117,
+        0.0,
+        0.0
+       ],
+       [
+        0.318561,
+        0.069284,
+        0.710619,
+        0.098663,
+        0.0,
+        0.034169,
+        0.125445,
+        0.0,
+        0.168616
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "bca": [
+        0.09178,
+        0.316887
+       ],
+       "hi": 0.318561,
+       "lo": 0.092879,
+       "pi": 0.201045
+      },
+      "DPLL from state (D)": {
+       "bca": [
+        0.0,
+        0.118279
+       ],
+       "hi": 0.069284,
+       "lo": 0.0,
+       "pi": 0.013135
+      },
+      "EXACT": {
+       "bca": [
+        0.478435,
+        0.713658
+       ],
+       "hi": 0.710619,
+       "lo": 0.474407,
+       "pi": 0.598913
+      },
+      "GREEDY-MENTION from state (C1)": {
+       "bca": [
+        0.0,
+        0.10267
+       ],
+       "hi": 0.098663,
+       "lo": 0.0,
+       "pi": 0.038475
+      },
+      "GREEDY-MENTION-ABORT from state (C1)": {
+       "bca": [
+        0.0,
+        0.104809
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "GUC-DET from state (C2) = SC-DET from state (C2)": {
+       "bca": [
+        0.0,
+        0.09951
+       ],
+       "hi": 0.034169,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "POLARITY (C0, ignores state)": {
+       "bca": [
+        0.027189,
+        0.144444
+       ],
+       "hi": 0.125445,
+       "lo": 0.017117,
+       "pi": 0.071974
+      },
+      "UC-DET from state (C2)": {
+       "bca": [
+        0.0,
+        0.004739
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.019415,
+        0.223274
+       ],
+       "hi": 0.168616,
+       "lo": 0.0,
+       "pi": 0.076458
+      }
+     }
+    },
+    "groups": [
+     [
+      "ALWAYS-UNSAT (A1 give-up)"
+     ],
+     [
+      "DPLL from state (D)"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "GREEDY-MENTION from state (C1)"
+     ],
+     [
+      "GREEDY-MENTION-ABORT from state (C1)"
+     ],
+     [
+      "GUC-DET from state (C2)",
+      "SC-DET from state (C2)"
+     ],
+     [
+      "POLARITY (C0, ignores state)"
+     ],
+     [
+      "UC-DET from state (C2)"
+     ]
+    ],
+    "item_set": "pc40",
+    "mass": {
+     "exact": 0.221737,
+     "noise": 0.577217,
+     "nonslipping_members": 0.201045,
+     "q": 0.076458,
+     "slip": 0.500759
+    },
+    "near": {
+     "bins": {
+      "0": 21,
+      "1": 10,
+      "2": 11,
+      "3": 10,
+      "4-6": 14,
+      ">6": 3,
+      "special token": 51
+     },
+     "n": 120,
+     "positions_per_item": [
+      20
+     ],
+     "set_sizes_max": 154
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.0765,
+     "weights": {
+      "ALWAYS-UNSAT (A1 give-up)": 0.201,
+      "DPLL from state (D)": 0.0131,
+      "EXACT": 0.5989,
+      "GREEDY-MENTION from state (C1)": 0.0385,
+      "POLARITY (C0, ignores state)": 0.072
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.1,
+     "exact": 0.525,
+     "special": 0.425
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.171417,
+       "1": 0.0795,
+       "2": 0.090583,
+       "3": 0.0855,
+       "4-6": 0.10325,
+       ">6": 0.027917,
+       "no member": 0.0,
+       "special token": 0.441833
+      },
+      "observed": {
+       "0": 0.175,
+       "1": 0.083333,
+       "2": 0.091667,
+       "3": 0.083333,
+       "4-6": 0.116667,
+       ">6": 0.025,
+       "no member": 0.0,
+       "special token": 0.425
+      },
+      "p05_p95": {
+       "0": [
+        0.116667,
+        0.233333
+       ],
+       "1": [
+        0.049583,
+        0.116667
+       ],
+       "2": [
+        0.05,
+        0.13375
+       ],
+       "3": [
+        0.05,
+        0.125417
+       ],
+       "4-6": [
+        0.066667,
+        0.15
+       ],
+       ">6": [
+        0.008333,
+        0.050417
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.383333,
+        0.508333
+       ]
+      },
+      "p_value": 1.0,
+      "tv_observed": 0.021917,
+      "tv_simulated_mean": 0.078003,
+      "tv_simulated_p05_p95": [
+       0.045504,
+       0.121663
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.076,
+       "p05_p95": [
+        0.049583,
+        0.116667
+       ]
+      },
+      "exact": {
+       "mean": 0.565167,
+       "p05_p95": [
+        0.508333,
+        0.625417
+       ]
+      },
+      "special": {
+       "mean": 0.441833,
+       "p05_p95": [
+        0.383333,
+        0.508333
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc40-gpt-oss-20b-thinking-low",
+    "seconds_fit": 70.1,
+    "seed": 2761531751,
+    "unit": "C_E5/3-SAT (partial assignment given)"
+   },
+   "2026-11-18-pc40-qwen3-14b-direct": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "STATE/SAT/s1": 40,
+      "STATE/SAT/s2": 40,
+      "STATE/SAT/s3": 40
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.994284,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.973462,
+      1.0
+     ],
+     "kernel": [
+      0.0,
+      0.015026,
+      0.125719,
+      0.197316,
+      0.188931,
+      0.210844,
+      0.262164
+     ],
+     "kernel_cells": "distance",
+     "loglik": -1339.534799,
+     "n_clusters": 40,
+     "n_params": 14,
+     "n_rows": 120,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)"
+     ],
+     "state": {
+      "eps": [
+       0.994284
+      ],
+      "g": [
+       0.0,
+       0.015026,
+       0.125719,
+       0.197316,
+       0.188931,
+       0.210844,
+       0.262164
+      ],
+      "pi": [
+       0.0,
+       0.119757,
+       0.017728,
+       0.297358,
+       0.0,
+       0.00803,
+       0.494848,
+       0.0,
+       0.062279
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.973462
+       ],
+       [
+        1.0
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.0,
+        0.048473,
+        0.110882,
+        0.093164,
+        0.099834,
+        0.146856
+       ],
+       [
+        0.0,
+        0.045155,
+        0.213992,
+        0.291504,
+        0.287556,
+        0.332202,
+        0.40241
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.031851,
+        0.0,
+        0.174793,
+        0.0,
+        0.0,
+        0.326273,
+        0.0,
+        0.011037
+       ],
+       [
+        0.0,
+        0.216539,
+        0.079778,
+        0.430604,
+        0.0,
+        0.041614,
+        0.660592,
+        0.0,
+        0.118841
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "DPLL from state (D)": {
+       "bca": [
+        0.040297,
+        0.229443
+       ],
+       "hi": 0.216539,
+       "lo": 0.031851,
+       "pi": 0.119757
+      },
+      "EXACT": {
+       "bca": [
+        0.0,
+        0.097314
+       ],
+       "hi": 0.079778,
+       "lo": 0.0,
+       "pi": 0.017728
+      },
+      "GREEDY-MENTION from state (C1)": {
+       "bca": [
+        0.18037,
+        0.438773
+       ],
+       "hi": 0.430604,
+       "lo": 0.174793,
+       "pi": 0.297358
+      },
+      "GREEDY-MENTION-ABORT from state (C1)": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "GUC-DET from state (C2) = SC-DET from state (C2)": {
+       "bca": [
+        0.0,
+        0.053175
+       ],
+       "hi": 0.041614,
+       "lo": 0.0,
+       "pi": 0.00803
+      },
+      "POLARITY (C0, ignores state)": {
+       "bca": [
+        0.328123,
+        0.66072
+       ],
+       "hi": 0.660592,
+       "lo": 0.326273,
+       "pi": 0.494848
+      },
+      "UC-DET from state (C2)": {
+       "bca": [
+        0.0,
+        0.019017
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.022382,
+        0.15064
+       ],
+       "hi": 0.118841,
+       "lo": 0.011037,
+       "pi": 0.062279
+      }
+     }
+    },
+    "groups": [
+     [
+      "ALWAYS-UNSAT (A1 give-up)"
+     ],
+     [
+      "DPLL from state (D)"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "GREEDY-MENTION from state (C1)"
+     ],
+     [
+      "GREEDY-MENTION-ABORT from state (C1)"
+     ],
+     [
+      "GUC-DET from state (C2)",
+      "SC-DET from state (C2)"
+     ],
+     [
+      "POLARITY (C0, ignores state)"
+     ],
+     [
+      "UC-DET from state (C2)"
+     ]
+    ],
+    "item_set": "pc40",
+    "mass": {
+     "exact": 0.00536,
+     "noise": 0.99464,
+     "nonslipping_members": 0.0,
+     "q": 0.062279,
+     "slip": 0.932361
+    },
+    "near": {
+     "bins": {
+      "0": 1,
+      "1": 3,
+      "2": 16,
+      "3": 24,
+      "4-6": 71,
+      ">6": 5
+     },
+     "n": 120,
+     "positions_per_item": [
+      20
+     ],
+     "set_sizes_max": 154
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.062802,
+     "weights": {
+      "DPLL from state (D)": 0.120766,
+      "EXACT": 0.017843,
+      "GREEDY-MENTION from state (C1)": 0.299798,
+      "POLARITY (C0, ignores state)": 0.49879
+     }
+    },
+    "ppc": {
+     "fails": [
+      "exact",
+      "special"
+     ],
+     "pass": false
+    },
+    "reach": {
+     "beyond_reach": 0.041667,
+     "exact": 0.008333,
+     "special": 0.0
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.006667,
+       "1": 0.027167,
+       "2": 0.129083,
+       "3": 0.203167,
+       "4-6": 0.535333,
+       ">6": 0.02725,
+       "no member": 0.0,
+       "special token": 0.071333
+      },
+      "observed": {
+       "0": 0.008333,
+       "1": 0.025,
+       "2": 0.133333,
+       "3": 0.2,
+       "4-6": 0.591667,
+       ">6": 0.041667,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.0,
+        0.017083
+       ],
+       "1": [
+        0.008333,
+        0.05
+       ],
+       "2": [
+        0.075,
+        0.183333
+       ],
+       "3": [
+        0.15,
+        0.266667
+       ],
+       "4-6": [
+        0.46625,
+        0.617083
+       ],
+       ">6": [
+        0.0,
+        0.05
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.033333,
+        0.10875
+       ]
+      },
+      "p_value": 0.356436,
+      "tv_observed": 0.076667,
+      "tv_simulated_mean": 0.067259,
+      "tv_simulated_p05_p95": [
+       0.032088,
+       0.120375
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.032417,
+       "p05_p95": [
+        0.008333,
+        0.058333
+       ]
+      },
+      "exact": {
+       "mean": 0.072833,
+       "p05_p95": [
+        0.033333,
+        0.116667
+       ]
+      },
+      "special": {
+       "mean": 0.071333,
+       "p05_p95": [
+        0.033333,
+        0.10875
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc40-qwen3-14b-direct",
+    "seconds_fit": 39.8,
+    "seed": 217577334,
+    "unit": "C_E5/3-SAT (partial assignment given)"
+   },
+   "2026-11-18-pc40-qwen3-14b-thinking-high": {
+    "excluded": {
+     "by_cell": {
+      "STATE/SAT/s1": {
+       "truncated": 1
+      },
+      "STATE/SAT/s2": {
+       "truncated": 1
+      }
+     },
+     "rates": {
+      "STATE/SAT/s1": {
+       "truncated": 0.025
+      },
+      "STATE/SAT/s2": {
+       "truncated": 0.025
+      }
+     },
+     "responses_by_cell": {
+      "STATE/SAT/s1": 40,
+      "STATE/SAT/s2": 40,
+      "STATE/SAT/s3": 40
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.164023,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.083561,
+      0.25197
+     ],
+     "kernel": [
+      0.0,
+      0.449815,
+      0.267592,
+      0.059949,
+      0.134311,
+      0.088333,
+      0.0
+     ],
+     "kernel_cells": "distance",
+     "loglik": -267.083749,
+     "n_clusters": 40,
+     "n_params": 14,
+     "n_rows": 118,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)"
+     ],
+     "state": {
+      "eps": [
+       0.164023
+      ],
+      "g": [
+       0.0,
+       0.449815,
+       0.267592,
+       0.059949,
+       0.134311,
+       0.088333,
+       0.0
+      ],
+      "pi": [
+       0.015914,
+       0.0,
+       0.927805,
+       0.008946,
+       0.0,
+       0.0,
+       0.0,
+       0.047335,
+       0.0
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.083561
+       ],
+       [
+        0.25197
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.093615,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.778398,
+        0.684368,
+        0.394982,
+        0.396185,
+        0.235669,
+        0.0
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.0,
+        0.850275,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.050734,
+        0.092603,
+        0.988952,
+        0.02824,
+        0.038823,
+        0.017982,
+        0.0,
+        0.117035,
+        0.0
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "bca": [
+        0.0,
+        0.091101
+       ],
+       "hi": 0.050734,
+       "lo": 0.0,
+       "pi": 0.015914
+      },
+      "DPLL from state (D)": {
+       "bca": [
+        0.0,
+        0.090017
+       ],
+       "hi": 0.092603,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "EXACT": {
+       "bca": [
+        0.846894,
+        0.986603
+       ],
+       "hi": 0.988952,
+       "lo": 0.850275,
+       "pi": 0.927805
+      },
+      "GREEDY-MENTION from state (C1)": {
+       "bca": [
+        0.0,
+        0.058637
+       ],
+       "hi": 0.02824,
+       "lo": 0.0,
+       "pi": 0.008946
+      },
+      "GREEDY-MENTION-ABORT from state (C1)": {
+       "bca": [
+        0.0,
+        0.043612
+       ],
+       "hi": 0.038823,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "GUC-DET from state (C2) = SC-DET from state (C2)": {
+       "bca": [
+        0.0,
+        0.098397
+       ],
+       "hi": 0.017982,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "POLARITY (C0, ignores state)": {
+       "bca": [
+        0.0,
+        0.02778
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "UC-DET from state (C2)": {
+       "bca": [
+        0.0,
+        0.165221
+       ],
+       "hi": 0.117035,
+       "lo": 0.0,
+       "pi": 0.047335
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.017548,
+        0.017556
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      }
+     }
+    },
+    "groups": [
+     [
+      "ALWAYS-UNSAT (A1 give-up)"
+     ],
+     [
+      "DPLL from state (D)"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "GREEDY-MENTION from state (C1)"
+     ],
+     [
+      "GREEDY-MENTION-ABORT from state (C1)"
+     ],
+     [
+      "GUC-DET from state (C2)",
+      "SC-DET from state (C2)"
+     ],
+     [
+      "POLARITY (C0, ignores state)"
+     ],
+     [
+      "UC-DET from state (C2)"
+     ]
+    ],
+    "item_set": "pc40",
+    "mass": {
+     "exact": 0.822673,
+     "noise": 0.161413,
+     "nonslipping_members": 0.015914,
+     "q": 0.0,
+     "slip": 0.161413
+    },
+    "near": {
+     "bins": {
+      "0": 65,
+      "1": 6,
+      "2": 3,
+      "3": 1,
+      "4-6": 2,
+      "special token": 41
+     },
+     "n": 118,
+     "positions_per_item": [
+      20
+     ],
+     "set_sizes_max": 154
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.0,
+     "weights": {
+      "ALWAYS-UNSAT (A1 give-up)": 0.016044,
+      "EXACT": 0.936226,
+      "UC-DET from state (C2)": 0.04773
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.0,
+     "exact": 0.898305,
+     "special": 0.347458
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.547627,
+       "1": 0.050763,
+       "2": 0.022797,
+       "3": 0.010085,
+       "4-6": 0.013983,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.354746
+      },
+      "observed": {
+       "0": 0.550847,
+       "1": 0.050847,
+       "2": 0.025424,
+       "3": 0.008475,
+       "4-6": 0.016949,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.347458
+      },
+      "p05_p95": {
+       "0": [
+        0.508051,
+        0.585169
+       ],
+       "1": [
+        0.016949,
+        0.084746
+       ],
+       "2": [
+        0.0,
+        0.042373
+       ],
+       "3": [
+        0.0,
+        0.025424
+       ],
+       "4-6": [
+        0.0,
+        0.033898
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.338983,
+        0.373305
+       ]
+      },
+      "p_value": 1.0,
+      "tv_observed": 0.008898,
+      "tv_simulated_mean": 0.036223,
+      "tv_simulated_p05_p95": [
+       0.015589,
+       0.063767
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.003305,
+       "p05_p95": [
+        0.0,
+        0.008898
+       ]
+      },
+      "exact": {
+       "mean": 0.899068,
+       "p05_p95": [
+        0.855932,
+        0.932627
+       ]
+      },
+      "special": {
+       "mean": 0.354746,
+       "p05_p95": [
+        0.338983,
+        0.373305
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc40-qwen3-14b-thinking-high",
+    "seconds_fit": 134.2,
+    "seed": 2333748402,
+    "unit": "C_E5/3-SAT (partial assignment given)"
+   },
+   "2026-11-18-pc40-qwen3-32b-direct": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "STATE/SAT/s1": 40,
+      "STATE/SAT/s2": 40,
+      "STATE/SAT/s3": 40
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.961669,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.911295,
+      1.0
+     ],
+     "kernel": [
+      0.0,
+      0.07017,
+      0.135084,
+      0.282739,
+      0.22325,
+      0.176413,
+      0.112344
+     ],
+     "kernel_cells": "distance",
+     "loglik": -1172.424239,
+     "n_clusters": 40,
+     "n_params": 14,
+     "n_rows": 120,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)"
+     ],
+     "state": {
+      "eps": [
+       0.961669
+      ],
+      "g": [
+       0.0,
+       0.07017,
+       0.135084,
+       0.282739,
+       0.22325,
+       0.176413,
+       0.112344
+      ],
+      "pi": [
+       0.0,
+       0.100626,
+       0.0,
+       0.124647,
+       0.0,
+       0.092245,
+       0.575628,
+       0.0,
+       0.106854
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.911295
+       ],
+       [
+        1.0
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.022052,
+        0.067075,
+        0.174945,
+        0.117498,
+        0.093116,
+        0.034428
+       ],
+       [
+        0.0,
+        0.127492,
+        0.207704,
+        0.393247,
+        0.334879,
+        0.27935,
+        0.198662
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.0,
+        0.0,
+        0.039054,
+        0.0,
+        0.0,
+        0.444481,
+        0.0,
+        0.043186
+       ],
+       [
+        0.017762,
+        0.168701,
+        0.053008,
+        0.214796,
+        0.001728,
+        0.15306,
+        0.717468,
+        0.133522,
+        0.167289
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "bca": [
+        0.0,
+        0.068818
+       ],
+       "hi": 0.017762,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "DPLL from state (D)": {
+       "bca": [
+        0.0,
+        0.185794
+       ],
+       "hi": 0.168701,
+       "lo": 0.0,
+       "pi": 0.100626
+      },
+      "EXACT": {
+       "bca": [
+        0.0,
+        0.112233
+       ],
+       "hi": 0.053008,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "GREEDY-MENTION from state (C1)": {
+       "bca": [
+        0.050736,
+        0.233018
+       ],
+       "hi": 0.214796,
+       "lo": 0.039054,
+       "pi": 0.124647
+      },
+      "GREEDY-MENTION-ABORT from state (C1)": {
+       "bca": [
+        0.0,
+        0.050382
+       ],
+       "hi": 0.001728,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "GUC-DET from state (C2) = SC-DET from state (C2)": {
+       "bca": [
+        0.024759,
+        0.167087
+       ],
+       "hi": 0.15306,
+       "lo": 0.0,
+       "pi": 0.092245
+      },
+      "POLARITY (C0, ignores state)": {
+       "bca": [
+        0.437016,
+        0.704383
+       ],
+       "hi": 0.717468,
+       "lo": 0.444481,
+       "pi": 0.575628
+      },
+      "UC-DET from state (C2)": {
+       "bca": [
+        0.0,
+        0.162769
+       ],
+       "hi": 0.133522,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.056646,
+        0.187998
+       ],
+       "hi": 0.167289,
+       "lo": 0.043186,
+       "pi": 0.106854
+      }
+     }
+    },
+    "groups": [
+     [
+      "ALWAYS-UNSAT (A1 give-up)"
+     ],
+     [
+      "DPLL from state (D)"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "GREEDY-MENTION from state (C1)"
+     ],
+     [
+      "GREEDY-MENTION-ABORT from state (C1)"
+     ],
+     [
+      "GUC-DET from state (C2)",
+      "SC-DET from state (C2)"
+     ],
+     [
+      "POLARITY (C0, ignores state)"
+     ],
+     [
+      "UC-DET from state (C2)"
+     ]
+    ],
+    "item_set": "pc40",
+    "mass": {
+     "exact": 0.034235,
+     "noise": 0.965765,
+     "nonslipping_members": 0.0,
+     "q": 0.106854,
+     "slip": 0.858912
+    },
+    "near": {
+     "bins": {
+      "0": 4,
+      "1": 10,
+      "2": 16,
+      "3": 28,
+      "4-6": 46,
+      ">6": 7,
+      "special token": 9
+     },
+     "n": 120,
+     "positions_per_item": [
+      20
+     ],
+     "set_sizes_max": 154
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.106911,
+     "weights": {
+      "DPLL from state (D)": 0.10061,
+      "GREEDY-MENTION from state (C1)": 0.124612,
+      "GUC-DET from state (C2)": 0.092209,
+      "POLARITY (C0, ignores state)": 0.575658
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.066667,
+     "exact": 0.1,
+     "special": 0.075
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.035833,
+       "1": 0.064333,
+       "2": 0.132667,
+       "3": 0.232917,
+       "4-6": 0.361833,
+       ">6": 0.044833,
+       "no member": 0.0,
+       "special token": 0.127583
+      },
+      "observed": {
+       "0": 0.033333,
+       "1": 0.083333,
+       "2": 0.133333,
+       "3": 0.233333,
+       "4-6": 0.383333,
+       ">6": 0.058333,
+       "no member": 0.0,
+       "special token": 0.075
+      },
+      "p05_p95": {
+       "0": [
+        0.008333,
+        0.066667
+       ],
+       "1": [
+        0.033333,
+        0.108333
+       ],
+       "2": [
+        0.083333,
+        0.175417
+       ],
+       "3": [
+        0.183333,
+        0.28375
+       ],
+       "4-6": [
+        0.3,
+        0.425
+       ],
+       ">6": [
+        0.016667,
+        0.075
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.075,
+        0.175
+       ]
+      },
+      "p_value": 0.821782,
+      "tv_observed": 0.055083,
+      "tv_simulated_mean": 0.077576,
+      "tv_simulated_p05_p95": [
+       0.040113,
+       0.111258
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.056333,
+       "p05_p95": [
+        0.025,
+        0.091667
+       ]
+      },
+      "exact": {
+       "mean": 0.151917,
+       "p05_p95": [
+        0.091667,
+        0.2
+       ]
+      },
+      "special": {
+       "mean": 0.127583,
+       "p05_p95": [
+        0.075,
+        0.175
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc40-qwen3-32b-direct",
+    "seconds_fit": 64.6,
+    "seed": 2065194689,
+    "unit": "C_E5/3-SAT (partial assignment given)"
+   },
+   "2026-11-18-pc40-qwen3-32b-thinking-high": {
+    "excluded": {
+     "by_cell": {
+      "STATE/SAT/s1": {
+       "truncated": 1
+      },
+      "STATE/SAT/s2": {
+       "truncated": 1
+      },
+      "STATE/SAT/s3": {
+       "truncated": 1
+      }
+     },
+     "rates": {
+      "STATE/SAT/s1": {
+       "truncated": 0.025
+      },
+      "STATE/SAT/s2": {
+       "truncated": 0.025
+      },
+      "STATE/SAT/s3": {
+       "truncated": 0.025
+      }
+     },
+     "responses_by_cell": {
+      "STATE/SAT/s1": 40,
+      "STATE/SAT/s2": 40,
+      "STATE/SAT/s3": 40
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.296338,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.213521,
+      0.386201
+     ],
+     "kernel": [
+      0.0,
+      0.357163,
+      0.224706,
+      0.186414,
+      0.133491,
+      0.038123,
+      0.060102
+     ],
+     "kernel_cells": "distance",
+     "loglik": -377.761634,
+     "n_clusters": 40,
+     "n_params": 14,
+     "n_rows": 117,
+     "rho": null,
+     "rho_ci": [
+      null,
+      null
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DPLL from state (D)",
+      "EXACT",
+      "GREEDY-MENTION from state (C1)",
+      "GREEDY-MENTION-ABORT from state (C1)",
+      "GUC-DET from state (C2) = SC-DET from state (C2)",
+      "POLARITY (C0, ignores state)",
+      "UC-DET from state (C2)"
+     ],
+     "state": {
+      "eps": [
+       0.296338
+      ],
+      "g": [
+       0.0,
+       0.357163,
+       0.224706,
+       0.186414,
+       0.133491,
+       0.038123,
+       0.060102
+      ],
+      "pi": [
+       0.012515,
+       0.038205,
+       0.892713,
+       0.0327,
+       0.0,
+       0.0,
+       0.023867,
+       0.0,
+       0.0
+      ],
+      "rho": 0.3
+     },
+     "state_ci": {
+      "eps": [
+       [
+        0.213521
+       ],
+       [
+        0.386201
+       ]
+      ],
+      "g": [
+       [
+        0.0,
+        0.110118,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.0,
+        0.599775,
+        0.548302,
+        0.415143,
+        0.296891,
+        0.170799,
+        0.174341
+       ]
+      ],
+      "pi": [
+       [
+        0.0,
+        0.0,
+        0.810107,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+       ],
+       [
+        0.03855,
+        0.112722,
+        0.961698,
+        0.082758,
+        0.0,
+        0.013566,
+        0.058063,
+        6.1e-05,
+        0.0
+       ]
+      ],
+      "rho": [
+       0.3,
+       0.3
+      ]
+     },
+     "weights": {
+      "ALWAYS-UNSAT (A1 give-up)": {
+       "bca": [
+        0.0,
+        0.063033
+       ],
+       "hi": 0.03855,
+       "lo": 0.0,
+       "pi": 0.012515
+      },
+      "DPLL from state (D)": {
+       "bca": [
+        0.0,
+        0.14134
+       ],
+       "hi": 0.112722,
+       "lo": 0.0,
+       "pi": 0.038205
+      },
+      "EXACT": {
+       "bca": [
+        0.796736,
+        0.952939
+       ],
+       "hi": 0.961698,
+       "lo": 0.810107,
+       "pi": 0.892713
+      },
+      "GREEDY-MENTION from state (C1)": {
+       "bca": [
+        0.0,
+        0.099284
+       ],
+       "hi": 0.082758,
+       "lo": 0.0,
+       "pi": 0.0327
+      },
+      "GREEDY-MENTION-ABORT from state (C1)": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "GUC-DET from state (C2) = SC-DET from state (C2)": {
+       "bca": [
+        0.0,
+        0.104338
+       ],
+       "hi": 0.013566,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "POLARITY (C0, ignores state)": {
+       "bca": [
+        0.0,
+        0.066953
+       ],
+       "hi": 0.058063,
+       "lo": 0.0,
+       "pi": 0.023867
+      },
+      "UC-DET from state (C2)": {
+       "bca": [
+        0.0,
+        0.062679
+       ],
+       "hi": 6.1e-05,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      }
+     }
+    },
+    "groups": [
+     [
+      "ALWAYS-UNSAT (A1 give-up)"
+     ],
+     [
+      "DPLL from state (D)"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "GREEDY-MENTION from state (C1)"
+     ],
+     [
+      "GREEDY-MENTION-ABORT from state (C1)"
+     ],
+     [
+      "GUC-DET from state (C2)",
+      "SC-DET from state (C2)"
+     ],
+     [
+      "POLARITY (C0, ignores state)"
+     ],
+     [
+      "UC-DET from state (C2)"
+     ]
+    ],
+    "item_set": "pc40",
+    "mass": {
+     "exact": 0.694855,
+     "noise": 0.29263,
+     "nonslipping_members": 0.012515,
+     "q": 0.0,
+     "slip": 0.29263
+    },
+    "near": {
+     "bins": {
+      "0": 58,
+      "1": 9,
+      "2": 6,
+      "3": 3,
+      "4-6": 5,
+      "special token": 36
+     },
+     "n": 117,
+     "positions_per_item": [
+      20
+     ],
+     "set_sizes_max": 154
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 1.0,
+     "kernel": "free",
+     "q": "uniform",
+     "reach": 6
+    },
+    "planted": {
+     "q": 0.0,
+     "weights": {
+      "ALWAYS-UNSAT (A1 give-up)": 0.0125,
+      "DPLL from state (D)": 0.0382,
+      "EXACT": 0.8927,
+      "GREEDY-MENTION from state (C1)": 0.0327,
+      "POLARITY (C0, ignores state)": 0.0239
+     }
+    },
+    "ppc": {
+     "fails": [],
+     "pass": true
+    },
+    "reach": {
+     "beyond_reach": 0.008547,
+     "exact": 0.794872,
+     "special": 0.307692
+    },
+    "recovery": {
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.484444,
+       "1": 0.076325,
+       "2": 0.046239,
+       "3": 0.036838,
+       "4-6": 0.034957,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.321197
+      },
+      "observed": {
+       "0": 0.495726,
+       "1": 0.076923,
+       "2": 0.051282,
+       "3": 0.025641,
+       "4-6": 0.042735,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.307692
+      },
+      "p05_p95": {
+       "0": [
+        0.42735,
+        0.530342
+       ],
+       "1": [
+        0.042735,
+        0.119658
+       ],
+       "2": [
+        0.017094,
+        0.08547
+       ],
+       "3": [
+        0.008547,
+        0.068376
+       ],
+       "4-6": [
+        0.008547,
+        0.068376
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.298718,
+        0.34188
+       ]
+      },
+      "p_value": 0.930693,
+      "tv_observed": 0.024701,
+      "tv_simulated_mean": 0.050143,
+      "tv_simulated_p05_p95": [
+       0.022585,
+       0.082714
+      ]
+     },
+     "refitted": false,
+     "replicates": 100,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.002308,
+       "p05_p95": [
+        0.0,
+        0.008547
+       ]
+      },
+      "exact": {
+       "mean": 0.803333,
+       "p05_p95": [
+        0.752137,
+        0.854701
+       ]
+      },
+      "special": {
+       "mean": 0.321197,
+       "p05_p95": [
+        0.298718,
+        0.34188
+       ]
+      }
+     }
+    },
+    "run_id": "2026-11-18-pc40-qwen3-32b-thinking-high",
+    "seconds_fit": 89.1,
+    "seed": 213374353,
+    "unit": "C_E5/3-SAT (partial assignment given)"
+   }
+  }
+ },
+ "git": {
+  "dirty_src": false,
+  "sha": "7c1cedf0a957a872b23bc5da896650144ed14353"
+ },
+ "noise": "KE",
+ "noise_model": {
+  "eps": "shared",
+  "eps_max": 1.0,
+  "kernel": "free",
+  "q": "uniform",
+  "reach": 6
+ },
+ "seconds": 3921,
+ "settings": {
+  "n_boot": 2000,
+  "n_perm": 0,
+  "plant_min": 0.01,
+  "recovery_boot": 0,
+  "recovery_reps": 100
+ }
+}

@@ -1,0 +1,463 @@
+{
+ "command": "analysis/noise_model_eval.py fits --noise M0 --only C_E2/knapsack 2026-11-18-pc20-gpt-oss-20b --workers 3 --out analysis/out/noise_model/m0_check.json",
+ "fits": {
+  "C_E2/knapsack": {
+   "2026-11-18-pc20-gpt-oss-20b-thinking-low": {
+    "excluded": {
+     "by_cell": {},
+     "rates": {},
+     "responses_by_cell": {
+      "KNAP/PREFIX-vs-RATIO/BASE": 20,
+      "KNAP/PREFIX-vs-RATIO/D(PREFIX|RATIO)": 20,
+      "KNAP/PREFIX-vs-RATIO/D(RATIO|PREFIX)": 20,
+      "KNAP/PREFIX-vs-RATIO/G-ONLY": 20,
+      "KNAP/PREFIX-vs-RATIO/PLACEBO": 20,
+      "KNAP/RATIO-vs-DIFF/BASE": 20,
+      "KNAP/RATIO-vs-DIFF/D(DIFF|RATIO)": 20,
+      "KNAP/RATIO-vs-DIFF/D(RATIO|DIFF)": 20,
+      "KNAP/RATIO-vs-DIFF/G-ONLY": 20,
+      "KNAP/RATIO-vs-DIFF/PLACEBO": 20,
+      "KNAP/RATIO-vs-VALUE/BASE": 20,
+      "KNAP/RATIO-vs-VALUE/D(RATIO|VALUE)": 20,
+      "KNAP/RATIO-vs-VALUE/D(VALUE|RATIO)": 20,
+      "KNAP/RATIO-vs-VALUE/G-ONLY": 20,
+      "KNAP/RATIO-vs-VALUE/PLACEBO": 20
+     }
+    },
+    "fit": {
+     "converged": true,
+     "data_ties": [],
+     "eps": 0.286653,
+     "eps_at_cap": false,
+     "eps_by_group": null,
+     "eps_ci": [
+      0.231266,
+      0.344034
+     ],
+     "kernel": [
+      0.0,
+      0.419576,
+      0.251745,
+      0.151047,
+      0.090628,
+      0.054377,
+      0.032626
+     ],
+     "kernel_cells": "distance",
+     "loglik": -822.079654,
+     "n_clusters": 60,
+     "n_params": 9,
+     "n_rows": 300,
+     "rho": 0.6,
+     "rho_ci": [
+      0.52,
+      0.68
+     ],
+     "slip_identified": true,
+     "slipping_groups": [
+      "DIFF",
+      "EXACT",
+      "INPUT-FIT",
+      "LARGEST-FIT",
+      "RATIO+BEST-SINGLE = RATIO-PREFIX",
+      "RATIO-SKIP",
+      "VALUE"
+     ],
+     "state": {
+      "eps": [
+       0.286653
+      ],
+      "g": [
+       0.0,
+       0.419576,
+       0.251745,
+       0.151047,
+       0.090628,
+       0.054377,
+       0.032626
+      ],
+      "pi": [
+       0.096228,
+       0.616279,
+       0.00422,
+       0.0,
+       0.031664,
+       0.136234,
+       0.115376,
+       0.0
+      ],
+      "rho": 0.6
+     },
+     "state_ci": null,
+     "weights": {
+      "DIFF": {
+       "bca": [
+        0.043279,
+        0.167222
+       ],
+       "hi": 0.158425,
+       "lo": 0.040429,
+       "pi": 0.096228
+      },
+      "EXACT": {
+       "bca": [
+        0.540248,
+        0.691922
+       ],
+       "hi": 0.687624,
+       "lo": 0.534886,
+       "pi": 0.616279
+      },
+      "INPUT-FIT": {
+       "bca": [
+        0.0,
+        0.023763
+       ],
+       "hi": 0.016817,
+       "lo": 0.0,
+       "pi": 0.00422
+      },
+      "LARGEST-FIT": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bca": [
+        0.0,
+        0.112934
+       ],
+       "hi": 0.105925,
+       "lo": 0.0,
+       "pi": 0.031664
+      },
+      "RATIO-SKIP": {
+       "bca": [
+        0.058786,
+        0.217689
+       ],
+       "hi": 0.212942,
+       "lo": 0.050782,
+       "pi": 0.136234
+      },
+      "VALUE": {
+       "bca": [
+        0.064415,
+        0.190547
+       ],
+       "hi": 0.178958,
+       "lo": 0.059596,
+       "pi": 0.115376
+      },
+      "unexplained (q)": {
+       "bca": [
+        0.0,
+        0.0
+       ],
+       "hi": 0.0,
+       "lo": 0.0,
+       "pi": 0.0
+      }
+     }
+    },
+    "groups": [
+     [
+      "DIFF"
+     ],
+     [
+      "EXACT"
+     ],
+     [
+      "INPUT-FIT"
+     ],
+     [
+      "LARGEST-FIT"
+     ],
+     [
+      "RATIO+BEST-SINGLE",
+      "RATIO-PREFIX"
+     ],
+     [
+      "RATIO-SKIP"
+     ],
+     [
+      "VALUE"
+     ]
+    ],
+    "item_set": "pc20",
+    "mass": {
+     "exact": 0.713347,
+     "noise": 0.286653,
+     "nonslipping_members": 0.0,
+     "q": 0.0,
+     "slip": 0.286653
+    },
+    "near": {
+     "bins": {
+      "0": 215,
+      "1": 29,
+      "2": 45,
+      "3": 10,
+      "4-6": 1
+     },
+     "n": 300,
+     "positions_per_item": [
+      10
+     ],
+     "set_sizes_max": 1
+    },
+    "noise": {
+     "eps": "shared",
+     "eps_max": 0.5,
+     "kernel": "geometric",
+     "q": "uniform"
+    },
+    "planted": {
+     "q": 0.0,
+     "weights": {
+      "DIFF": 0.096606,
+      "EXACT": 0.618899,
+      "RATIO+BEST-SINGLE": 0.031834,
+      "RATIO-SKIP": 0.136774,
+      "VALUE": 0.115887
+     }
+    },
+    "ppc": {
+     "fails": [
+      "distance"
+     ],
+     "pass": false
+    },
+    "reach": {
+     "beyond_reach": 0.0,
+     "exact": 0.716667,
+     "special": 0.0
+    },
+    "recovery": {
+     "bca": {
+      "gates": {
+       "bias": true,
+       "coverage": true,
+       "width": true
+      },
+      "median_width": 0.1076,
+      "min_coverage": 0.91,
+      "pass": true,
+      "worst_coverage_quantity": "RATIO-SKIP"
+     },
+     "distance_check": {
+      "bins": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4-6",
+       ">6",
+       "special token",
+       "no member"
+      ],
+      "mean": {
+       "0": 0.7183,
+       "1": 0.127833,
+       "2": 0.083133,
+       "3": 0.046033,
+       "4-6": 0.0247,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "observed": {
+       "0": 0.716667,
+       "1": 0.096667,
+       "2": 0.15,
+       "3": 0.033333,
+       "4-6": 0.003333,
+       ">6": 0.0,
+       "no member": 0.0,
+       "special token": 0.0
+      },
+      "p05_p95": {
+       "0": [
+        0.6865,
+        0.753333
+       ],
+       "1": [
+        0.096667,
+        0.153333
+       ],
+       "2": [
+        0.056667,
+        0.103333
+       ],
+       "3": [
+        0.026667,
+        0.0635
+       ],
+       "4-6": [
+        0.01,
+        0.04
+       ],
+       ">6": [
+        0.0,
+        0.0
+       ],
+       "no member": [
+        0.0,
+        0.0
+       ],
+       "special token": [
+        0.0,
+        0.0
+       ]
+      },
+      "p_value": 0.009901,
+      "tv_observed": 0.066867,
+      "tv_simulated_mean": 0.030414,
+      "tv_simulated_p05_p95": [
+       0.013497,
+       0.051913
+      ]
+     },
+     "eps_mean": 0.281473,
+     "gates": {
+      "bias": true,
+      "coverage": false,
+      "width": true
+     },
+     "max_abs_bias": 0.007357,
+     "median_width": 0.106557,
+     "min_coverage": 0.89,
+     "pass": false,
+     "quantities": {
+      "DIFF": {
+       "bias": -0.003694,
+       "coverage": 0.89,
+       "coverage_bca": 0.92,
+       "mean": 0.092912,
+       "median_width": 0.110344,
+       "median_width_bca": 0.108855,
+       "truth": 0.096606
+      },
+      "EXACT": {
+       "bias": -0.005637,
+       "coverage": 0.96,
+       "coverage_bca": 0.96,
+       "mean": 0.613262,
+       "median_width": 0.139476,
+       "median_width_bca": 0.139062,
+       "truth": 0.618899
+      },
+      "INPUT-FIT": {
+       "bias": 0.000161,
+       "coverage": 1.0,
+       "coverage_bca": 0.39,
+       "mean": 0.000161,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "LARGEST-FIT": {
+       "bias": 0.000147,
+       "coverage": 1.0,
+       "coverage_bca": 0.58,
+       "mean": 0.000147,
+       "median_width": 0.0,
+       "median_width_bca": 0.0,
+       "truth": 0.0
+      },
+      "RATIO+BEST-SINGLE = RATIO-PREFIX": {
+       "bias": -0.000419,
+       "coverage": 0.93,
+       "coverage_bca": 0.94,
+       "mean": 0.031415,
+       "median_width": 0.062211,
+       "median_width_bca": 0.067657,
+       "truth": 0.031834
+      },
+      "RATIO-SKIP": {
+       "bias": -0.000426,
+       "coverage": 0.92,
+       "coverage_bca": 0.91,
+       "mean": 0.136349,
+       "median_width": 0.131021,
+       "median_width_bca": 0.131188,
+       "truth": 0.136774
+      },
+      "VALUE": {
+       "bias": 0.00251,
+       "coverage": 0.92,
+       "coverage_bca": 0.94,
+       "mean": 0.118396,
+       "median_width": 0.090624,
+       "median_width_bca": 0.091481,
+       "truth": 0.115887
+      },
+      "unexplained (q)": {
+       "bias": 0.007357,
+       "coverage": 0.98,
+       "coverage_bca": 0.85,
+       "mean": 0.007357,
+       "median_width": 0.032953,
+       "median_width_bca": 0.048353,
+       "truth": 0.0
+      }
+     },
+     "replicates": 100,
+     "rho_mean": 0.575,
+     "simulated": {
+      "beyond_reach": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      },
+      "exact": {
+       "mean": 0.7183,
+       "p05_p95": [
+        0.6865,
+        0.753333
+       ]
+      },
+      "special": {
+       "mean": 0.0,
+       "p05_p95": [
+        0.0,
+        0.0
+       ]
+      }
+     },
+     "worst_bias_quantity": "unexplained (q)",
+     "worst_coverage_quantity": "DIFF"
+    },
+    "run_id": "2026-11-18-pc20-gpt-oss-20b-thinking-low",
+    "seconds_fit": 12.8,
+    "seed": 4215263142,
+    "unit": "C_E2/knapsack"
+   }
+  }
+ },
+ "git": {
+  "dirty_src": false,
+  "sha": "b4a278790ca0764198bc9ad63bc74a77216d19bf"
+ },
+ "noise": "M0",
+ "noise_model": {
+  "eps": "shared",
+  "eps_max": 0.5,
+  "kernel": "geometric",
+  "q": "uniform"
+ },
+ "seconds": 112,
+ "settings": {
+  "n_boot": 2000,
+  "n_perm": 0,
+  "plant_min": 0.01,
+  "recovery_boot": 200,
+  "recovery_reps": 100
+ }
+}

@@ -441,6 +441,7 @@ def set_distance(space: Any, y: str, sol: Any, bound: int | None = None) -> int:
 
 
 NEAR_BINS = ("0", "1", "2", "3", "4-6", ">6", "special token", "no member")
+FAR = 7  # every distance from here on is the bin ">6"
 
 
 def nearest_distances(um: UnitModel, obs: list) -> dict[str, Any]:
@@ -468,7 +469,9 @@ def nearest_distances(um: UnitModel, obs: list) -> dict[str, Any]:
         for sol in sols:
             if best == 0:
                 break
-            best = set_distance(im.space, y, sol, bound=best)
+            # the bins stop at ">6", so a solution set is searched only for distances up to 7: the bins are
+            # the same as with the exact distance, and far answers no longer search a whole solution set
+            best = set_distance(im.space, y, sol, bound=FAR if best is None or best > FAR else best)
         if best is None:
             bins["no member"] += 1
         elif best <= 3:
